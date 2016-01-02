@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VariablesViewState
+   version = "1.0">
+   <ContextStates>
+      <ContextState
+         contextName = "ItemViewController.tableView(UITableView, didSelectRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedCategory">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ListViewController.handleDeleteList(UIAlertAction!) -&gt; ():ListViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.section">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "list.categories[selectedCategory].items[i].name">
+            </PersistentString>
+            <PersistentString
+               value = "textField.text">
+            </PersistentString>
+            <PersistentString
+               value = "selectedCategory">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.tableView(UITableView, commitEditingStyle : UITableViewCellEditingStyle, forRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.section">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.listDeleted(List) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "list">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+   </ContextStates>
+</VariablesViewState>
