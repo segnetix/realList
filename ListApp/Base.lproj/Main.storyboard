@@ -41,6 +41,31 @@
                                     <outlet property="itemName" destination="ek5-bB-UcJ" id="Pnn-R8-IcF"/>
                                 </connections>
                             </tableViewCell>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="CategoryCell" rowHeight="60" id="STC-IF-0Ob" userLabel="CategoryCell" customClass="CategoryCell" customModule="ListApp" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="156" width="600" height="60"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="STC-IF-0Ob" id="F5V-gG-q6K">
+                                    <rect key="frame" x="0.0" y="0.0" width="567" height="59"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="nPQ-Yu-QYm" userLabel="Category Name">
+                                            <rect key="frame" x="68" y="8" width="491" height="43"/>
+                                            <attributedString key="attributedText"/>
+                                            <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                                        </textField>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="trailingMargin" secondItem="nPQ-Yu-QYm" secondAttribute="trailing" id="1xI-NW-DiT"/>
+                                        <constraint firstItem="nPQ-Yu-QYm" firstAttribute="leading" secondItem="F5V-gG-q6K" secondAttribute="leadingMargin" constant="60" id="Bb1-IN-Pq3"/>
+                                        <constraint firstItem="nPQ-Yu-QYm" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="topMargin" id="ltS-v9-iTM"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="nPQ-Yu-QYm" secondAttribute="bottom" id="nwd-9D-CsO"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <connections>
+                                    <outlet property="categoryName" destination="nPQ-Yu-QYm" id="CKq-Tr-iMh"/>
+                                </connections>
+                            </tableViewCell>
                         </prototypes>
                         <connections>
                             <outlet property="dataSource" destination="xgg-C1-F1C" id="vi6-Uv-79u"/>

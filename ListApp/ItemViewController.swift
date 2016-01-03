@@ -8,9 +8,12 @@
 
 import UIKit
 
+let itemCellID     = "ItemCell"
+let categoryCellID = "CategoryCell"
+
 class ItemViewController: UITableViewController, UITextFieldDelegate
 {
-    let maxItemsPerCategory = 1000000
+    //let maxItemsPerCategory = 1000000
     var inEditMode = false
     var deleteItemIndexPath: NSIndexPath? = nil
     
@@ -19,7 +22,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             self.refreshItems()
         }
     }
-    
     
     override func viewDidLoad()
     {
@@ -69,69 +71,83 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     required init(coder aDecoder: NSCoder)
     {
         super.init(coder: aDecoder)!
-        
     }
     
     func itemNameDidChange(textField: UITextField)
     {
         // update item name data with new value
         let i = textField.tag
-        let categoryNr: Int = i / maxItemsPerCategory
-        let itemNr: Int = i - (categoryNr * maxItemsPerCategory)
-        list.categories[categoryNr].items[itemNr].name = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        let newName = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        let indexPath = NSIndexPath(index: i)
+        
+        list?.updateObjectNameAtIndexPath(indexPath, withName: newName)
         
         print(textField.text)
     }
     
     // MARK: - Table view data source
     
+    /*
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int
     {
-        // return the number of categories
-        let count = list?.categories.count
-        
-        if count != nil {
-            return count!
-        }
-        else {
+        return 1
+    }
+    */
+    
+    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    {
+        // return the total number of rows in our item table view (categories + items)
+        if let currentList = list {
+            return currentList.categoryCount() + currentList.itemCount()
+        } else {
+            print("ERROR: numberOfRowsInSection - list is null!")
             return 0
         }
     }
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
-    {
-        // return the number of items in this category
-        return list.categories[section].items.count
-    }
-    
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        let cell = tableView.dequeueReusableCellWithIdentifier("ItemCell", forIndexPath: indexPath) as! ItemCell
-        
-        // Configure the cell...
-        //cell.textLabel?.text = list?.categories[indexPath.section].items[indexPath.row].name
-        cell.itemName.userInteractionEnabled = inEditMode
-        cell.itemName.delegate = self
-        cell.itemName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
-        cell.itemName!.tag = (indexPath.section * maxItemsPerCategory) + indexPath.row
-        
-        let title = list?.categories[indexPath.section].items[indexPath.row].name
-        
-        if let cellTitle = title {
-            cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")
-            //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")
+        if list.cellIsItem(indexPath) {
+            let cell = tableView.dequeueReusableCellWithIdentifier(itemCellID, forIndexPath: indexPath) as! ItemCell
+            
+            // Configure the cell...
+            cell.itemName.userInteractionEnabled = inEditMode
+            cell.itemName.delegate = self
+            cell.itemName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+            cell.itemName!.tag = indexPath.row
+            
+            let title = list?.cellTitle(indexPath)
+            
+            if let cellTitle = title {
+                cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")    // for debugging
+                //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                      // for production
+            } else {
+                cell.itemName?.attributedText = makeAttributedString(title: "", subtitle: "")
+            }
+            
+            return cell
+        } else {
+            let cell = tableView.dequeueReusableCellWithIdentifier(categoryCellID, forIndexPath: indexPath) as! CategoryCell
+            
+            // Configure the cell...
+            cell.categoryName.userInteractionEnabled = inEditMode
+            cell.categoryName.delegate = self
+            cell.categoryName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+            cell.categoryName!.tag = indexPath.row
+            
+            let title = list?.cellTitle(indexPath)
+            
+            if let cellTitle = title {
+                cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.categoryName.tag)")
+                //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")
+            } else {
+                cell.categoryName?.attributedText = makeAttributedString(title: "", subtitle: "")
+            }
+            
+            cell.backgroundColor = UIColor.greenColor()
+            
+            return cell
         }
-        else {
-            cell.itemName?.attributedText = makeAttributedString(title: "", subtitle: "")
-        }
-        
-        return cell
-    }
-    
-    override func tableView(tableView: UITableView, titleForHeaderInSection section: Int) -> String?
-    {
-        // empty category names will not get a section header
-        return list.categories[section].name
     }
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
@@ -142,13 +158,12 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         return UITableViewAutomaticDimension
     }
     
-    override func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return UITableViewAutomaticDimension
-    }
-    
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        //selectedCategory = indexPath.section
-        print("selection: cat \(indexPath.section)  item \(indexPath.row)")
+        let title = list.cellTitle(indexPath)
+        //print("selection: cat \(indexPath.section)  item \(indexPath.row)  title \(title)")
+        let indices = list.indeciesForObjectAtIndexPath(indexPath)
+        
+        print("selection: cat \(indices.categoryIndex)  item \(indices.itemIndex)  \(title)")
     }
     
     func textFieldShouldReturn(textField: UITextField) -> Bool {
@@ -167,24 +182,13 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     func refreshItems()
     {
         if list != nil {
-            self.title = list.name
+            self.title = list!.name
             self.tableView.reloadData()
         } else {
             self.title = "<empty>"
             self.tableView.reloadData()
         }
     }
-    
-    /*
-    // not called
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath) {
-        print("commitEditingStyle: \(editingStyle)  section: \(indexPath.section)  row: \(indexPath.row)")
-    }
-    
-    override func tableView(tableView: UITableView, willBeginEditingRowAtIndexPath indexPath: NSIndexPath) {
-        print("willBeginEditingRowAtIndexPath section: \(indexPath.section)  row: \(indexPath.row)")
-    }
-    */
     
     // Override to support conditional editing of the table view.
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
@@ -195,14 +199,17 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     // Override to support editing the table view.
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath)
     {
-        if editingStyle == .Delete
-        {
+        if editingStyle == .Delete {
             deleteItemIndexPath = indexPath
-            let deletedItem = list.categories[indexPath.section].items[indexPath.row]
-            confirmDelete(deletedItem.name)
+            let deletedItem = list?.objectAtIndexPath(indexPath)
+            
+            if let item = deletedItem {
+                confirmDelete(item.name)
+            } else {
+                print("ERROR: Attempt to delete a null item!")
+            }
         }
-        else if editingStyle == .Insert
-        {
+        else if editingStyle == .Insert {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }
     }
@@ -210,11 +217,24 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     // Override to support rearranging the table view.
     override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath)
     {
-        let item = list?.categories[fromIndexPath.section].items[fromIndexPath.row]
-        list?.categories[fromIndexPath.section].items.removeAtIndex(fromIndexPath.row)
-        list?.categories[toIndexPath.section].items.insert(item!, atIndex: toIndexPath.row)
+        if list != nil {
+            let item = list!.objectAtIndexPath(fromIndexPath)
+            
+            if item != nil {
+                tableView.beginUpdates()
+                list!.removeItemAtIndexPath(fromIndexPath)
+                list!.insertItemAtIndexPath(item as! Item, indexPath: toIndexPath)
+                tableView.endUpdates()
+                
+                // use tableView.reloadRowsAtIndexPaths???
+                self.tableView.reloadData()
+            } else {
+                print("ERROR: Attempt to move a null item!")
+            }
+        } else {
+            print("ERROR: Attempt to move an item in a null list!")
+        }
         
-        self.tableView.reloadData()
     }
     
     // Override to support conditional rearranging of the table view.
@@ -255,17 +275,19 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     
     func handleDeleteItem(alertAction: UIAlertAction!) -> Void
     {
-        if let indexPath = deleteItemIndexPath
+        if let indexPath = deleteItemIndexPath, currentList = list
         {
             tableView.beginUpdates()
-            
             // Delete the row from the data source
-            list.categories[indexPath.section].items.removeAtIndex(indexPath.row)
+            currentList.removeItemAtIndexPath(indexPath)
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
-            self.tableView.reloadData()
             deleteItemIndexPath = nil
-            
             tableView.endUpdates()
+            
+             // use tableView.reloadRowsAtIndexPaths???
+            self.tableView.reloadData()
+        } else {
+            print("ERROR: handleDeleteItem received a null indexPath or list!")
         }
     }
     

@@ -8,6 +8,8 @@
 
 import UIKit
 
+let listCellID = "ListCell"
+
 // ListSelectionDelegate protocol
 protocol ListSelectionDelegate: class
 {
@@ -101,7 +103,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        let cell = tableView.dequeueReusableCellWithIdentifier("ListCell", forIndexPath: indexPath) as! ListCell
+        let cell = tableView.dequeueReusableCellWithIdentifier(listCellID, forIndexPath: indexPath) as! ListCell
         
         // Configure the cell...
         let list = lists[indexPath.row]
@@ -175,11 +177,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         {
             // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }
-    }
-    
-    // to change the name of the Delete button on swipe
-    override func tableView(tableView: UITableView, titleForDeleteConfirmationButtonForRowAtIndexPath indexPath: NSIndexPath) -> String? {
-        return "Drop"
     }
     
     // Override to support rearranging the table view.
@@ -283,8 +280,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cat1_2 = Category(name: "Meats")
         let cat1_3 = Category(name: "Other")
         
-        list1.categories.append(cat1_2)
         list1.categories.append(cat1_1)
+        list1.categories.append(cat1_2)
         list1.categories.append(cat1_3)
         
         cat1_1.items.append(Item(name: "Carrots"))
