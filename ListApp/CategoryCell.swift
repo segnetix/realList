@@ -11,6 +11,7 @@ import UIKit
 class CategoryCell: UITableViewCell
 {
     @IBOutlet weak var categoryName: UITextField!
+    @IBOutlet weak var expandButton: UIButton!
     
     override func awakeFromNib() {
         super.awakeFromNib()

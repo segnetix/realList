@@ -55,6 +55,20 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedCategory">
+            </PersistentString>
+            <PersistentString
+               value = "list.categories[selectedCategory].items[i].name">
+            </PersistentString>
+            <PersistentString
+               value = "textField.text">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "List.objectAtIndexPath(NSIndexPath) -&gt; AnyObject?:ListData.swift">
          <PersistentStrings>
             <PersistentString
@@ -69,21 +83,21 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
+         contextName = "List.cellTitle(NSIndexPath) -&gt; String?:ListData.swift">
          <PersistentStrings>
             <PersistentString
-               value = "list.categories[selectedCategory].items[i].name">
+               value = "obj.name">
             </PersistentString>
             <PersistentString
-               value = "textField.text">
+               value = "(obj as! Category).name">
             </PersistentString>
             <PersistentString
-               value = "selectedCategory">
+               value = "indexPath.section">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.row">
             </PersistentString>
          </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "List.cellTitle(NSIndexPath) -&gt; String?:ListData.swift">
       </ContextState>
       <ContextState
          contextName = "ItemViewController.tableView(UITableView, didSelectRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">

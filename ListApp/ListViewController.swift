@@ -319,21 +319,18 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         cat2_1.items.append(Item(name: "Oranges"))
         
         // list3
-        let list3 = List(name: "King Super")
+        let list3 = List(name: "King Sooper")
         lists.append(list3)
         
         let cat3_1 = Category(name: "")
-        let cat3_2 = Category(name: "General")
-        
         list3.categories.append(cat3_1)
-        list3.categories.append(cat3_2)
         
         cat3_1.items.append(Item(name: "Bread"))
         cat3_1.items.append(Item(name: "Tomatoes"))
         cat3_1.items.append(Item(name: "Coffee"))
-        cat3_2.items.append(Item(name: "Syrup"))
-        cat3_2.items.append(Item(name: "Dog toys"))
-        cat3_2.items.append(Item(name: "Leggings"))
+        cat3_1.items.append(Item(name: "Syrup"))
+        cat3_1.items.append(Item(name: "Dog toys"))
+        cat3_1.items.append(Item(name: "Leggings"))
         
         // list4
         let list4 = List(name: "Trail Mannor")

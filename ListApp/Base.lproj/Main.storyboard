@@ -10,21 +10,22 @@
         <scene sceneID="3kH-gL-p5m">
             <objects>
                 <tableViewController id="xgg-C1-F1C" customClass="ItemViewController" customModule="ListApp" customModuleProvider="target" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="40" sectionHeaderHeight="32" sectionFooterHeight="32" id="ATl-Ia-AoT">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" rowHeight="32" sectionHeaderHeight="32" sectionFooterHeight="32" id="ATl-Ia-AoT">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <inset key="scrollIndicatorInsets" minX="-1" minY="0.0" maxX="0.0" maxY="0.0"/>
                         <color key="separatorColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="ItemCell" rowHeight="60" id="Nku-xk-hbv" userLabel="ItemCell" customClass="ItemCell" customModule="ListApp" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="96" width="600" height="60"/>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="ItemCell" id="Nku-xk-hbv" userLabel="ItemCell" customClass="ItemCell" customModule="ListApp" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="96" width="600" height="32"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Nku-xk-hbv" id="AZO-88-8cc">
-                                    <rect key="frame" x="0.0" y="0.0" width="567" height="59"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="567" height="31"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="ek5-bB-UcJ" userLabel="Item Name">
-                                            <rect key="frame" x="68" y="8" width="491" height="43"/>
+                                            <rect key="frame" x="68" y="8" width="491" height="15"/>
                                             <attributedString key="attributedText"/>
                                             <textInputTraits key="textInputTraits" returnKeyType="done"/>
                                         </textField>
@@ -37,33 +38,47 @@
                                     </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
                                     <outlet property="itemName" destination="ek5-bB-UcJ" id="Pnn-R8-IcF"/>
                                 </connections>
                             </tableViewCell>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="CategoryCell" rowHeight="60" id="STC-IF-0Ob" userLabel="CategoryCell" customClass="CategoryCell" customModule="ListApp" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="156" width="600" height="60"/>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="CategoryCell" id="STC-IF-0Ob" userLabel="CategoryCell" customClass="CategoryCell" customModule="ListApp" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="128" width="600" height="32"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="STC-IF-0Ob" id="F5V-gG-q6K">
-                                    <rect key="frame" x="0.0" y="0.0" width="567" height="59"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="567" height="31"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="nPQ-Yu-QYm" userLabel="Category Name">
-                                            <rect key="frame" x="68" y="8" width="491" height="43"/>
+                                            <rect key="frame" x="68" y="8" width="491" height="15"/>
                                             <attributedString key="attributedText"/>
                                             <textInputTraits key="textInputTraits" returnKeyType="done"/>
                                         </textField>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4zQ-J3-YIq">
+                                            <rect key="frame" x="8" y="3" width="52" height="15"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="52" id="qVt-kp-aF2"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" name="Didot" family="Didot" pointSize="36"/>
+                                            <state key="normal" title="+"/>
+                                        </button>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstAttribute="trailingMargin" secondItem="nPQ-Yu-QYm" secondAttribute="trailing" id="1xI-NW-DiT"/>
-                                        <constraint firstItem="nPQ-Yu-QYm" firstAttribute="leading" secondItem="F5V-gG-q6K" secondAttribute="leadingMargin" constant="60" id="Bb1-IN-Pq3"/>
-                                        <constraint firstItem="nPQ-Yu-QYm" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="topMargin" id="ltS-v9-iTM"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="nPQ-Yu-QYm" secondAttribute="bottom" id="nwd-9D-CsO"/>
+                                        <constraint firstItem="4zQ-J3-YIq" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="topMargin" constant="-5" id="61g-2O-xmc"/>
+                                        <constraint firstItem="4zQ-J3-YIq" firstAttribute="leading" secondItem="F5V-gG-q6K" secondAttribute="leadingMargin" id="9GZ-pL-sxs"/>
+                                        <constraint firstItem="nPQ-Yu-QYm" firstAttribute="trailing" secondItem="F5V-gG-q6K" secondAttribute="trailingMargin" id="LDr-aD-irQ"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="4zQ-J3-YIq" secondAttribute="bottom" constant="5" id="XJO-OF-wo0"/>
+                                        <constraint firstItem="nPQ-Yu-QYm" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="topMargin" id="hDD-3Q-A0C"/>
+                                        <constraint firstItem="nPQ-Yu-QYm" firstAttribute="centerY" secondItem="F5V-gG-q6K" secondAttribute="centerY" id="lYH-kz-FIR"/>
+                                        <constraint firstItem="nPQ-Yu-QYm" firstAttribute="leading" secondItem="4zQ-J3-YIq" secondAttribute="trailing" constant="8" symbolic="YES" id="mHj-sM-AP2"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
                                     <outlet property="categoryName" destination="nPQ-Yu-QYm" id="CKq-Tr-iMh"/>
+                                    <outlet property="expandButton" destination="4zQ-J3-YIq" id="Ii2-sQ-Fep"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -88,7 +103,7 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <color key="separatorColor" white="0.66666666666666663" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" reuseIdentifier="ListCell" rowHeight="60" id="FTu-BX-p1L" customClass="ListCell" customModule="ListApp" customModuleProvider="target">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="ListCell" rowHeight="60" id="FTu-BX-p1L" customClass="ListCell" customModule="ListApp" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="86" width="600" height="60"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="FTu-BX-p1L" id="LfD-kY-ebN">
@@ -117,6 +132,7 @@
                                     </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
                                     <outlet property="listName" destination="KOg-sp-vFR" id="gdi-VP-8yc"/>
                                 </connections>
