@@ -8,10 +8,18 @@
 
 import UIKit
 
+// A protocol that the TableViewCell uses to inform its delegate of state change
+protocol CategoryCellDelegate: class
+{
+    // indicates that the cell has been long pressed for editing
+    func catNameTappedForEditing(textField: UITextField)
+}
+
 class CategoryCell: UITableViewCell
 {
     @IBOutlet weak var categoryName: UITextField!
-    @IBOutlet weak var expandButton: UIButton!
+    @IBOutlet weak var catCountLabel: UILabel!
+    weak var delegate: CategoryCellDelegate?
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -31,4 +39,14 @@ class CategoryCell: UITableViewCell
         // Configure the view for the selected state
     }
 
+    override func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool
+    {
+        if let _ = gestureRecognizer as? UILongPressGestureRecognizer
+        {
+            self.delegate?.catNameTappedForEditing(categoryName)
+            return true
+        }
+        return false
+    }
+    
 }

@@ -17,6 +17,9 @@
          contextName = "ItemViewController.tableView(UITableView, commitEditingStyle : UITableViewCellEditingStyle, forRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
+               value = "(item as! Item).name">
+            </PersistentString>
+            <PersistentString
                value = "indexPath.row">
             </PersistentString>
             <PersistentString
@@ -100,10 +103,26 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "ItemViewController.catCellTapped(UITapGestureRecognizer) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "inEditMode">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ItemViewController.tableView(UITableView, didSelectRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
                value = "selectedCategory">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "CategoryCell.gestureRecognizerShouldBegin(UIGestureRecognizer) -&gt; Bool:CategoryCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.delegate">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

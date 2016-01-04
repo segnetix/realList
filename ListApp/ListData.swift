@@ -93,6 +93,44 @@ class List
         return count
     }
     
+    // returns total of all potential displayable rows
+    func totalCount() -> Int
+    {
+        var count: Int = 0
+        
+        for category in categories {
+            // add the category if displayed
+            if category.name.characters.count > 0 {
+                ++count
+            }
+            
+            // add the items in this category
+            count += category.items.count
+        }
+        
+        return count
+    }
+    
+    // returns the total of all rows to display
+    func totalDisplayCount() -> Int
+    {
+        var count: Int = 0
+        
+        for category in categories {
+            // add the category if displayed
+            if category.name.characters.count > 0 {
+                ++count
+            }
+            
+            // add the items in this category if expanded
+            if category.expanded {
+                count += category.items.count
+            }
+        }
+        
+        return count
+    }
+    
     func cellTitle(indexPath: NSIndexPath) -> String?
     {
         let object = objectAtIndexPath(indexPath)
