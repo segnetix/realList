@@ -179,22 +179,23 @@ class List
         return false
     }
     
+    // returns an array of index paths of the category and displayed items for the category at the given path
     func getPathsForCategoryAtPath(indexPath: NSIndexPath) -> [NSIndexPath]
     {
-        var catPaths = [NSIndexPath]()
-        let catPath = categoryPathForItemPath(indexPath)
+        var catPaths = [NSIndexPath]()                          // holds array of display paths in category
+        //let catDisplayPath = displayPathFor
         let category = self.categoryForItemAtIndex(indexPath)
         var row = indexPath.row
         
         // add the category path
-        if catPath != nil {
-            catPaths.append(catPath!)
-        }
+        catPaths.append(indexPath)
         
         // add the paths of all items in the category
         if let cat = category {
-            for _ in cat.items {
-                catPaths.append(NSIndexPath(forRow: ++row, inSection: 0))
+            if cat.expanded {
+                for _ in cat.items {
+                    catPaths.append(NSIndexPath(forRow: ++row, inSection: 0))
+                }
             }
         }
         
@@ -202,7 +203,8 @@ class List
     }
     
     // will remove the item at indexPath
-    // if the path is to a category will remove the entire category with items
+    // if the path is to a category, will remove the entire category with items
+    // returns the display index paths of any removed rows
     func removeItemAtIndexPath(indexPath: NSIndexPath) -> [NSIndexPath]?
     {
         let itemIndices = indicesForObjectAtIndexPath(indexPath)
@@ -222,17 +224,26 @@ class List
         }
     }
     
+    // will insert the item at the indexPath
+    // if the path is to a category, will insert at the end of the category
     func insertItemAtIndexPath(item: Item, indexPath: NSIndexPath)
     {
         let itemIndices = indicesForObjectAtIndexPath(indexPath)
         
         if itemIndices.categoryIndex != nil && itemIndices.itemIndex != nil {
             self.categories[itemIndices.categoryIndex!].items.insert(item, atIndex: itemIndices.itemIndex!)
+        }  else if itemIndices.categoryIndex != nil && itemIndices.itemIndex == nil {
+            // if itemIndex is nil, then we landed on a category, so need to insert the item at the end of the previous category
+            self.categories[itemIndices.categoryIndex! - 1].items.append(item)
+        } else if itemIndices.categoryIndex == nil && itemIndices.itemIndex == nil {
+            // insert the item at the end of the last category
+            self.categories[categories.count-1].items.append(item)
         } else {
             print("ERROR: List.insertItemAtIndexPath got a nil category or item index!")
         }
     }
     
+    // returns the data indices (cat and item) for the given display index path
     func indicesForObjectAtIndexPath(indexPath: NSIndexPath) -> (categoryIndex: Int?, itemIndex: Int?)
     {
         var index: Int = -1
@@ -250,20 +261,22 @@ class List
                 return (catIndex, nil)
             }
             
-            for _ in category.items
-            {
-                ++index
-                ++itemIndex
-                if index == indexPath.row {
-                    // obj is an item
-                    print("indicesForObjectAtIndexPath cat \(catIndex) item \(itemIndex)")
-                    return (catIndex, itemIndex)
+            // only count items if category is expanded
+            if category.expanded {
+                for _ in category.items
+                {
+                    ++index
+                    ++itemIndex
+                    if index == indexPath.row {
+                        // obj is an item
+                        print("indicesForObjectAtIndexPath cat \(catIndex) item \(itemIndex)")
+                        return (catIndex, itemIndex)
+                    }
                 }
             }
         }
         
-        // error condition
-        print("ERROR: indicesForObjectAtIndexPath exited with nil, nil!")
+        // points to a cell after end of last cell
         return (nil, nil)
     }
     

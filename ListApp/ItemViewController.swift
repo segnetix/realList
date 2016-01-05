@@ -17,6 +17,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var inEditMode = false
     var deleteItemIndexPath: NSIndexPath? = nil
     
+    var movedToCollapsedCategory = false
+    
     var list: List! {
         didSet (newList) {
             self.refreshItems()
@@ -75,9 +77,14 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         // return the total number of rows in our item table view (categories + items)
         if let currentList = list {
-            let displayCount = currentList.totalDisplayCount()
+            var displayCount = currentList.totalDisplayCount()
             
-            //print("displayCount: \(displayCount)")
+            // if moving a cell to a collapsed category then we need to account for the newly hidden cell by temporarily incrementing the displayCount
+            if movedToCollapsedCategory {
+                ++displayCount
+                movedToCollapsedCategory = false
+            }
+            
             return displayCount
         } else {
             return 0
@@ -212,22 +219,23 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         if list != nil {
             let item = list!.objectAtIndexPath(fromIndexPath)
             
-            if item != nil {
+            if item != nil && item is Item {
                 tableView.beginUpdates()
                 list!.removeItemAtIndexPath(fromIndexPath)
                 list!.insertItemAtIndexPath(item as! Item, indexPath: toIndexPath)
+                
+                // hack to handle moving to a collapsed category
+                if let cat = list.categoryForItemAtIndex(NSIndexPath(forRow: toIndexPath.row - 1, inSection: 0)) {
+                    if !cat.expanded {
+                        movedToCollapsedCategory = true
+                    }
+                }
+                
                 tableView.endUpdates()
                 
-                // also update the category rows so we get new item counts displayed
-                /*
-                let fromCatPath = list.categoryPathForItemPath(fromIndexPath)
-                let toCatPath = list.categoryPathForItemPath(toIndexPath)
-                if let fromPath = fromCatPath, toPath = toCatPath {
-                    tableView.reloadRowsAtIndexPaths([fromPath, toPath], withRowAnimation: UITableViewRowAnimation.None)
-                }*/
                 tableView.reloadData()
             } else {
-                print("ERROR: Attempt to move a null item!")
+                print("ERROR: Attempt to move a category!")
             }
         } else {
             print("ERROR: Attempt to move an item in a null list!")
@@ -315,13 +323,15 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         if let indexPath = deleteItemIndexPath, currentList = list
         {
             tableView.beginUpdates()
-            // Delete the row(s) from the data source and return paths of the removed rows
+            // Delete the row(s) from the data source and return display paths of the removed rows
             let removedPaths = currentList.removeItemAtIndexPath(indexPath)
             if let _ = removedPaths {
                 tableView.deleteRowsAtIndexPaths(removedPaths!, withRowAnimation: .Fade)
             }
             deleteItemIndexPath = nil
             tableView.endUpdates()
+            
+            tableView.reloadData()
         } else {
             print("ERROR: handleDeleteItem received a null indexPath or list!")
         }
