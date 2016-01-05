@@ -160,10 +160,9 @@ class List
     func cellIsItem(indexPath: NSIndexPath) -> Bool
     {
         // returns true if path points to an item, false for categories
-        
         let object = objectAtIndexPath(indexPath)
         
-        if let _ = object as? Item {
+        if object is Item {
             return true
         }
         
@@ -173,22 +172,53 @@ class List
     func objectIsItem(object: AnyObject?) -> Bool
     {
         // returns true if object is an item, false for categories
-        
-        if let _ = object as? Item {
+        if object is Item {
             return true
         }
         
         return false
     }
     
-    func removeItemAtIndexPath(indexPath: NSIndexPath)
+    func getPathsForCategoryAtPath(indexPath: NSIndexPath) -> [NSIndexPath]
+    {
+        var catPaths = [NSIndexPath]()
+        let catPath = categoryPathForItemPath(indexPath)
+        let category = self.categoryForItemAtIndex(indexPath)
+        var row = indexPath.row
+        
+        // add the category path
+        if catPath != nil {
+            catPaths.append(catPath!)
+        }
+        
+        // add the paths of all items in the category
+        if let cat = category {
+            for _ in cat.items {
+                catPaths.append(NSIndexPath(forRow: ++row, inSection: 0))
+            }
+        }
+        
+        return catPaths
+    }
+    
+    // will remove the item at indexPath
+    // if the path is to a category will remove the entire category with items
+    func removeItemAtIndexPath(indexPath: NSIndexPath) -> [NSIndexPath]?
     {
         let itemIndices = indicesForObjectAtIndexPath(indexPath)
         
         if itemIndices.categoryIndex != nil && itemIndices.itemIndex != nil {
+            // remove the item from the category
             self.categories[itemIndices.categoryIndex!].items.removeAtIndex(itemIndices.itemIndex!)
+            return [indexPath]
+        } else if itemIndices.categoryIndex != nil && itemIndices.itemIndex == nil {
+            // remove the category and its items from the list
+            let removedPaths = getPathsForCategoryAtPath(indexPath)
+            self.categories.removeAtIndex(itemIndices.categoryIndex!)
+            return removedPaths
         } else {
             print("ERROR: List.removeItemAtIndexPath got a nil category or item index!")
+            return nil
         }
     }
     
@@ -250,6 +280,31 @@ class List
         }
         
         return nil
+    }
+    
+    // returns the path of the enclosing category for the given item
+    func categoryPathForItemPath(itemPath: NSIndexPath) -> NSIndexPath?
+    {
+        let itemAtPath = self.objectAtIndexPath(itemPath)
+        var index = -1
+        var catPath: NSIndexPath? = nil
+        
+        for category in categories {
+            catPath = NSIndexPath(forRow: ++index, inSection: 0)
+            
+            if category === itemAtPath {
+                return catPath
+            }
+            
+            for item in category.items {
+                ++index
+                if item === itemAtPath {
+                    return catPath
+                }
+            }
+        }
+        
+        return catPath
     }
     
     // returns the category (including the dummy category if only one category) for the item at the given index

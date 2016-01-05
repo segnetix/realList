@@ -88,13 +88,15 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // MARK: - Table view data source
-        
+    
+    /*
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int
     {
         // #warning Incomplete implementation, return the number of sections
         return 1
     }
-
+    */
+    
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         // return the number of rows
@@ -115,6 +117,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         cell.listName.userInteractionEnabled = inEditMode
         //cell.listName.attributedText = makeAttributedString(title: list.name, subtitle: "\(cell.listName.tag)")
         cell.listName.attributedText = makeAttributedString(title: list.name, subtitle: "")
+        
+        // cell separator
+        cell.preservesSuperviewLayoutMargins = false
+        cell.separatorInset = UIEdgeInsetsZero
+        cell.layoutMargins = UIEdgeInsetsZero
         
         return cell
     }

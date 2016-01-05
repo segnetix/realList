@@ -3,13 +3,18 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "List.objectIsItem(AnyObject?) -&gt; Bool:ListData.swift">
+         contextName = "ItemViewController.tableView(UITableView, didSelectRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "(object as! Category).name">
+               value = "selectedCategory">
             </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.listDeleted(List) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
             <PersistentString
-               value = "(object as! Item).name">
+               value = "list">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -28,17 +33,6 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ItemViewController.tableView(UITableView, cellForRowAtIndexPath : NSIndexPath) -&gt; UITableViewCell:ItemViewController.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "indexPath.row">
-            </PersistentString>
-            <PersistentString
-               value = "indexPath.section">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
          contextName = "ListViewController.handleDeleteList(UIAlertAction!) -&gt; ():ListViewController.swift">
          <PersistentStrings>
             <PersistentString
@@ -46,42 +40,6 @@
             </PersistentString>
             <PersistentString
                value = "indexPath.section">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "ItemViewController.listDeleted(List) -&gt; ():ItemViewController.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "list">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "selectedCategory">
-            </PersistentString>
-            <PersistentString
-               value = "list.categories[selectedCategory].items[i].name">
-            </PersistentString>
-            <PersistentString
-               value = "textField.text">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "List.objectAtIndexPath(NSIndexPath) -&gt; AnyObject?:ListData.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "category.name">
-            </PersistentString>
-            <PersistentString
-               value = "indexPath.row">
-            </PersistentString>
-            <PersistentString
-               value = "categories[0].items[0].name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -103,18 +61,13 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ItemViewController.catCellTapped(UITapGestureRecognizer) -&gt; ():ItemViewController.swift">
+         contextName = "ItemViewController.tableView(UITableView, cellForRowAtIndexPath : NSIndexPath) -&gt; UITableViewCell:ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "inEditMode">
+               value = "indexPath.row">
             </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "ItemViewController.tableView(UITableView, didSelectRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
-         <PersistentStrings>
             <PersistentString
-               value = "selectedCategory">
+               value = "indexPath.section">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -123,6 +76,64 @@
          <PersistentStrings>
             <PersistentString
                value = "self.delegate">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedCategory">
+            </PersistentString>
+            <PersistentString
+               value = "list.categories[selectedCategory].items[i].name">
+            </PersistentString>
+            <PersistentString
+               value = "textField.text">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "List.objectIsItem(AnyObject?) -&gt; Bool:ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "(object as! Category).name">
+            </PersistentString>
+            <PersistentString
+               value = "(object as! Item).name">
+            </PersistentString>
+            <PersistentString
+               value = "object.name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "List.objectAtIndexPath(NSIndexPath) -&gt; AnyObject?:ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "category.name">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+            <PersistentString
+               value = "categories[0].items[0].name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.handleDeleteItem(UIAlertAction!) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.catCellTapped(UITapGestureRecognizer) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "inEditMode">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

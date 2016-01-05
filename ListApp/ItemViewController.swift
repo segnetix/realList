@@ -36,24 +36,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         refreshItems()
     }
     
-    /*
-    // called when Edit/Done button is tapped in the navigation bar
-    override func setEditing(editing: Bool, animated: Bool)
-    {
-        super.setEditing(editing, animated: animated)
-        
-        if editing {
-            // enable the list cells for text editing
-            inEditMode = true
-        } else {
-            // disable the list cells for text editing
-            inEditMode = false
-        }
-        
-        //self.tableView.reloadData()
-    }
-    */
-    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -95,10 +77,9 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         if let currentList = list {
             let displayCount = currentList.totalDisplayCount()
             
-            print("displayCount: \(displayCount)")
+            //print("displayCount: \(displayCount)")
             return displayCount
         } else {
-            print("ERROR: numberOfRowsInSection - list is null!")
             return 0
         }
     }
@@ -123,6 +104,11 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             } else {
                 cell.itemName?.attributedText = makeAttributedString(title: "", subtitle: "")
             }
+            
+            // cell separator
+            cell.preservesSuperviewLayoutMargins = false
+            cell.separatorInset = UIEdgeInsetsZero
+            cell.layoutMargins = UIEdgeInsetsZero
             
             cell.backgroundColor = colorForIndex(indexPath.row)
             cell.delegate = self
@@ -158,6 +144,11 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 cell.catCountLabel.text = String(cat.items.count)
             }
             
+            // cell separator
+            cell.preservesSuperviewLayoutMargins = false
+            cell.separatorInset = UIEdgeInsetsZero
+            cell.layoutMargins = UIEdgeInsetsZero
+            
             cell.backgroundColor = UIColor.lightGrayColor()
             cell.delegate = self
             
@@ -166,11 +157,21 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     }
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return UITableViewAutomaticDimension
+        if list.cellIsItem(indexPath) {
+            return 44
+        } else {
+            return 60
+        }
+        //return UITableViewAutomaticDimension
     }
     
     override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        return UITableViewAutomaticDimension
+        if list.cellIsItem(indexPath) {
+            return 44
+        } else {
+            return 60
+        }
+        //return UITableViewAutomaticDimension
     }
     
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -194,10 +195,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             deleteItemIndexPath = indexPath
             let deletedItem = list?.objectAtIndexPath(indexPath)
             
-            if let item = deletedItem as? Item {
-                confirmDelete(item.name)
+            if list.objectIsItem(deletedItem) {
+                confirmDelete((deletedItem as! Item).name, isItem: true)
             } else {
-                print("ERROR: Attempt to delete a category!")
+                confirmDelete((deletedItem as! Category).name, isItem: false)
             }
         }
         else if editingStyle == .Insert {
@@ -217,15 +218,20 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 list!.insertItemAtIndexPath(item as! Item, indexPath: toIndexPath)
                 tableView.endUpdates()
                 
-                // use tableView.reloadRowsAtIndexPaths???
-                self.tableView.reloadData()
+                // also update the category rows so we get new item counts displayed
+                /*
+                let fromCatPath = list.categoryPathForItemPath(fromIndexPath)
+                let toCatPath = list.categoryPathForItemPath(toIndexPath)
+                if let fromPath = fromCatPath, toPath = toCatPath {
+                    tableView.reloadRowsAtIndexPaths([fromPath, toPath], withRowAnimation: UITableViewRowAnimation.None)
+                }*/
+                tableView.reloadData()
             } else {
                 print("ERROR: Attempt to move a null item!")
             }
         } else {
             print("ERROR: Attempt to move an item in a null list!")
         }
-        
     }
     
     // Override to support conditional rearranging of the table view.
@@ -259,7 +265,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         
         list?.updateObjectNameAtIndexPath(indexPath, withName: newName)
         
-        print(textField.text)
+        //print(textField.text)
     }
     
     // toggle expand/collapse state of category
@@ -273,7 +279,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             if let cat = category {
                 cat.expanded = !cat.expanded
                 print("expandButton was hit for category \(i) with name: \(cat.name)")
-                self.tableView.reloadData()
+                tableView.reloadData()
             }
         } else {
             print("no toggle - inEditMode!")
@@ -286,9 +292,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
     
-    func confirmDelete(itemName: String)
+    func confirmDelete(objName: String, isItem: Bool)
     {
-        let alert = UIAlertController(title: "Delete List", message: "Are you sure you want to permanently delete the item \(itemName)?", preferredStyle: .Alert)
+        let objType = isItem ? "item" : "category"
+        let alert = UIAlertController(title: "Delete \(objType.capitalizedString)", message: "Are you sure you want to permanently delete the \(objType) \(objName)?", preferredStyle: .Alert)
         
         let DeleteAction = UIAlertAction(title: "Delete", style: .Destructive, handler: handleDeleteItem)
         let CancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: cancelDeleteItem)
@@ -308,14 +315,13 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         if let indexPath = deleteItemIndexPath, currentList = list
         {
             tableView.beginUpdates()
-            // Delete the row from the data source
-            currentList.removeItemAtIndexPath(indexPath)
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            // Delete the row(s) from the data source and return paths of the removed rows
+            let removedPaths = currentList.removeItemAtIndexPath(indexPath)
+            if let _ = removedPaths {
+                tableView.deleteRowsAtIndexPaths(removedPaths!, withRowAnimation: .Fade)
+            }
             deleteItemIndexPath = nil
             tableView.endUpdates()
-            
-             // use tableView.reloadRowsAtIndexPaths???
-            self.tableView.reloadData()
         } else {
             print("ERROR: handleDeleteItem received a null indexPath or list!")
         }
@@ -349,10 +355,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         if list != nil {
             self.title = list!.name
-            self.tableView.reloadData()
+            tableView.reloadData()
         } else {
-            self.title = "<empty>"
-            self.tableView.reloadData()
+            self.title = "<no selection>"
+            tableView.reloadData()
         }
     }
     
