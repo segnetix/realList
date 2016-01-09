@@ -11,8 +11,10 @@ import UIKit
 // A protocol that the TableViewCell uses to inform its delegate of state change
 protocol ItemCellDelegate: class
 {
-    // indicates that the cell has been long pressed for editing
-    func itemNameTappedForEditing(textField: UITextField)
+    // gesture action methods for delegates
+    //func itemSingleTapAction(sender: UIGestureRecognizer)
+    //func itemDoubleTapAction(textField: UITextField)
+    //func itemLongPressAction(sender: UILongPressGestureRecognizer)
 }
 
 class ItemCell: UITableViewCell
@@ -24,7 +26,28 @@ class ItemCell: UITableViewCell
     override func awakeFromNib()
     {
         super.awakeFromNib()
+
         // Initialization code
+        
+        /*
+        // set up single tap gesture recognizer in cat cell to enable expand/collapse
+        let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTappedAction:")
+        singleTapGestureRecognizer.numberOfTapsRequired = 1
+        self.addGestureRecognizer(singleTapGestureRecognizer)
+        */
+        
+        /*
+        // set up double tap gesture recognizer in item cell to enable cell moving
+        let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTappedAction:")
+        doubleTapGestureRecognizer.numberOfTapsRequired = 2
+        //singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
+        self.addGestureRecognizer(doubleTapGestureRecognizer)
+        */
+        
+        // set up long press gesture recognizer
+        // let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
+        // doubleTapGestureRecognizer.requireGestureRecognizerToFail(longPressGestureRecognizer)
+        // self.addGestureRecognizer(longPressGestureRecognizer)
     }
     
     override func layoutSubviews()
@@ -57,15 +80,43 @@ class ItemCell: UITableViewCell
         super.setSelected(selected, animated: animated)
         // Configure the view for the selected state
     }
+
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Gesture Recognizer Methods
+//
+////////////////////////////////////////////////////////////////
+    
+    /*
+    func cellSingleTappedAction(sender: UIGestureRecognizer)
+    {
+        print("cellSingleTappedAction for \(itemName.text)")
+        self.delegate?.itemSingleTapAction(sender)
+    }
+    */
+    
+    /*
+    func cellDoubleTappedAction(sender: UITapGestureRecognizer)
+    {
+        print("cellDoubleTappedAction for \(itemName.text)")
+        self.delegate?.itemDoubleTapAction(itemName)
+    }
+    */
+    
+    /*
+    func longPressAction(sender: UILongPressGestureRecognizer)
+    {
+    print("longPressAction for \(categoryName.text)")
+    self.delegate?.categoryLongPressAction(sender)
+    }
     
     override func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool
     {
-        if let _ = gestureRecognizer as? UILongPressGestureRecognizer
-        {
-            self.delegate?.itemNameTappedForEditing(itemName)
-            return true
-        }
-        return false
+    if let _ = gestureRecognizer as? UILongPressGestureRecognizer {
+    return true
     }
+    return false
+    }
+    */
     
 }

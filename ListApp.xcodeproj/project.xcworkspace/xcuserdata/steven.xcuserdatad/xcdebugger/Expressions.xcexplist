@@ -19,12 +19,21 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "List.removeItemAtIndexPath(NSIndexPath, preserveCategories : Bool) -&gt; [NSIndexPath]?:ListData.swift">
+      </ContextState>
+      <ContextState
+         contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath, atPosition : InsertPosition) -&gt; ():ListData.swift">
+      </ContextState>
+      <ContextState
          contextName = "ItemViewController.listDeleted(List) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
                value = "list">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath, atEnd : Bool) -&gt; ():ListData.swift">
       </ContextState>
       <ContextState
          contextName = "ItemViewController.tableView(UITableView, commitEditingStyle : UITableViewCellEditingStyle, forRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
@@ -71,6 +80,9 @@
       <ContextState
          contextName = "ItemViewController.tableView(UITableView, cellForRowAtIndexPath : NSIndexPath) -&gt; UITableViewCell:ItemViewController.swift">
          <PersistentStrings>
+            <PersistentString
+               value = "cell.contentView.tag">
+            </PersistentString>
             <PersistentString
                value = "indexPath.row">
             </PersistentString>
@@ -138,12 +150,40 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "List.indicesForObjectAtIndexPath(NSIndexPath) -&gt; (categoryIndex : Int?, itemIndex : Int?):ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "category.name">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+            <PersistentString
+               value = "item.name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ItemViewController.catCellTapped(UITapGestureRecognizer) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
                value = "inEditMode">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.longPressAction(UILongPressGestureRecognizer) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "destCat.name">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath!.row">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath) -&gt; ():ListData.swift">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

@@ -169,6 +169,18 @@ class List
         return false
     }
     
+    func cellIsCategory(indexPath: NSIndexPath) -> Bool
+    {
+        // returns true if path points to an item, false for categories
+        let object = objectAtIndexPath(indexPath)
+        
+        if object is Category {
+            return true
+        }
+        
+        return false
+    }
+    
     func objectIsItem(object: AnyObject?) -> Bool
     {
         // returns true if object is an item, false for categories
@@ -205,19 +217,26 @@ class List
     // will remove the item at indexPath
     // if the path is to a category, will remove the entire category with items
     // returns the display index paths of any removed rows
-    func removeItemAtIndexPath(indexPath: NSIndexPath) -> [NSIndexPath]?
+    func removeItemAtIndexPath(indexPath: NSIndexPath, preserveCategories: Bool) -> [NSIndexPath]?
     {
         let itemIndices = indicesForObjectAtIndexPath(indexPath)
+        print("remove: indicesForObjectAtIndexPath cat \(itemIndices.categoryIndex) item \(itemIndices.itemIndex)")
         
         if itemIndices.categoryIndex != nil && itemIndices.itemIndex != nil {
             // remove the item from the category
             self.categories[itemIndices.categoryIndex!].items.removeAtIndex(itemIndices.itemIndex!)
             return [indexPath]
         } else if itemIndices.categoryIndex != nil && itemIndices.itemIndex == nil {
-            // remove the category and its items from the list
-            let removedPaths = getPathsForCategoryAtPath(indexPath)
-            self.categories.removeAtIndex(itemIndices.categoryIndex!)
-            return removedPaths
+            if preserveCategories {
+                // remove the first item in this category
+                self.categories[itemIndices.categoryIndex!].items.removeAtIndex(0)
+                return [indexPath]
+            } else {
+                // remove an entire category and it's items
+                let removedPaths = getPathsForCategoryAtPath(indexPath)
+                self.categories.removeAtIndex(itemIndices.categoryIndex!)
+                return removedPaths
+            }
         } else {
             print("ERROR: List.removeItemAtIndexPath got a nil category or item index!")
             return nil
@@ -225,21 +244,29 @@ class List
     }
     
     // will insert the item at the indexPath
-    // if the path is to a category, will insert at the end of the category
-    func insertItemAtIndexPath(item: Item, indexPath: NSIndexPath)
+    // if the path is to a category, then will insert at beginning or end of category depending on move direction
+    func insertItemAtIndexPath(item: Item, indexPath: NSIndexPath, atPosition: InsertPosition)
     {
         let itemIndices = indicesForObjectAtIndexPath(indexPath)
+        print("insert: indicesForObjectAtIndexPath cat \(itemIndices.categoryIndex) item \(itemIndices.itemIndex)")
         
-        if itemIndices.categoryIndex != nil && itemIndices.itemIndex != nil {
-            self.categories[itemIndices.categoryIndex!].items.insert(item, atIndex: itemIndices.itemIndex!)
-        }  else if itemIndices.categoryIndex != nil && itemIndices.itemIndex == nil {
-            // if itemIndex is nil, then we landed on a category, so need to insert the item at the end of the previous category
-            self.categories[itemIndices.categoryIndex! - 1].items.append(item)
-        } else if itemIndices.categoryIndex == nil && itemIndices.itemIndex == nil {
-            // insert the item at the end of the last category
-            self.categories[categories.count-1].items.append(item)
-        } else {
-            print("ERROR: List.insertItemAtIndexPath got a nil category or item index!")
+        switch atPosition {
+        case .Beginning:
+            self.categories[itemIndices.categoryIndex!].items.insert(item, atIndex: 0)
+        case .Middle:
+            if itemIndices.itemIndex != nil {
+                self.categories[itemIndices.categoryIndex!].items.insert(item, atIndex: itemIndices.itemIndex!)
+            } else {
+                // if itemIndex is nil then we are moving down past the last item in the category, so just decrement the category and append
+                if itemIndices.categoryIndex != nil {
+                    self.categories[itemIndices.categoryIndex! - 1].items.append(item)
+                } else {
+                    // special case for moving past end of the list, append to the end of the last category
+                    self.categories[categories.count-1].items.append(item)
+                }
+            }
+        case .End:
+            self.categories[itemIndices.categoryIndex!].items.append(item)
         }
     }
     
@@ -251,32 +278,47 @@ class List
         
         for category in categories
         {
-            var itemIndex: Int = -1
-            
             ++index
             ++catIndex
-            if index == indexPath.row {
-                // obj is a category, so item is nil
-                print("indicesForObjectAtIndexPath cat \(catIndex) item (nil)")
-                return (catIndex, nil)
+            if category.name.characters.count > 0 {
+                if index == indexPath.row {
+                    // obj is a category, so item is nil
+                    //print("indicesForObjectAtIndexPath cat \(catIndex) item (nil)")
+                    return (catIndex, nil)
+                }
+            } else {
+                // maps to a non-display category, so return indices to the first item in the category
+                return (catIndex, indexPath.row)
             }
             
-            // only count items if category is expanded
+            // only count items in in expandeded categories
             if category.expanded {
+                var itemIndex: Int = -1
+                
+                // expanded category
                 for _ in category.items
                 {
+                    //print(item.name)
                     ++index
                     ++itemIndex
                     if index == indexPath.row {
                         // obj is an item
-                        print("indicesForObjectAtIndexPath cat \(catIndex) item \(itemIndex)")
+                        //print("indicesForObjectAtIndexPath cat \(catIndex) item \(itemIndex)")
                         return (catIndex, itemIndex)
                     }
+                }
+            } else {
+                // collapsed category
+                if index == indexPath.row {
+                    // obj is a collapsed category
+                    //print("indicesForObjectAtIndexPath cat \(catIndex) item (nil)")
+                    return (catIndex, nil)
                 }
             }
         }
         
         // points to a cell after end of last cell
+        //print("indicesForObjectAtIndexPath cat (nil) item (nil)")
         return (nil, nil)
     }
     
@@ -354,12 +396,14 @@ class List
         
         for category in categories
         {
-            ++index
-            if index == indexPath.row {
-                if category.name.characters.count > 0 {
-                    return category
-                } else {
-                    --index // we will pick up the next object
+            if category.name.characters.count > 0 {
+                ++index
+                if index == indexPath.row {
+                    if category.name.characters.count > 0 {
+                        return category
+                    } else {
+                        --index // we will pick up the next object
+                    }
                 }
             }
             
@@ -377,7 +421,20 @@ class List
         
         return nil
     }
-    
+    /*
+    func getIndexPathsForAllRowsAfterCategoryAtIndexPath(indexPath: NSIndexPath) -> [NSIndexPath]
+    {
+        var indexPaths = [NSIndexPath]()
+        
+        for let category in categories
+        {
+            
+        }
+        
+        
+        return indexPaths
+    }
+    */
 }
 
     // MARK: - Category class
@@ -388,7 +445,7 @@ class Category
     var items = [Item]()
     var expanded: Bool = true {
         didSet {
-            print("Category: \(name) expanded: \(expanded)")
+            //print("Category: \(name) expanded: \(expanded)")
         }
     }
     
