@@ -421,6 +421,7 @@ class List
         
         return nil
     }
+    
     /*
     func getIndexPathsForAllRowsAfterCategoryAtIndexPath(indexPath: NSIndexPath) -> [NSIndexPath]
     {

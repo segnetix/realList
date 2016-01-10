@@ -390,15 +390,38 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         let state: UIGestureRecognizerState = gesture.state;
         let location: CGPoint = gesture.locationInView(tableView)
-        let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+        var indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
         
-        // if indexPath is null, that means we took our dragged cell off the table
-        // so...
-        //      need to put it at end before the gesture ends
-        //
+        // if indexPath is null then we took our dragged cell some direction off the table
         if indexPath == nil {
-            //indexPath = NSIndexPath(forRow: list.totalDisplayCount() - 1, inSection: 0)
+            print("state: \(gesture.state)  location: \(location)")
+            
+            if gesture.state == UIGestureRecognizerState.Ended {
+                longPressEnded(nil, location: location)
+            }
+            
+            // if past last row then drop cell at end of last cat/row
+            if location.y > 0 {
+                print("we went off the bottom end of the table view...")
+                
+                // get indexPath of last cell...
+                let lastCellIndexPath = NSIndexPath(forRow: list.totalDisplayCount() - 1, inSection: 0)
+                
+                // ... and pass to longPressEnded
+                longPressEnded(lastCellIndexPath, location: location)
+            }
+            
             return
+        }
+        
+        // also need to prevent moving above the top category cell
+        if indexPath!.row == 0
+        {
+            let obj = tableView.cellForRowAtIndexPath(indexPath!)
+            
+            if obj is CategoryCell {
+                indexPath = NSIndexPath(forRow: 1, inSection: 0)
+            }
         }
         
         switch (state)
@@ -449,103 +472,113 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             }
             
         default:
-            // finalize list data with new location for sourceIndexObj
-            if sourceIndexPath != nil
+            // long press has ended - call clean up method
+            self.longPressEnded(indexPath!, location: location)
+            
+        }   // end switch
+        
+    }
+    
+    // clean up after a long press gesture
+    func longPressEnded(indexPath: NSIndexPath?, location: CGPoint)
+    {
+        // finalize list data with new location for sourceIndexObj
+        if sourceIndexPath != nil
+        {
+            var center: CGPoint = snapshot!.center
+            center.y = location.y
+            snapshot?.center = center
+            
+            //print(center.y)
+            
+            // check if destination is different from source and valid
+            if indexPath != sourceIndexPath && indexPath != nil && list != nil
             {
-                var center: CGPoint = snapshot!.center
-                center.y = location.y
-                snapshot?.center = center
+                let sourceDataObj = list.objectAtIndexPath(sourceIndexPath!)
+                var destDataObj = list.objectAtIndexPath(indexPath!)
                 
-                //print(center.y)
                 
-                // check if destination is different from source and valid
-                if indexPath != sourceIndexPath && indexPath != nil && list != nil
+                // *** debug code ***
+                if sourceDataObj is Item {
+                    print((sourceDataObj as! Item).name)
+                } else {
+                    print((sourceDataObj as! Category).name)
+                }
+                if destDataObj is Item {
+                    print((destDataObj as! Item).name)
+                } else {
+                    print((destDataObj as! Category).name)
+                }
+                
+                
+                // update the list data source, for now only move items (categories later)
+                if sourceDataObj is Item
                 {
-                    let sourceDataObj = list.objectAtIndexPath(sourceIndexPath!)
-                    var destDataObj = list.objectAtIndexPath(indexPath!)
+                    tableView.beginUpdates()
                     
+                    // remove the item from its original location
+                    list.removeItemAtIndexPath(sourceIndexPath!, preserveCategories: true)
                     
-                    // *** debug code ***
-                    if sourceDataObj is Item {
-                        print((sourceDataObj as! Item).name)
-                    } else {
-                        print((sourceDataObj as! Category).name)
-                    }
-                    if destDataObj is Item {
-                        print((destDataObj as! Item).name)
-                    } else {
-                        print((destDataObj as! Category).name)
-                    }
-                    
-                    
-                    // update the list data source, for now only move items (categories later)
-                    if sourceDataObj is Item
+                    // insert the item at its new location
+                    if destDataObj is Item
                     {
-                        //tableView.beginUpdates()
+                        list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: indexPath!, atPosition: .Middle)
+                    }
+                    else if destDataObj is Category
+                    {
+                        // use dirModifier to jump over a dest category when moving up (down is handled by landing on the new category)
+                        let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
+                        let position = (moveDirection == .Down) ? InsertPosition.Beginning : InsertPosition.End
+                        let altIndexPath = NSIndexPath(forRow: indexPath!.row - 1, inSection: 0)
                         
-                        // remove the item from its original location
-                        list.removeItemAtIndexPath(sourceIndexPath!, preserveCategories: true)
-                        
-                        // insert the item at its new location
-                        if destDataObj is Item
-                        {
-                            list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: indexPath!, atPosition: .Middle)
-                        }
-                        else if destDataObj is Category
-                        {
-                            // use dirModifier to jump over a dest category when moving up (down is handled by landing on the new category)
-                            let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
-                            let position = (moveDirection == .Down) ? InsertPosition.Beginning : InsertPosition.End
-                            let altIndexPath = NSIndexPath(forRow: indexPath!.row - 1, inSection: 0)
+                        // check if dest cat is collapsed
+                        destDataObj = list.objectAtIndexPath(altIndexPath)
+                        if destDataObj is Category {
+                            let destCat = destDataObj as! Category
                             
-                            // check if dest cat is collapsed
-                            destDataObj = list.objectAtIndexPath(altIndexPath)
-                            if destDataObj is Category {
-                                let destCat = destDataObj as! Category
-                                
-                                if destCat.expanded == false {
-                                    // need to alter path to land on the collapsed category
-                                    list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .End)
-                                    movedToCollapsedCategory = true
-                                } else {
-                                    list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: position)
-                                }
+                            if destCat.expanded == false {
+                                // need to alter path to land on the collapsed category
+                                list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .End)
+                                movedToCollapsedCategory = true
                             } else {
                                 list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: position)
                             }
+                        } else {
+                            list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: position)
                         }
-                        
-                        print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
-                        
-                        // ... move the rows (do we need this???)
-                        tableView.moveRowAtIndexPath(sourceIndexPath!, toIndexPath: indexPath!)
-                        
-                        //tableView.endUpdates()
                     }
+                    
+                    print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
+                    
+                    // ... move the rows (do we need this???)
+                    tableView.moveRowAtIndexPath(sourceIndexPath!, toIndexPath: indexPath!)
+                    
+                    tableView.endUpdates()
                 }
             }
+        }
+
+        if indexPath != nil {
+            let cell = tableView.cellForRowAtIndexPath(indexPath!)
             
-            // clean up
-            let cell = tableView.cellForRowAtIndexPath(indexPath!)!
-            cell.alpha = 0.0
-            UIView.animateWithDuration(0.25, animations: { () -> Void in
-                self.snapshot?.center = cell.center
-                self.snapshot?.transform = CGAffineTransformIdentity
-                self.snapshot?.alpha = 0.0
-                
-                // undo fade out
-                cell.alpha = 1.0
-                
-                }, completion: { (finished) in
+            if cell != nil {
+                cell!.alpha = 0.0
+                UIView.animateWithDuration(0.25, animations: { () -> Void in
+                    self.snapshot?.center = cell!.center
+                    self.snapshot?.transform = CGAffineTransformIdentity
+                    self.snapshot?.alpha = 0.0
                     
-                    self.sourceIndexPath = nil
-                    self.snapshot?.removeFromSuperview()
-                    self.snapshot = nil;
-            })
-            
-            self.tableView.reloadData()
-        }   // end switch
+                    // undo fade out
+                    cell!.alpha = 1.0
+                })
+            }
+        }
         
+        self.sourceIndexPath = nil
+        self.snapshot?.removeFromSuperview()
+        self.snapshot = nil;
+        
+        self.tableView.reloadData()
     }
     
 ////////////////////////////////////////////////////////////////
@@ -655,6 +688,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         return snapshot
     }
     
+    // resets the cell's tags after a collapse/expand event
     func resetCellViewTags()
     {
         var cell: UITableViewCell? = nil
