@@ -266,7 +266,9 @@ class List
                 }
             }
         case .End:
-            self.categories[itemIndices.categoryIndex!].items.append(item)
+            if itemIndices.categoryIndex != nil {
+                self.categories[itemIndices.categoryIndex!].items.append(item)
+            }
         }
     }
     

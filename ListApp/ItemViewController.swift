@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import QuartzCore
 
 let itemCellID     = "ItemCell"
 let categoryCellID = "CategoryCell"
@@ -22,16 +23,22 @@ enum MoveDirection {
     case Down
 }
 
+let kScrollRate: CGFloat = 6
+
 class ItemViewController: UITableViewController, UITextFieldDelegate
 {
     //let maxItemsPerCategory = 1000000
     var inEditMode = false
     var deleteItemIndexPath: NSIndexPath? = nil
     var editModeRow = -1
+    var longPressGestureRecognizer: UILongPressGestureRecognizer? = nil
     var movedToCollapsedCategory = false
     var sourceIndexPath: NSIndexPath? = nil
     var movingFromIndexPath: NSIndexPath? = nil
+    var prevLocation: CGPoint? = nil
     var snapshot: UIView? = nil
+    var displayLink: CADisplayLink? = nil
+    var scrollLoopCount = 0     // debugging var
     
     var list: List! {
         didSet (newList) {
@@ -50,8 +57,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         //self.navigationItem.rightBarButtonItem = self.editButtonItem()
         
         // set up long press gesture recognizer for the cell move functionality
-        let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
-        self.tableView.addGestureRecognizer(longPressGestureRecognizer)
+        longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
+        self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
+        
+        //self.tableView.backgroundColor = UIColor.clearColor()
         
         refreshItems()
     }
@@ -72,7 +81,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         // in this case, it's good to combine hidesBarsOnTap with hidesBarsWhenKeyboardAppears
         // so the user can get back to the navigation bar to save
         //navigationController?.hidesBarsOnTap = true
-        navigationController?.hidesBarsWhenKeyboardAppears = true
+        //navigationController?.hidesBarsWhenKeyboardAppears = true
         //navigationController?.hidesBarsOnSwipe = false
     }
     
@@ -390,11 +399,51 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         let state: UIGestureRecognizerState = gesture.state;
         let location: CGPoint = gesture.locationInView(tableView)
+        let topBarHeight = getTopBarHeight()
         var indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
         
+        let touchLocationInWindow = tableView.convertPoint(location, toView: tableView.window)
+        print("touchLocationInWindow.y", touchLocationInWindow.y)
+        
+        // we need to cancel any display link scrolling if the touch location gets too high
+        if touchLocationInWindow.y <= topBarHeight {
+            longPressEnded(indexPath, location: location)
+            return
+        }
+        
+        // check if we need to scroll tableView
+        let touchLocation = gesture.locationInView(gesture.view!.window)
+        
+        if touchLocation.y > tableView.bounds.height - 50 {
+            // need to scroll down
+            if displayLink == nil {
+                displayLink = CADisplayLink(target: self, selector: Selector("scrollDownLoop"))
+                displayLink!.frameInterval = 1
+                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+            }
+        } else if touchLocation.y < topBarHeight + 50 {
+            // need to scroll up
+            if displayLink == nil {
+                displayLink = CADisplayLink(target: self, selector: Selector("scrollUpLoop"))
+                displayLink!.frameInterval = 1
+                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+            }
+        } else if displayLink != nil {
+            // check if we need to cancel a current scroll update because the touch moved out of scroll area
+            if touchLocation.y < tableView.bounds.height - 50 {
+                displayLink!.invalidate()
+                displayLink = nil
+                scrollLoopCount = 0
+            } else if touchLocation.y > topBarHeight + 50 {
+                displayLink!.invalidate()
+                displayLink = nil
+                scrollLoopCount = 0
+            }
+        }
+
         // if indexPath is null then we took our dragged cell some direction off the table
         if indexPath == nil {
-            print("state: \(gesture.state)  location: \(location)")
+            //print("state: \(gesture.state)  location: \(location)")
             
             if gesture.state == UIGestureRecognizerState.Ended {
                 longPressEnded(nil, location: location)
@@ -415,14 +464,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         }
         
         // also need to prevent moving above the top category cell
-        if indexPath!.row == 0
-        {
-            let obj = tableView.cellForRowAtIndexPath(indexPath!)
-            
-            if obj is CategoryCell {
-                indexPath = NSIndexPath(forRow: 1, inSection: 0)
-            }
-        }
+        // this will effectively fix the top category to the top of the view
+        indexPath = adjustIndexPathIfAboveTopRow(indexPath!)
         
         switch (state)
         {
@@ -456,20 +499,12 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 print("Can't move a category yet!!!")
             }
             
-        case UIGestureRecognizerState.Changed:
-            var center: CGPoint = snapshot!.center
-            center.y = location.y
-            snapshot?.center = center
+            prevLocation = location
             
-            // check if destination is different from source and valid then move the cell in the tableView
-            if indexPath != sourceIndexPath && indexPath != nil && movingFromIndexPath != nil
-            {
-                // ... move the rows
-                tableView.moveRowAtIndexPath(movingFromIndexPath!, toIndexPath: indexPath!)
-                
-                // ... and update movingFromIndexPath so it is in sync with UI changes
-                movingFromIndexPath = indexPath
-            }
+        case UIGestureRecognizerState.Changed:
+            // long press has moved - call move method
+            self.longPressMoved(indexPath!, location: location)
+            prevLocation = location
             
         default:
             // long press has ended - call clean up method
@@ -479,9 +514,41 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         
     }
     
+    func longPressMoved(var indexPath: NSIndexPath, location: CGPoint)
+    {
+        indexPath = adjustIndexPathIfAboveTopRow(indexPath)
+        
+        if snapshot != nil {
+            var center: CGPoint = snapshot!.center
+            center.y = location.y
+            snapshot?.center = center
+            
+            print("snapshot location.y \(location.y)")
+            
+            if location.y > 0 {
+                // check if destination is different from source and valid then move the cell in the tableView
+                if indexPath != sourceIndexPath && movingFromIndexPath != nil
+                {
+                    // ... move the rows
+                    tableView.moveRowAtIndexPath(movingFromIndexPath!, toIndexPath: indexPath)
+                    
+                    // ... and update movingFromIndexPath so it is in sync with UI changes
+                    movingFromIndexPath = indexPath
+                }
+            }
+        }
+    }
+    
     // clean up after a long press gesture
     func longPressEnded(indexPath: NSIndexPath?, location: CGPoint)
     {
+        // cancel any scroll loop
+        if displayLink != nil {
+            displayLink!.invalidate()
+            displayLink = nil
+            scrollLoopCount = 0
+        }
+        
         // finalize list data with new location for sourceIndexObj
         if sourceIndexPath != nil
         {
@@ -489,27 +556,11 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             center.y = location.y
             snapshot?.center = center
             
-            //print(center.y)
-            
             // check if destination is different from source and valid
             if indexPath != sourceIndexPath && indexPath != nil && list != nil
             {
                 let sourceDataObj = list.objectAtIndexPath(sourceIndexPath!)
                 var destDataObj = list.objectAtIndexPath(indexPath!)
-                
-                
-                // *** debug code ***
-                if sourceDataObj is Item {
-                    print((sourceDataObj as! Item).name)
-                } else {
-                    print((sourceDataObj as! Category).name)
-                }
-                if destDataObj is Item {
-                    print((destDataObj as! Item).name)
-                } else {
-                    print((destDataObj as! Category).name)
-                }
-                
                 
                 // update the list data source, for now only move items (categories later)
                 if sourceDataObj is Item
@@ -576,9 +627,46 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         
         self.sourceIndexPath = nil
         self.snapshot?.removeFromSuperview()
-        self.snapshot = nil;
+        self.snapshot = nil
+        self.prevLocation = nil
+        self.displayLink?.invalidate()
+        self.displayLink = nil
         
         self.tableView.reloadData()
+    }
+    
+    func scrollUpLoop()
+    {
+        let currentOffset = tableView.contentOffset
+        let topBarHeight = getTopBarHeight()
+        let newOffsetY = max(currentOffset.y - kScrollRate, -topBarHeight)
+        let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
+        let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+        
+        self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: newOffsetY), animated: false)
+        
+        if let path = indexPath {
+            longPressMoved(path, location: location)
+        }
+    }
+    
+    func scrollDownLoop()
+    {
+        let currentOffset = tableView.contentOffset
+        let lastCellIndex = NSIndexPath(forRow: list.totalDisplayCount() - 1, inSection: 0)
+        let lastCell = tableView.cellForRowAtIndexPath(lastCellIndex)
+        //let lastCellRect = tableView.rectForRowAtIndexPath(lastCellIndex)
+        
+        if lastCell == nil {
+            self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: currentOffset.y + kScrollRate), animated: false)
+            
+            let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
+            let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+            
+            if let path = indexPath {
+                longPressMoved(path, location: location)
+            }
+        }
     }
     
 ////////////////////////////////////////////////////////////////
@@ -711,6 +799,37 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         } while cell != nil
     }
     
+    func rowAtIndexPathIsVisible(indexPath: NSIndexPath) -> Bool
+    {
+        let indicies = self.tableView.indexPathsForVisibleRows
+        
+        if indicies != nil {
+            return indicies!.contains(indexPath)
+        }
+        
+        return false
+    }
+    
+    func adjustIndexPathIfAboveTopRow(var indexPath: NSIndexPath) -> NSIndexPath
+    {
+        if indexPath.row == 0
+        {
+            let obj = tableView.cellForRowAtIndexPath(indexPath)
+            
+            if obj is CategoryCell {
+                indexPath = NSIndexPath(forRow: 1, inSection: 0)
+            }
+        }
+        
+        return indexPath
+    }
+    
+    func getTopBarHeight() -> CGFloat {
+        let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height
+        let navBarHeight = self.navigationController!.navigationBar.frame.size.height
+        
+        return statusBarHeight + navBarHeight
+    }
 }
 
 ////////////////////////////////////////////////////////////////
