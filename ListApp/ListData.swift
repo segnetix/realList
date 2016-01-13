@@ -268,6 +268,8 @@ class List
         case .End:
             if itemIndices.categoryIndex != nil {
                 self.categories[itemIndices.categoryIndex!].items.append(item)
+            } else {
+                print("ALERT! - insertItemAtIndexPath - .End with nil categoryIndex...")
             }
         }
     }

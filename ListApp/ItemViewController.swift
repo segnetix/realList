@@ -23,7 +23,8 @@ enum MoveDirection {
     case Down
 }
 
-let kScrollRate: CGFloat = 6
+let kScrollRate: CGFloat = 6.0
+let kCellHeight: CGFloat = 44.0
 
 class ItemViewController: UITableViewController, UITextFieldDelegate
 {
@@ -221,22 +222,22 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         if list.cellIsItem(indexPath) {
-            return 44
+            return kCellHeight
         } else {
-            return 44
+            return kCellHeight
         }
         //return UITableViewAutomaticDimension
     }
-    
+    /*
     override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         if list.cellIsItem(indexPath) {
-            return 44
+            return kCellHeight
         } else {
-            return 44
+            return kCellHeight
         }
         //return UITableViewAutomaticDimension
     }
-    
+    */
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let title = list.cellTitle(indexPath)
         //print("selection: cat \(indexPath.section)  item \(indexPath.row)  title \(title)")
@@ -403,7 +404,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         var indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
         
         let touchLocationInWindow = tableView.convertPoint(location, toView: tableView.window)
-        print("touchLocationInWindow.y", touchLocationInWindow.y)
+        print("longPressAction: touchLocationInWindow.y", touchLocationInWindow.y)
         
         // we need to cancel any display link scrolling if the touch location gets too high
         if touchLocationInWindow.y <= topBarHeight {
@@ -648,6 +649,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         if let path = indexPath {
             longPressMoved(path, location: location)
         }
+        
+        //tableView.contentInset = UIEdgeInsetsMake(0, 0, -120, 0) //values passed are - top, left, bottom, right
     }
     
     func scrollDownLoop()
@@ -655,7 +658,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         let currentOffset = tableView.contentOffset
         let lastCellIndex = NSIndexPath(forRow: list.totalDisplayCount() - 1, inSection: 0)
         let lastCell = tableView.cellForRowAtIndexPath(lastCellIndex)
-        //let lastCellRect = tableView.rectForRowAtIndexPath(lastCellIndex)
         
         if lastCell == nil {
             self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: currentOffset.y + kScrollRate), animated: false)
@@ -666,6 +668,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             if let path = indexPath {
                 longPressMoved(path, location: location)
             }
+        } else {
+            self.tableView.scrollToRowAtIndexPath(lastCellIndex, atScrollPosition: .Bottom, animated: true)
         }
     }
     
