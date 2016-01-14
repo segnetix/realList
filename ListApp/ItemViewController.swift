@@ -28,7 +28,6 @@ let kCellHeight: CGFloat = 44.0
 
 class ItemViewController: UITableViewController, UITextFieldDelegate
 {
-    //let maxItemsPerCategory = 1000000
     var inEditMode = false
     var deleteItemIndexPath: NSIndexPath? = nil
     var editModeRow = -1
@@ -40,6 +39,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var snapshot: UIView? = nil
     var displayLink: CADisplayLink? = nil
     var scrollLoopCount = 0     // debugging var
+    var longPressActive = false
     
     var list: List! {
         didSet (newList) {
@@ -392,23 +392,27 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 cell.categoryName.becomeFirstResponder()
             }
         }
-        
     }
 
     // handle cell move on long press (move)
     func longPressAction(gesture: UILongPressGestureRecognizer)
     {
-        let state: UIGestureRecognizerState = gesture.state;
+        let state: UIGestureRecognizerState = gesture.state
         let location: CGPoint = gesture.locationInView(tableView)
         let topBarHeight = getTopBarHeight()
         var indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
         
         let touchLocationInWindow = tableView.convertPoint(location, toView: tableView.window)
-        print("longPressAction: touchLocationInWindow.y", touchLocationInWindow.y)
+        //print("longPressAction: touchLocationInWindow.y", touchLocationInWindow.y)
         
-        // we need to cancel any display link scrolling if the touch location gets too high
-        if touchLocationInWindow.y <= topBarHeight {
-            longPressEnded(indexPath, location: location)
+        // we need to end the long press if we move above the top cell and into the top bar
+        if touchLocationInWindow.y <= topBarHeight && location.y <= 0
+        {
+            // if we moved above the table view then set the destination to the top cell and end the long press
+            if longPressActive {
+                indexPath = NSIndexPath(forRow: 0, inSection: 0)
+                longPressEnded(indexPath, location: location)
+            }
             return
         }
         
@@ -444,33 +448,23 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
 
         // if indexPath is null then we took our dragged cell some direction off the table
         if indexPath == nil {
-            //print("state: \(gesture.state)  location: \(location)")
-            
-            if gesture.state == UIGestureRecognizerState.Ended {
-                longPressEnded(nil, location: location)
-            }
-            
-            // if past last row then drop cell at end of last cat/row
-            if location.y > 0 {
-                print("we went off the bottom end of the table view...")
-                
-                // get indexPath of last cell...
-                let lastCellIndexPath = NSIndexPath(forRow: list.totalDisplayCount() - 1, inSection: 0)
-                
-                // ... and pass to longPressEnded
-                longPressEnded(lastCellIndexPath, location: location)
+            if gesture.state != .Cancelled {
+                gesture.enabled = false
+                gesture.enabled = true
+                longPressEnded(movingFromIndexPath, location: location)
             }
             
             return
         }
         
-        // also need to prevent moving above the top category cell
+        // also need to prevent moving above the top category cell if we are moving an item
         // this will effectively fix the top category to the top of the view
-        indexPath = adjustIndexPathIfAboveTopRow(indexPath!)
+        indexPath = adjustIndexPathIfItemMovingAboveTopRow(indexPath!)
         
         switch (state)
         {
         case UIGestureRecognizerState.Began:
+            longPressActive = true
             sourceIndexPath = indexPath
             movingFromIndexPath = indexPath
             let cell = tableView.cellForRowAtIndexPath(indexPath!)!
@@ -478,10 +472,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             
             let obj = list.objectAtIndexPath(sourceIndexPath!)
             
-            if obj is Item {
-                let item = obj as! Item
-                print("cell: \(item.name)")
-                
+            if obj is Item || obj is Category {
                 var center = cell.center
                 snapshot?.center = center
                 snapshot?.alpha = 0.0
@@ -496,8 +487,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                     }, completion: { (finished: Bool) -> Void in
                         cell.hidden = true      // hides the real cell while moving
                 })
-            } else {
-                print("Can't move a category yet!!!")
             }
             
             prevLocation = location
@@ -515,23 +504,24 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         
     }
     
-    func longPressMoved(var indexPath: NSIndexPath, location: CGPoint)
+    func longPressMoved(var indexPath: NSIndexPath?, location: CGPoint)
     {
-        indexPath = adjustIndexPathIfAboveTopRow(indexPath)
+        if indexPath != nil {
+            // if an item, then adjust indexPath if necessary so we don't move above top-most category
+            indexPath = adjustIndexPathIfItemMovingAboveTopRow(indexPath!)
+        }
         
         if snapshot != nil {
             var center: CGPoint = snapshot!.center
             center.y = location.y
             snapshot?.center = center
             
-            print("snapshot location.y \(location.y)")
-            
-            if location.y > 0 {
+            if indexPath != nil && location.y > 0 {
                 // check if destination is different from source and valid then move the cell in the tableView
                 if indexPath != sourceIndexPath && movingFromIndexPath != nil
                 {
                     // ... move the rows
-                    tableView.moveRowAtIndexPath(movingFromIndexPath!, toIndexPath: indexPath)
+                    tableView.moveRowAtIndexPath(movingFromIndexPath!, toIndexPath: indexPath!)
                     
                     // ... and update movingFromIndexPath so it is in sync with UI changes
                     movingFromIndexPath = indexPath
@@ -543,16 +533,18 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     // clean up after a long press gesture
     func longPressEnded(indexPath: NSIndexPath?, location: CGPoint)
     {
+        longPressActive = false
+        
         // cancel any scroll loop
-        if displayLink != nil {
-            displayLink!.invalidate()
-            displayLink = nil
-            scrollLoopCount = 0
-        }
+        displayLink?.invalidate()
+        displayLink = nil
+        scrollLoopCount = 0
         
         // finalize list data with new location for sourceIndexObj
         if sourceIndexPath != nil
         {
+            print("sourceIndexPath is not nil...")
+            
             var center: CGPoint = snapshot!.center
             center.y = location.y
             snapshot?.center = center
@@ -566,6 +558,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 // update the list data source, for now only move items (categories later)
                 if sourceDataObj is Item
                 {
+                    // we are moving an item
                     tableView.beginUpdates()
                     
                     // remove the item from its original location
@@ -580,8 +573,15 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                     {
                         // use dirModifier to jump over a dest category when moving up (down is handled by landing on the new category)
                         let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
-                        let position = (moveDirection == .Down) ? InsertPosition.Beginning : InsertPosition.End
-                        let altIndexPath = NSIndexPath(forRow: indexPath!.row - 1, inSection: 0)
+                        var position = (moveDirection == .Down) ? InsertPosition.Beginning : InsertPosition.End
+                        var altIndexPath = indexPath!
+                        
+                        // alt path above category unles we are moving above top category
+                        if indexPath!.row > 0 {
+                            altIndexPath = NSIndexPath(forRow: indexPath!.row - 1, inSection: 0)
+                        } else {
+                            position = .Beginning
+                        }
                         
                         // check if dest cat is collapsed
                         destDataObj = list.objectAtIndexPath(altIndexPath)
@@ -603,37 +603,68 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                     print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
                     
                     // ... move the rows (do we need this???)
-                    tableView.moveRowAtIndexPath(sourceIndexPath!, toIndexPath: indexPath!)
+                    //tableView.moveRowAtIndexPath(sourceIndexPath!, toIndexPath: indexPath!)
                     
                     tableView.endUpdates()
                 }
-            }
-        }
-
-        if indexPath != nil {
-            let cell = tableView.cellForRowAtIndexPath(indexPath!)
-            
-            if cell != nil {
-                cell!.alpha = 0.0
-                UIView.animateWithDuration(0.25, animations: { () -> Void in
-                    self.snapshot?.center = cell!.center
-                    self.snapshot?.transform = CGAffineTransformIdentity
-                    self.snapshot?.alpha = 0.0
+                else if sourceDataObj is Category
+                {
+                    // we are moving a category
+                    let sourceCatIndex = list.indicesForObjectAtIndexPath(sourceIndexPath!).categoryIndex
+                    var destCatIndex = list.indicesForObjectAtIndexPath(indexPath!).categoryIndex
                     
-                    // undo fade out
-                    cell!.alpha = 1.0
-                })
+                    // this is so dropping a category on an item will only move the category if the item is above the dest category when moving up
+                    let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
+
+                    if moveDirection == .Up && destDataObj is Item && destCatIndex != nil {
+                        ++destCatIndex!
+                    }
+                    
+                    print("sourceCatIndex: \(sourceCatIndex)  destCatIndex: \(destCatIndex)")
+                    
+                    if sourceCatIndex != nil && destCatIndex != nil {
+                        tableView.beginUpdates()
+                        
+                        // remove the category from its original location
+                        list.removeCatetoryAtIndex(sourceCatIndex!)
+                        
+                        list.insertCategory(sourceDataObj as! Category, atIndex: destCatIndex!)
+                        
+                        tableView.endUpdates()
+                    }
+                }
             }
+        } else {
+            print("sourceIndexPath is nil...")
         }
         
-        self.sourceIndexPath = nil
-        self.snapshot?.removeFromSuperview()
-        self.snapshot = nil
+        var cell: UITableViewCell? = nil
+        
+        if indexPath != nil {
+            cell = tableView.cellForRowAtIndexPath(indexPath!)
+        }
+        
+        cell?.alpha = 0.0
+        UIView.animateWithDuration(0.25, animations: { () -> Void in
+            if cell != nil {
+                self.snapshot?.center = cell!.center
+            }
+            self.snapshot?.transform = CGAffineTransformIdentity
+            self.snapshot?.alpha = 0.0
+            
+            // undo fade out
+            cell?.alpha = 1.0
+        }, completion: { (finished: Bool) -> Void in
+            self.sourceIndexPath = nil
+            self.snapshot?.removeFromSuperview()
+            self.snapshot = nil
+        })
+        
+        self.tableView.reloadData()
+        
         self.prevLocation = nil
         self.displayLink?.invalidate()
         self.displayLink = nil
-        
-        self.tableView.reloadData()
     }
     
     func scrollUpLoop()
@@ -648,6 +679,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         
         if let path = indexPath {
             longPressMoved(path, location: location)
+            prevLocation = location
         }
         
         //tableView.contentInset = UIEdgeInsetsMake(0, 0, -120, 0) //values passed are - top, left, bottom, right
@@ -667,6 +699,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             
             if let path = indexPath {
                 longPressMoved(path, location: location)
+                prevLocation = location
             }
         } else {
             self.tableView.scrollToRowAtIndexPath(lastCellIndex, atScrollPosition: .Bottom, animated: true)
@@ -767,7 +800,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             inputView.layer.renderInContext(context)
         }
         let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext();
+        UIGraphicsEndImageContext()
         
         // Create an image view.
         let snapshot = UIImageView(image: image)
@@ -814,14 +847,19 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         return false
     }
     
-    func adjustIndexPathIfAboveTopRow(var indexPath: NSIndexPath) -> NSIndexPath
+    func adjustIndexPathIfItemMovingAboveTopRow(var indexPath: NSIndexPath) -> NSIndexPath
     {
-        if indexPath.row == 0
+        if sourceIndexPath != nil
         {
-            let obj = tableView.cellForRowAtIndexPath(indexPath)
-            
-            if obj is CategoryCell {
-                indexPath = NSIndexPath(forRow: 1, inSection: 0)
+            let srcObj = tableView.cellForRowAtIndexPath(sourceIndexPath!)
+        
+            if srcObj is ItemCell && indexPath.row == 0
+            {
+                let obj = tableView.cellForRowAtIndexPath(indexPath)
+                
+                if obj is CategoryCell {
+                    indexPath = NSIndexPath(forRow: 1, inSection: 0)
+                }
             }
         }
         

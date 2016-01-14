@@ -274,6 +274,23 @@ class List
         }
     }
     
+    func removeCatetoryAtIndex(sourceCatIndex: Int)
+    {
+        if sourceCatIndex < self.categories.count {
+            self.categories.removeAtIndex(sourceCatIndex)
+        }
+    }
+    
+    func insertCategory(category: Category, atIndex: Int)
+    {
+        if atIndex >= self.categories.count {
+            // append this category to the end
+            self.categories.append(category)
+        } else {
+            self.categories.insert(category, atIndex: atIndex)
+        }
+    }
+    
     // returns the data indices (cat and item) for the given display index path
     func indicesForObjectAtIndexPath(indexPath: NSIndexPath) -> (categoryIndex: Int?, itemIndex: Int?)
     {
@@ -426,20 +443,6 @@ class List
         return nil
     }
     
-    /*
-    func getIndexPathsForAllRowsAfterCategoryAtIndexPath(indexPath: NSIndexPath) -> [NSIndexPath]
-    {
-        var indexPaths = [NSIndexPath]()
-        
-        for let category in categories
-        {
-            
-        }
-        
-        
-        return indexPaths
-    }
-    */
 }
 
     // MARK: - Category class
