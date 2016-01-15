@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "474486458.688105"
+            timestampString = "474510148.575831"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "545"
-            endingLineNumber = "545"
+            startingLineNumber = "541"
+            endingLineNumber = "541"
             landmarkName = "longPressEnded(_:location:)"
             landmarkType = "5">
          </BreakpointContent>

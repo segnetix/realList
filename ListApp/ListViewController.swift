@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import QuartzCore
 
 let listCellID = "ListCell"
 
@@ -17,11 +18,25 @@ protocol ListSelectionDelegate: class
     func listDeleted(deletedList: List)
 }
 
+let kListViewScrollRate: CGFloat = 6.0
+let kListViewCellHeight: CGFloat = 44.0
+
 class ListViewController: UITableViewController, UITextFieldDelegate
 {
     var lists = [List]()
     var inEditMode = false
     var deleteListIndexPath: NSIndexPath? = nil
+    var editModeRow = -1
+    var longPressGestureRecognizer: UILongPressGestureRecognizer? = nil
+    var sourceIndexPath: NSIndexPath? = nil
+    var movingFromIndexPath: NSIndexPath? = nil
+    var prevLocation: CGPoint? = nil
+    var snapshot: UIView? = nil
+    var displayLink: CADisplayLink? = nil
+    var scrollLoopCount = 0     // debugging var
+    var longPressActive = false    
+    var selectionIndex = -1
+
     
     weak var delegate: ListSelectionDelegate?
     
@@ -33,9 +48,17 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        //self.navigationItem.rightBarButtonItem = self.editButtonItem()
         
-        //tableView.rowHeight = 80.0
+        // set up long press gesture recognizer for the cell move functionality
+        longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
+        self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
+        
+        // this is to suppress the extra cell separators in the table view
+        self.tableView.tableFooterView = UIView()
+        
+        // selectionIndex can be set by the AppDelegate with an initial list selection on app start (from saved state)
+        self.selectList(selectionIndex)
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -47,22 +70,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // so the user can get back to the navigation bar to save
         //navigationController?.hidesBarsOnTap = true
         //navigationController?.hidesBarsWhenKeyboardAppears = true
-    }
-    
-    // called when Edit/Done button is tapped in the navigation bar
-    override func setEditing(editing: Bool, animated: Bool)
-    {
-        super.setEditing(editing, animated: animated)
-        
-        if editing {
-            // enable the list cells for text editing
-            inEditMode = true
-        } else {
-            // disable the list cells for text editing
-            inEditMode = false
-        }
-        
-        self.tableView.reloadData()
     }
     
     override func didReceiveMemoryWarning() {
@@ -78,18 +85,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         addTestItems()
     }
     
-    func listNameDidChange(textField: UITextField)
-    {
-        // update list name data with new value
-        let i = textField.tag
-        lists[i].name = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
-        
-        print(lists[i].name)
-    }
-    
-    // MARK: - Table view data source
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Table view data source methods
+//
+////////////////////////////////////////////////////////////////
     
     /*
+    // we always will have one section only so just let it default
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int
     {
         // #warning Incomplete implementation, return the number of sections
@@ -103,6 +106,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return lists.count
     }
 
+    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+        return UITableViewAutomaticDimension
+        //return kListViewCellHeight
+    }
+    
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
         let cell = tableView.dequeueReusableCellWithIdentifier(listCellID, forIndexPath: indexPath) as! ListCell
@@ -110,13 +118,23 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // Configure the cell...
         let list = lists[indexPath.row]
         
-        //cell.listName?.text = list.name
+        cell.listName.userInteractionEnabled = false
         cell.listName.delegate = self
         cell.listName.addTarget(self, action: "listNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
-        cell.listName.tag = indexPath.row
-        cell.listName.userInteractionEnabled = inEditMode
-        //cell.listName.attributedText = makeAttributedString(title: list.name, subtitle: "\(cell.listName.tag)")
         cell.listName.attributedText = makeAttributedString(title: list.name, subtitle: "")
+        cell.listName.tag = indexPath.row
+        cell.contentView.tag = indexPath.row
+        
+        // set up single tap gesture recognizer in cat cell to enable expand/collapse
+        let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
+        singleTapGestureRecognizer.numberOfTapsRequired = 1
+        cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
+        
+        // set up double tap gesture recognizer in item cell to enable cell moving
+        let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
+        doubleTapGestureRecognizer.numberOfTapsRequired = 2
+        singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
+        cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
         
         // cell separator
         cell.preservesSuperviewLayoutMargins = false
@@ -126,63 +144,59 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
-    {
-        let selectedList = self.lists[indexPath.row]
-        self.delegate?.listSelected(selectedList)
-        
-        if let itemViewController = self.delegate as? ItemViewController {
-            splitViewController?.showDetailViewController(itemViewController.navigationController!, sender: nil)
-        }
-    }
-    
-    //override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-    //    return UITableViewAutomaticDimension
-    //}
-    
-    //override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-    //    return UITableViewAutomaticDimension
-    //}
-    
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        self.setEditing(false, animated: true)
+    /*
+    override func tableView(tableView: UITableView, shouldHighlightRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         return true
     }
     
-    /**
-     * Called when the user click on the view (outside the UITextField).
-
-    override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?) {
-        self.view.endEditing(true)
+    override func tableView(tableView: UITableView, didHighlightRowAtIndexPath indexPath: NSIndexPath) {
+        print("need to highlight item \(indexPath.row)")
     }
-    */
-     
-    /*
-    // not called
-    override func tableView(tableView: UITableView, didEndEditingRowAtIndexPath indexPath: NSIndexPath) {
-        print("didEndEditingAtIndexPath: \(indexPath.section), \(indexPath.row)")
+    
+    override func tableView(tableView: UITableView, didUnhighlightRowAtIndexPath indexPath: NSIndexPath) {
+        print("need to unhighlight item \(indexPath.row)")
     }
     */
     
-     // Override to support conditional editing of the table view.
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
+    {
+        self.selectList(indexPath.row)
+    }
+    
+    /*
+    override func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
+        let deselectedCell = tableView.cellForRowAtIndexPath(indexPath)!
+        deselectedCell.contentView.backgroundColor = UIColor.whiteColor()
+    }
+
+    override func tableView(tableView: UITableView, willSelectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+        print("will select item \(indexPath.row)")
+        return indexPath
+    }
+    
+    override func tableView(tableView: UITableView, willDeselectRowAtIndexPath indexPath: NSIndexPath) -> NSIndexPath? {
+        print("will deselect item \(indexPath.row)")
+        return indexPath
+    }
+    */
+    
+    // override to support conditional editing of the table view
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
         return true
     }
     
-    // Override to support editing the table view.
+    // override to support editing the table view
     override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath)
     {
-        if editingStyle == .Delete
-        {
+        if editingStyle == .Delete {
             deleteListIndexPath = indexPath
             let deletedList = lists[indexPath.row]
+            
             confirmDelete(deletedList.name)
         }
-        else if editingStyle == .Insert
-        {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+        else if editingStyle == .Insert {
+            // Create a new list instance, insert it into the array of lists, and add a new row to the table view
         }
     }
     
@@ -195,7 +209,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         self.tableView.reloadData()
     }
-
+    
     // Override to support conditional rearranging of the table view.
     override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool
     {
@@ -203,11 +217,304 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return true
     }
     
-    /*
-    override func tableView(tableView: UITableView, editingStyleForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCellEditingStyle {
-        return self.inEditMode ? UITableViewCellEditingStyle.Delete: UITableViewCellEditingStyle.Delete
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - TextField methods
+//
+////////////////////////////////////////////////////////////////
+    
+    override func prefersStatusBarHidden() -> Bool {
+        return navigationController?.navigationBarHidden == true
     }
-    */
+    
+    override func preferredStatusBarUpdateAnimation() -> UIStatusBarAnimation {
+        return UIStatusBarAnimation.Slide
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
+        inEditMode = false
+        textField.userInteractionEnabled = false
+        textField.resignFirstResponder()
+        self.tableView.setEditing(false, animated: true)
+        
+        // do we need this???
+        UIView.animateWithDuration(0.25) {
+            self.navigationController?.navigationBarHidden = false
+        }
+        
+        return true
+    }
+    
+    
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Gesture Recognizer methods
+//
+////////////////////////////////////////////////////////////////
+    
+    // respond to a single tap (display the selected list in the ItemListViewController)
+    func cellSingleTapAction(sender: UITapGestureRecognizer)
+    {
+        let i = sender.view?.tag
+        let indexPath = NSIndexPath(forRow: i!, inSection: 0)
+        
+        let selectedList = self.lists[indexPath.row]
+        self.delegate?.listSelected(selectedList)
+        
+        if let itemViewController = self.delegate as? ItemViewController {
+            splitViewController?.showDetailViewController(itemViewController.navigationController!, sender: nil)
+        }
+    }
+    
+    // respond to a double tap (list name edit)
+    func cellDoubleTapAction(sender: UITapGestureRecognizer)
+    {
+        if sender.view != nil {
+            let indexPath = NSIndexPath(forRow: (sender.view?.tag)!, inSection: 0)
+            let cell = tableView.cellForRowAtIndexPath(indexPath) as! ListCell
+            
+            inEditMode = true
+            cell.listName.userInteractionEnabled = true
+            cell.listName.becomeFirstResponder()
+        }
+    }
+    
+    // handle cell move on long press (move)
+    func longPressAction(gesture: UILongPressGestureRecognizer)
+    {
+        let state: UIGestureRecognizerState = gesture.state
+        let location: CGPoint = gesture.locationInView(tableView)
+        let topBarHeight = getTopBarHeight()
+        var indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+        
+        let touchLocationInWindow = tableView.convertPoint(location, toView: tableView.window)
+        //print("longPressAction: touchLocationInWindow.y", touchLocationInWindow.y)
+        
+        // we need to end the long press if we move above the top cell and into the top bar
+        if touchLocationInWindow.y <= topBarHeight && location.y <= 0
+        {
+            // if we moved above the table view then set the destination to the top cell and end the long press
+            if longPressActive {
+                indexPath = NSIndexPath(forRow: 0, inSection: 0)
+                longPressEnded(indexPath, location: location)
+            }
+            return
+        }
+        
+        // check if we need to scroll tableView
+        let touchLocation = gesture.locationInView(gesture.view!.window)
+        
+        if touchLocation.y > tableView.bounds.height - 50 {
+            // need to scroll down
+            if displayLink == nil {
+                displayLink = CADisplayLink(target: self, selector: Selector("scrollDownLoop"))
+                displayLink!.frameInterval = 1
+                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+            }
+        } else if touchLocation.y < topBarHeight + 50 {
+            // need to scroll up
+            if displayLink == nil {
+                displayLink = CADisplayLink(target: self, selector: Selector("scrollUpLoop"))
+                displayLink!.frameInterval = 1
+                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+            }
+        } else if displayLink != nil {
+            // check if we need to cancel a current scroll update because the touch moved out of scroll area
+            if touchLocation.y < tableView.bounds.height - 50 {
+                displayLink!.invalidate()
+                displayLink = nil
+                scrollLoopCount = 0
+            } else if touchLocation.y > topBarHeight + 50 {
+                displayLink!.invalidate()
+                displayLink = nil
+                scrollLoopCount = 0
+            }
+        }
+        
+        // if indexPath is null then we took our dragged cell some direction off the table
+        if indexPath == nil {
+            if gesture.state != .Cancelled {
+                gesture.enabled = false
+                gesture.enabled = true
+                longPressEnded(movingFromIndexPath, location: location)
+            }
+            
+            return
+        }
+        
+        switch (state)
+        {
+        case UIGestureRecognizerState.Began:
+            longPressActive = true
+            sourceIndexPath = indexPath
+            movingFromIndexPath = indexPath
+            let cell = tableView.cellForRowAtIndexPath(indexPath!)!
+            snapshot = snapshotFromView(cell)
+            
+            //let obj = list.objectAtIndexPath(sourceIndexPath!)
+            
+            //if obj is Item || obj is Category {
+            
+            var center = cell.center
+            snapshot?.center = center
+            snapshot?.alpha = 0.0
+            tableView.addSubview(snapshot!)
+            
+            UIView.animateWithDuration(0.25, animations: { () -> Void in
+                center.y = location.y
+                self.snapshot?.center = center
+                self.snapshot?.transform = CGAffineTransformMakeScale(1.05, 1.05)
+                self.snapshot?.alpha = 0.98
+                cell.alpha = 0.0
+                }, completion: { (finished: Bool) -> Void in
+                    cell.hidden = true      // hides the real cell while moving
+            })
+            
+            //}
+            
+            prevLocation = location
+            
+        case UIGestureRecognizerState.Changed:
+            // long press has moved - call move method
+            self.longPressMoved(indexPath!, location: location)
+            prevLocation = location
+            
+        default:
+            // long press has ended - call clean up method
+            self.longPressEnded(indexPath!, location: location)
+            
+        }   // end switch
+        
+    }
+    
+    func longPressMoved(indexPath: NSIndexPath?, location: CGPoint)
+    {
+        if snapshot != nil {
+            var center: CGPoint = snapshot!.center
+            center.y = location.y
+            snapshot?.center = center
+            
+            if indexPath != nil && location.y > 0 {
+                // check if destination is different from source and valid then move the cell in the tableView
+                if indexPath != sourceIndexPath && movingFromIndexPath != nil
+                {
+                    // ... move the rows
+                    tableView.moveRowAtIndexPath(movingFromIndexPath!, toIndexPath: indexPath!)
+                    
+                    // ... and update movingFromIndexPath so it is in sync with UI changes
+                    movingFromIndexPath = indexPath
+                }
+            }
+        }
+    }
+    
+    // clean up after a long press gesture
+    func longPressEnded(indexPath: NSIndexPath?, location: CGPoint)
+    {
+        longPressActive = false
+        
+        // cancel any scroll loop
+        displayLink?.invalidate()
+        displayLink = nil
+        scrollLoopCount = 0
+        
+        // finalize list data with new location for sourceIndexObj
+        if sourceIndexPath != nil
+        {
+            var center: CGPoint = snapshot!.center
+            center.y = location.y
+            snapshot?.center = center
+            
+            // check if destination is different from source and valid
+            if indexPath != sourceIndexPath && indexPath != nil
+            {
+                // we are moving an item
+                tableView.beginUpdates()
+                
+                // remove the item from its original location
+                let removedList = lists.removeAtIndex(sourceIndexPath!.row)
+                lists.insert(removedList, atIndex: indexPath!.row)
+
+                tableView.endUpdates()
+            }
+        } else {
+            print("sourceIndexPath is nil...!!!")
+        }
+        
+        var cell: UITableViewCell? = nil
+        
+        if indexPath != nil {
+            cell = tableView.cellForRowAtIndexPath(indexPath!)
+        }
+        
+        cell?.alpha = 0.0
+        UIView.animateWithDuration(0.25, animations: { () -> Void in
+            if cell != nil {
+                self.snapshot?.center = cell!.center
+            }
+            self.snapshot?.transform = CGAffineTransformIdentity
+            self.snapshot?.alpha = 0.0
+            
+            // undo fade out
+            cell?.alpha = 1.0
+            }, completion: { (finished: Bool) -> Void in
+                self.sourceIndexPath = nil
+                self.snapshot?.removeFromSuperview()
+                self.snapshot = nil
+        })
+        
+        self.tableView.reloadData()
+        
+        self.prevLocation = nil
+        self.displayLink?.invalidate()
+        self.displayLink = nil
+    }
+    
+    func scrollUpLoop()
+    {
+        let currentOffset = tableView.contentOffset
+        let topBarHeight = getTopBarHeight()
+        let newOffsetY = max(currentOffset.y - kItemViewScrollRate, -topBarHeight)
+        let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
+        let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+        
+        self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: newOffsetY), animated: false)
+        
+        if let path = indexPath {
+            longPressMoved(path, location: location)
+            prevLocation = location
+        }
+        
+        //tableView.contentInset = UIEdgeInsetsMake(0, 0, -120, 0) //values passed are - top, left, bottom, right
+    }
+    
+    func scrollDownLoop()
+    {
+        let currentOffset = tableView.contentOffset
+        let lastCellIndex = NSIndexPath(forRow: lists.count - 1, inSection: 0)
+        let lastCell = tableView.cellForRowAtIndexPath(lastCellIndex)
+        
+        if lastCell == nil {
+            self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: currentOffset.y + kItemViewScrollRate), animated: false)
+            
+            let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
+            let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+            
+            if let path = indexPath {
+                longPressMoved(path, location: location)
+                prevLocation = location
+            }
+        } else {
+            self.tableView.scrollToRowAtIndexPath(lastCellIndex, atScrollPosition: .Bottom, animated: true)
+        }
+    }
+
+    
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Delete methods
+//
+////////////////////////////////////////////////////////////////
     
     func confirmDelete(listName: String)
     {
@@ -255,16 +562,31 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.setEditing(false, animated: true)
     }
     
-    /*
-    // MARK: - Navigation
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Helper methods
+//
+////////////////////////////////////////////////////////////////
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
+    func selectList(index: Int)
+    {
+        if lists.count > index && index >= 0 {
+            delegate?.listSelected(lists[index])
+            
+            // deselect all cells
+            var i = 0
+            for _ in lists {
+                let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
+                cell?.backgroundColor = UIColor.whiteColor()
+                ++i
+            }
+            
+            // then select the current cell
+            let selectedCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 0))
+            selectedCell?.backgroundColor = UIColor(colorLiteralRed: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
+        }
     }
-    */
-
+    
     func makeAttributedString(title title: String, subtitle: String) -> NSAttributedString {
         let titleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleBody), NSForegroundColorAttributeName: UIColor.blackColor()]
         let subtitleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleSubheadline)]
@@ -276,6 +598,46 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         return titleString
     }
+    
+    func listNameDidChange(textField: UITextField)
+    {
+        // update list name data with new value
+        let i = textField.tag
+        lists[i].name = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        
+        print(lists[i].name)
+    }
+    
+    func getTopBarHeight() -> CGFloat {
+        let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height
+        let navBarHeight = self.navigationController!.navigationBar.frame.size.height
+        
+        return statusBarHeight + navBarHeight
+    }
+    
+    func snapshotFromView(inputView: UIView) -> UIView
+    {
+        // Make an image from the input view.
+        UIGraphicsBeginImageContextWithOptions(inputView.bounds.size, false, 0)
+        if let context = UIGraphicsGetCurrentContext()
+        {
+            inputView.layer.renderInContext(context)
+        }
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        // Create an image view.
+        let snapshot = UIImageView(image: image)
+        snapshot.layer.masksToBounds = false
+        snapshot.layer.cornerRadius = 0.0
+        snapshot.layer.shadowOffset = CGSize(width: -5.0, height: 0.0)
+        snapshot.layer.shadowRadius = 5.0
+        snapshot.layer.shadowOpacity = 0.4
+        
+        return snapshot
+    }
+    
+////////////////////////////////////////////////////////////////
     
     func addTestItems()
     {
@@ -305,11 +667,18 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         cat1_2.items.append(Item(name: "Chicken"))
         cat1_2.items.append(Item(name: "Sirloin"))
         cat1_2.items.append(Item(name: "Salmon"))
+        cat1_2.items.append(Item(name: "Cod"))
+        cat1_2.items.append(Item(name: "Halibut"))
+        cat1_2.items.append(Item(name: "Ham"))
         
         cat1_3.items.append(Item(name: "Noodle Chicken Bag"))
         cat1_3.items.append(Item(name: "Soda"))
         cat1_3.items.append(Item(name: "Dinty Moore"))
         cat1_3.items.append(Item(name: "Tea Bags"))
+        cat1_3.items.append(Item(name: "Vegtable Soup"))
+        cat1_3.items.append(Item(name: "Cookie Mix"))
+        cat1_3.items.append(Item(name: "Salad fixings"))
+        cat1_3.items.append(Item(name: "Dressing"))
         
         // list2
         let list2 = List(name: "Safeway")
@@ -351,6 +720,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         cat4_1.items.append(Item(name: "Sleeping bags"))
         cat4_1.items.append(Item(name: "Soap"))
         cat4_1.items.append(Item(name: "Towels"))
+        cat4_1.items.append(Item(name: "Food"))
+        cat4_1.items.append(Item(name: "Bacon"))
+        cat4_1.items.append(Item(name: "Cereal"))
+        cat4_1.items.append(Item(name: "Coffee"))
+        cat4_1.items.append(Item(name: "Water"))
         
         // list5
         let list5 = List(name: "Home Depot")
@@ -366,6 +740,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         cat5_1.items.append(Item(name: "Toilet kit"))
         cat5_1.items.append(Item(name: "Shower head"))
         cat5_1.items.append(Item(name: "Garden hose"))
+        cat5_1.items.append(Item(name: "Lights"))
+        cat5_1.items.append(Item(name: "3/8' plywood"))
+        cat5_1.items.append(Item(name: "Power tools"))
+        cat5_1.items.append(Item(name: "Potting soil"))
+        cat5_1.items.append(Item(name: "Cat 6 cable"))
+        cat5_1.items.append(Item(name: "Wall plates"))
         
         // list6
         let list6 = List(name: "Walmart")

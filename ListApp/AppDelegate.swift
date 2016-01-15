@@ -22,7 +22,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         let rightNavController = splitViewController.viewControllers.last as! UINavigationController
         let itemViewController = rightNavController.topViewController as! ItemViewController
         
-        itemViewController.list = listViewController.lists.first
+        // coordinate the initial selection in both controllers from saved state (set 3 here for testing)
+        itemViewController.list = listViewController.lists[3]
+        listViewController.selectionIndex = 3;
+        
         listViewController.delegate = itemViewController
         itemViewController.navigationItem.leftItemsSupplementBackButton = true
         itemViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem()

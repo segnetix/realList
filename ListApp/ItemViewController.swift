@@ -23,8 +23,8 @@ enum MoveDirection {
     case Down
 }
 
-let kScrollRate: CGFloat = 6.0
-let kCellHeight: CGFloat = 44.0
+let kItemViewScrollRate: CGFloat = 6.0
+let kItemViewCellHeight: CGFloat = 44.0
 
 class ItemViewController: UITableViewController, UITextFieldDelegate
 {
@@ -61,18 +61,13 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
         self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
         
+        //self.tableView.estimatedRowHeight = kItemViewCellHeight
+        //self.tableView.rowHeight = UITableViewAutomaticDimension
+        
         //self.tableView.backgroundColor = UIColor.clearColor()
         
         refreshItems()
     }
-    /*
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        self.tableView.setEditing(false, animated: false)
-        editModeRow = -1
-    }
-    */
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
@@ -119,7 +114,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             // if moving a cell to a collapsed category then we need to account for the newly hidden cell by temporarily incrementing the displayCount
             if movedToCollapsedCategory {
                 ++displayCount
-                //print(displayCount)
                 movedToCollapsedCategory = false
             }
             
@@ -204,8 +198,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             
             // catCountLabel
             let category = list.categoryForItemAtIndex(indexPath)
-            if let cat = category {
-                cell.catCountLabel.text = String(cat.items.count)
+            if let category = category {
+                cell.catCountLabel.attributedText = makeAttributedString(title: String(category.items.count), subtitle: "")
             }
             
             // cell separator
@@ -222,22 +216,24 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         if list.cellIsItem(indexPath) {
-            return kCellHeight
+            return kItemViewCellHeight
         } else {
-            return kCellHeight
+            return kItemViewCellHeight
         }
         //return UITableViewAutomaticDimension
     }
+    
     /*
     override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         if list.cellIsItem(indexPath) {
-            return kCellHeight
+            return kItemViewCellHeight
         } else {
-            return kCellHeight
+            return kItemViewCellHeight
         }
         //return UITableViewAutomaticDimension
     }
     */
+    
     override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         let title = list.cellTitle(indexPath)
         //print("selection: cat \(indexPath.section)  item \(indexPath.row)  title \(title)")
@@ -292,6 +288,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
 
+        // do we need this???
         UIView.animateWithDuration(0.25) {
             self.navigationController?.navigationBarHidden = false
         }
@@ -671,7 +668,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         let currentOffset = tableView.contentOffset
         let topBarHeight = getTopBarHeight()
-        let newOffsetY = max(currentOffset.y - kScrollRate, -topBarHeight)
+        let newOffsetY = max(currentOffset.y - kItemViewScrollRate, -topBarHeight)
         let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
         let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
         
@@ -692,7 +689,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         let lastCell = tableView.cellForRowAtIndexPath(lastCellIndex)
         
         if lastCell == nil {
-            self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: currentOffset.y + kScrollRate), animated: false)
+            self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: currentOffset.y + kItemViewScrollRate), animated: false)
             
             let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
             let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
