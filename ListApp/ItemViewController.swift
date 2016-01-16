@@ -350,7 +350,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                         var indexPaths = [NSIndexPath]()
                         let index = indexPath.row
                         
-                        for (var i = index + 1; i <= index + cat.items.count; i++ ){
+                        for (var i = index + 1; i <= index + cat.items.count; i++ ) {
                             indexPaths.append(NSIndexPath(forRow: i, inSection: 0))
                         }
                         
@@ -391,7 +391,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         }
     }
 
-    // handle cell move on long press (move)
+    // handle long press gesture (cell move)
     func longPressAction(gesture: UILongPressGestureRecognizer)
     {
         let state: UIGestureRecognizerState = gesture.state
@@ -540,8 +540,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         // finalize list data with new location for sourceIndexObj
         if sourceIndexPath != nil
         {
-            print("sourceIndexPath is not nil...")
-            
             var center: CGPoint = snapshot!.center
             center.y = location.y
             snapshot?.center = center
@@ -655,9 +653,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             self.sourceIndexPath = nil
             self.snapshot?.removeFromSuperview()
             self.snapshot = nil
+            self.tableView.reloadData()
         })
         
-        self.tableView.reloadData()
+        //self.tableView.reloadData()
         
         self.prevLocation = nil
         self.displayLink?.invalidate()

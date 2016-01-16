@@ -10,6 +10,7 @@ import UIKit
 import QuartzCore
 
 let listCellID = "ListCell"
+let addCellId = "AddCell"
 
 // ListSelectionDelegate protocol
 protocol ListSelectionDelegate: class
@@ -102,8 +103,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
-        // return the number of rows
-        return lists.count
+        // return the number of rows (plus 1 for the Add row)
+        return lists.count + 1
     }
 
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
@@ -113,35 +114,48 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        let cell = tableView.dequeueReusableCellWithIdentifier(listCellID, forIndexPath: indexPath) as! ListCell
-        
-        // Configure the cell...
-        let list = lists[indexPath.row]
-        
-        cell.listName.userInteractionEnabled = false
-        cell.listName.delegate = self
-        cell.listName.addTarget(self, action: "listNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
-        cell.listName.attributedText = makeAttributedString(title: list.name, subtitle: "")
-        cell.listName.tag = indexPath.row
-        cell.contentView.tag = indexPath.row
-        
-        // set up single tap gesture recognizer in cat cell to enable expand/collapse
-        let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
-        singleTapGestureRecognizer.numberOfTapsRequired = 1
-        cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
-        
-        // set up double tap gesture recognizer in item cell to enable cell moving
-        let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
-        doubleTapGestureRecognizer.numberOfTapsRequired = 2
-        singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
-        cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
-        
-        // cell separator
-        cell.preservesSuperviewLayoutMargins = false
-        cell.separatorInset = UIEdgeInsetsZero
-        cell.layoutMargins = UIEdgeInsetsZero
-        
-        return cell
+        if indexPath.row < lists.count {
+            // set up a List row
+            let cell = tableView.dequeueReusableCellWithIdentifier(listCellID, forIndexPath: indexPath) as! ListCell
+            
+            // Configure the cell...
+            let list = lists[indexPath.row]
+            
+            cell.listName.userInteractionEnabled = false
+            cell.listName.delegate = self
+            cell.listName.addTarget(self, action: "listNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+            cell.listName.attributedText = makeAttributedString(title: list.name, subtitle: "")
+            cell.listName.tag = indexPath.row
+            cell.contentView.tag = indexPath.row
+            
+            // set up single tap gesture recognizer in cat cell to enable expand/collapse
+            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
+            singleTapGestureRecognizer.numberOfTapsRequired = 1
+            cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
+            
+            // set up double tap gesture recognizer in item cell to enable cell moving
+            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
+            doubleTapGestureRecognizer.numberOfTapsRequired = 2
+            singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
+            cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
+            
+            // cell separator
+            cell.preservesSuperviewLayoutMargins = false
+            cell.separatorInset = UIEdgeInsetsZero
+            cell.layoutMargins = UIEdgeInsetsZero
+            
+            return cell
+        } else {
+            // set up Add row
+            let cell = tableView.dequeueReusableCellWithIdentifier(addCellId, forIndexPath: indexPath)
+            
+            // cell separator
+            cell.preservesSuperviewLayoutMargins = false
+            cell.separatorInset = UIEdgeInsetsZero
+            cell.layoutMargins = UIEdgeInsetsZero
+            
+            return cell
+        }
     }
     
     /*
@@ -183,7 +197,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     // override to support conditional editing of the table view
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
-        return true
+        return indexPath.row < lists.count
     }
     
     // override to support editing the table view
@@ -245,6 +259,22 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return true
     }
     
+    @IBAction func addButtonTapped(sender: UIButton)
+    {
+        // create a new list and append
+        let newList = List(name: "")
+        newList.categories.append(Category(name: ""))
+        lists.append(newList)
+        self.tableView.reloadData()
+        
+        // set up editing mode
+        let indexPath = NSIndexPath(forRow: lists.count - 1, inSection: 0)
+        let cell = tableView.cellForRowAtIndexPath(indexPath) as! ListCell
+        
+        inEditMode = true
+        cell.listName.userInteractionEnabled = true
+        cell.listName.becomeFirstResponder()
+    }
     
 ////////////////////////////////////////////////////////////////
 //
