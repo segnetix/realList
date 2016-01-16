@@ -11,6 +11,7 @@ import QuartzCore
 
 let itemCellID     = "ItemCell"
 let categoryCellID = "CategoryCell"
+let addItemCellId  = "AddItemCell"
 
 enum InsertPosition {
     case Beginning
@@ -40,6 +41,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var displayLink: CADisplayLink? = nil
     var scrollLoopCount = 0     // debugging var
     var longPressActive = false
+    var editingNewItemName = false
     
     var list: List! {
         didSet (newList) {
@@ -117,98 +119,111 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 movedToCollapsedCategory = false
             }
             
-            return displayCount
+            return displayCount + 1
         } else {
-            return 0
+            return 1
         }
     }
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        if list.cellIsItem(indexPath) {
-            // item cell
-            let cell = tableView.dequeueReusableCellWithIdentifier(itemCellID, forIndexPath: indexPath) as! ItemCell
-            
-            // Configure the cell...
-            cell.itemName.userInteractionEnabled = false
-            cell.itemName.delegate = self
-            cell.itemName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
-            cell.itemName!.tag = indexPath.row
-            cell.contentView.tag = indexPath.row
-            
-            // set up single tap gesture recognizer in cat cell to enable expand/collapse
-            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
-            singleTapGestureRecognizer.numberOfTapsRequired = 1
-            cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
-            
-            // set up double tap gesture recognizer in item cell to enable cell moving
-            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
-            doubleTapGestureRecognizer.numberOfTapsRequired = 2
-            singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
-            cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
+        if indexPath.row < list.totalDisplayCount() {
+            if list.cellIsItem(indexPath) {
+                // item cell
+                let cell = tableView.dequeueReusableCellWithIdentifier(itemCellID, forIndexPath: indexPath) as! ItemCell
+                
+                // Configure the cell...
+                cell.itemName.userInteractionEnabled = false
+                cell.itemName.delegate = self
+                cell.itemName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+                cell.itemName!.tag = indexPath.row
+                cell.contentView.tag = indexPath.row
+                
+                // set up single tap gesture recognizer in cat cell to enable expand/collapse
+                let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
+                singleTapGestureRecognizer.numberOfTapsRequired = 1
+                cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
+                
+                // set up double tap gesture recognizer in item cell to enable cell moving
+                let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
+                doubleTapGestureRecognizer.numberOfTapsRequired = 2
+                singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
+                cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
 
-            // item title
-            let title = list?.cellTitle(indexPath)
-            if let cellTitle = title {
-                cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")    // for debugging
-                //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                      // for production
+                // item title
+                let title = list?.cellTitle(indexPath)
+                if let cellTitle = title {
+                    cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")    // for debugging
+                    //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                      // for production
+                } else {
+                    cell.itemName?.attributedText = makeAttributedString(title: "", subtitle: "")
+                }
+                
+                // cell separator
+                cell.preservesSuperviewLayoutMargins = false
+                cell.separatorInset = UIEdgeInsetsZero
+                cell.layoutMargins = UIEdgeInsetsZero
+                
+                cell.backgroundColor = colorForIndex(indexPath.row)
+                cell.delegate = self
+                
+                return cell
             } else {
-                cell.itemName?.attributedText = makeAttributedString(title: "", subtitle: "")
+                // category cell
+                let cell = tableView.dequeueReusableCellWithIdentifier(categoryCellID, forIndexPath: indexPath) as! CategoryCell
+                
+                // Configure the cell...
+                cell.categoryName.userInteractionEnabled = false
+                cell.categoryName.delegate = self
+                cell.categoryName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+                cell.categoryName!.tag = indexPath.row
+                cell.contentView.tag = indexPath.row
+                
+                // set up single tap gesture recognizer in cat cell to enable expand/collapse
+                let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
+                singleTapGestureRecognizer.numberOfTapsRequired = 1
+                cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
+                
+                // set up double tap gesture recognizer in cat cell to enable cell moving
+                let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
+                doubleTapGestureRecognizer.numberOfTapsRequired = 2
+                singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
+                cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
+                
+                // category title
+                let title = list?.cellTitle(indexPath)
+                if let cellTitle = title {
+                    cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.categoryName.tag)")
+                    //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")
+                } else {
+                    cell.categoryName?.attributedText = makeAttributedString(title: "", subtitle: "")
+                }
+                
+                // catCountLabel
+                let category = list.categoryForItemAtIndex(indexPath)
+                if let category = category {
+                    cell.catCountLabel.attributedText = makeAttributedString(title: String(category.items.count), subtitle: "")
+                }
+                
+                // cell separator
+                cell.preservesSuperviewLayoutMargins = false
+                cell.separatorInset = UIEdgeInsetsZero
+                cell.layoutMargins = UIEdgeInsetsZero
+                
+                cell.backgroundColor = UIColor.lightGrayColor()
+                cell.delegate = self
+                
+                return cell
             }
+        }  else {
+            // set up Add row
+            // let cell = tableView.dequeueReusableCellWithIdentifier(addItemCellId, forIndexPath: indexPath)
+            let cell = tableView.dequeueReusableCellWithIdentifier(addItemCellId) as! AddItemCell
             
             // cell separator
             cell.preservesSuperviewLayoutMargins = false
             cell.separatorInset = UIEdgeInsetsZero
             cell.layoutMargins = UIEdgeInsetsZero
-            
-            cell.backgroundColor = colorForIndex(indexPath.row)
-            cell.delegate = self
-            
-            return cell
-        } else {
-            // category cell
-            let cell = tableView.dequeueReusableCellWithIdentifier(categoryCellID, forIndexPath: indexPath) as! CategoryCell
-            
-            // Configure the cell...
-            cell.categoryName.userInteractionEnabled = false
-            cell.categoryName.delegate = self
-            cell.categoryName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
-            cell.categoryName!.tag = indexPath.row
-            cell.contentView.tag = indexPath.row
-            
-            // set up single tap gesture recognizer in cat cell to enable expand/collapse
-            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
-            singleTapGestureRecognizer.numberOfTapsRequired = 1
-            cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
-            
-            // set up double tap gesture recognizer in cat cell to enable cell moving
-            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
-            doubleTapGestureRecognizer.numberOfTapsRequired = 2
-            singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
-            cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
-            
-            // category title
-            let title = list?.cellTitle(indexPath)
-            if let cellTitle = title {
-                cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.categoryName.tag)")
-                //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")
-            } else {
-                cell.categoryName?.attributedText = makeAttributedString(title: "", subtitle: "")
-            }
-            
-            // catCountLabel
-            let category = list.categoryForItemAtIndex(indexPath)
-            if let category = category {
-                cell.catCountLabel.attributedText = makeAttributedString(title: String(category.items.count), subtitle: "")
-            }
-            
-            // cell separator
-            cell.preservesSuperviewLayoutMargins = false
-            cell.separatorInset = UIEdgeInsetsZero
-            cell.layoutMargins = UIEdgeInsetsZero
-            
-            cell.backgroundColor = UIColor.lightGrayColor()
-            cell.delegate = self
             
             return cell
         }
@@ -245,7 +260,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     // override to support conditional editing of the table view
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
-        return true
+        return indexPath.row < list.totalDisplayCount()
     }
     
     // override to support editing the table view
@@ -288,6 +303,16 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
 
+        // delete the newly added list if use didn't create a name
+        if editingNewItemName
+        {
+            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
+            {
+                list.categories[list.categories.count-1].items.removeLast()
+                self.tableView.reloadData()
+            }
+        }
+        
         // do we need this???
         UIView.animateWithDuration(0.25) {
             self.navigationController?.navigationBarHidden = false
@@ -306,6 +331,25 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         list?.updateObjectNameAtIndexPath(indexPath, withName: newName)
         navigationController?.navigationBar.hidden = true
         //print(textField.text)
+    }
+    
+    @IBAction func addItemButtonTapped(sender: UIButton)
+    {
+        print("Add item button tapped...")
+        // create a new item and append to last category
+        let newItem = Item(name: "")
+        let category = list.categories[list.categories.count-1]
+        category.items.append(newItem)
+        self.tableView.reloadData()
+        
+        // set up editing mode for item name
+        let indexPath = NSIndexPath(forRow: list.totalDisplayCount() - 1, inSection: 0)
+        let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
+        
+        inEditMode = true
+        cell.itemName.userInteractionEnabled = true
+        cell.itemName.becomeFirstResponder()
+        editingNewItemName = true
     }
     
 ////////////////////////////////////////////////////////////////
@@ -398,6 +442,17 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         let location: CGPoint = gesture.locationInView(tableView)
         let topBarHeight = getTopBarHeight()
         var indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+        
+        // prevent long press action on an AddItem cell
+        if indexPath != nil {
+            let cell = tableView.cellForRowAtIndexPath(indexPath!)
+            
+            if cell is AddItemCell
+            {
+                // we got a long press on the AddItem cell... cancel the action
+                return
+            }
+        }
         
         let touchLocationInWindow = tableView.convertPoint(location, toView: tableView.window)
         //print("longPressAction: touchLocationInWindow.y", touchLocationInWindow.y)

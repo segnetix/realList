@@ -10,7 +10,7 @@ import UIKit
 import QuartzCore
 
 let listCellID = "ListCell"
-let addCellId = "AddCell"
+let addListCellId = "AddListCell"
 
 // ListSelectionDelegate protocol
 protocol ListSelectionDelegate: class
@@ -37,7 +37,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     var scrollLoopCount = 0     // debugging var
     var longPressActive = false    
     var selectionIndex = -1
-
+    var editingNewListName = false
     
     weak var delegate: ListSelectionDelegate?
     
@@ -147,14 +147,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             return cell
         } else {
             // set up Add row
-            let cell = tableView.dequeueReusableCellWithIdentifier(addCellId, forIndexPath: indexPath)
+            let cell = tableView.dequeueReusableCellWithIdentifier(addListCellId)
             
             // cell separator
-            cell.preservesSuperviewLayoutMargins = false
-            cell.separatorInset = UIEdgeInsetsZero
-            cell.layoutMargins = UIEdgeInsetsZero
+            cell!.preservesSuperviewLayoutMargins = false
+            cell!.separatorInset = UIEdgeInsetsZero
+            cell!.layoutMargins = UIEdgeInsetsZero
             
-            return cell
+            return cell!
         }
     }
     
@@ -237,6 +237,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
     
+    /*
     override func prefersStatusBarHidden() -> Bool {
         return navigationController?.navigationBarHidden == true
     }
@@ -244,22 +245,46 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     override func preferredStatusBarUpdateAnimation() -> UIStatusBarAnimation {
         return UIStatusBarAnimation.Slide
     }
+    */
     
-    func textFieldShouldReturn(textField: UITextField) -> Bool {
+    func listNameDidChange(textField: UITextField)
+    {
+        // update list name data with new value
+        let i = textField.tag
+        lists[i].name = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        
+        print(lists[i].name)
+    }
+
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool
+    {
         inEditMode = false
         textField.userInteractionEnabled = false
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
+        
+        // delete the newly added list if use didn't create a name
+        if editingNewListName
+        {
+            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
+            {
+                lists.removeLast()
+                self.tableView.reloadData()
+            }
+        }
         
         // do we need this???
         UIView.animateWithDuration(0.25) {
             self.navigationController?.navigationBarHidden = false
         }
         
+        editingNewListName = false
+        
         return true
     }
     
-    @IBAction func addButtonTapped(sender: UIButton)
+    @IBAction func addListButtonTapped(sender: UIButton)
     {
         // create a new list and append
         let newList = List(name: "")
@@ -267,13 +292,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         lists.append(newList)
         self.tableView.reloadData()
         
-        // set up editing mode
+        // set up editing mode for list name
         let indexPath = NSIndexPath(forRow: lists.count - 1, inSection: 0)
         let cell = tableView.cellForRowAtIndexPath(indexPath) as! ListCell
         
         inEditMode = true
         cell.listName.userInteractionEnabled = true
         cell.listName.becomeFirstResponder()
+        editingNewListName = true
     }
     
 ////////////////////////////////////////////////////////////////
@@ -316,6 +342,17 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let location: CGPoint = gesture.locationInView(tableView)
         let topBarHeight = getTopBarHeight()
         var indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+        
+        // prevent long press action on an AddItem cell
+        if indexPath != nil {
+            let cell = tableView.cellForRowAtIndexPath(indexPath!)
+            
+            if cell is AddListCell
+            {
+                // we got a long press on the AddList cell... cancel the action
+                return
+            }
+        }
         
         let touchLocationInWindow = tableView.convertPoint(location, toView: tableView.window)
         //print("longPressAction: touchLocationInWindow.y", touchLocationInWindow.y)
@@ -627,15 +664,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         titleString.appendAttributedString(subtitleString)
         
         return titleString
-    }
-    
-    func listNameDidChange(textField: UITextField)
-    {
-        // update list name data with new value
-        let i = textField.tag
-        lists[i].name = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
-        
-        print(lists[i].name)
     }
     
     func getTopBarHeight() -> CGFloat {

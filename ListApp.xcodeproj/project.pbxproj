@@ -18,6 +18,8 @@
 		B0A3027E1C34A1C800F6FB44 /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */; };
 		B0A302801C34A31C00F6FB44 /* ItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */; };
 		B0A302881C35915B00F6FB44 /* ListData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A302871C35915B00F6FB44 /* ListData.swift */; };
+		B0FF8C351C4AE2B000C0A33C /* AddItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */; };
+		B0FF8C371C4AE58900C0A33C /* AddListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FF8C361C4AE58900C0A33C /* AddListCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +36,8 @@
 		B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemViewController.swift; sourceTree = "<group>"; };
 		B0A302871C35915B00F6FB44 /* ListData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListData.swift; sourceTree = "<group>"; };
+		B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddItemCell.swift; sourceTree = "<group>"; };
+		B0FF8C361C4AE58900C0A33C /* AddListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddListCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +75,8 @@
 				B0A302871C35915B00F6FB44 /* ListData.swift */,
 				B07828971C36000B009D356F /* ListCell.swift */,
 				B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */,
+				B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */,
+				B0FF8C361C4AE58900C0A33C /* AddListCell.swift */,
 				B07828991C360020009D356F /* ItemCell.swift */,
 				B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */,
 				B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */,
@@ -154,11 +160,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0A3026E1C349F7A00F6FB44 /* ViewController.swift in Sources */,
+				B0FF8C371C4AE58900C0A33C /* AddListCell.swift in Sources */,
 				B0A302881C35915B00F6FB44 /* ListData.swift in Sources */,
 				B0A3026C1C349F7A00F6FB44 /* AppDelegate.swift in Sources */,
 				B0854A891C3895DA00B9D2F7 /* CategoryCell.swift in Sources */,
 				B07828981C36000B009D356F /* ListCell.swift in Sources */,
 				B078289A1C360020009D356F /* ItemCell.swift in Sources */,
+				B0FF8C351C4AE2B000C0A33C /* AddItemCell.swift in Sources */,
 				B0A3027E1C34A1C800F6FB44 /* ListViewController.swift in Sources */,
 				B0A302801C34A31C00F6FB44 /* ItemViewController.swift in Sources */,
 			);

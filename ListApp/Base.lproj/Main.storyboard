@@ -89,6 +89,44 @@
                                     <outlet property="categoryName" destination="nPQ-Yu-QYm" id="CKq-Tr-iMh"/>
                                 </connections>
                             </tableViewCell>
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="AddItemCell" rowHeight="60" id="Ui4-cJ-iDI" customClass="AddItemCell" customModule="ListApp" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="160" width="600" height="60"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Ui4-cJ-iDI" id="gu9-8t-wra">
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="59"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9Rm-EG-YMt">
+                                            <rect key="frame" x="8" y="8" width="584" height="43"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="46" id="L7V-aA-Omo"/>
+                                            </constraints>
+                                            <fontDescription key="fontDescription" name="Avenir-Light" family="Avenir" pointSize="36"/>
+                                            <color key="tintColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            <state key="normal" title=" +">
+                                                <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            </state>
+                                            <variation key="default">
+                                                <mask key="constraints">
+                                                    <exclude reference="L7V-aA-Omo"/>
+                                                </mask>
+                                            </variation>
+                                            <connections>
+                                                <action selector="addButtonTapped:" destination="YAY-IK-bg0" eventType="touchUpInside" id="nME-fW-R3n"/>
+                                                <action selector="addItemButtonTapped:" destination="xgg-C1-F1C" eventType="touchUpInside" id="xUg-Du-sw0"/>
+                                            </connections>
+                                        </button>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="9Rm-EG-YMt" firstAttribute="top" secondItem="gu9-8t-wra" secondAttribute="topMargin" id="4oF-l7-D6P"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="9Rm-EG-YMt" secondAttribute="trailing" id="agv-wZ-cJr"/>
+                                        <constraint firstItem="9Rm-EG-YMt" firstAttribute="leading" secondItem="gu9-8t-wra" secondAttribute="leadingMargin" id="m88-Yx-uE8"/>
+                                        <constraint firstAttribute="bottomMargin" secondItem="9Rm-EG-YMt" secondAttribute="bottom" id="u87-Nm-BBK"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
+                            </tableViewCell>
                         </prototypes>
                         <connections>
                             <outlet property="dataSource" destination="xgg-C1-F1C" id="vi6-Uv-79u"/>
@@ -146,7 +184,7 @@
                                     <outlet property="listName" destination="KOg-sp-vFR" id="gdi-VP-8yc"/>
                                 </connections>
                             </tableViewCell>
-                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="AddCell" rowHeight="60" id="Zms-cz-8bu">
+                            <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="AddListCell" rowHeight="60" id="Zms-cz-8bu" customClass="AddListCell" customModule="ListApp" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="146" width="600" height="60"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Zms-cz-8bu" id="LRg-Ey-VjT">
@@ -159,7 +197,10 @@
                                                 <constraint firstAttribute="width" constant="46" id="wNh-dT-f0i"/>
                                             </constraints>
                                             <fontDescription key="fontDescription" name="Avenir-Light" family="Avenir" pointSize="36"/>
-                                            <state key="normal" title=" +"/>
+                                            <color key="tintColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            <state key="normal" title=" +">
+                                                <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
+                                            </state>
                                             <variation key="default">
                                                 <mask key="constraints">
                                                     <exclude reference="wNh-dT-f0i"/>
@@ -167,6 +208,7 @@
                                             </variation>
                                             <connections>
                                                 <action selector="addButtonTapped:" destination="YAY-IK-bg0" eventType="touchUpInside" id="FS6-Nm-Ngs"/>
+                                                <action selector="addListButtonTapped:" destination="YAY-IK-bg0" eventType="touchUpInside" id="hGQ-gG-c9B"/>
                                             </connections>
                                         </button>
                                     </subviews>
