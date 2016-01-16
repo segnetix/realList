@@ -450,12 +450,15 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             if cell is AddItemCell
             {
                 // we got a long press on the AddItem cell... cancel the action
+                if longPressActive {
+                    longPressEnded(movingFromIndexPath, location: location)
+                }
                 return
             }
         }
         
+        // check if we need to end scrolling
         let touchLocationInWindow = tableView.convertPoint(location, toView: tableView.window)
-        //print("longPressAction: touchLocationInWindow.y", touchLocationInWindow.y)
         
         // we need to end the long press if we move above the top cell and into the top bar
         if touchLocationInWindow.y <= topBarHeight && location.y <= 0
@@ -471,14 +474,14 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         // check if we need to scroll tableView
         let touchLocation = gesture.locationInView(gesture.view!.window)
         
-        if touchLocation.y > tableView.bounds.height - 50 {
+        if touchLocation.y > (tableView.bounds.height - kScrollZoneHeight) {
             // need to scroll down
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: Selector("scrollDownLoop"))
                 displayLink!.frameInterval = 1
                 displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
             }
-        } else if touchLocation.y < topBarHeight + 50 {
+        } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: Selector("scrollUpLoop"))
@@ -487,11 +490,11 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             }
         } else if displayLink != nil {
             // check if we need to cancel a current scroll update because the touch moved out of scroll area
-            if touchLocation.y < tableView.bounds.height - 50 {
+            if touchLocation.y < (tableView.bounds.height - kScrollZoneHeight) {
                 displayLink!.invalidate()
                 displayLink = nil
                 scrollLoopCount = 0
-            } else if touchLocation.y > topBarHeight + 50 {
+            } else if touchLocation.y > (topBarHeight + kScrollZoneHeight) {
                 displayLink!.invalidate()
                 displayLink = nil
                 scrollLoopCount = 0
@@ -606,7 +609,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 var destDataObj = list.objectAtIndexPath(indexPath!)
                 
                 // update the list data source, for now only move items (categories later)
-                if sourceDataObj is Item
+                if sourceDataObj is Item && (destDataObj is Item || destDataObj is Category)
                 {
                     // we are moving an item
                     tableView.beginUpdates()
@@ -688,6 +691,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             print("sourceIndexPath is nil...")
         }
         
+        // clean up any snapshot views or displayLink scrolls
         var cell: UITableViewCell? = nil
         
         if indexPath != nil {
@@ -710,8 +714,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             self.snapshot = nil
             self.tableView.reloadData()
         })
-        
-        //self.tableView.reloadData()
         
         self.prevLocation = nil
         self.displayLink?.invalidate()

@@ -207,7 +207,6 @@
                                                 </mask>
                                             </variation>
                                             <connections>
-                                                <action selector="addButtonTapped:" destination="YAY-IK-bg0" eventType="touchUpInside" id="FS6-Nm-Ngs"/>
                                                 <action selector="addListButtonTapped:" destination="YAY-IK-bg0" eventType="touchUpInside" id="hGQ-gG-c9B"/>
                                             </connections>
                                         </button>

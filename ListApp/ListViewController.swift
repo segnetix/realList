@@ -11,6 +11,7 @@ import QuartzCore
 
 let listCellID = "ListCell"
 let addListCellId = "AddListCell"
+let kScrollZoneHeight: CGFloat = 50.0
 
 // ListSelectionDelegate protocol
 protocol ListSelectionDelegate: class
@@ -350,12 +351,16 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             if cell is AddListCell
             {
                 // we got a long press on the AddList cell... cancel the action
+                if longPressActive {
+                    indexPath = NSIndexPath(forRow: lists.count - 1, inSection: 0)
+                    longPressEnded(indexPath, location: location)
+                }
                 return
             }
         }
         
+        // check if we need to end scrolling
         let touchLocationInWindow = tableView.convertPoint(location, toView: tableView.window)
-        //print("longPressAction: touchLocationInWindow.y", touchLocationInWindow.y)
         
         // we need to end the long press if we move above the top cell and into the top bar
         if touchLocationInWindow.y <= topBarHeight && location.y <= 0
@@ -371,14 +376,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // check if we need to scroll tableView
         let touchLocation = gesture.locationInView(gesture.view!.window)
         
-        if touchLocation.y > tableView.bounds.height - 50 {
+        if touchLocation.y > (tableView.bounds.height - kScrollZoneHeight) {
             // need to scroll down
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: Selector("scrollDownLoop"))
                 displayLink!.frameInterval = 1
                 displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
             }
-        } else if touchLocation.y < topBarHeight + 50 {
+        } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: Selector("scrollUpLoop"))
@@ -387,11 +392,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             }
         } else if displayLink != nil {
             // check if we need to cancel a current scroll update because the touch moved out of scroll area
-            if touchLocation.y < tableView.bounds.height - 50 {
+            if touchLocation.y < (tableView.bounds.height - kScrollZoneHeight) {
                 displayLink!.invalidate()
                 displayLink = nil
                 scrollLoopCount = 0
-            } else if touchLocation.y > topBarHeight + 50 {
+            } else if touchLocation.y > (topBarHeight + kScrollZoneHeight) {
                 displayLink!.invalidate()
                 displayLink = nil
                 scrollLoopCount = 0
@@ -415,12 +420,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             longPressActive = true
             sourceIndexPath = indexPath
             movingFromIndexPath = indexPath
+            
             let cell = tableView.cellForRowAtIndexPath(indexPath!)!
             snapshot = snapshotFromView(cell)
-            
-            //let obj = list.objectAtIndexPath(sourceIndexPath!)
-            
-            //if obj is Item || obj is Category {
             
             var center = cell.center
             snapshot?.center = center
@@ -436,8 +438,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 }, completion: { (finished: Bool) -> Void in
                     cell.hidden = true      // hides the real cell while moving
             })
-            
-            //}
             
             prevLocation = location
             
@@ -476,7 +476,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // clean up after a long press gesture
-    func longPressEnded(indexPath: NSIndexPath?, location: CGPoint)
+    func longPressEnded(var indexPath: NSIndexPath?, location: CGPoint)
     {
         longPressActive = false
         
@@ -484,6 +484,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         displayLink?.invalidate()
         displayLink = nil
         scrollLoopCount = 0
+        
+        let destCell = self.tableView.cellForRowAtIndexPath(indexPath!)
+        
+        // if we are dropping on the AddList cell then move dest to just above the AddList cell
+        if destCell is AddListCell {
+            indexPath = NSIndexPath(forRow: indexPath!.row-1, inSection: 0)
+        }
         
         // finalize list data with new location for sourceIndexObj
         if sourceIndexPath != nil
@@ -505,9 +512,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 tableView.endUpdates()
             }
         } else {
-            print("sourceIndexPath is nil...!!!")
+            print("sourceIndexPath is nil...")
         }
         
+        // clean up any snapshot views or displayLink scrolls
         var cell: UITableViewCell? = nil
         
         if indexPath != nil {
@@ -528,9 +536,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 self.sourceIndexPath = nil
                 self.snapshot?.removeFromSuperview()
                 self.snapshot = nil
+                self.tableView.reloadData()
         })
-        
-        self.tableView.reloadData()
         
         self.prevLocation = nil
         self.displayLink?.invalidate()
