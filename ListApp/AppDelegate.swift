@@ -12,6 +12,8 @@ import UIKit
 class AppDelegate: UIResponder, UIApplicationDelegate
 {
     var window: UIWindow?
+    
+    let kInitialListIndex = 0
 
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool
     {
@@ -22,9 +24,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         let rightNavController = splitViewController.viewControllers.last as! UINavigationController
         let itemViewController = rightNavController.topViewController as! ItemViewController
         
-        // coordinate the initial selection in both controllers from saved state (set 3 here for testing)
-        itemViewController.list = listViewController.lists[3]
-        listViewController.selectionIndex = 3;
+        // coordinate the initial selection in both controllers from saved state
+        itemViewController.list = listViewController.lists[kInitialListIndex]
+        listViewController.selectionIndex = kInitialListIndex;
         
         listViewController.delegate = itemViewController
         itemViewController.navigationItem.leftItemsSupplementBackButton = true

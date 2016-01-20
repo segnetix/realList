@@ -823,5 +823,15 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         cat6_1.items.append(Item(name: "Chips"))
         cat6_1.items.append(Item(name: "Movies"))
         cat6_1.items.append(Item(name: "Subway sandwich"))
+        
+        
+        // update cell type array in temp lists
+        list1.updateCellTypeArray()
+        list2.updateCellTypeArray()
+        list3.updateCellTypeArray()
+        list4.updateCellTypeArray()
+        list5.updateCellTypeArray()
+        list6.updateCellTypeArray()
+        
     }
 }

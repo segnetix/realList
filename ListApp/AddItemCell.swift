@@ -10,6 +10,8 @@ import UIKit
 
 class AddItemCell: UITableViewCell
 {
+    @IBOutlet weak var addItemButton: UIButton!
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
