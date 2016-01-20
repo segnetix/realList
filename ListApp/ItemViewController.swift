@@ -48,9 +48,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var scrollLoopCount = 0     // debugging var
     var longPressActive = false
     var editingNewItemName = false
-    //var movedToAddItemCategoryCell = false                // so we can move addItem cell with category
-    
-    //var longPressCellTypeArray = [ItemViewCellType]()       // holds the row structure while in long press gesture
     
     var list: List! {
         didSet (newList) {
@@ -346,21 +343,29 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     @IBAction func addItemButtonTapped(sender: UIButton)
     {
         // create a new item and append to the category of the add button
-        let newItem = Item(name: "")
+        let newItem = Item(name: "new item: \(sender.tag)")
         let category  = list.categoryForAddItemButtonAtRowIndex(sender.tag)
         
         category.items.append(newItem)
         list.updateCellTypeArray()
         self.tableView.reloadData()
+        self.resetCellViewTags()
         
-        // set up editing mode for item name
-        let indexPath = NSIndexPath(forRow: sender.tag, inSection: 0)
-        let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
+        let newIndexPath = list.indexPathForItem(newItem)
         
-        inEditMode = true
-        cell.itemName.userInteractionEnabled = true
-        cell.itemName.becomeFirstResponder()
-        editingNewItemName = true
+        if let indexPath = newIndexPath {
+            //print("newIndexPath: \(indexPath.row)  sender.tag \(sender.tag)")
+            
+            // set up editing mode for item name
+            let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
+            
+            inEditMode = true
+            cell.itemName.userInteractionEnabled = true
+            cell.itemName.becomeFirstResponder()
+            editingNewItemName = true
+        } else {
+            print("ERROR: addItemButtonTapped - indexPathForItem returned a nil index path.")
+        }
     }
     
 ////////////////////////////////////////////////////////////////
@@ -457,9 +462,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         let topBarHeight = getTopBarHeight()
         var indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
         
-        // initialize the longPressCellTypeArray
-        //self.initLongPressCellTypeArray()
-        
         // prevent long press action on an AddItem cell
         if indexPath != nil {
             let cell = tableView.cellForRowAtIndexPath(indexPath!)
@@ -473,16 +475,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                     longPressEnded(movingFromIndexPath, location: location)
                     return
                 }
-                
-                // we entered an AddItem cell (but not the last one)
-               // if longPressActive {
-               //     movedToAddItemCategoryCell = true
-               // }
-            }// else if cell is CategoryCell {
-            //    if longPressActive {
-            //        movedToAddItemCategoryCell = true
-            //    }
-            //}
+            }
         }
         
         // check if we need to end scrolling
@@ -628,9 +621,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                     
                     // ... move the rows
                     tableView.moveRowAtIndexPath(movingFromIndexPath!, toIndexPath: indexPath!)
-                    
-                    // update the temp longPressCellTypeArray
-                    //self.updateLongPressCellTypeArray(movingFromIndexPath!.row, toPos: indexPath!.row)
 
                     // ... and update movingFromIndexPath so it is in sync with UI changes
                     movingFromIndexPath = indexPath
@@ -706,7 +696,11 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                                 list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .End)
                                 movedToCollapsedCategory = true
                             } else {
-                                list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: position)
+                                if destCat.expanded {
+                                    list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .Beginning)
+                                } else {
+                                    list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .End)
+                                }
                             }
                         } else {
                             list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: position)
@@ -775,7 +769,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         self.prevLocation = nil
         self.displayLink?.invalidate()
         self.displayLink = nil
-        //movedToAddItemCategoryCell = false
     }
     
     func scrollUpLoop()
@@ -814,108 +807,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             self.tableView.scrollToRowAtIndexPath(lastCellIndex, atScrollPosition: .Bottom, animated: true)
         }
     }
-    
-////////////////////////////////////////////////////////////////
-//
-//  MARK: - LongPressCellTypeArray methods
-//
-////////////////////////////////////////////////////////////////
-    /*
-    /// Initializes the longPressCellTypeArray from the ListData.cellTypeArray
-    func initLongPressCellTypeArray()
-    {
-        longPressCellTypeArray.removeAll()
-        
-        for value in list.cellTypeArray {
-            if value == ItemViewCellType.Category {
-                longPressCellTypeArray.append(ItemViewCellType.Category)
-            } else if value == ItemViewCellType.Item {
-                longPressCellTypeArray.append(ItemViewCellType.Item)
-            } else if value == ItemViewCellType.AddItem {
-                longPressCellTypeArray.append(ItemViewCellType.AddItem)
-            }
-        }
-    }
-    
-    func updateLongPressCellTypeArray(moveFromPos: Int, toPos: Int)
-    {
-        if  moveFromPos >= 0 &&
-            moveFromPos < longPressCellTypeArray.count &&
-            toPos >= 0 &&
-            toPos < longPressCellTypeArray.count
-        {
-            let type = longPressCellTypeArray[moveFromPos]
-            
-            longPressCellTypeArray.removeAtIndex(moveFromPos)
-            longPressCellTypeArray.insert(type, atIndex: toPos)
-        }
-    }
-    
-    func longPressCellTypeAtIndex(index: Int) -> ItemViewCellType?
-    {
-        if index >= 0 && index < longPressCellTypeArray.count {
-            return longPressCellTypeArray[index]
-        } else {
-            return nil
-        }
-    }
-    */
-    /// This version uses cellForRowAtIndexPath
-    func cellAtIndexPathIsAddCellCategoryPair(indexPath: NSIndexPath) -> Bool
-    {
-        let row = indexPath.row
-        let nextRow = row + 1
-        let prevRow = row - 1
-        var isPair = false
-        
-        let cell = tableView.cellForRowAtIndexPath(indexPath)
-        let nextCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: nextRow, inSection: 0))
-        let prevCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: prevRow, inSection: 0))
-        
-        if cell is ItemCell {
-            return false
-        }
-        
-        if cell is AddItemCell && nextCell is CategoryCell {
-                isPair = true
-                //print("isPair...")
-        } else if cell is CategoryCell && prevCell is AddItemCell {
-                isPair = true
-                //print("isPair...")
-        }
-        
-        return isPair
-    }
-
-    /*
-    /// Returns true if the cell at the given index path is part of an AddCell/Category pair.
-    func cellAtIndexPathIsAddCellCategoryPair(indexPath: NSIndexPath) -> Bool
-    {
-        let row = indexPath.row
-        let nextRow = row + 1
-        let prevRow = row - 1
-        var isPair = false
-        
-        if row >= 0 && row < longPressCellTypeArray.count {
-            if longPressCellTypeArray[row] == ItemViewCellType.Item {
-                return false
-            }
-            if longPressCellTypeArray[row] == ItemViewCellType.AddItem &&
-                nextRow < longPressCellTypeArray.count &&
-                longPressCellTypeArray[nextRow] == ItemViewCellType.Category {
-                    isPair = true
-                    //print("isPair...")
-            } else if longPressCellTypeArray[row] == ItemViewCellType.Category &&
-                prevRow >= 0 &&
-                longPressCellTypeArray[prevRow] == ItemViewCellType.AddItem {
-                    isPair = true
-                    //print("isPair...")
-            }
-        }
-        
-        return isPair
-    }
-    */
     
 ////////////////////////////////////////////////////////////////
 //
@@ -1077,6 +968,33 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         return indexPath
     }
     
+    /// Returns true if the cell at the given index path is part of an AddCell/Category pair.
+    func cellAtIndexPathIsAddCellCategoryPair(indexPath: NSIndexPath) -> Bool
+    {
+        let row = indexPath.row
+        let nextRow = row + 1
+        let prevRow = row - 1
+        var isPair = false
+        
+        let cell = tableView.cellForRowAtIndexPath(indexPath)
+        let nextCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: nextRow, inSection: 0))
+        let prevCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: prevRow, inSection: 0))
+        
+        if cell is ItemCell {
+            return false
+        }
+        
+        if cell is AddItemCell && nextCell is CategoryCell {
+            isPair = true
+            //print("isPair...")
+        } else if cell is CategoryCell && prevCell is AddItemCell {
+            isPair = true
+            //print("isPair...")
+        }
+        
+        return isPair
+    }
+
     func getTopBarHeight() -> CGFloat {
         let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height
         let navBarHeight = self.navigationController!.navigationBar.frame.size.height

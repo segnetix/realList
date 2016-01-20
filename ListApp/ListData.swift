@@ -66,7 +66,7 @@ class List
         var categoryIndex = -1
         
         for row in cellTypeArray {
-            if row == ItemViewCellType.AddItem {
+            if row == ItemViewCellType.Category {
                 ++categoryIndex
             }
             if rowCount == addCellRowIndex {
@@ -110,40 +110,6 @@ class List
         
         return count
     }
-    
-    /*
-    /// Returns total display item count.
-    func itemDisplayCount() -> Int
-    {
-        var count: Int = 0
-        
-        for category in categories {
-            if category.expanded {
-                count += category.items.count   // if expanded, add the count of items in this category
-            }
-        }
-        
-        return count
-    }
-
-    /// Returns total of all potential displayable rows.
-    func totalCount() -> Int
-    {
-        var count: Int = 0
-        
-        for category in categories {
-            // add the category if displayed
-            if category.name.characters.count > 0 {
-                ++count
-            }
-            
-            // add the items in this category
-            count += category.items.count
-        }
-        
-        return count
-    }
-    */
     
     /// Returns the total count of all rows to display, including addCell rows (one for each expanded category).
     func totalDisplayCount() -> Int
@@ -369,7 +335,7 @@ class List
                 var itemIndex: Int = -1
                 
                 // expanded category
-                for item in category.items
+                for _ in category.items
                 {
                     //print(item.name)
                     ++index
@@ -521,6 +487,27 @@ class List
         return nil
     }
     
+    /// Returns the display index path for the given Item.
+    func indexPathForItem(item: Item) -> NSIndexPath?
+    {
+        var index = -1
+        
+        for category in categories {
+            ++index
+            
+            if category.expanded {
+                for catItem in category.items {
+                    ++index
+                    if catItem === item {
+                        return NSIndexPath(forRow: index, inSection: 0)
+                    }
+                }
+                ++index     // increment for the AddItem cell
+            }
+        }
+        
+        return nil
+    }
     
     /// Returns true if the given path is the last row displayed.
     func indexPathIsLastRowDisplayed(indexPath: NSIndexPath) -> Bool {
