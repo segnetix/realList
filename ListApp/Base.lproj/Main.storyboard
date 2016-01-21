@@ -35,6 +35,9 @@
                                                 <constraint firstAttribute="width" constant="49" id="9vN-8H-Qrn"/>
                                                 <constraint firstAttribute="height" constant="31" id="g8u-0A-b1b"/>
                                             </constraints>
+                                            <connections>
+                                                <action selector="checkSwitchTapped:" destination="xgg-C1-F1C" eventType="valueChanged" id="KfB-Ur-pxm"/>
+                                            </connections>
                                         </switch>
                                     </subviews>
                                     <constraints>
@@ -154,9 +157,7 @@
                         </connections>
                     </tableView>
                     <toolbarItems>
-                        <barButtonItem systemItem="flexibleSpace" id="ZTK-0h-HQG">
-                            <color key="tintColor" cocoaTouchSystemColor="darkTextColor"/>
-                        </barButtonItem>
+                        <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="8fD-3a-lY0"/>
                         <barButtonItem title="+ new category" id="ELC-Rp-IDd">
                             <connections>
                                 <action selector="addCategoryButtonTapped:" destination="xgg-C1-F1C" id="unq-CM-HBw"/>
@@ -165,11 +166,18 @@
                         <barButtonItem systemItem="flexibleSpace" id="kRX-ab-hKb">
                             <color key="tintColor" cocoaTouchSystemColor="darkTextColor"/>
                         </barButtonItem>
+                        <barButtonItem title="hide completed" id="n52-lD-IN2">
+                            <connections>
+                                <action selector="showHideCategoryButtonTapped:" destination="xgg-C1-F1C" id="CTF-y0-93N"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="KjE-5C-Ldy"/>
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="hVo-Wt-zbt"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="newCategoryButton" destination="ELC-Rp-IDd" id="NGl-si-bH8"/>
+                        <outlet property="showHideCompletedButton" destination="n52-lD-IN2" id="ETT-rg-s45"/>
                     </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9yt-Fe-mAE" userLabel="First Responder" sceneMemberID="firstResponder"/>

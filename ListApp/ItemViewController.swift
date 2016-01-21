@@ -36,7 +36,9 @@ let kItemViewCellHeight: CGFloat = 52.0
 
 class ItemViewController: UITableViewController, UITextFieldDelegate
 {
-    @IBOutlet weak var newCategoryButton: UITabBarItem!
+    @IBOutlet weak var newCategoryButton: UIBarButtonItem!
+    @IBOutlet weak var showHideCompletedButton: UIBarButtonItem!
+    
     var inEditMode = false
     var deleteItemIndexPath: NSIndexPath? = nil
     var editModeRow = -1
@@ -52,13 +54,29 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var longPressActive = false
     var editingNewItemName = false
     var editingNewCategoryName = false
-    //var bannerView: ADBannerView!
     
     var list: List! {
         didSet (newList) {
             self.refreshItems()
         }
     }
+    
+    var showCompletedItems: Bool = true {
+        didSet(newShow) {
+            if showCompletedItems {
+                showHideCompletedButton.title = "hide completed"
+            } else {
+                showHideCompletedButton.title = "show completed"
+            }
+            
+        }
+    }
+    
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Table set up methods
+//
+////////////////////////////////////////////////////////////////
     
     override func viewDidLoad()
     {
@@ -117,13 +135,16 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         //navigationController?.hidesBarsWhenKeyboardAppears = true
         //navigationController?.hidesBarsOnSwipe = false
         
-
+        // showHideCompletedButton state
+        self.setShowHideCompleted(true)
+        
     }
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    
     
     required init(coder aDecoder: NSCoder)
     {
@@ -183,6 +204,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             // check switch
             let item = list.objectAtIndexPath(indexPath) as! Item
             cell.checkSwitch.setOn(item.completed, animated: false)
+            cell.checkSwitch.tag = indexPath.row
             
             // item title
             let title = list?.cellTitle(indexPath)
@@ -462,9 +484,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    
-    func scrollToCategoryEnded(scrollView: UIScrollView) {
-        print("scrollToCategoryEnded...")
+    func scrollToCategoryEnded(scrollView: UIScrollView)
+    {
         NSObject.cancelPreviousPerformRequestsWithTarget(self)
         
         let cell = tableView.cellForRowAtIndexPath(newCatIndexPath!) as! CategoryCell
@@ -1112,11 +1133,34 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         return isPair
     }
 
+    // calculates the top bar height, inlcuding the status bar and nav bar (if present)
     func getTopBarHeight() -> CGFloat {
         let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height
         let navBarHeight = self.navigationController!.navigationBar.frame.size.height
         
         return statusBarHeight + navBarHeight
+    }
+    
+    // called when check switch is toggled
+    @IBAction func checkSwitchTapped(sender: UISwitch)
+    {
+        let i = sender.tag
+        let senderItem = list.objectAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
+        
+        if senderItem is Item {
+            let item = senderItem as! Item
+            item.completed = sender.on
+            print("item: \(item.name) is set to \(sender.on)")
+        }
+    }
+    
+    @IBAction func showHideCategoryButtonTapped(sender: UIBarButtonItem)
+    {
+        showCompletedItems = !showCompletedItems
+    }
+    
+    func setShowHideCompleted(show: Bool) {
+        showCompletedItems = show
     }
     
     /*
