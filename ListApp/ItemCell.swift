@@ -19,6 +19,7 @@ protocol ItemCellDelegate: class
 
 class ItemCell: UITableViewCell
 {
+    @IBOutlet weak var checkSwitch: UISwitch!
     @IBOutlet weak var itemName: UITextField!
     weak var delegate: ItemCellDelegate?
     let gradientLayer = CAGradientLayer()
@@ -48,6 +49,7 @@ class ItemCell: UITableViewCell
         // let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
         // doubleTapGestureRecognizer.requireGestureRecognizerToFail(longPressGestureRecognizer)
         // self.addGestureRecognizer(longPressGestureRecognizer)
+        
     }
     
     override func layoutSubviews()

@@ -213,12 +213,13 @@ class List
         // add the category path
         catPaths.append(indexPath)
         
-        // add the paths of all items in the category
+        // add the paths of all items in the category and its AddItem cell
         if let category = category {
             if category.expanded {
                 for _ in category.items {
                     catPaths.append(NSIndexPath(forRow: ++row, inSection: 0))
                 }
+                catPaths.append(NSIndexPath(forRow: ++row, inSection: 0))
             }
         }
         
@@ -582,11 +583,13 @@ class Category
 class Item
 {
     var name: String
+    var completed: Bool
     
     // designated initializer for an Item
-    init(name: String)
+    init(name: String, completed: Bool)
     {
         self.name = name
+        self.completed = completed
     }
     
 }

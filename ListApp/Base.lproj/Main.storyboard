@@ -25,21 +25,37 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="ek5-bB-UcJ" userLabel="Item Name">
-                                            <rect key="frame" x="68" y="8" width="524" height="15"/>
+                                            <rect key="frame" x="85" y="8" width="507" height="15"/>
                                             <attributedString key="attributedText"/>
-                                            <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                                            <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done"/>
                                         </textField>
+                                        <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Izy-VV-qSb">
+                                            <rect key="frame" x="20" y="0.0" width="51" height="31"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="49" id="9vN-8H-Qrn"/>
+                                                <constraint firstAttribute="height" constant="31" id="g8u-0A-b1b"/>
+                                            </constraints>
+                                        </switch>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="ek5-bB-UcJ" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="topMargin" id="7pP-x3-S4b"/>
+                                        <constraint firstItem="Izy-VV-qSb" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leading" constant="20" symbolic="YES" id="Ir5-YQ-8Gb"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="ek5-bB-UcJ" secondAttribute="trailing" id="Mjf-hp-FpB"/>
                                         <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leadingMargin" constant="60" id="RtA-jO-WKj"/>
+                                        <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="Izy-VV-qSb" secondAttribute="trailing" constant="16" id="ixY-xo-B8l"/>
                                         <constraint firstAttribute="bottomMargin" secondItem="ek5-bB-UcJ" secondAttribute="bottom" id="py0-c6-1Yx"/>
+                                        <constraint firstItem="Izy-VV-qSb" firstAttribute="centerY" secondItem="ek5-bB-UcJ" secondAttribute="centerY" id="thw-Ge-sSh"/>
                                     </constraints>
+                                    <variation key="default">
+                                        <mask key="constraints">
+                                            <exclude reference="RtA-jO-WKj"/>
+                                        </mask>
+                                    </variation>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
+                                    <outlet property="checkSwitch" destination="Izy-VV-qSb" id="1fp-Oy-4U0"/>
                                     <outlet property="itemName" destination="ek5-bB-UcJ" id="Pnn-R8-IcF"/>
                                 </connections>
                             </tableViewCell>
@@ -53,7 +69,7 @@
                                         <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="nPQ-Yu-QYm" userLabel="Category Name">
                                             <rect key="frame" x="20" y="8" width="522" height="15"/>
                                             <attributedString key="attributedText"/>
-                                            <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                                            <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done"/>
                                         </textField>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="37Y-n0-dxM">
                                             <rect key="frame" x="550" y="8" width="42" height="15"/>
@@ -93,7 +109,7 @@
                                 <rect key="frame" x="0.0" y="160" width="600" height="60"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Ui4-cJ-iDI" id="gu9-8t-wra">
-                                    <rect key="frame" x="0.0" y="0.0" width="600" height="59.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="60"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9Rm-EG-YMt">
@@ -189,7 +205,7 @@
                                                 <constraint firstAttribute="width" constant="483" id="jcx-sb-g8L"/>
                                             </constraints>
                                             <attributedString key="attributedText"/>
-                                            <textInputTraits key="textInputTraits" returnKeyType="done"/>
+                                            <textInputTraits key="textInputTraits" spellCheckingType="no" returnKeyType="done"/>
                                             <variation key="default">
                                                 <mask key="constraints">
                                                     <exclude reference="jcx-sb-g8L"/>
@@ -214,11 +230,11 @@
                                 <rect key="frame" x="0.0" y="146" width="600" height="60"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Zms-cz-8bu" id="LRg-Ey-VjT">
-                                    <rect key="frame" x="0.0" y="0.0" width="600" height="59.5"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="600" height="60"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kcl-ny-7ll">
-                                            <rect key="frame" x="8" y="3" width="584" height="53"/>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kcl-ny-7ll">
+                                            <rect key="frame" x="8" y="8" width="584" height="44"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="46" id="wNh-dT-f0i"/>
                                             </constraints>

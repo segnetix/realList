@@ -17,11 +17,12 @@ let kScrollZoneHeight: CGFloat = 50.0
 protocol ListSelectionDelegate: class
 {
     func listSelected(newList: List)
+    func listNameChanged(newName: String)
     func listDeleted(deletedList: List)
 }
 
 let kListViewScrollRate: CGFloat = 6.0
-let kListViewCellHeight: CGFloat = 44.0
+let kListViewCellHeight: CGFloat = 52.0
 
 class ListViewController: UITableViewController, UITextFieldDelegate
 {
@@ -256,6 +257,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let i = textField.tag
         lists[i].name = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
         
+        // update ItemVC list name
+        delegate?.listNameChanged(textField.text!)
+        
         print(lists[i].name)
     }
 
@@ -275,11 +279,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 lists.removeLast()
                 self.tableView.reloadData()
             }
-        }
-        
-        // do we need this???
-        UIView.animateWithDuration(0.25) {
-            self.navigationController?.navigationBarHidden = false
         }
         
         editingNewListName = false
@@ -721,32 +720,32 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         list1.categories.append(cat1_2)
         list1.categories.append(cat1_3)
         
-        cat1_1.items.append(Item(name: "Carrots"))
-        cat1_1.items.append(Item(name: "Squash"))
-        cat1_1.items.append(Item(name: "Tomatoes"))
-        cat1_1.items.append(Item(name: "Potatoes"))
-        cat1_1.items.append(Item(name: "Apples"))
-        cat1_1.items.append(Item(name: "Oranges"))
-        cat1_1.items.append(Item(name: "Lettuce"))
-        cat1_1.items.append(Item(name: "Onions"))
-        cat1_1.items.append(Item(name: "Bananas"))
-        cat1_1.items.append(Item(name: "Strawberries"))
+        cat1_1.items.append(Item(name: "Carrots", completed: false))
+        cat1_1.items.append(Item(name: "Squash", completed: false))
+        cat1_1.items.append(Item(name: "Tomatoes", completed: false))
+        cat1_1.items.append(Item(name: "Potatoes", completed: true))
+        cat1_1.items.append(Item(name: "Apples", completed: false))
+        cat1_1.items.append(Item(name: "Oranges", completed: true))
+        cat1_1.items.append(Item(name: "Lettuce", completed: true))
+        cat1_1.items.append(Item(name: "Onions", completed: false))
+        cat1_1.items.append(Item(name: "Bananas", completed: true))
+        cat1_1.items.append(Item(name: "Strawberries", completed: true))
         
-        cat1_2.items.append(Item(name: "Chicken"))
-        cat1_2.items.append(Item(name: "Sirloin"))
-        cat1_2.items.append(Item(name: "Salmon"))
-        cat1_2.items.append(Item(name: "Cod"))
-        cat1_2.items.append(Item(name: "Halibut"))
-        cat1_2.items.append(Item(name: "Ham"))
+        cat1_2.items.append(Item(name: "Chicken", completed: false))
+        cat1_2.items.append(Item(name: "Sirloin", completed: true))
+        cat1_2.items.append(Item(name: "Salmon", completed: true))
+        cat1_2.items.append(Item(name: "Cod", completed: false))
+        cat1_2.items.append(Item(name: "Halibut", completed: true))
+        cat1_2.items.append(Item(name: "Ham", completed: true))
         
-        cat1_3.items.append(Item(name: "Noodle Chicken Bag"))
-        cat1_3.items.append(Item(name: "Soda"))
-        cat1_3.items.append(Item(name: "Dinty Moore"))
-        cat1_3.items.append(Item(name: "Tea Bags"))
-        cat1_3.items.append(Item(name: "Vegtable Soup"))
-        cat1_3.items.append(Item(name: "Cookie Mix"))
-        cat1_3.items.append(Item(name: "Salad fixings"))
-        cat1_3.items.append(Item(name: "Dressing"))
+        cat1_3.items.append(Item(name: "Noodle Chicken Bag", completed: false))
+        cat1_3.items.append(Item(name: "Soda", completed: false))
+        cat1_3.items.append(Item(name: "Dinty Moore", completed: true))
+        cat1_3.items.append(Item(name: "Tea Bags", completed: true))
+        cat1_3.items.append(Item(name: "Vegtable Soup", completed: true))
+        cat1_3.items.append(Item(name: "Cookie Mix", completed: true))
+        cat1_3.items.append(Item(name: "Salad fixings", completed: false))
+        cat1_3.items.append(Item(name: "Dressing", completed: false))
         
         // list2
         let list2 = List(name: "Safeway")
@@ -755,12 +754,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cat2_1 = Category(name: "", displayHeader: false)
         list2.categories.append(cat2_1)
         
-        cat2_1.items.append(Item(name: "Juice"))
-        cat2_1.items.append(Item(name: "Cream Cheese"))
-        cat2_1.items.append(Item(name: "Deli Ham"))
-        cat2_1.items.append(Item(name: "Potatoes"))
-        cat2_1.items.append(Item(name: "Bananas"))
-        cat2_1.items.append(Item(name: "Oranges"))
+        cat2_1.items.append(Item(name: "Juice", completed: false))
+        cat2_1.items.append(Item(name: "Cream Cheese", completed: true))
+        cat2_1.items.append(Item(name: "Deli Ham", completed: true))
+        cat2_1.items.append(Item(name: "Potatoes", completed: false))
+        cat2_1.items.append(Item(name: "Bananas", completed: true))
+        cat2_1.items.append(Item(name: "Oranges", completed: true))
         
         // list3
         let list3 = List(name: "King Sooper")
@@ -769,12 +768,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cat3_1 = Category(name: "", displayHeader: false)
         list3.categories.append(cat3_1)
         
-        cat3_1.items.append(Item(name: "Bread"))
-        cat3_1.items.append(Item(name: "Tomatoes"))
-        cat3_1.items.append(Item(name: "Coffee"))
-        cat3_1.items.append(Item(name: "Syrup"))
-        cat3_1.items.append(Item(name: "Dog toys"))
-        cat3_1.items.append(Item(name: "Leggings"))
+        cat3_1.items.append(Item(name: "Bread", completed: true))
+        cat3_1.items.append(Item(name: "Tomatoes", completed: true))
+        cat3_1.items.append(Item(name: "Coffee", completed: false))
+        cat3_1.items.append(Item(name: "Syrup", completed: false))
+        cat3_1.items.append(Item(name: "Dog toys", completed: true))
+        cat3_1.items.append(Item(name: "Leggings", completed: false))
         
         // list4
         let list4 = List(name: "Trail Mannor")
@@ -783,16 +782,16 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cat4_1 = Category(name: "", displayHeader: false)
         list4.categories.append(cat4_1)
         
-        cat4_1.items.append(Item(name: "Popcorn"))
-        cat4_1.items.append(Item(name: "Ramen noodles"))
-        cat4_1.items.append(Item(name: "Sleeping bags"))
-        cat4_1.items.append(Item(name: "Soap"))
-        cat4_1.items.append(Item(name: "Towels"))
-        cat4_1.items.append(Item(name: "Food"))
-        cat4_1.items.append(Item(name: "Bacon"))
-        cat4_1.items.append(Item(name: "Cereal"))
-        cat4_1.items.append(Item(name: "Coffee"))
-        cat4_1.items.append(Item(name: "Water"))
+        cat4_1.items.append(Item(name: "Popcorn", completed: false))
+        cat4_1.items.append(Item(name: "Ramen noodles", completed: true))
+        cat4_1.items.append(Item(name: "Sleeping bags", completed: false))
+        cat4_1.items.append(Item(name: "Soap", completed: false))
+        cat4_1.items.append(Item(name: "Towels", completed: false))
+        cat4_1.items.append(Item(name: "Food", completed: true))
+        cat4_1.items.append(Item(name: "Bacon", completed: true))
+        cat4_1.items.append(Item(name: "Cereal", completed: false))
+        cat4_1.items.append(Item(name: "Coffee", completed: false))
+        cat4_1.items.append(Item(name: "Water", completed: false))
         
         // list5
         let list5 = List(name: "Home Depot")
@@ -801,18 +800,18 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cat5_1 = Category(name: "", displayHeader: false)
         list5.categories.append(cat5_1)
         
-        cat5_1.items.append(Item(name: "Paint"))
-        cat5_1.items.append(Item(name: "Nails"))
-        cat5_1.items.append(Item(name: "Extension cord"))
-        cat5_1.items.append(Item(name: "Toilet kit"))
-        cat5_1.items.append(Item(name: "Shower head"))
-        cat5_1.items.append(Item(name: "Garden hose"))
-        cat5_1.items.append(Item(name: "Lights"))
-        cat5_1.items.append(Item(name: "3/8' plywood"))
-        cat5_1.items.append(Item(name: "Power tools"))
-        cat5_1.items.append(Item(name: "Potting soil"))
-        cat5_1.items.append(Item(name: "Cat 6 cable"))
-        cat5_1.items.append(Item(name: "Wall plates"))
+        cat5_1.items.append(Item(name: "Paint", completed: false))
+        cat5_1.items.append(Item(name: "Nails", completed: false))
+        cat5_1.items.append(Item(name: "Extension cord", completed: false))
+        cat5_1.items.append(Item(name: "Toilet kit", completed: false))
+        cat5_1.items.append(Item(name: "Shower head", completed: true))
+        cat5_1.items.append(Item(name: "Garden hose", completed: true))
+        cat5_1.items.append(Item(name: "Lights", completed: false))
+        cat5_1.items.append(Item(name: "3/8' plywood", completed: false))
+        cat5_1.items.append(Item(name: "Power tools", completed: false))
+        cat5_1.items.append(Item(name: "Potting soil", completed: true))
+        cat5_1.items.append(Item(name: "Cat 6 cable", completed: false))
+        cat5_1.items.append(Item(name: "Wall plates", completed: false))
         
         // list6
         let list6 = List(name: "Walmart")
@@ -821,10 +820,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cat6_1 = Category(name: "", displayHeader: false)
         list6.categories.append(cat6_1)
         
-        cat6_1.items.append(Item(name: "Dog Shampoo"))
-        cat6_1.items.append(Item(name: "Chips"))
-        cat6_1.items.append(Item(name: "Movies"))
-        cat6_1.items.append(Item(name: "Subway sandwich"))
+        cat6_1.items.append(Item(name: "Dog Shampoo", completed: false))
+        cat6_1.items.append(Item(name: "Chips", completed: false))
+        cat6_1.items.append(Item(name: "Movies", completed: false))
+        cat6_1.items.append(Item(name: "Subway sandwich", completed: false))
         
         
         // update cell type array in temp lists

@@ -32,7 +32,7 @@ enum ItemViewCellType {
 }
 
 let kItemViewScrollRate: CGFloat = 6.0
-let kItemViewCellHeight: CGFloat = 44.0
+let kItemViewCellHeight: CGFloat = 52.0
 
 class ItemViewController: UITableViewController, UITextFieldDelegate
 {
@@ -103,7 +103,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardDidShow", name: UIKeyboardDidShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardDidHide", name: UIKeyboardDidHideNotification, object: nil)
         
-        
         refreshItems()
     }
     
@@ -151,7 +150,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             
             return displayCount
         } else {
-            return 1
+            return 0
         }
     }
     
@@ -181,6 +180,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
             cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
 
+            // check switch
+            let item = list.objectAtIndexPath(indexPath) as! Item
+            cell.checkSwitch.setOn(item.completed, animated: false)
+            
             // item title
             let title = list?.cellTitle(indexPath)
             if let cellTitle = title {
@@ -393,7 +396,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         // create a new item and append to the category of the add button
         //let newItem = Item(name: "new item: \(sender.tag)")
-        let newItem = Item(name: "")
+        let newItem = Item(name: "", completed: false)
         let category  = list.categoryForAddItemButtonAtRowIndex(sender.tag)
         
         category.items.append(newItem)
@@ -760,12 +763,11 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
                 var altIndexPath = indexPath!.row > 0 ? NSIndexPath(forRow: indexPath!.row - 1, inSection: 0) : indexPath!
                 let sourceDataObj = list.objectAtIndexPath(sourceIndexPath!)
-                let destDataCell = moveDirection == .Up ? tableView.cellForRowAtIndexPath(altIndexPath) : tableView.cellForRowAtIndexPath(indexPath!)
                 var destDataObj  = moveDirection == .Up ? list.objectAtIndexPath(altIndexPath) : list.objectAtIndexPath(indexPath!)
                 let destCellType = moveDirection == .Up ? list.cellTypeAtIndex(altIndexPath.row) : list.cellTypeAtIndex(indexPath!.row)
                 
                 // move cells, update the list data source, move items and categories differently
-                if sourceDataObj is Item //&& (destDataCell is ItemCell || destDataCell is CategoryCell || destDataCell is AddItemCell)
+                if sourceDataObj is Item
                 {
                     // we are moving an item
                     tableView.beginUpdates()
@@ -776,7 +778,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                     // insert the item at its new location
                     if destCellType == ItemViewCellType.Item
                     {
-                        print("destDataCell: \((destDataCell as! ItemCell).itemName.text)")
                         list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: indexPath!, atPosition: .Middle)
                     }
                     else if destCellType == ItemViewCellType.Category || destCellType == ItemViewCellType.AddItem
@@ -946,7 +947,14 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         {
             tableView.beginUpdates()
             // Delete the row(s) from the data source and return display paths of the removed rows
-            let removedPaths = currentList.removeItemAtIndexPath(indexPath, preserveCategories: true)
+            var removedPaths: [NSIndexPath]
+            var preserveCat = true
+            
+            if list.objectAtIndexPath(indexPath) is Category {
+                preserveCat = false
+            }
+            
+            removedPaths = currentList.removeItemAtIndexPath(indexPath, preserveCategories: preserveCat)
             tableView.deleteRowsAtIndexPaths(removedPaths, withRowAnimation: .Fade)
             deleteItemIndexPath = nil
             tableView.endUpdates()
@@ -1143,6 +1151,11 @@ extension ItemViewController: ListSelectionDelegate
     // called when the ListController changes the selected list
     func listSelected(newList: List) {
         list = newList
+    }
+    
+    // called when the ListController changes the name of the list
+    func listNameChanged(newName: String) {
+        self.title = list!.name
     }
     
     // called when the ListController deletes a list
