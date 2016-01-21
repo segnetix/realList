@@ -32,6 +32,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         itemViewController.navigationItem.leftItemsSupplementBackButton = true
         itemViewController.navigationItem.leftBarButtonItem = splitViewController.displayModeButtonItem()
         
+        // tab bar items
+        //UITabBarItem.appearance().setTitleTextAttributes([NSFontAttributeName: UIFont(name: "AmericanTypewriter", size: 20.0)!], forState: UIControlState.Normal)
+        
         return true
     }
 
@@ -56,7 +59,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func applicationWillTerminate(application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
-
-
+    
 }
 

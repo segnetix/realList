@@ -8,6 +8,7 @@
 
 import UIKit
 import QuartzCore
+//import iAd
 
 let itemCellID     = "ItemCell"
 let categoryCellID = "CategoryCell"
@@ -35,6 +36,7 @@ let kItemViewCellHeight: CGFloat = 44.0
 
 class ItemViewController: UITableViewController, UITextFieldDelegate
 {
+    @IBOutlet weak var newCategoryButton: UITabBarItem!
     var inEditMode = false
     var deleteItemIndexPath: NSIndexPath? = nil
     var editModeRow = -1
@@ -42,12 +44,15 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var movedToCollapsedCategory = false
     var sourceIndexPath: NSIndexPath? = nil
     var movingFromIndexPath: NSIndexPath? = nil
+    var newCatIndexPath: NSIndexPath? = nil
     var prevLocation: CGPoint? = nil
     var snapshot: UIView? = nil
     var displayLink: CADisplayLink? = nil
     var scrollLoopCount = 0     // debugging var
     var longPressActive = false
     var editingNewItemName = false
+    var editingNewCategoryName = false
+    //var bannerView: ADBannerView!
     
     var list: List! {
         didSet (newList) {
@@ -74,6 +79,31 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         
         //self.tableView.backgroundColor = UIColor.clearColor()
         
+        //self.navigationController?.setToolbarHidden(false, animated: false)
+
+        /*
+        bannerView = ADBannerView(adType: .Banner)
+        bannerView.translatesAutoresizingMaskIntoConstraints = false
+        bannerView.delegate = self
+        bannerView.hidden = true
+        view.addSubview(bannerView)
+        
+        let viewsDictionary = ["bannerView": bannerView]
+        view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[bannerView]|", options: [], metrics: nil, views: viewsDictionary))
+        view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:[bannerView]|", options: [], metrics: nil, views: viewsDictionary))
+        */
+        
+        //let bannerHeight = bannerView.frame.height
+        
+        // adjust tableView for iAD banner
+        //let insets = UIEdgeInsets(top: 100, left: 20, bottom: 100, right: 20)
+        //self.tableView.contentInset = insets
+        
+        // set up keyboard show/hide notifications
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardDidShow", name: UIKeyboardDidShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardDidHide", name: UIKeyboardDidHideNotification, object: nil)
+        
+        
         refreshItems()
     }
     
@@ -87,6 +117,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         //navigationController?.hidesBarsOnTap = true
         //navigationController?.hidesBarsWhenKeyboardAppears = true
         //navigationController?.hidesBarsOnSwipe = false
+        
+
     }
     
     override func didReceiveMemoryWarning() {
@@ -295,29 +327,46 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
     
-    override func prefersStatusBarHidden() -> Bool {
-        return navigationController?.navigationBarHidden == true
+    
+    func keyboardDidShow() {
+        //print("keyboardDidShow")
+        inEditMode = true
     }
     
-    override func preferredStatusBarUpdateAnimation() -> UIStatusBarAnimation {
-        return UIStatusBarAnimation.Slide
+    func keyboardDidHide() {
+        //print("keyboardDidHide")
+        inEditMode = false
+        editingNewCategoryName = false
+        editingNewItemName = false
     }
     
     func textFieldShouldReturn(textField: UITextField) -> Bool
     {
-        inEditMode = false
         textField.userInteractionEnabled = false
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
 
-        // delete the newly added list if use didn't create a name
+        // delete the newly added item if user didn't create a name
         if editingNewItemName
         {
             if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
             {
+                // remove last item from category
                 list.categories[list.categories.count-1].items.removeLast()
                 self.tableView.reloadData()
+                list.updateCellTypeArray()
             }
+            editingNewItemName = false
+        } else if editingNewCategoryName
+        {
+            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
+            {
+                // remove last category from list
+                list.categories.removeLast()
+                self.tableView.reloadData()
+                list.updateCellTypeArray()
+            }
+            editingNewCategoryName = false
         }
         
         // do we need this???
@@ -343,7 +392,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     @IBAction func addItemButtonTapped(sender: UIButton)
     {
         // create a new item and append to the category of the add button
-        let newItem = Item(name: "new item: \(sender.tag)")
+        //let newItem = Item(name: "new item: \(sender.tag)")
+        let newItem = Item(name: "")
         let category  = list.categoryForAddItemButtonAtRowIndex(sender.tag)
         
         category.items.append(newItem)
@@ -351,21 +401,76 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         self.tableView.reloadData()
         self.resetCellViewTags()
         
-        let newIndexPath = list.indexPathForItem(newItem)
+        let newItemIndexPath = list.indexPathForItem(newItem)
         
-        if let indexPath = newIndexPath {
+        if let indexPath = newItemIndexPath {
             //print("newIndexPath: \(indexPath.row)  sender.tag \(sender.tag)")
             
             // set up editing mode for item name
             let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
             
-            inEditMode = true
             cell.itemName.userInteractionEnabled = true
             cell.itemName.becomeFirstResponder()
             editingNewItemName = true
         } else {
             print("ERROR: addItemButtonTapped - indexPathForItem returned a nil index path.")
         }
+    }
+    
+    
+    @IBAction func addCategoryButtonTapped(sender: UIButton)
+    {
+        var newCategory: Category
+        
+        if list.categories[0].displayHeader == false {
+            newCategory = list.categories[0]
+            newCategory.displayHeader = true
+            newCatIndexPath = NSIndexPath(forRow: 0, inSection: 0)
+        } else  {
+            newCategory = Category(name: "", displayHeader: true)
+            list.categories.append(newCategory)
+            newCatIndexPath = list.indexPathForCategory(newCategory)
+        }
+        
+        list.updateCellTypeArray()
+        self.tableView.reloadData()
+        
+        if let indexPath = newCatIndexPath {
+            // need to scroll the target cell into view so the tags can be updated
+            if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false
+            {
+                self.tableView.scrollToRowAtIndexPath(NSIndexPath(forRow: indexPath.row, inSection: 0), atScrollPosition: UITableViewScrollPosition.Bottom, animated: false)
+                self.resetCellViewTags()
+                
+                // set up a selector event to fire when the new cell has scrolled into place
+                NSObject.cancelPreviousPerformRequestsWithTarget(self)
+                self.performSelector("scrollToCategoryEnded:", withObject: nil, afterDelay: 0.1)
+            } else {
+                // new cell is already visible
+                print("new cell is already visible")
+                let cell = tableView.cellForRowAtIndexPath(indexPath) as! CategoryCell
+                
+                cell.categoryName.userInteractionEnabled = true
+                cell.categoryName.becomeFirstResponder()
+                editingNewCategoryName = true
+                editingNewItemName = false
+                newCatIndexPath = nil
+            }
+        }
+    }
+    
+    
+    func scrollToCategoryEnded(scrollView: UIScrollView) {
+        print("scrollToCategoryEnded...")
+        NSObject.cancelPreviousPerformRequestsWithTarget(self)
+        
+        let cell = tableView.cellForRowAtIndexPath(newCatIndexPath!) as! CategoryCell
+        
+        cell.categoryName.userInteractionEnabled = true
+        cell.categoryName.becomeFirstResponder()
+        editingNewCategoryName = true
+        editingNewItemName = false
+        newCatIndexPath = nil
     }
     
 ////////////////////////////////////////////////////////////////
@@ -425,6 +530,11 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                     
                     // this is needed so that operations that rely on view.tag (like this one!) will function correctly
                     self.resetCellViewTags()
+                    
+                    if cat.expanded {
+                        // scroll the newly expanded header to the top so items can be seen
+                        self.tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: UITableViewScrollPosition.Top, animated: true)
+                    }
                 }
             } else {
                 print("no toggle - inEditMode!")
@@ -441,13 +551,11 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             if list.cellIsItem(indexPath) {
                 let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
                 
-                inEditMode = true
                 cell.itemName.userInteractionEnabled = true
                 cell.itemName.becomeFirstResponder()
             } else if list.cellIsCategory(indexPath) {
                 let cell = tableView.cellForRowAtIndexPath(indexPath) as! CategoryCell
                 
-                inEditMode = true
                 cell.categoryName.userInteractionEnabled = true
                 cell.categoryName.becomeFirstResponder()
             }
@@ -914,6 +1022,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     }
     
     // resets the cell's tags after a collapse/expand event
+    // NOTE: this only updates the tags for visible cells
     func resetCellViewTags()
     {
         var cell: UITableViewCell? = nil
@@ -935,7 +1044,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 cell!.contentView.tag = indexPath.row
             }
             
-        } while cell != nil
+        } while index < list.totalDisplayCount()
     }
     
     func rowAtIndexPathIsVisible(indexPath: NSIndexPath) -> Bool
@@ -1002,7 +1111,25 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         return statusBarHeight + navBarHeight
     }
     
+    /*
+    func bannerViewActionShouldBegin(banner: ADBannerView!, willLeaveApplication willLeave: Bool) -> Bool {
+        print("bannerViewActionShouldBegin")
+        return true
+    }
+    
+    func bannerViewDidLoadAd(banner: ADBannerView!) {
+        print("bannerViewDidLoadAd")
+        self.bannerView.hidden = false
+    }
+    
+    func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
+        print("didFailToReceiveAdWithError")
+        self.bannerView.hidden = true
+    }
+    */
+    
 }
+
 
 ////////////////////////////////////////////////////////////////
 //

@@ -72,6 +72,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // so the user can get back to the navigation bar to save
         //navigationController?.hidesBarsOnTap = true
         //navigationController?.hidesBarsWhenKeyboardAppears = true
+        
+
     }
     
     override func didReceiveMemoryWarning() {
@@ -265,7 +267,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
         
-        // delete the newly added list if use didn't create a name
+        // delete the newly added list if user didn't create a name
         if editingNewListName
         {
             if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
@@ -289,7 +291,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     {
         // create a new list and append
         let newList = List(name: "")
-        newList.categories.append(Category(name: ""))
+        newList.categories.append(Category(name: "", displayHeader: false))
+        newList.updateCellTypeArray()
         lists.append(newList)
         self.tableView.reloadData()
         
@@ -710,9 +713,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let list1 = List(name: "Costco")
         lists.append(list1)
         
-        let cat1_1 = Category(name: "Fruits and Veggies")
-        let cat1_2 = Category(name: "Meats")
-        let cat1_3 = Category(name: "Other")
+        let cat1_1 = Category(name: "Fruits and Veggies", displayHeader: true)
+        let cat1_2 = Category(name: "Meats", displayHeader: true)
+        let cat1_3 = Category(name: "Other", displayHeader: true)
         
         list1.categories.append(cat1_1)
         list1.categories.append(cat1_2)
@@ -749,7 +752,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let list2 = List(name: "Safeway")
         lists.append(list2)
         
-        let cat2_1 = Category(name: "")
+        let cat2_1 = Category(name: "", displayHeader: false)
         list2.categories.append(cat2_1)
         
         cat2_1.items.append(Item(name: "Juice"))
@@ -763,7 +766,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let list3 = List(name: "King Sooper")
         lists.append(list3)
         
-        let cat3_1 = Category(name: "")
+        let cat3_1 = Category(name: "", displayHeader: false)
         list3.categories.append(cat3_1)
         
         cat3_1.items.append(Item(name: "Bread"))
@@ -777,7 +780,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let list4 = List(name: "Trail Mannor")
         lists.append(list4)
         
-        let cat4_1 = Category(name: "")
+        let cat4_1 = Category(name: "", displayHeader: false)
         list4.categories.append(cat4_1)
         
         cat4_1.items.append(Item(name: "Popcorn"))
@@ -795,8 +798,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let list5 = List(name: "Home Depot")
         lists.append(list5)
         
-        let cat5_1 = Category(name: "")
-        
+        let cat5_1 = Category(name: "", displayHeader: false)
         list5.categories.append(cat5_1)
         
         cat5_1.items.append(Item(name: "Paint"))
@@ -816,7 +818,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let list6 = List(name: "Walmart")
         lists.append(list6)
         
-        let cat6_1 = Category(name: "")
+        let cat6_1 = Category(name: "", displayHeader: false)
         list6.categories.append(cat6_1)
         
         cat6_1.items.append(Item(name: "Dog Shampoo"))

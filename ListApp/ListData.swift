@@ -37,11 +37,11 @@ class List
         
         for category in categories
         {
-            if category.name != "" {
+            if category.displayHeader {
                 cellTypeArray.append(ItemViewCellType.Category)
             }
             
-            if category.expanded || category.name == "" {
+            if category.expanded {
                 for _ in category.items {
                     cellTypeArray.append(ItemViewCellType.Item)
                 }
@@ -75,6 +75,11 @@ class List
             ++rowCount
         }
         
+        // special check for non-category lists
+        if categoryIndex == -1 {
+            categoryIndex = 0
+        }
+        
         return categories[categoryIndex]
     }
     
@@ -91,7 +96,7 @@ class List
         var count: Int = 0
         
         for category in categories {
-            if category.name.characters.count > 0 {
+            if category.displayHeader {
                 ++count
             }
         }
@@ -118,7 +123,7 @@ class List
         
         for category in categories {
             // add the category if displayed
-            if category.name.characters.count > 0 {
+            if category.displayHeader {
                 ++count
             }
             
@@ -319,7 +324,7 @@ class List
         {
             ++index
             ++catIndex
-            if category.name.characters.count > 0 {
+            if category.displayHeader {
                 if index == indexPath.row {
                     // obj is a category, so item is nil
                     //print("indicesForObjectAtIndexPath cat \(catIndex) item (nil)")
@@ -453,14 +458,10 @@ class List
         
         for category in categories
         {
-            if category.name.characters.count > 0 {
+            if category.displayHeader {
                 ++index
                 if index == indexPath.row {
-                    if category.name.characters.count > 0 {
-                        return category
-                    } else {
-                        --index // we will pick up the next object
-                    }
+                    return category
                 }
             }
             
@@ -492,17 +493,45 @@ class List
     {
         var index = -1
         
-        for category in categories {
-            ++index
+        for category in categories
+        {
+            if category.displayHeader {
+                ++index
+            }
             
-            if category.expanded {
-                for catItem in category.items {
+            if category.expanded
+            {
+                for catItem in category.items
+                {
                     ++index
                     if catItem === item {
                         return NSIndexPath(forRow: index, inSection: 0)
                     }
                 }
                 ++index     // increment for the AddItem cell
+            }
+        }
+        
+        return nil
+    }
+    
+    func indexPathForCategory(category: Category) -> NSIndexPath?
+    {
+        var index = -1
+        
+        for cat in categories
+        {
+            if category.displayHeader {
+                ++index
+                if cat === category {
+                    return NSIndexPath(forRow: index, inSection: 0)
+                }
+            }
+            
+            if cat.expanded
+            {
+                index += cat.items.count   // increment for the items in the category
+                ++index                         // increment for the AddItem cell
             }
         }
         
@@ -526,6 +555,7 @@ class Category
 {
     var name: String
     var items = [Item]()
+    var displayHeader: Bool
     var expanded: Bool = true {
         didSet {
             //print("Category: \(name) expanded: \(expanded)")
@@ -533,8 +563,9 @@ class Category
     }
     
     // designated initializer for a Category
-    init(name: String) {
+    init(name: String, displayHeader: Bool) {
         self.name = name
+        self.displayHeader = displayHeader
     }
     
     func itemCount() -> Int {
