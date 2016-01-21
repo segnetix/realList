@@ -57,6 +57,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     
     var list: List! {
         didSet (newList) {
+            list.showCompletedItems = self.showCompletedItems
             self.refreshItems()
         }
     }
@@ -69,6 +70,11 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 showHideCompletedButton.title = "show completed"
             }
             
+            if list != nil {
+                list.showCompletedItems = self.showCompletedItems
+            }
+            
+            self.updateShowHideCompletedRows()
         }
     }
     
@@ -136,7 +142,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         //navigationController?.hidesBarsOnSwipe = false
         
         // showHideCompletedButton state
-        self.setShowHideCompleted(true)
+        //self.setShowHideCompleted(true)
         
     }
     
@@ -528,21 +534,31 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                         // we are expanding a category
                         var insertPos = indexPath.row
                         
-                        // 'plus 1' for the addItem cell
-                        for (var i = 0; i < cat.items.count + 1; ++i) {
-                            indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
+                        for item in cat.items
+                        {
+                            if showCompletedItems || !item.completed {
+                                indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
+                            }
                         }
+                        
+                        // one more for the addItem cell
+                        indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
                         
                         self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
                     } else {
                         // we are collapsing a category
                         var indexPaths = [NSIndexPath]()
-                        let index = indexPath.row
+                        var index = indexPath.row
                         
-                        // 'plus 1' for the addItem cell
-                        for (var i = index + 1; i <= index + cat.items.count + 1; i++ ) {
-                            indexPaths.append(NSIndexPath(forRow: i, inSection: 0))
+                        for item in cat.items
+                        {
+                            if showCompletedItems || !item.completed {
+                                indexPaths.append(NSIndexPath(forRow: ++index, inSection: 0))
+                            }
                         }
+                        
+                        // one more for the addItem cell
+                        indexPaths.append(NSIndexPath(forRow: ++index, inSection: 0))
                         
                         self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
                     }
@@ -603,7 +619,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 // we got a long press action on the AddItem cell...
                 
                 // if it is the last AddItem cell, then we are moving down past the bottom of the tableView, so end the long press
-                if list.indexPathIsLastRowDisplayed(indexPath!) && longPressActive {
+                if list.indexPathIsLastRowDisplayed(indexPath!) && longPressActive
+                {
                     longPressEnded(movingFromIndexPath, location: location)
                     return
                 }
@@ -1015,6 +1032,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         if list != nil {
             self.title = list!.name
             tableView.reloadData()
+            list.showCompletedItems = self.showCompletedItems
         } else {
             self.title = "<no selection>"
             tableView.reloadData()
@@ -1154,6 +1172,12 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - ShowHideCompleted methods
+//
+////////////////////////////////////////////////////////////////
+    
     @IBAction func showHideCategoryButtonTapped(sender: UIBarButtonItem)
     {
         showCompletedItems = !showCompletedItems
@@ -1162,6 +1186,92 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     func setShowHideCompleted(show: Bool) {
         showCompletedItems = show
     }
+    
+    /// Refreshes the ItemVC item rows with animation after a change to showHideCompleted
+    func updateShowHideCompletedRows()
+    {
+        var indexPaths = [NSIndexPath]()
+        
+        if showCompletedItems == false
+        {
+            // we are hiding the completed rows
+            var deletePos = -1
+            
+            for category in list.categories
+            {
+                if category.displayHeader {
+                    ++deletePos
+                }
+                
+                if category.expanded
+                {
+                    for item in category.items
+                    {
+                        if item.completed {
+                            indexPaths.append(NSIndexPath(forRow: ++deletePos, inSection: 0))
+                        } else {
+                            ++deletePos
+                        }
+                    }
+                    ++deletePos     // for the AddItem cell
+                }
+            }
+            
+            // remove the complete rows
+            self.tableView.beginUpdates()
+            self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
+            self.tableView.endUpdates()
+            
+            // need to update the cellTypeArray after show/hide event
+            list.updateCellTypeArray()
+            
+            // this is needed so that operations that rely on view.tag will function correctly
+            self.resetCellViewTags()
+        }
+        else
+        {
+            /*
+            // we are showing the completed rows
+            var insertPos = -1
+            
+            for category in list.categories
+            {
+                if category.displayHeader {
+                    ++deletePos
+                }
+                
+                if category.expanded
+                {
+                    for item in category.items
+                    {
+                        if item.completed {
+                            indexPaths.append(NSIndexPath(forRow: ++deletePos, inSection: 0))
+                        } else {
+                            ++deletePos
+                        }
+                    }
+                    ++deletePos     // for the AddItem cell
+                }
+            }
+            
+            // remove the complete rows
+            self.tableView.beginUpdates()
+            self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
+            self.tableView.endUpdates()
+            */
+            
+            // temp code
+            self.tableView.reloadData()
+            
+            // need to update the cellTypeArray after show/hide event
+            list.updateCellTypeArray()
+            
+            // this is needed so that operations that rely on view.tag will function correctly
+            self.resetCellViewTags()
+        }
+   
+    }
+    
     
     /*
     func bannerViewActionShouldBegin(banner: ADBannerView!, willLeaveApplication willLeave: Bool) -> Bool {

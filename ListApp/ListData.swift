@@ -24,6 +24,11 @@ class List
     var name: String
     var categories = [Category]()
     var cellTypeArray = [ItemViewCellType]()
+    var showCompletedItems: Bool = true {
+        didSet(newShow) {
+            self.updateCellTypeArray()
+        }
+    }
     
     // designated initializer for a List
     init(name: String) {
@@ -42,8 +47,11 @@ class List
             }
             
             if category.expanded {
-                for _ in category.items {
-                    cellTypeArray.append(ItemViewCellType.Item)
+                for item in category.items
+                {
+                    if showCompletedItems || !item.completed {
+                        cellTypeArray.append(ItemViewCellType.Item)
+                    }
                 }
                 
                 cellTypeArray.append(ItemViewCellType.AddItem)
@@ -90,7 +98,7 @@ class List
         return self.categories.count
     }
     
-    /// Return the number of expanded categories with non-empty names.
+    /// Return the number of categories displaying the header.
     func categoryDisplayCount() -> Int
     {
         var count: Int = 0
@@ -121,16 +129,23 @@ class List
     {
         var count: Int = 0
         
-        for category in categories {
+        for category in categories
+        {
             // add the category if displayed
             if category.displayHeader {
                 ++count
             }
             
             // add the items in this category if expanded
-            if category.expanded {
-                count += category.items.count       // for the Items cells
-                count += 1                          // for the AddItem cell
+            if category.expanded
+            {
+                for item in category.items
+                {
+                    if showCompletedItems || !item.completed {
+                        ++count     // for the Items cells
+                    }
+                }
+                count += 1          // for the AddItem cell
             }
         }
         
@@ -215,9 +230,14 @@ class List
         
         // add the paths of all items in the category and its AddItem cell
         if let category = category {
-            if category.expanded {
-                for _ in category.items {
-                    catPaths.append(NSIndexPath(forRow: ++row, inSection: 0))
+            if category.expanded
+            {
+                for item in category.items
+                {
+                    ++row
+                    if showCompletedItems || !item.completed {
+                        catPaths.append(NSIndexPath(forRow: row, inSection: 0))
+                    }
                 }
                 catPaths.append(NSIndexPath(forRow: ++row, inSection: 0))
             }
@@ -336,20 +356,24 @@ class List
                 return (catIndex, indexPath.row)
             }
             
-            // only count items in in expandeded categories
-            if category.expanded {
+            // only count items in in expanded categories
+            if category.expanded
+            {
                 var itemIndex: Int = -1
                 
                 // expanded category
-                for _ in category.items
+                for item in category.items
                 {
-                    //print(item.name)
-                    ++index
-                    ++itemIndex
-                    if index == indexPath.row {
-                        // obj is an item
-                        //print("indicesForObjectAtIndexPath cat \(catIndex) item \(itemIndex)")
-                        return (catIndex, itemIndex)
+                    if showCompletedItems || !item.completed
+                    {
+                        //print(item.name)
+                        ++index
+                        ++itemIndex
+                        if index == indexPath.row {
+                            // obj is an item
+                            //print("indicesForObjectAtIndexPath cat \(catIndex) item \(itemIndex)")
+                            return (catIndex, itemIndex)
+                        }
                     }
                 }
                 
@@ -428,12 +452,17 @@ class List
                 return category
             }
             
-            if category.expanded {
+            if category.expanded
+            {
                 // check each item in the category
-                for _ in category.items {
-                    ++index
-                    if index == indexPath.row {
-                        return category
+                for item in category.items
+                {
+                    if showCompletedItems || !item.completed
+                    {
+                        ++index
+                        if index == indexPath.row {
+                            return category
+                        }
                     }
                 }
                 
@@ -467,13 +496,17 @@ class List
             }
             
             // we only look at objects that are displayed
-            if category.expanded {
+            if category.expanded
+            {
                 // check each item
                 for item in category.items
                 {
-                    ++index
-                    if index == indexPath.row {
-                        return item
+                    if showCompletedItems || !item.completed
+                    {
+                        ++index
+                        if index == indexPath.row {
+                            return item
+                        }
                     }
                 }
                 
@@ -504,9 +537,12 @@ class List
             {
                 for catItem in category.items
                 {
-                    ++index
-                    if catItem === item {
-                        return NSIndexPath(forRow: index, inSection: 0)
+                    if showCompletedItems || !catItem.completed
+                    {
+                        ++index
+                        if catItem === item {
+                            return NSIndexPath(forRow: index, inSection: 0)
+                        }
                     }
                 }
                 ++index     // increment for the AddItem cell
@@ -531,8 +567,14 @@ class List
             
             if cat.expanded
             {
-                index += cat.items.count   // increment for the items in the category
-                ++index                         // increment for the AddItem cell
+                for item in cat.items
+                {
+                    if showCompletedItems || !item.completed
+                    {
+                        index += cat.items.count        // increment for the items in the category
+                        ++index                         // increment for the AddItem cell
+                    }
+                }
             }
         }
         
