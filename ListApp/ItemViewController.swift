@@ -54,6 +54,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var longPressActive = false
     var editingNewItemName = false
     var editingNewCategoryName = false
+    var itemsCompletedInHideCompletedItemsMode = [Item]()
     
     var list: List! {
         didSet (newList) {
@@ -68,6 +69,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 showHideCompletedButton.title = "hide completed"
             } else {
                 showHideCompletedButton.title = "show completed"
+                // need to clear the array when first hiding completed items
+                itemsCompletedInHideCompletedItemsMode.removeAll()
             }
             
             if list != nil {
@@ -175,6 +178,9 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 movedToCollapsedCategory = false
             }
             
+            // need to adjust for any rows in the itemsCompletedInHideCompletedItemsMode
+            displayCount += itemsCompletedInHideCompletedItemsMode.count
+            
             return displayCount
         } else {
             return 0
@@ -265,6 +271,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             let category = list.categoryForItemAtIndex(indexPath)
             if let category = category {
                 cell.catCountLabel.attributedText = makeAttributedString(title: String(category.items.count), subtitle: "")
+                cell.catCountLabel.textAlignment = NSTextAlignment.Right
             }
             
             // cell separator
@@ -503,6 +510,18 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         newCatIndexPath = nil
     }
     
+    func makeAttributedString(title title: String, subtitle: String) -> NSAttributedString {
+        let titleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleBody), NSForegroundColorAttributeName: UIColor.blackColor()]
+        let subtitleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleSubheadline)]
+        
+        let titleString = NSMutableAttributedString(string: "\(title)\n", attributes: titleAttributes)
+        let subtitleString = NSAttributedString(string: subtitle, attributes: subtitleAttributes)
+        
+        titleString.appendAttributedString(subtitleString)
+        
+        return titleString
+    }
+    
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - Gesture Recognizer methods
@@ -552,8 +571,14 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                         
                         for item in cat.items
                         {
-                            if showCompletedItems || !item.completed {
+                            if showCompletedItems || !item.completed || arrayContainsItem(itemsCompletedInHideCompletedItemsMode, item: item) {
                                 indexPaths.append(NSIndexPath(forRow: ++index, inSection: 0))
+                                
+                                // need to remove the item from itemsCompletedInHideCompletedItemsMode (if it was in the array)
+                                let i = indexOfItemInArray(itemsCompletedInHideCompletedItemsMode, item: item)
+                                if i > -1 {
+                                    itemsCompletedInHideCompletedItemsMode.removeAtIndex(i)
+                                }
                             }
                         }
                         
@@ -1015,18 +1040,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
     
-    func makeAttributedString(title title: String, subtitle: String) -> NSAttributedString {
-        let titleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleBody), NSForegroundColorAttributeName: UIColor.blackColor()]
-        let subtitleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleSubheadline)]
-        
-        let titleString = NSMutableAttributedString(string: "\(title)\n", attributes: titleAttributes)
-        let subtitleString = NSAttributedString(string: subtitle, attributes: subtitleAttributes)
-        
-        titleString.appendAttributedString(subtitleString)
-        
-        return titleString
-    }
-    
     func refreshItems()
     {
         if list != nil {
@@ -1073,10 +1086,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     func resetCellViewTags()
     {
         var cell: UITableViewCell? = nil
-        var index = 0
+        var index = -1
         
         repeat {
-            let indexPath = NSIndexPath(forRow: index++, inSection: 0)
+            let indexPath = NSIndexPath(forRow: ++index, inSection: 0)
             cell = tableView.cellForRowAtIndexPath(indexPath)
                 
             if cell != nil {
@@ -1158,19 +1171,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         
         return statusBarHeight + navBarHeight
     }
-    
-    // called when check switch is toggled
-    @IBAction func checkSwitchTapped(sender: UISwitch)
-    {
-        let i = sender.tag
-        let senderItem = list.objectAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
-        
-        if senderItem is Item {
-            let item = senderItem as! Item
-            item.completed = sender.on
-            print("item: \(item.name) is set to \(sender.on)")
-        }
-    }
+
     
 ////////////////////////////////////////////////////////////////
 //
@@ -1221,57 +1222,100 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             self.tableView.beginUpdates()
             self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
             self.tableView.endUpdates()
-            
-            // need to update the cellTypeArray after show/hide event
-            list.updateCellTypeArray()
-            
-            // this is needed so that operations that rely on view.tag will function correctly
-            self.resetCellViewTags()
         }
         else
         {
-            /*
             // we are showing the completed rows
             var insertPos = -1
             
             for category in list.categories
             {
                 if category.displayHeader {
-                    ++deletePos
+                    ++insertPos
                 }
                 
                 if category.expanded
                 {
                     for item in category.items
                     {
-                        if item.completed {
-                            indexPaths.append(NSIndexPath(forRow: ++deletePos, inSection: 0))
+                        // only add previously completed items (not newly completed as those are already being displayed)
+                        if item.completed && arrayContainsItem(itemsCompletedInHideCompletedItemsMode, item: item) == false {
+                            indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
                         } else {
-                            ++deletePos
+                            ++insertPos
                         }
                     }
-                    ++deletePos     // for the AddItem cell
+                    ++insertPos     // for the AddItem cell
                 }
             }
             
-            // remove the complete rows
+            itemsCompletedInHideCompletedItemsMode.removeAll()
+            
+            // insert the complete rows
             self.tableView.beginUpdates()
             self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
             self.tableView.endUpdates()
-            */
-            
-            // temp code
-            self.tableView.reloadData()
-            
-            // need to update the cellTypeArray after show/hide event
-            list.updateCellTypeArray()
-            
-            // this is needed so that operations that rely on view.tag will function correctly
-            self.resetCellViewTags()
         }
    
+        // need to update the cellTypeArray after show/hide event
+        list.updateCellTypeArray()
+        
+        // this is needed so that operations that rely on view.tag will function correctly
+        self.resetCellViewTags()
+        
+        self.tableView.reloadData()
     }
     
+    // called when check switch is toggled
+    @IBAction func checkSwitchTapped(sender: UISwitch)
+    {
+        let i = sender.tag
+        let senderItem = list.objectAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
+        
+        if senderItem is Item {
+            let item = senderItem as! Item
+            item.completed = sender.on
+            print("item: \(item.name) is set to \(sender.on)")
+            
+            // If we are currently hiding completed items and our item is changed to completed
+            // then add to itemsCompletedInHideCompletedItemsMode array so the item doesn't get re-added
+            // when later switching back to show completed mode.
+            if showCompletedItems == false
+            {
+                // add to array
+                if item.completed  && arrayContainsItem(itemsCompletedInHideCompletedItemsMode, item: item) == false {
+                    itemsCompletedInHideCompletedItemsMode.append(item)
+                }
+                
+                // remove from array
+                let i = indexOfItemInArray(itemsCompletedInHideCompletedItemsMode, item: item)
+                
+                if !item.completed && i > -1 {
+                    itemsCompletedInHideCompletedItemsMode.removeAtIndex(i)
+                }
+            }
+            
+        }
+    }
+    
+    // item array helper methods
+    func arrayContainsItem(itemArray: [Item], item: Item) -> Bool
+    {
+        return indexOfItemInArray(itemArray, item: item) > -1
+    }
+    
+    func indexOfItemInArray(itemArray: [Item], item: Item) -> Int
+    {
+        var i = -1
+        
+        for obj in itemArray {
+            ++i
+            if obj === item {
+                return i
+            }
+        }
+        return -1
+    }
     
     /*
     func bannerViewActionShouldBegin(banner: ADBannerView!, willLeaveApplication willLeave: Bool) -> Bool {

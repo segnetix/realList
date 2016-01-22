@@ -115,31 +115,21 @@
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="59"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9Rm-EG-YMt">
-                                            <rect key="frame" x="8" y="8" width="584" height="44"/>
-                                            <fontDescription key="fontDescription" name="Avenir-Light" family="Avenir" pointSize="30"/>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9Rm-EG-YMt">
+                                            <rect key="frame" x="8" y="8" width="584" height="43"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <color key="tintColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <state key="normal" title=" +">
+                                            <state key="normal" title="new item">
                                                 <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                             </state>
                                             <connections>
                                                 <action selector="addItemButtonTapped:" destination="xgg-C1-F1C" eventType="touchUpInside" id="xUg-Du-sw0"/>
                                             </connections>
                                         </button>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="new item" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tnN-ds-s1W">
-                                            <rect key="frame" x="48" y="10" width="544" height="40"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <color key="textColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="9Rm-EG-YMt" firstAttribute="trailing" secondItem="gu9-8t-wra" secondAttribute="trailingMargin" id="34r-d0-POi"/>
                                         <constraint firstItem="9Rm-EG-YMt" firstAttribute="top" secondItem="gu9-8t-wra" secondAttribute="topMargin" id="4oF-l7-D6P"/>
-                                        <constraint firstItem="tnN-ds-s1W" firstAttribute="top" secondItem="gu9-8t-wra" secondAttribute="top" constant="10" id="VmB-vs-MaG"/>
-                                        <constraint firstAttribute="bottom" secondItem="tnN-ds-s1W" secondAttribute="bottom" constant="10" id="Vmo-5V-ncU"/>
-                                        <constraint firstItem="tnN-ds-s1W" firstAttribute="leading" secondItem="gu9-8t-wra" secondAttribute="leading" constant="48" id="YGi-Wx-Wps"/>
-                                        <constraint firstItem="tnN-ds-s1W" firstAttribute="trailing" secondItem="gu9-8t-wra" secondAttribute="trailingMargin" id="lGA-iB-8zL"/>
                                         <constraint firstItem="9Rm-EG-YMt" firstAttribute="leading" secondItem="gu9-8t-wra" secondAttribute="leadingMargin" id="m88-Yx-uE8"/>
                                         <constraint firstAttribute="bottomMargin" secondItem="9Rm-EG-YMt" secondAttribute="bottom" id="u87-Nm-BBK"/>
                                     </constraints>
@@ -157,21 +147,21 @@
                         </connections>
                     </tableView>
                     <toolbarItems>
-                        <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="8fD-3a-lY0"/>
-                        <barButtonItem title="+ new category" id="ELC-Rp-IDd">
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="8gv-GM-jm9"/>
+                        <barButtonItem title="new category" id="ELC-Rp-IDd">
                             <connections>
                                 <action selector="addCategoryButtonTapped:" destination="xgg-C1-F1C" id="unq-CM-HBw"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem systemItem="flexibleSpace" id="kRX-ab-hKb">
-                            <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                        </barButtonItem>
+                        <barButtonItem style="plain" systemItem="flexibleSpace" id="OUU-9U-jcQ"/>
                         <barButtonItem title="hide completed" id="n52-lD-IN2">
                             <connections>
                                 <action selector="showHideCategoryButtonTapped:" destination="xgg-C1-F1C" id="CTF-y0-93N"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem width="42" style="plain" systemItem="fixedSpace" id="KjE-5C-Ldy"/>
+                        <barButtonItem systemItem="flexibleSpace" id="kRX-ab-hKb">
+                            <color key="tintColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                        </barButtonItem>
                     </toolbarItems>
                     <navigationItem key="navigationItem" id="hVo-Wt-zbt"/>
                     <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
@@ -241,14 +231,14 @@
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="59"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kcl-ny-7ll">
-                                            <rect key="frame" x="8" y="8" width="584" height="44"/>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kcl-ny-7ll">
+                                            <rect key="frame" x="8" y="8" width="584" height="43"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="46" id="wNh-dT-f0i"/>
                                             </constraints>
-                                            <fontDescription key="fontDescription" name="Avenir-Light" family="Avenir" pointSize="30"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <color key="tintColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <state key="normal" title=" +">
+                                            <state key="normal" title="new list">
                                                 <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
                                             </state>
                                             <variation key="default">
@@ -260,35 +250,13 @@
                                                 <action selector="addListButtonTapped:" destination="YAY-IK-bg0" eventType="touchUpInside" id="hGQ-gG-c9B"/>
                                             </connections>
                                         </button>
-                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="new list" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="I5O-XF-1fI">
-                                            <rect key="frame" x="48" y="10" width="552" height="40"/>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <color key="textColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <nil key="highlightedColor"/>
-                                        </label>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="I5O-XF-1fI" firstAttribute="top" secondItem="LRg-Ey-VjT" secondAttribute="topMargin" constant="10" id="8yE-qA-Sxe"/>
-                                        <constraint firstItem="I5O-XF-1fI" firstAttribute="top" secondItem="LRg-Ey-VjT" secondAttribute="top" constant="10" id="9WH-HE-Mli"/>
-                                        <constraint firstItem="I5O-XF-1fI" firstAttribute="leading" secondItem="LRg-Ey-VjT" secondAttribute="leading" constant="48" id="AgF-O7-5oj"/>
                                         <constraint firstItem="Kcl-ny-7ll" firstAttribute="top" secondItem="LRg-Ey-VjT" secondAttribute="topMargin" id="D3a-t1-GzQ"/>
                                         <constraint firstAttribute="bottomMargin" secondItem="Kcl-ny-7ll" secondAttribute="bottom" id="FZA-uJ-agP"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="Kcl-ny-7ll" secondAttribute="trailing" id="Ii1-aI-Ieg"/>
-                                        <constraint firstAttribute="trailing" secondItem="I5O-XF-1fI" secondAttribute="trailing" id="Vbs-9H-uYa"/>
                                         <constraint firstItem="Kcl-ny-7ll" firstAttribute="leading" secondItem="LRg-Ey-VjT" secondAttribute="leadingMargin" id="ZE1-m6-jpl"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="I5O-XF-1fI" secondAttribute="trailing" id="hgp-p5-GMy"/>
-                                        <constraint firstItem="I5O-XF-1fI" firstAttribute="leading" secondItem="LRg-Ey-VjT" secondAttribute="leadingMargin" constant="58" id="nJl-TV-xUq"/>
-                                        <constraint firstAttribute="bottom" secondItem="I5O-XF-1fI" secondAttribute="bottom" constant="10" id="pLb-ck-7K3"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="I5O-XF-1fI" secondAttribute="bottom" constant="10" id="wq8-gA-taz"/>
                                     </constraints>
-                                    <variation key="default">
-                                        <mask key="constraints">
-                                            <exclude reference="8yE-qA-Sxe"/>
-                                            <exclude reference="hgp-p5-GMy"/>
-                                            <exclude reference="nJl-TV-xUq"/>
-                                            <exclude reference="wq8-gA-taz"/>
-                                        </mask>
-                                    </variation>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>

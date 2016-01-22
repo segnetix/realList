@@ -3,55 +3,14 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "ItemViewController.tableView(UITableView, moveRowAtIndexPath : NSIndexPath, toIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "(item as! Item).name">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "ItemViewController.tableView(UITableView, didSelectRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "selectedCategory">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
          contextName = "List.removeItemAtIndexPath(NSIndexPath, preserveCategories : Bool) -&gt; [NSIndexPath]?:ListData.swift">
-      </ContextState>
-      <ContextState
-         contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath, atPosition : InsertPosition) -&gt; ():ListData.swift">
-      </ContextState>
-      <ContextState
-         contextName = "ItemViewController.listDeleted(List) -&gt; ():ItemViewController.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "list">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath, atEnd : Bool) -&gt; ():ListData.swift">
       </ContextState>
       <ContextState
          contextName = "ItemViewController.tableView(UITableView, commitEditingStyle : UITableViewCellEditingStyle, forRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "indexPath.section">
-            </PersistentString>
-            <PersistentString
-               value = "indexPath.row">
-            </PersistentString>
-            <PersistentString
                value = "(item as! Item).name">
             </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "ListViewController.handleDeleteList(UIAlertAction!) -&gt; ():ListViewController.swift">
-         <PersistentStrings>
             <PersistentString
                value = "indexPath.row">
             </PersistentString>
@@ -78,72 +37,27 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ItemViewController.tableView(UITableView, cellForRowAtIndexPath : NSIndexPath) -&gt; UITableViewCell:ItemViewController.swift">
+         contextName = "ItemViewController.listDeleted(List) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "cell.contentView.tag">
-            </PersistentString>
-            <PersistentString
-               value = "indexPath.row">
-            </PersistentString>
-            <PersistentString
-               value = "indexPath.section">
+               value = "list">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "CategoryCell.gestureRecognizerShouldBegin(UIGestureRecognizer) -&gt; Bool:CategoryCell.swift">
+         contextName = "ItemViewController.catCellTapped(UITapGestureRecognizer) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "self.delegate">
+               value = "inEditMode">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
+         contextName = "ItemViewController.resetCellViewTags() -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "textField.text">
+               value = "(cell as! ItemCell).itemName.text">
             </PersistentString>
-            <PersistentString
-               value = "list.categories[selectedCategory].items[i].name">
-            </PersistentString>
-            <PersistentString
-               value = "selectedCategory">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "List.objectIsItem(AnyObject?) -&gt; Bool:ListData.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "(object as! Category).name">
-            </PersistentString>
-            <PersistentString
-               value = "(object as! Item).name">
-            </PersistentString>
-            <PersistentString
-               value = "object.name">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "List.objectAtIndexPath(NSIndexPath) -&gt; AnyObject?:ListData.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "category.name">
-            </PersistentString>
-            <PersistentString
-               value = "indexPath.row">
-            </PersistentString>
-            <PersistentString
-               value = "categories[0].items[0].name">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "ItemViewController.handleDeleteItem(UIAlertAction!) -&gt; ():ItemViewController.swift">
-         <PersistentStrings>
             <PersistentString
                value = "indexPath.row">
             </PersistentString>
@@ -164,10 +78,13 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ItemViewController.catCellTapped(UITapGestureRecognizer) -&gt; ():ItemViewController.swift">
+         contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath) -&gt; ():ListData.swift">
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.handleDeleteItem(UIAlertAction!) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "inEditMode">
+               value = "indexPath.row">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -175,15 +92,136 @@
          contextName = "ItemViewController.longPressAction(UILongPressGestureRecognizer) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "destCat.name">
+               value = "indexPath!.row">
             </PersistentString>
             <PersistentString
-               value = "indexPath!.row">
+               value = "destCat.name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath) -&gt; ():ListData.swift">
+         contextName = "ItemViewController.tableView(UITableView, cellForRowAtIndexPath : NSIndexPath) -&gt; UITableViewCell:ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "cell.contentView.tag">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.section">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath, atEnd : Bool) -&gt; ():ListData.swift">
+      </ContextState>
+      <ContextState
+         contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath, atPosition : InsertPosition) -&gt; ():ListData.swift">
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.tableView(UITableView, moveRowAtIndexPath : NSIndexPath, toIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "(item as! Item).name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.cellSingleTapAction(UITapGestureRecognizer) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "item.name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "CategoryCell.gestureRecognizerShouldBegin(UIGestureRecognizer) -&gt; Bool:CategoryCell.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "self.delegate">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "List.objectAtIndexPath(NSIndexPath) -&gt; AnyObject?:ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "category.name">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+            <PersistentString
+               value = "categories[0].items[0].name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.checkSwitchTapped(UISwitch) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "(senderItem as! Item).name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.tableView(UITableView, didSelectRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedCategory">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ListViewController.handleDeleteList(UIAlertAction!) -&gt; ():ListViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "indexPath.row">
+            </PersistentString>
+            <PersistentString
+               value = "indexPath.section">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.updateShowHideCompletedRows() -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "indexPaths.count">
+            </PersistentString>
+            <PersistentString
+               value = "item.name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "selectedCategory">
+            </PersistentString>
+            <PersistentString
+               value = "textField.text">
+            </PersistentString>
+            <PersistentString
+               value = "list.categories[selectedCategory].items[i].name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "List.objectIsItem(AnyObject?) -&gt; Bool:ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "(object as! Category).name">
+            </PersistentString>
+            <PersistentString
+               value = "(object as! Item).name">
+            </PersistentString>
+            <PersistentString
+               value = "object.name">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
    </ContextStates>
 </VariablesViewState>
