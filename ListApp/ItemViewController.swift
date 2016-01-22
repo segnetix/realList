@@ -214,12 +214,12 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             cell.checkSwitch.tag = indexPath.row
             
             // item title
-            let title = list?.cellTitle(indexPath)
+            let title = list.cellTitle(indexPath)
             if let cellTitle = title {
-                cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")    // for debugging
-                //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                      // for production
+                cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")    // for debugging
+                //cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                      // for production
             } else {
-                cell.itemName?.attributedText = makeAttributedString(title: "", subtitle: "")
+                cell.itemName.attributedText = makeAttributedString(title: "cellTitle is nil", subtitle: "")
             }
             
             // cell separator
@@ -614,7 +614,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     func cellDoubleTapAction(sender: UITapGestureRecognizer)
     {
         if sender.view != nil {
-            let indexPath = NSIndexPath(forRow: (sender.view?.tag)!, inSection: 0)
+            let indexPath = NSIndexPath(forRow: sender.view!.tag, inSection: 0)
             
             if list.cellIsItem(indexPath) {
                 let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
@@ -1100,6 +1100,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             if cell != nil {
                 if cell is ItemCell {
                     (cell as! ItemCell).itemName!.tag = indexPath.row
+                    (cell as! ItemCell).checkSwitch!.tag = indexPath.row
                 } else if cell is CategoryCell {
                     (cell as! CategoryCell).categoryName!.tag = indexPath.row
                 } else if cell is AddItemCell {
@@ -1309,6 +1310,9 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                     }
                 }
             }
+            
+            // update tags
+            resetCellViewTags()
         }
         
     }

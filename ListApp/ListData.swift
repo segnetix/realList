@@ -611,19 +611,8 @@ class Category
         self.displayHeader = displayHeader
     }
     
-    func itemCount() -> Int {
-        return items.count
-    }
-    
-    func itemsComplete() -> Int {
-        var i = 0
-        for item in items {
-            if item.completed {
-                ++i
-            }
-        }
-        return i
-    }
+    // returns the number of completed items in a category
+    func itemsComplete() -> Int {var i=0; for item in items {if item.completed {++i}}; return i}
 }
 
 ////////////////////////////////////////////////////////////////
