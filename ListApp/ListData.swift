@@ -614,6 +614,16 @@ class Category
     func itemCount() -> Int {
         return items.count
     }
+    
+    func itemsComplete() -> Int {
+        var i = 0
+        for item in items {
+            if item.completed {
+                ++i
+            }
+        }
+        return i
+    }
 }
 
 ////////////////////////////////////////////////////////////////

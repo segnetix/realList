@@ -43,7 +43,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var deleteItemIndexPath: NSIndexPath? = nil
     var editModeRow = -1
     var longPressGestureRecognizer: UILongPressGestureRecognizer? = nil
-    var movedToCollapsedCategory = false
     var sourceIndexPath: NSIndexPath? = nil
     var movingFromIndexPath: NSIndexPath? = nil
     var newCatIndexPath: NSIndexPath? = nil
@@ -171,14 +170,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         // return the total number of rows in our item table view (categories + items)
         if let list = list {
             var displayCount = list.totalDisplayCount()
-            
-            // if moving a cell to a collapsed category then we need to account for the newly hidden cell by temporarily incrementing the displayCount
-            if movedToCollapsedCategory {
-                ++displayCount
-                movedToCollapsedCategory = false
+
+            if itemsCompletedInHideCompletedItemsMode.count > 0 {
+                print("tableView:numberOfRowsInSection itemsCompletedInHideCompletedItemsMode.count is > 0...!!!")
             }
-            
-            // need to adjust for any rows in the itemsCompletedInHideCompletedItemsMode
             displayCount += itemsCompletedInHideCompletedItemsMode.count
             
             return displayCount
@@ -270,7 +265,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             // catCountLabel
             let category = list.categoryForItemAtIndex(indexPath)
             if let category = category {
-                cell.catCountLabel.attributedText = makeAttributedString(title: String(category.items.count), subtitle: "")
+                cell.catCountLabel.attributedText = categoryCountString(category)
                 cell.catCountLabel.textAlignment = NSTextAlignment.Right
             }
             
@@ -522,6 +517,12 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         return titleString
     }
     
+    func categoryCountString(category: Category) -> NSAttributedString
+    {
+        return makeAttributedString(title: String("\(category.itemsComplete())/\(category.items.count)"), subtitle: "")
+    }
+
+    
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - Gesture Recognizer methods
@@ -563,6 +564,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                         // one more for the addItem cell
                         indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
                         
+                        // now insert the expanded rows into the table view
                         self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
                     } else {
                         // we are collapsing a category
@@ -585,16 +587,17 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                         // one more for the addItem cell
                         indexPaths.append(NSIndexPath(forRow: ++index, inSection: 0))
                         
+                        // now delete the collapsed rows from the table view
                         self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
                     }
                     
                     //need to update the cellTypeArray after collapse/expand event
                     list.updateCellTypeArray()
                     
-                    self.tableView.endUpdates()
-                    
                     // this is needed so that operations that rely on view.tag (like this one!) will function correctly
                     self.resetCellViewTags()
+                    
+                    self.tableView.endUpdates()
                     
                     if cat.expanded {
                         // scroll the newly expanded header to the top so items can be seen
@@ -866,7 +869,9 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                             if destCat.expanded == false {
                                 // need to alter path to land on the collapsed category
                                 list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .End)
-                                movedToCollapsedCategory = true
+                                
+                                // also need to remove the row from the table as it will no longer be displayed
+                                tableView.deleteRowsAtIndexPaths([altIndexPath], withRowAnimation: UITableViewRowAnimation.Fade)
                             } else {
                                 if destCat.expanded {
                                     list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .Beginning)
@@ -1282,20 +1287,30 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             // when later switching back to show completed mode.
             if showCompletedItems == false
             {
-                // add to array
-                if item.completed  && arrayContainsItem(itemsCompletedInHideCompletedItemsMode, item: item) == false {
-                    itemsCompletedInHideCompletedItemsMode.append(item)
-                }
-                
-                // remove from array
+                // get index of item in itemsCompletedInHideCompletedItemsMode array
                 let i = indexOfItemInArray(itemsCompletedInHideCompletedItemsMode, item: item)
                 
-                if !item.completed && i > -1 {
+                if item.completed && i == -1 {
+                    // add to array
+                    itemsCompletedInHideCompletedItemsMode.append(item)
+                }
+                else if !item.completed && i > -1 {
+                    // remove from array
                     itemsCompletedInHideCompletedItemsMode.removeAtIndex(i)
                 }
             }
             
+            // need to update the counts in the cat cell
+            if let category = list.categoryForItem(item) {
+                if let catIndexPath = list.indexPathForCategory(category) {
+                    if self.tableView.indexPathsForVisibleRows?.contains(catIndexPath) == true {
+                        let catCell = tableView.cellForRowAtIndexPath(catIndexPath) as! CategoryCell
+                        catCell.catCountLabel.attributedText = self.categoryCountString(category)
+                    }
+                }
+            }
         }
+        
     }
     
     // item array helper methods
