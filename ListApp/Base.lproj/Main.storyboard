@@ -25,29 +25,33 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="ek5-bB-UcJ" userLabel="Item Name">
-                                            <rect key="frame" x="85" y="8" width="507" height="15"/>
+                                            <rect key="frame" x="60" y="8" width="532" height="15"/>
                                             <attributedString key="attributedText"/>
                                             <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done"/>
                                         </textField>
-                                        <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Izy-VV-qSb">
-                                            <rect key="frame" x="20" y="0.0" width="51" height="31"/>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="b3w-fy-jQC">
+                                            <rect key="frame" x="0.0" y="-13" width="52" height="44"/>
                                             <constraints>
-                                                <constraint firstAttribute="width" constant="49" id="9vN-8H-Qrn"/>
-                                                <constraint firstAttribute="height" constant="31" id="g8u-0A-b1b"/>
+                                                <constraint firstAttribute="width" constant="52" id="DEO-tL-uYY"/>
+                                                <constraint firstAttribute="height" constant="44" id="DMT-DF-wyr"/>
                                             </constraints>
+                                            <fontDescription key="fontDescription" type="system" pointSize="12"/>
+                                            <state key="normal" title="1">
+                                                <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                            </state>
                                             <connections>
-                                                <action selector="checkSwitchTapped:" destination="xgg-C1-F1C" eventType="valueChanged" id="KfB-Ur-pxm"/>
+                                                <action selector="checkButtonTapped:" destination="xgg-C1-F1C" eventType="touchUpInside" id="MSS-46-7yf"/>
                                             </connections>
-                                        </switch>
+                                        </button>
                                     </subviews>
                                     <constraints>
                                         <constraint firstItem="ek5-bB-UcJ" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="topMargin" id="7pP-x3-S4b"/>
-                                        <constraint firstItem="Izy-VV-qSb" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leading" constant="20" symbolic="YES" id="Ir5-YQ-8Gb"/>
+                                        <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" symbolic="YES" id="Gfc-PN-1Xh"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="ek5-bB-UcJ" secondAttribute="trailing" id="Mjf-hp-FpB"/>
                                         <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leadingMargin" constant="60" id="RtA-jO-WKj"/>
-                                        <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="Izy-VV-qSb" secondAttribute="trailing" constant="16" id="ixY-xo-B8l"/>
+                                        <constraint firstAttribute="bottom" secondItem="b3w-fy-jQC" secondAttribute="bottom" id="hhC-bL-ONo"/>
                                         <constraint firstAttribute="bottomMargin" secondItem="ek5-bB-UcJ" secondAttribute="bottom" id="py0-c6-1Yx"/>
-                                        <constraint firstItem="Izy-VV-qSb" firstAttribute="centerY" secondItem="ek5-bB-UcJ" secondAttribute="centerY" id="thw-Ge-sSh"/>
+                                        <constraint firstItem="b3w-fy-jQC" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leading" id="tAB-1R-QC4"/>
                                     </constraints>
                                     <variation key="default">
                                         <mask key="constraints">
@@ -58,8 +62,8 @@
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <connections>
-                                    <outlet property="checkSwitch" destination="Izy-VV-qSb" id="1fp-Oy-4U0"/>
                                     <outlet property="itemName" destination="ek5-bB-UcJ" id="Pnn-R8-IcF"/>
+                                    <outlet property="tempCheckButton" destination="b3w-fy-jQC" id="DHm-3N-U2k"/>
                                 </connections>
                             </tableViewCell>
                             <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="CategoryCell" id="STC-IF-0Ob" userLabel="CategoryCell" customClass="CategoryCell" customModule="ListApp" customModuleProvider="target">

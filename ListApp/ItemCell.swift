@@ -19,7 +19,7 @@ protocol ItemCellDelegate: class
 
 class ItemCell: UITableViewCell
 {
-    @IBOutlet weak var checkSwitch: UISwitch!
+    @IBOutlet weak var tempCheckButton: UIButton!
     @IBOutlet weak var itemName: UITextField!
     weak var delegate: ItemCellDelegate?
     let gradientLayer = CAGradientLayer()

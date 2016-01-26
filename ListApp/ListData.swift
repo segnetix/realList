@@ -8,6 +8,14 @@
 
 import UIKit
 
+let kItemIndexMax = 100000
+
+enum ItemState {
+    case Inactive
+    case Incomplete
+    case Complete
+}
+
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - List class
@@ -23,10 +31,19 @@ class List
 {
     var name: String
     var categories = [Category]()
-    var cellTypeArray = [ItemViewCellType]()
+    //var cellTypeArray = [ItemViewCellType]()
+    
     var showCompletedItems: Bool = true {
         didSet(newShow) {
-            self.updateCellTypeArray()
+            //self.updateCellTypeArray()
+            self.updateIndices()
+        }
+    }
+    
+    var showInactiveItems: Bool = true {
+        didSet(newShow) {
+            //self.updateCellTypeArray()
+            self.updateIndices()
         }
     }
     
@@ -35,291 +52,147 @@ class List
         self.name = name
     }
     
-    /// Updates the cellTypeArray.  Should be called after each change to a list.
-    func updateCellTypeArray()
+///////////////////////////////////////////////////////
+//
+//  MARK: New initializers for Category and Item objects
+//
+///////////////////////////////////////////////////////
+    
+    func indexForCategory(category: Category) -> Int
     {
-        cellTypeArray.removeAll()
+        var index = -1
         
-        for category in categories
-        {
-            if category.displayHeader {
-                cellTypeArray.append(ItemViewCellType.Category)
-            }
-            
-            if category.expanded {
-                for item in category.items
-                {
-                    if showCompletedItems || !item.completed {
-                        cellTypeArray.append(ItemViewCellType.Item)
-                    }
-                }
-                
-                cellTypeArray.append(ItemViewCellType.AddItem)
+        for cat in categories {
+            if cat === category {
+                ++index
+                return index
             }
         }
+        
+        return -1
     }
     
-    func cellTypeAtIndex(index: Int) -> ItemViewCellType?
+    func addCategory(name: String, displayHeader: Bool, updateIndices: Bool) -> Category
     {
-        if index >= 0 && index < cellTypeArray.count {
-            return cellTypeArray[index]
+        let category = Category(name: name, displayHeader: displayHeader)
+        categories.append(category)
+        
+        if updateIndices {
+            self.updateIndices()
+        }
+        
+        return category
+    }
+    
+    func addItem(category: Category, name: String, state: ItemState, updateIndices: Bool) -> Item?
+    {
+        let indexForCat = indexForCategory(category)
+        var item: Item? = nil
+        
+        if indexForCat > -1 {
+            item = Item(name: name, state: state)
+            category.items.append(item!)
         } else {
-            return nil
-        }
-    }
-    
-    func categoryForAddItemButtonAtRowIndex(addCellRowIndex: Int) -> Category
-    {
-        var rowCount = 0
-        var categoryIndex = -1
-        
-        for row in cellTypeArray {
-            if row == ItemViewCellType.Category {
-                ++categoryIndex
-            }
-            if rowCount == addCellRowIndex {
-                break
-            }
-            ++rowCount
+            print("ERROR: addItem given invalid category!")
         }
         
-        // special check for non-category lists
-        if categoryIndex == -1 {
-            categoryIndex = 0
+        if (updateIndices) {
+            self.updateIndices()
         }
         
-        return categories[categoryIndex]
+        return item
     }
     
-    
-    /// Return the number of categories with non-empty names.
-    func categoryCount() -> Int
-    {
-        return self.categories.count
-    }
-    
-    /// Return the number of categories displaying the header.
-    func categoryDisplayCount() -> Int
-    {
-        var count: Int = 0
-        
-        for category in categories {
-            if category.displayHeader {
-                ++count
-            }
-        }
-        
-        return count
-    }
-    
-    /// Returns total item count.
-    func itemCount() -> Int
-    {
-        var count: Int = 0
-        
-        for category in categories {
-            count += category.items.count
-        }
-        
-        return count
-    }
-    
-    /// Returns the total count of all rows to display, including addCell rows (one for each expanded category).
-    func totalDisplayCount() -> Int
-    {
-        var count: Int = 0
-        
-        for category in categories
-        {
-            // add the category if displayed
-            if category.displayHeader {
-                ++count
-            }
-            
-            // add the items in this category if expanded
-            if category.expanded
-            {
-                for item in category.items
-                {
-                    if showCompletedItems || !item.completed {
-                        ++count     // for the Items cells
-                    }
-                }
-                count += 1          // for the AddItem cell
-            }
-        }
-        
-        return count
-    }
-    
-    /// Return the title of the cell at the index path.
-    func cellTitle(indexPath: NSIndexPath) -> String?
-    {
-        let object = objectAtIndexPath(indexPath)
-        
-        if let obj = object {
-            if objectIsItem(obj) {
-                return (obj as! Item).name
-            } else {
-                return (obj as! Category).name
-            }
-        }
-        
-        return ""
-    }
-    
-    /// Updates the name of the object at the index path.
-    func updateObjectNameAtIndexPath(indexPath: NSIndexPath, withName: String)
-    {
-        let obj = objectAtIndexPath(indexPath)
-        
-        if objectIsItem(obj) {
-            (obj as! Item).name = withName
-        } else {
-            (obj as! Category).name = withName
-        }
-    }
-    
-    /// Returns true if the cell at an index path is an item.
-    func cellIsItem(indexPath: NSIndexPath) -> Bool
-    {
-        // returns true if path points to an item, false for categories
-        let object = objectAtIndexPath(indexPath)
-        
-        if object is Item {
-            return true
-        }
-        
-        return false
-    }
-    
-    /// Returns true if the cell at an index path is a category.
-    func cellIsCategory(indexPath: NSIndexPath) -> Bool
-    {
-        // returns true if path points to an item, false for categories
-        let object = objectAtIndexPath(indexPath)
-        
-        if object is Category {
-            return true
-        }
-        
-        return false
-    }
-    
-    /// Returns true if the object is an item.
-    func objectIsItem(object: AnyObject?) -> Bool
-    {
-        // returns true if object is an item, false for categories
-        if object is Item {
-            return true
-        }
-        
-        return false
-    }
-    
-    /// Returns an array of index paths of the category and displayed items for the category at the given path.
-    func getPathsForCategoryAtPath(indexPath: NSIndexPath) -> [NSIndexPath]
-    {
-        var catPaths = [NSIndexPath]()                          // holds array of display paths in category
-        //let catDisplayPath = displayPathFor
-        let category = self.categoryForItemAtIndex(indexPath)
-        var row = indexPath.row
-        
-        // add the category path
-        catPaths.append(indexPath)
-        
-        // add the paths of all items in the category and its AddItem cell
-        if let category = category {
-            if category.expanded
-            {
-                for item in category.items
-                {
-                    ++row
-                    if showCompletedItems || !item.completed {
-                        catPaths.append(NSIndexPath(forRow: row, inSection: 0))
-                    }
-                }
-                catPaths.append(NSIndexPath(forRow: ++row, inSection: 0))
-            }
-        }
-        
-        return catPaths
-    }
+///////////////////////////////////////////////////////
+//
+//  MARK: New remove and insert methods for List objects
+//
+///////////////////////////////////////////////////////
     
     /// Will remove the item at indexPath.
     /// If the path is to a category, will remove the entire category with items.
     /// Returns an array with the display index paths of any removed rows.
-    func removeItemAtIndexPath(indexPath: NSIndexPath, preserveCategories: Bool) -> [NSIndexPath]
+    func removeItemAtIndexPath(indexPath: NSIndexPath, preserveCategories: Bool, updateIndices: Bool) -> [NSIndexPath]
     {
-        let itemIndices = indicesForObjectAtIndexPath(indexPath)
         var removedPaths = [NSIndexPath]()
+        let obj = objectForIndexPath(indexPath)
         
-        print("remove: indicesForObjectAtIndexPath cat \(itemIndices.categoryIndex) item \(itemIndices.itemIndex)")
-        
-        if itemIndices.categoryIndex != nil && itemIndices.itemIndex != nil {
-            // remove the item from the category
-            self.categories[itemIndices.categoryIndex!].items.removeAtIndex(itemIndices.itemIndex!)
-            removedPaths.append(indexPath)
-        } else if itemIndices.categoryIndex != nil && itemIndices.itemIndex == nil {
-            if preserveCategories {
-                // remove the first item in this category
-                self.categories[itemIndices.categoryIndex!].items.removeAtIndex(0)
+        if let obj = obj
+        {
+            let catIndex = obj.categoryIndex
+            let itemIndex = obj.itemIndex - 1       // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
+            
+            print("remove: indicesForObjectAtIndexPath cat \(catIndex) item \(itemIndex) name: \(obj.name)")
+            
+            if itemIndex >= 0 {
+                // remove the item from the category
+                self.categories[catIndex].items.removeAtIndex(itemIndex)
                 removedPaths.append(indexPath)
             } else {
-                // remove an entire category and it's items
-                removedPaths = getPathsForCategoryAtPath(indexPath)
-                self.categories.removeAtIndex(itemIndices.categoryIndex!)
+                if preserveCategories {
+                    // remove the first item in this category
+                    self.categories[catIndex].items.removeAtIndex(0)
+                    removedPaths.append(indexPath)
+                } else {
+                    // remove an entire category and it's items
+                    removedPaths = displayIndexPathsForCategory(indexPath)
+                    self.categories.removeAtIndex(catIndex)
+                }
             }
-        } else {
-            print("ERROR: List.removeItemAtIndexPath got a nil category or item index!")
         }
         
-        updateCellTypeArray()
+        if updateIndices {
+            self.updateIndices()
+        }
         
         return removedPaths
     }
     
     /// Will insert the item at the indexPath.
     /// If the path is to a category, then will insert at beginning or end of category depending on move direction.
-    func insertItemAtIndexPath(item: Item, indexPath: NSIndexPath, atPosition: InsertPosition)
+    func insertItemAtIndexPath(item: Item, indexPath: NSIndexPath, atPosition: InsertPosition, updateIndices: Bool)
     {
-        let itemIndices = indicesForObjectAtIndexPath(indexPath)
-        print("insert: indicesForObjectAtIndexPath cat \(itemIndices.categoryIndex) item \(itemIndices.itemIndex)")
-        
+        let tag = tagForIndexPath(indexPath)
+        let catIndex = tag.catIdx
+        let itemIndex = tag.itmIdx
+    
         switch atPosition {
         case .Beginning:
-            self.categories[itemIndices.categoryIndex!].items.insert(item, atIndex: 0)
+            categories[catIndex].items.insert(item, atIndex: 0)
         case .Middle:
-            if itemIndices.itemIndex != nil {
-                self.categories[itemIndices.categoryIndex!].items.insert(item, atIndex: itemIndices.itemIndex!)
+            if itemIndex > 0 {
+                categories[catIndex].items.insert(item, atIndex: itemIndex - 1)     // -1 converts from row tag to category item index
             } else {
-                // if itemIndex is nil then we are moving down past the last item in the category, so just decrement the category and append
-                if itemIndices.categoryIndex != nil {
-                    self.categories[itemIndices.categoryIndex! - 1].items.append(item)
+                // if itemIndex is 0 then we are moving down past the last item in the category, so just decrement the category and append
+                if catIndex > 0 {
+                    categories[catIndex - 1].items.append(item)
                 } else {
                     // special case for moving past end of the list, append to the end of the last category
-                    self.categories[categories.count-1].items.append(item)
+                    categories[categories.count-1].items.append(item)
                 }
             }
         case .End:
-            if itemIndices.categoryIndex != nil {
-                self.categories[itemIndices.categoryIndex!].items.append(item)
+            if catIndex >= 0 {
+                categories[catIndex].items.append(item)
             } else {
                 print("ALERT! - insertItemAtIndexPath - .End with nil categoryIndex...")
             }
         }
         
-        updateCellTypeArray()
+        if updateIndices {
+            self.updateIndices()
+        }
     }
     
     /// Removed the category (and associated items) at the given index.
     func removeCatetoryAtIndex(sourceCatIndex: Int)
     {
-        if sourceCatIndex < self.categories.count {
-            self.categories.removeAtIndex(sourceCatIndex)
+        if sourceCatIndex < self.categories.count
+        {
+            categories.removeAtIndex(sourceCatIndex)
         }
         
-        updateCellTypeArray()
+        updateIndices()
     }
     
     /// Inserts the given category at the given index.
@@ -332,260 +205,462 @@ class List
             self.categories.insert(category, atIndex: atIndex)
         }
         
-        updateCellTypeArray()
+        updateIndices()
     }
     
-    /// Returns the data indices (cat and item) for the given display index path.
-    func indicesForObjectAtIndexPath(indexPath: NSIndexPath) -> (categoryIndex: Int?, itemIndex: Int?)
+
+///////////////////////////////////////////////////////
+//
+//  MARK: New reference methods for List objects
+//
+///////////////////////////////////////////////////////
+    
+    /// Updates the indices for all objects in the list.
+    func updateIndices()
     {
-        var index: Int = -1
-        var catIndex: Int = -1
+        var i = -1
+        for cat in categories {
+            cat.updateIndices(++i)
+        }
+    }
+    
+    /// Returns the total number of rows to display in the ItemVC
+    func totalDisplayCount() -> Int
+    {
+        var count = 0
         
-        for category in categories
-        {
-            ++index
-            ++catIndex
+        for category in categories {
             if category.displayHeader {
-                if index == indexPath.row {
-                    // obj is a category, so item is nil
-                    //print("indicesForObjectAtIndexPath cat \(catIndex) item (nil)")
-                    return (catIndex, nil)
-                }
-            } else {
-                // maps to a non-display category, so return indices to the first item in the category
-                return (catIndex, indexPath.row)
+                ++count
             }
             
-            // only count items in in expanded categories
-            if category.expanded
-            {
-                var itemIndex: Int = -1
-                
-                // expanded category
-                for item in category.items
-                {
-                    if showCompletedItems || !item.completed
-                    {
-                        //print(item.name)
-                        ++index
-                        ++itemIndex
-                        if index == indexPath.row {
-                            // obj is an item
-                            //print("indicesForObjectAtIndexPath cat \(catIndex) item \(itemIndex)")
-                            return (catIndex, itemIndex)
-                        }
+            if category.expanded {
+                for item in category.items {
+                    if isDisplayedItem(item) {
+                        ++count
                     }
                 }
-                
-                // check the addItem row at the end of each category
-                ++index
-                if index == indexPath.row {
-                    return (catIndex, category.items.count)
-                }
-            } else {
-                // collapsed category
-                if index == indexPath.row {
-                    // obj is a collapsed category
-                    //print("indicesForObjectAtIndexPath cat \(catIndex) item (nil)")
-                    return (catIndex, nil)
-                }
+                ++count     // for AddItem cell
             }
         }
         
-        // points to a cell after end of last cell
-        //print("indicesForObjectAtIndexPath cat (nil) item (nil)")
-        return (nil, nil)
+        return count
     }
     
-    /// Returns the category (including the dummy category if only one category) for the given item.
-    func categoryForItem(givenItem: Item) -> Category?
+    /// Returns the Category with the given tag.
+    func categoryForTag(tag: Int) -> Category?
     {
-        for category in categories
+        let tag = Tag.indicesFromTag(tag)
+        
+        if tag.catIdx >= 0 && tag.catIdx < categories.count {
+            return categories[tag.catIdx]
+        }
+        
+        print("ERROR: categoryForTag given invalid tag! \(tag)")
+        return nil
+    }
+    
+    /// Returns the Item with the given tag.
+    func itemForTag(tag: Int) -> Item?
+    {
+        let tag = Tag.indicesFromTag(tag)
+        
+        if tag.catIdx >= 0 && tag.catIdx < categories.count
         {
-            for item in category.items {
-                if item === givenItem {
-                    return category
-                }
+            let category = categories[tag.catIdx]
+            if tag.itmIdx > 0 && tag.itmIdx <= category.items.count {
+                return category.items[tag.itmIdx - 1]       // -1 converts from row tag to category item index
             }
+        }
+        
+        print("ERROR: itemForTag given invalid tag!")
+        return nil
+    }
+    
+    /// Returns the object (Category or Item) with the given tag.
+    func objectForTag(tag: Int) -> ListObj?
+    {
+        // get indices from tag
+        let indices = Tag.indicesFromTag(tag)
+        var obj: ListObj? = nil
+        
+        if indices.itmIdx == 0 {
+            obj = categoryForTag(tag)
+        } else {
+            obj = itemForTag(tag)
+        }
+        
+        if obj == nil {
+            print("ERROR: objectForTag given invalid tag!")
+        }
+        
+        return obj
+    }
+    
+    /// Returns the Category for the given Item.
+    func categoryForItem(item: Item) -> Category?
+    {
+        if item.categoryIndex >= 0 && item.categoryIndex < categories.count {
+            return categories[item.categoryIndex]
+        }
+        
+        print("ERROR: categoryForItem - Item has an invalid category index!")
+        return nil
+    }
+    
+    /// Returns a Category for the object at the given index path.
+    func categoryForIndexPath(indexPath: NSIndexPath) -> Category?
+    {
+        let obj = objectForIndexPath(indexPath)
+        
+        if obj is Category {
+            return (obj as! Category)
         }
         
         return nil
     }
     
-    /// Returns the path of the enclosing category for the given item.
-    func categoryPathForItemPath(itemPath: NSIndexPath) -> NSIndexPath?
+    /// Returns an Item for the object at the given index path.
+    func itemForIndexPath(indexPath: NSIndexPath) -> Item?
     {
-        let itemAtPath = self.objectAtIndexPath(itemPath)
-        var index = -1
-        var catPath: NSIndexPath? = nil
+        let obj = objectForIndexPath(indexPath)
         
-        for category in categories {
-            catPath = NSIndexPath(forRow: ++index, inSection: 0)
-            
-            if category === itemAtPath {
-                return catPath
-            }
-            
-            for item in category.items {
-                ++index
-                if item === itemAtPath {
-                    return catPath
-                }
-            }
-            
-            // skip over the addItem row at the end of each category
-            ++index
+        if obj is Item {
+            return (obj as! Item)
         }
         
-        return catPath
+        return nil
     }
     
-    /// Returns the category (including the dummy category if only one category) for the item at the given index.
-    func categoryForItemAtIndex(indexPath: NSIndexPath) -> Category?
+    /// Returns the object for the given indexPath.
+    func objectForIndexPath(indexPath: NSIndexPath) -> ListObj?
     {
-        var index: Int = -1
+        let row = indexPath.row
+        var index = -1
         
-        for category in categories
-        {
-            ++index
-            if index == indexPath.row {
+        for category in categories {
+            if category.displayHeader {
+                ++index
+            }
+            
+            if index == row {
                 return category
             }
             
-            if category.expanded
-            {
-                // check each item in the category
-                for item in category.items
-                {
-                    if showCompletedItems || !item.completed
-                    {
+            if category.expanded {
+                for item in category.items {
+                    if isDisplayedItem(item) {
                         ++index
-                        if index == indexPath.row {
-                            return category
-                        }
-                    }
-                }
-                
-                // check the addItem row at the end of each category
-                ++index
-                if index == indexPath.row {
-                    return category
-                }
-            }
-        }
-
-        return nil
-    }
-    
-    /// Returns the object at the given index path.
-    func objectAtIndexPath(indexPath: NSIndexPath) -> AnyObject?
-    {
-        // returns the object (Category or Item) at the given index path
-        // also, will skip a category with an empty name
-        // and will skip items in collapsed categories
-        // returns nil if an AddItem row
-        var index: Int = -1
-        
-        for category in categories
-        {
-            if category.displayHeader {
-                ++index
-                if index == indexPath.row {
-                    return category
-                }
-            }
-            
-            // we only look at objects that are displayed
-            if category.expanded
-            {
-                // check each item
-                for item in category.items
-                {
-                    if showCompletedItems || !item.completed
-                    {
-                        ++index
-                        if index == indexPath.row {
+                        if index == row {
                             return item
                         }
                     }
                 }
-                
-                // check the AddItem row at the end of each category
                 ++index
-                if index == indexPath.row {
-                    return nil
+                if index == row {
+                    return category.addItem
                 }
             }
+        }
+        
+        print("ERROR: objectForIndexPath given invalid indexPath!")
+        return nil
+    }
+    
+    /// Returns a display indexPath for a given tag.  The index path is calculated from the current category status plus ItemVC view status (show/hide status of completed/inactive items).
+    func displayIndexPathForTag(tag: Int) -> NSIndexPath?
+    {
+        // get object from tag
+        let obj = objectForTag(tag)
+        
+        // return indexPathForObj
+        if let obj = obj {
+            return displayIndexPathForObj(obj).indexPath
+        }
+        
+        print("ERROR: displayIndexPathForTag given invalid tag!")
+        return nil
+    }
+    
+    /// Returns the current index path for the given object.  The index path is calculated from the current category status plus ItemVC view status (show/hide status of completed/inactive items).
+    func displayIndexPathForObj(obj: ListObj) -> (indexPath: NSIndexPath?, isItem: Bool)
+    {
+        var index = -1
+        
+        for category in categories {
+            if category.displayHeader {
+                ++index
+            }
             
+            if category === obj {
+                return (NSIndexPath(forRow: index, inSection: 0), false)
+            }
+            
+            if category.expanded {
+                for item in category.items {
+                    if isDisplayedItem(item) {
+                        ++index
+                        if item === obj {
+                            return (NSIndexPath(forRow: index, inSection: 0), true)
+                        }
+                    }
+                }
+                // for AddItem cell
+                ++index
+                if category.addItem === obj {
+                    return (NSIndexPath(forRow: index, inSection: 0), true)
+                }
+            }
+        }
+        
+        print("ERROR: displayIndexPathForObj given an invalid object!")
+        return (nil, false)
+    }
+    
+    /// Returns a display indexPath to the given Category.
+    func displayIndexPathForCategory(category: Category) -> NSIndexPath?
+    {
+        let result = displayIndexPathForObj(category)
+        
+        if result.isItem == false {
+            return result.indexPath
+        }
+        
+        print("ERROR: displayIndexPathForCategory given an invalid object as a Category!")
+        return nil
+    }
+    
+    /// Returns a display indexPath to the given Item.
+    func displayIndexPathForItem(item: Item) -> NSIndexPath?
+    {
+        let result = displayIndexPathForObj(item)
+        
+        if result.isItem {
+            return result.indexPath
+        }
+        
+        print("ERROR: displayIndexPathForCategory given an invalid object as an Item!")
+        return nil
+    }
+    
+    /// Returns a display indexPath for the AddItem cell in this category.
+    func displayIndexPathForAddItemInCategory(category: Category) -> NSIndexPath?
+    {
+        var lastItemInCat: ListObj? = nil
+        
+        if category.items.count > 0 {
+            lastItemInCat = category.items[category.items.count-1]
+        } else {
+            lastItemInCat = category
+        }
+        
+        if let lastItem = lastItemInCat
+        {
+            let lastItemIndexPath: NSIndexPath? = displayIndexPathForObj(lastItem).indexPath
+            
+            if let lastItemIndexPath = lastItemIndexPath {
+                return NSIndexPath(forRow: lastItemIndexPath.row + 1, inSection: 0)
+            }
+        } else {
+           print("ERROR: displayIndexPathForAddItemInCategory given an invalid category!")
         }
         
         return nil
     }
     
-    /// Returns the display index path for the given Item.
-    func indexPathForItem(item: Item) -> NSIndexPath?
+    /// Returns the index paths for a Category at given index path, all of its Items and the AddItem row.
+    func displayIndexPathsForCategory(indexPath: NSIndexPath) -> [NSIndexPath]
     {
-        var index = -1
+        let category = categoryForIndexPath(indexPath)
+        
+        if category != nil {
+            return displayIndexPathsForCategory(category!)
+        }
+        
+        return [NSIndexPath]()
+    }
+    
+    /// Returns an array of display index paths for a category that is being expanded or collapsed.
+    func displayIndexPathsForCategory(category: Category) -> [NSIndexPath]
+    {
+        var indexPaths = [NSIndexPath]()
+        let catIndexPath = displayIndexPathForCategory(category)
+        
+        if let indexPath = catIndexPath
+        {
+            var pos = indexPath.row
+            
+            for item in category.items {
+                if isDisplayedItem(item) {
+                    indexPaths.append(NSIndexPath(forRow: ++pos, inSection: 0))
+                }
+            }
+            
+            // one more for the addItem cell
+            indexPaths.append(NSIndexPath(forRow: ++pos, inSection: 0))
+        } else {
+            print("ERROR: displayIndexPathsForCategory was given an invalid index path!")
+        }
+        
+        return indexPaths
+    }
+    
+    /*
+    /// Returns an array of index paths for a category that is being collapsed.
+    func displayIndexPathsForCollapsingCategory(category: Category) -> [NSIndexPath]
+    {
+        var indexPaths = [NSIndexPath]()
+        let catIndexPath = displayIndexPathForCategory(category)
+        
+        if let indexPath = catIndexPath
+        {
+            var insertPos = indexPath.row
+            
+            for item in category.items {
+                if isDisplayedItem(item) {
+                    indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
+                }
+            }
+            
+            // one more for the addItem cell
+            indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
+        }
+        
+        return indexPaths
+    }
+    */
+    
+    /// Returns index paths for completed rows.
+    func indexPathsForCompletedRows() -> [NSIndexPath]
+    {
+        var indexPaths = [NSIndexPath]()
+        var pos = -1
         
         for category in categories
         {
             if category.displayHeader {
-                ++index
+                ++pos
             }
             
             if category.expanded
             {
-                for catItem in category.items
+                for item in category.items
                 {
-                    if showCompletedItems || !catItem.completed
-                    {
-                        ++index
-                        if catItem === item {
-                            return NSIndexPath(forRow: index, inSection: 0)
-                        }
+                    if item.state == ItemState.Complete {
+                        indexPaths.append(NSIndexPath(forRow: ++pos, inSection: 0))
+                    } else {
+                        ++pos
                     }
                 }
-                ++index     // increment for the AddItem cell
+                ++pos     // for the AddItem cell
             }
         }
         
-        return nil
+        return indexPaths
     }
     
-    func indexPathForCategory(category: Category) -> NSIndexPath?
+    /// Returns the title of the object at the given index path.
+    func titleForObjectAtIndexPath(indexPath: NSIndexPath) -> String?
     {
-        var index = -1
+        let obj = objectForIndexPath(indexPath)
         
-        for cat in categories
-        {
-            if category.displayHeader {
-                ++index
-                if cat === category {
-                    return NSIndexPath(forRow: index, inSection: 0)
-                }
-            }
-            
-            if cat.expanded
-            {
-                for item in cat.items
-                {
-                    if showCompletedItems || !item.completed
-                    {
-                        index += cat.items.count        // increment for the items in the category
-                        ++index                         // increment for the AddItem cell
-                    }
-                }
-            }
+        if obj != nil {
+            return obj!.name
         }
         
-        return nil
+        print("ERROR: titleForObjectAtIndexPath given an invalid index path!")
+        return ""
+    }
+    
+    /// Updates the category or item object's name.
+    func updateObjNameAtTag(tag: Int, name: String)
+    {
+        let obj = objectForTag(tag)
+        
+        if obj != nil {
+            obj!.name = name
+        }
+    }
+    
+    /// Determines if an Item should be displayed
+    func isDisplayedItem(item: Item) -> Bool
+    {
+        return (item.state == .Incomplete) ||
+               (item.state == .Complete && showCompletedItems) ||
+               (item.state == .Inactive && showInactiveItems)
     }
     
     /// Returns true if the given path is the last row displayed.
-    func indexPathIsLastRowDisplayed(indexPath: NSIndexPath) -> Bool {
-        return indexPath.row == cellTypeArray.count - 1
+    func indexPathIsLastRowDisplayed(indexPath: NSIndexPath) -> Bool
+    {
+        var lastObjRow: Int? = nil
+        let lastCategory = categories[categories.count-1]
+        let itemCount = lastCategory.items.count
+        
+        if itemCount > 0 {
+            let lastItem = lastCategory.items[itemCount-1]
+            lastObjRow = (displayIndexPathForObj(lastItem).indexPath?.row)! + 1
+        } else {
+            lastObjRow = (displayIndexPathForObj(lastCategory).indexPath?.row)! + 1
+        }
+        
+        return lastObjRow == indexPath.row
     }
     
+    /// Returns the catagory and item indices for the given path.
+    func tagForIndexPath(indexPath: NSIndexPath) -> Tag
+    {
+        let row = indexPath.row
+        var rowIndex = -1
+        var catIndex = -1
+        
+        for category in categories
+        {
+            var itemIndex = 0
+            
+            if category.displayHeader {
+                ++catIndex
+                ++rowIndex
+                if rowIndex == row {
+                    return Tag(catIdx: catIndex, itmIdx: itemIndex)     // categories are always itemIndex 0
+                }
+            }
+            
+            if category.expanded
+            {
+                for item in category.items
+                {
+                    if isDisplayedItem(item) {
+                        ++itemIndex
+                        ++rowIndex
+                        if rowIndex == row {
+                            return Tag(catIdx: catIndex, itmIdx: itemIndex)
+                        }
+                    }
+                }
+                // AddItem row
+                ++itemIndex
+                ++rowIndex
+                if rowIndex == row {
+                    return Tag(catIdx: catIndex, itmIdx: itemIndex)
+                }
+            }
+        }
+        
+        return Tag()
+    }
+    
+    /// Return the int tag for the object at the given index path.
+    func tagValueForIndexPath(indexPath: NSIndexPath) -> Int
+    {
+        let obj = objectForIndexPath(indexPath)
+        
+        if obj != nil {
+            return obj!.tag()
+        }
+        
+        return -1
+    }
 }
 
 ////////////////////////////////////////////////////////////////
@@ -594,25 +669,67 @@ class List
 //
 ////////////////////////////////////////////////////////////////
 
-class Category
+class ListObj
 {
     var name: String
+    var categoryIndex: Int
+    var itemIndex: Int
+    
+    init(name: String)
+    {
+        self.name = name
+        self.categoryIndex = 0
+        self.itemIndex = 0
+    }
+    
+    func updateIndicesFromTag(tag: Int) {
+        let tag = Tag.indicesFromTag(tag)
+        categoryIndex = tag.catIdx
+        itemIndex = tag.itmIdx
+    }
+    
+    func tag() -> Int {
+        return Tag.tagFromIndices(categoryIndex, itmIdx: itemIndex)
+    }
+}
+
+class Category: ListObj
+{
     var items = [Item]()
+    var addItem = AddItem()
     var displayHeader: Bool
     var expanded: Bool = true {
         didSet {
-            //print("Category: \(name) expanded: \(expanded)")
+            
         }
     }
     
     // designated initializer for a Category
     init(name: String, displayHeader: Bool) {
-        self.name = name
         self.displayHeader = displayHeader
+        super.init(name: name)
+    }
+    
+    // updates the indices for all items in this category
+    func updateIndices(catIndex: Int)
+    {
+        self.categoryIndex = catIndex
+        
+        var i = 0
+        for item in items {
+            item.itemIndex = ++i
+            item.categoryIndex = catIndex
+        }
+        
+        addItem.categoryIndex = catIndex
+        addItem.itemIndex = ++i
     }
     
     // returns the number of completed items in a category
-    func itemsComplete() -> Int {var i=0; for item in items {if item.completed {++i}}; return i}
+    func itemsComplete() -> Int   {var i=0; for item in items {if item.state == ItemState.Complete   {++i}}; return i}
+    func itemsActive() -> Int     {var i=0; for item in items {if item.state != ItemState.Inactive   {++i}}; return i}
+    func itemsInactive() -> Int   {var i=0; for item in items {if item.state == ItemState.Inactive   {++i}}; return i}
+    func itemsIncomplete() -> Int {var i=0; for item in items {if item.state == ItemState.Incomplete {++i}}; return i}
 }
 
 ////////////////////////////////////////////////////////////////
@@ -621,16 +738,68 @@ class Category
 //
 ////////////////////////////////////////////////////////////////
 
-class Item
+class Item: ListObj
 {
-    var name: String
-    var completed: Bool
+    var state: ItemState
     
     // designated initializer for an Item
-    init(name: String, completed: Bool)
+    init(name: String, state: ItemState)
     {
-        self.name = name
-        self.completed = completed
+        self.state = state
+        super.init(name: name)
+    }
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - AddItem class
+//
+////////////////////////////////////////////////////////////////
+
+class AddItem: ListObj
+{
+    // designated initializer for an AddItem
+    init()
+    {
+        super.init(name: "add item")
+    }
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Tag struct
+//
+////////////////////////////////////////////////////////////////
+
+struct Tag
+{
+    var catIdx: Int
+    var itmIdx: Int
+    
+    init() {
+        self.catIdx = -1
+        self.itmIdx = -1
     }
     
+    init(catIdx: Int, itmIdx: Int) {
+        self.catIdx = catIdx
+        self.itmIdx = itmIdx
+    }
+    
+    func value() -> Int {
+        return Tag.tagFromIndices(self.catIdx, itmIdx: self.itmIdx)
+    }
+    
+    static func tagFromIndices(catIdx: Int, itmIdx: Int) -> Int
+    {
+        return catIdx * kItemIndexMax + itmIdx
+    }
+    
+    static func indicesFromTag(tag: Int) -> (catIdx: Int, itmIdx: Int)
+    {
+        let cIdx = tag / kItemIndexMax
+        return (cIdx, tag - (cIdx * kItemIndexMax))
+    }
 }
+
+

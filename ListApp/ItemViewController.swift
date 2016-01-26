@@ -53,11 +53,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var longPressActive = false
     var editingNewItemName = false
     var editingNewCategoryName = false
-    var itemsCompletedInHideCompletedItemsMode = [Item]()
+    //var itemsCompletedInHideCompletedItemsMode = [Item]()
     
     var list: List! {
         didSet (newList) {
-            list.showCompletedItems = self.showCompletedItems
             self.refreshItems()
         }
     }
@@ -69,7 +68,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             } else {
                 showHideCompletedButton.title = "show completed"
                 // need to clear the array when first hiding completed items
-                itemsCompletedInHideCompletedItemsMode.removeAll()
+                //itemsCompletedInHideCompletedItemsMode.removeAll()
             }
             
             if list != nil {
@@ -169,12 +168,14 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         // return the total number of rows in our item table view (categories + items)
         if let list = list {
-            var displayCount = list.totalDisplayCount()
+            let displayCount = list.totalDisplayCount()
 
+            /*
             if itemsCompletedInHideCompletedItemsMode.count > 0 {
                 print("tableView:numberOfRowsInSection itemsCompletedInHideCompletedItemsMode.count is > 0...!!!")
             }
             displayCount += itemsCompletedInHideCompletedItemsMode.count
+            */
             
             return displayCount
         } else {
@@ -184,18 +185,21 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
-        let cellType = list.cellTypeAtIndex(indexPath.row)
+        let obj = list.objectForIndexPath(indexPath)
+        let tag = obj != nil ? obj!.tag() : -1
         
-        if cellType == ItemViewCellType.Item {
+        if obj is Item {
             // item cell
             let cell = tableView.dequeueReusableCellWithIdentifier(itemCellID, forIndexPath: indexPath) as! ItemCell
+            let item = obj as! Item
+            let tag = item.tag()
             
             // Configure the cell...
             cell.itemName.userInteractionEnabled = false
             cell.itemName.delegate = self
             cell.itemName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
-            cell.itemName!.tag = indexPath.row
-            cell.contentView.tag = indexPath.row
+            cell.itemName!.tag = tag
+            cell.contentView.tag = tag
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
             let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
@@ -208,13 +212,20 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
             cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
 
-            // check switch
-            let item = list.objectAtIndexPath(indexPath) as! Item
-            cell.checkSwitch.setOn(item.completed, animated: false)
-            cell.checkSwitch.tag = indexPath.row
+            // set tempCheckButton state
+            switch item.state {
+            case ItemState.Inactive:
+                cell.tempCheckButton.setTitle("INACT", forState: .Normal)
+            case ItemState.Incomplete:
+                cell.tempCheckButton.setTitle("INCMP", forState: .Normal)
+            case ItemState.Complete:
+                cell.tempCheckButton.setTitle("COMPL", forState: .Normal)
+            }
+            
+            cell.tempCheckButton.tag = tag
             
             // item title
-            let title = list.cellTitle(indexPath)
+            let title = list.titleForObjectAtIndexPath(indexPath)
             if let cellTitle = title {
                 cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")    // for debugging
                 //cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                      // for production
@@ -231,16 +242,18 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             cell.delegate = self
             
             return cell
-        } else if cellType == ItemViewCellType.Category  {
+        } else if obj is Category  {
             // category cell
             let cell = tableView.dequeueReusableCellWithIdentifier(categoryCellID, forIndexPath: indexPath) as! CategoryCell
+            let category = obj as! Category
+            let tag = category.tag()
             
             // Configure the cell...
             cell.categoryName.userInteractionEnabled = false
             cell.categoryName.delegate = self
             cell.categoryName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
-            cell.categoryName!.tag = indexPath.row
-            cell.contentView.tag = indexPath.row
+            cell.categoryName!.tag = tag
+            cell.contentView.tag = tag
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
             let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
@@ -254,7 +267,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
             
             // category title
-            let title = list?.cellTitle(indexPath)
+            let title = list.titleForObjectAtIndexPath(indexPath)
             if let cellTitle = title {
                 cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.categoryName.tag)")
                 //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")
@@ -263,11 +276,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             }
             
             // catCountLabel
-            let category = list.categoryForItemAtIndex(indexPath)
-            if let category = category {
-                cell.catCountLabel.attributedText = categoryCountString(category)
-                cell.catCountLabel.textAlignment = NSTextAlignment.Right
-            }
+            cell.catCountLabel.attributedText = categoryCountString(category)
+            cell.catCountLabel.textAlignment = NSTextAlignment.Right
             
             // cell separator
             cell.preservesSuperviewLayoutMargins = false
@@ -278,9 +288,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             cell.delegate = self
             
             return cell
-         } else if cellType == ItemViewCellType.AddItem {
-            // set up Add row
-            // let cell = tableView.dequeueReusableCellWithIdentifier(addItemCellId, forIndexPath: indexPath)
+         } else {
+            // set up AddItem row
             let cell = tableView.dequeueReusableCellWithIdentifier(addItemCellId) as! AddItemCell
             
             // cell separator
@@ -289,25 +298,22 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             cell.layoutMargins = UIEdgeInsetsZero
             
             // set up cell tag for later id
-            cell.addItemButton.tag = indexPath.row
+            cell.addItemButton.tag = tag
             
             return cell
-        } else if cellType == nil {
-            print("ERROR: cell type is nil...")
         }
         
-        return UITableViewCell()
     }
     
     override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        if let list = list {
-            if list.cellIsItem(indexPath) {
-                return kItemViewCellHeight
-            } else {
-                return kItemViewCellHeight
-            }
+        let obj = list.objectForIndexPath(indexPath)
+        if obj is Item {
+            return kItemViewCellHeight
+        } else if obj is Category {
+            return kItemViewCellHeight
+        } else {
+            return kItemViewCellHeight
         }
-        return kItemViewCellHeight
     }
     
     /*
@@ -321,18 +327,18 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     }
     */
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        let title = list.cellTitle(indexPath)
-        //print("selection: cat \(indexPath.section)  item \(indexPath.row)  title \(title)")
-        let indices = list.indicesForObjectAtIndexPath(indexPath)
-        
-        print("selection: cat \(indices.categoryIndex)  item \(indices.itemIndex)  \(title)")
+    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
+    {
+        print("didSelectRowAtIndexPath...!!!")
     }
     
     // override to support conditional editing of the table view
     override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
-        return list.cellTypeAtIndex(indexPath.row) != ItemViewCellType.AddItem
+        let obj = list.objectForIndexPath(indexPath)
+        
+        return obj is Item || obj is Category
+        //return list.cellTypeAtIndex(indexPath.row) != ItemViewCellType.AddItem
     }
     
     // override to support editing the table view
@@ -340,16 +346,13 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         if editingStyle == .Delete {
             deleteItemIndexPath = indexPath
-            let deletedItem = list?.objectAtIndexPath(indexPath)
+            let deletedItem = list.objectForIndexPath(indexPath)
             
-            if list.objectIsItem(deletedItem) {
+            if deletedItem is Item {
                 confirmDelete((deletedItem as! Item).name, isItem: true)
-            } else {
+            } else if deletedItem is Category {
                 confirmDelete((deletedItem as! Category).name, isItem: false)
             }
-        }
-        else if editingStyle == .Insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
         }
     }
     
@@ -387,7 +390,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 // remove last item from category
                 list.categories[list.categories.count-1].items.removeLast()
                 self.tableView.reloadData()
-                list.updateCellTypeArray()
+                list.updateIndices()
             }
             editingNewItemName = false
         } else if editingNewCategoryName
@@ -397,7 +400,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 // remove last category from list
                 list.categories.removeLast()
                 self.tableView.reloadData()
-                list.updateCellTypeArray()
+                list.updateIndices()
             }
             editingNewCategoryName = false
         }
@@ -413,62 +416,57 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     func itemNameDidChange(textField: UITextField)
     {
         // update item name data with new value
-        let i = textField.tag
         let newName = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
-        let indexPath = NSIndexPath(forRow: i, inSection: 0)
-        
-        list?.updateObjectNameAtIndexPath(indexPath, withName: newName)
-        //navigationController?.navigationBar.hidden = true
-        //print(textField.text)
+        list.updateObjNameAtTag(textField.tag, name: newName)
     }
     
     @IBAction func addItemButtonTapped(sender: UIButton)
     {
         // create a new item and append to the category of the add button
-        //let newItem = Item(name: "new item: \(sender.tag)")
-        let newItem = Item(name: "", completed: false)
-        let category  = list.categoryForAddItemButtonAtRowIndex(sender.tag)
+        let category = list.categoryForTag(sender.tag)
+        var newItem: Item? = nil
         
-        category.items.append(newItem)
-        list.updateCellTypeArray()
+        if let category = category {
+            newItem = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true)
+        }
+        
+        list.updateIndices()
         self.tableView.reloadData()
         self.resetCellViewTags()
         
-        let newItemIndexPath = list.indexPathForItem(newItem)
-        
-        if let indexPath = newItemIndexPath {
-            //print("newIndexPath: \(indexPath.row)  sender.tag \(sender.tag)")
+        if let item = newItem {
+            let newItemIndexPath = list.displayIndexPathForItem(item)
             
-            // set up editing mode for item name
-            let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
-            
-            cell.itemName.userInteractionEnabled = true
-            cell.itemName.becomeFirstResponder()
-            editingNewItemName = true
-        } else {
-            print("ERROR: addItemButtonTapped - indexPathForItem returned a nil index path.")
+            if let indexPath = newItemIndexPath {
+                let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
+                
+                cell.itemName.userInteractionEnabled = true
+                cell.itemName.becomeFirstResponder()
+                editingNewItemName = true
+            }
         }
     }
-    
     
     @IBAction func addCategoryButtonTapped(sender: UIButton)
     {
         var newCategory: Category
         
         if list.categories[0].displayHeader == false {
+            // we will use the existing (hidden) category header
             newCategory = list.categories[0]
             newCategory.displayHeader = true
             newCatIndexPath = NSIndexPath(forRow: 0, inSection: 0)
         } else  {
-            newCategory = Category(name: "", displayHeader: true)
-            list.categories.append(newCategory)
-            newCatIndexPath = list.indexPathForCategory(newCategory)
+            // we need a new category
+            newCategory = list.addCategory("", displayHeader: true, updateIndices: true)
+            newCatIndexPath = list.displayIndexPathForCategory(newCategory)
         }
         
-        list.updateCellTypeArray()
+        list.updateIndices()
         self.tableView.reloadData()
         
-        if let indexPath = newCatIndexPath {
+        if let indexPath = newCatIndexPath
+        {
             // need to scroll the target cell into view so the tags can be updated
             if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false
             {
@@ -532,81 +530,54 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     /// Respond to a single tap (toggle expand/collapse state of category).
     func cellSingleTapAction(sender: UITapGestureRecognizer)
     {
-        let i = sender.view?.tag
-        let indexPath = NSIndexPath(forRow: i!, inSection: 0)
-        
-        if list.cellIsCategory(indexPath)
+        if sender.view != nil
         {
-            if !inEditMode {
-                let i = sender.view?.tag
-                let category = list.categoryForItemAtIndex(NSIndexPath(forRow: i!, inSection: 0))
-                
-                if let cat = category
+            let tag = sender.view!.tag
+            let obj = list.objectForTag(tag)
+            
+            if obj is Category
+            {
+                if !inEditMode
                 {
-                    var indexPaths = [NSIndexPath]()
+                    let category = obj as! Category
                     
-                    cat.expanded = !cat.expanded
-                    print("cellSingleTapAction was hit for category \(i) with name: \(cat.name)")
+                    category.expanded = !category.expanded
+                    print("cellSingleTapAction was hit for category '\(obj!.name)' with tag \(tag)")
+                    
+                    // get display index paths for this category
+                    let indexPaths = list.displayIndexPathsForCategory(category)    // includes AddItem cell path
                     
                     self.tableView.beginUpdates()
-                    
-                    if cat.expanded {
-                        // we are expanding a category
-                        var insertPos = indexPath.row
-                        
-                        for item in cat.items
-                        {
-                            if showCompletedItems || !item.completed {
-                                indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
-                            }
-                        }
-                        
-                        // one more for the addItem cell
-                        indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
-                        
-                        // now insert the expanded rows into the table view
-                        self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
+                    if category.expanded {
+                        // insert the expanded rows into the table view
+                        self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
                     } else {
-                        // we are collapsing a category
-                        var indexPaths = [NSIndexPath]()
-                        var index = indexPath.row
-                        
-                        for item in cat.items
-                        {
-                            if showCompletedItems || !item.completed || arrayContainsItem(itemsCompletedInHideCompletedItemsMode, item: item) {
-                                indexPaths.append(NSIndexPath(forRow: ++index, inSection: 0))
-                                
-                                // need to remove the item from itemsCompletedInHideCompletedItemsMode (if it was in the array)
-                                let i = indexOfItemInArray(itemsCompletedInHideCompletedItemsMode, item: item)
-                                if i > -1 {
-                                    itemsCompletedInHideCompletedItemsMode.removeAtIndex(i)
-                                }
-                            }
+                        // delete the collapsed rows from the table view
+                        self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
+                    }
+                    self.tableView.endUpdates()
+                    
+                    if category.expanded {
+                        // scroll the newly expanded header to the top so items can be seen
+                        let indexPath = list.displayIndexPathForCategory(category)
+                        if indexPath != nil {
+                            self.tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Top, animated: true)
                         }
-                        
-                        // one more for the addItem cell
-                        indexPaths.append(NSIndexPath(forRow: ++index, inSection: 0))
-                        
-                        // now delete the collapsed rows from the table view
-                        self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
                     }
                     
                     //need to update the cellTypeArray after collapse/expand event
-                    list.updateCellTypeArray()
+                    list.updateIndices()
                     
                     // this is needed so that operations that rely on view.tag (like this one!) will function correctly
                     self.resetCellViewTags()
-                    
-                    self.tableView.endUpdates()
-                    
-                    if cat.expanded {
-                        // scroll the newly expanded header to the top so items can be seen
-                        self.tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: UITableViewScrollPosition.Top, animated: true)
-                    }
+                } else {
+                    print("no toggle - inEditMode!")
                 }
-            } else {
-                print("no toggle - inEditMode!")
+            } else if obj is Item {
+                print("cellSingleTapAction on \(obj!.name)")
             }
+        } else {
+            print("ERROR: cellSingleTapAction received a nil sender.view!")
         }
     }
     
@@ -614,18 +585,21 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     func cellDoubleTapAction(sender: UITapGestureRecognizer)
     {
         if sender.view != nil {
-            let indexPath = NSIndexPath(forRow: sender.view!.tag, inSection: 0)
+            let obj = list.objectForTag(sender.view!.tag)
+            let pathResult = list.displayIndexPathForObj(obj!)
             
-            if list.cellIsItem(indexPath) {
-                let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
-                
-                cell.itemName.userInteractionEnabled = true
-                cell.itemName.becomeFirstResponder()
-            } else if list.cellIsCategory(indexPath) {
-                let cell = tableView.cellForRowAtIndexPath(indexPath) as! CategoryCell
-                
-                cell.categoryName.userInteractionEnabled = true
-                cell.categoryName.becomeFirstResponder()
+            if let indexPath = pathResult.indexPath {
+                if obj is Item {
+                    let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
+                    
+                    cell.itemName.userInteractionEnabled = true
+                    cell.itemName.becomeFirstResponder()
+                } else if obj is Category {
+                    let cell = tableView.cellForRowAtIndexPath(indexPath) as! CategoryCell
+                    
+                    cell.categoryName.userInteractionEnabled = true
+                    cell.categoryName.becomeFirstResponder()
+                }
             }
         }
     }
@@ -742,7 +716,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         let cell = tableView.cellForRowAtIndexPath(indexPath)!
         snapshot = snapshotFromView(cell)
         
-        let obj = list.objectAtIndexPath(sourceIndexPath!)
+        let obj = list.objectForIndexPath(indexPath)
         
         if obj is Item || obj is Category {
             var center = cell.center
@@ -816,38 +790,43 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         displayLink = nil
         scrollLoopCount = 0
         
-        // finalize list data with new location for sourceIndexObj
+        // finalize list data with new location for srcIndexObj
         if sourceIndexPath != nil
         {
             var center: CGPoint = snapshot!.center
             center.y = location.y
             snapshot?.center = center
             
-            // check if destination is different from source and valid
-            if indexPath != sourceIndexPath && indexPath != nil && list != nil
+            // check if destination is different from source and is valid
+            if indexPath != nil && indexPath != sourceIndexPath
             {
                 let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
-                var altIndexPath = indexPath!.row > 0 ? NSIndexPath(forRow: indexPath!.row - 1, inSection: 0) : indexPath!
-                let sourceDataObj = list.objectAtIndexPath(sourceIndexPath!)
-                var destDataObj  = moveDirection == .Up ? list.objectAtIndexPath(altIndexPath) : list.objectAtIndexPath(indexPath!)
-                let destCellType = moveDirection == .Up ? list.cellTypeAtIndex(altIndexPath.row) : list.cellTypeAtIndex(indexPath!.row)
+                let altIndexPath = indexPath!.row > 0 ? NSIndexPath(forRow: indexPath!.row - 1, inSection: 0) : indexPath!
+                let srcDataObj = list.objectForIndexPath(sourceIndexPath!)
+                //let destDataObj = moveDirection == .Down ? list.objectForIndexPath(indexPath!) : list.objectForIndexPath(altIndexPath)
+                var destDataObj = list.objectForIndexPath(indexPath!)
                 
                 // move cells, update the list data source, move items and categories differently
-                if sourceDataObj is Item
+                if srcDataObj is Item
                 {
                     // we are moving an item
                     tableView.beginUpdates()
                     
                     // remove the item from its original location
-                    list.removeItemAtIndexPath(sourceIndexPath!, preserveCategories: true)
+                    list.removeItemAtIndexPath(sourceIndexPath!, preserveCategories: true, updateIndices: true)
                     
                     // insert the item at its new location
-                    if destCellType == ItemViewCellType.Item
+                    if destDataObj is Item
                     {
-                        list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: indexPath!, atPosition: .Middle)
+                        list.insertItemAtIndexPath(srcDataObj as! Item, indexPath: indexPath!, atPosition: .Middle, updateIndices: true)
                     }
-                    else if destCellType == ItemViewCellType.Category || destCellType == ItemViewCellType.AddItem
+                    else if destDataObj is Category || destDataObj == nil
                     {
+                        // use altIndexPath if moving up to a category
+                        if moveDirection == .Up {
+                            destDataObj = list.objectForIndexPath(altIndexPath)
+                        }
+                        
                         // use dirModifier to jump over a dest category when moving up (down is handled by landing on the new category)
                         var position = (moveDirection == .Down) ? InsertPosition.Beginning : InsertPosition.End
                         
@@ -856,10 +835,9 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                             position = .Beginning
                         }
                         
-                        // fix for moving down to an AddItem cell (should get pushed to the next category)
-                        if destCellType == .AddItem {
-                            destDataObj = list.objectAtIndexPath(NSIndexPath(forRow: indexPath!.row, inSection: 0))
-                            altIndexPath = indexPath!
+                        // cell moved down past the last row, drop at end of last category
+                        if destDataObj == nil {
+                            position = .End
                         }
                         
                         // check if dest cat is collapsed
@@ -868,48 +846,51 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                             
                             if destCat.expanded == false {
                                 // need to alter path to land on the collapsed category
-                                list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .End)
+                                list.insertItemAtIndexPath(srcDataObj as! Item, indexPath: altIndexPath, atPosition: .End, updateIndices: true)
                                 
                                 // also need to remove the row from the table as it will no longer be displayed
-                                tableView.deleteRowsAtIndexPaths([altIndexPath], withRowAnimation: UITableViewRowAnimation.Fade)
+                                tableView.deleteRowsAtIndexPaths([altIndexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
                             } else {
-                                if destCat.expanded {
-                                    list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .Beginning)
-                                } else {
-                                    list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: .End)
-                                }
+                                list.insertItemAtIndexPath(srcDataObj as! Item, indexPath: altIndexPath, atPosition: position, updateIndices: true)
                             }
                         } else {
-                            list.insertItemAtIndexPath(sourceDataObj as! Item, indexPath: altIndexPath, atPosition: position)
+                            // moving to AddItem cell, so drop just above the AddItem cell
+                            list.insertItemAtIndexPath(srcDataObj as! Item, indexPath: altIndexPath, atPosition: position, updateIndices: true)
                         }
                     }
+                    
+                    //list.updateIndices()
                     
                     print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
                     
                     tableView.endUpdates()
                 }
-                else if sourceDataObj is Category
+                else if srcDataObj is Category
                 {
                     // we are moving a category
-                    let sourceCatIndex = list.indicesForObjectAtIndexPath(sourceIndexPath!).categoryIndex
-                    var destCatIndex = list.indicesForObjectAtIndexPath(indexPath!).categoryIndex
+                    let category = srcDataObj as! Category
+                    let srcCategoryIndex = category.categoryIndex
+                    var dstCategoryIndex = destDataObj!.categoryIndex
+                    
+                    //let srcCategoryIndex = list.indicesForObjectAtIndexPath(sourceIndexPath!).categoryIndex
+                    //var dstCategoryIndex = list.indicesForObjectAtIndexPath(indexPath!).categoryIndex
                     
                     // this is so dropping a category on an item will only move the category if the item is above the dest category when moving up
                     let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
 
-                    if moveDirection == .Up && destDataObj is Item && destCatIndex != nil {
-                        ++destCatIndex!
+                    if moveDirection == .Up && destDataObj is Item && dstCategoryIndex >= 0 {
+                        ++dstCategoryIndex
                     }
                     
-                    print("sourceCatIndex: \(sourceCatIndex)  destCatIndex: \(destCatIndex)")
+                    print("srcCategoryIndex: \(srcCategoryIndex)  dstCategoryIndex: \(dstCategoryIndex)")
                     
-                    if sourceCatIndex != nil && destCatIndex != nil {
+                    if srcCategoryIndex >= 0 && dstCategoryIndex >= 0 {
                         tableView.beginUpdates()
                         
                         // remove the category from its original location
-                        list.removeCatetoryAtIndex(sourceCatIndex!)
+                        list.removeCatetoryAtIndex(srcCategoryIndex)
                         
-                        list.insertCategory(sourceDataObj as! Category, atIndex: destCatIndex!)
+                        list.insertCategory(category, atIndex: dstCategoryIndex)
                         
                         tableView.endUpdates()
                     }
@@ -1018,16 +999,16 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             var removedPaths: [NSIndexPath]
             var preserveCat = true
             
-            if list.objectAtIndexPath(indexPath) is Category {
+            if list.objectForIndexPath(indexPath) is Category {
                 preserveCat = false
             }
             
-            removedPaths = currentList.removeItemAtIndexPath(indexPath, preserveCategories: preserveCat)
-            tableView.deleteRowsAtIndexPaths(removedPaths, withRowAnimation: .Fade)
+            removedPaths = currentList.removeItemAtIndexPath(indexPath, preserveCategories: preserveCat, updateIndices: true)
+            tableView.deleteRowsAtIndexPaths(removedPaths, withRowAnimation: .Automatic)
             deleteItemIndexPath = nil
             tableView.endUpdates()
             
-            tableView.reloadData()
+            resetCellViewTags()
         } else {
             print("ERROR: handleDeleteItem received a null indexPath or list!")
         }
@@ -1049,8 +1030,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         if list != nil {
             self.title = list!.name
-            tableView.reloadData()
             list.showCompletedItems = self.showCompletedItems
+            tableView.reloadData()
         } else {
             self.title = "<no selection>"
             tableView.reloadData()
@@ -1098,16 +1079,19 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             cell = tableView.cellForRowAtIndexPath(indexPath)
                 
             if cell != nil {
+                let tag = list.tagValueForIndexPath(indexPath)
+                
                 if cell is ItemCell {
-                    (cell as! ItemCell).itemName!.tag = indexPath.row
-                    (cell as! ItemCell).checkSwitch!.tag = indexPath.row
+                    let itemCell = cell as! ItemCell
+                    itemCell.itemName!.tag = tag
+                    itemCell.tempCheckButton!.tag = tag
                 } else if cell is CategoryCell {
-                    (cell as! CategoryCell).categoryName!.tag = indexPath.row
+                    (cell as! CategoryCell).categoryName!.tag = tag
                 } else if cell is AddItemCell {
-                    (cell as! AddItemCell).addItemButton.tag = indexPath.row
+                    (cell as! AddItemCell).addItemButton.tag = tag
                 }
                 
-                cell!.contentView.tag = indexPath.row
+                cell!.contentView.tag = tag
             }
             
         } while index < list.totalDisplayCount()
@@ -1197,124 +1181,77 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     /// Refreshes the ItemVC item rows with animation after a change to showHideCompleted
     func updateShowHideCompletedRows()
     {
-        var indexPaths = [NSIndexPath]()
+        let indexPaths = list.indexPathsForCompletedRows()
         
         if showCompletedItems == false
         {
-            // we are hiding the completed rows
-            var deletePos = -1
-            
-            for category in list.categories
-            {
-                if category.displayHeader {
-                    ++deletePos
-                }
-                
-                if category.expanded
-                {
-                    for item in category.items
-                    {
-                        if item.completed {
-                            indexPaths.append(NSIndexPath(forRow: ++deletePos, inSection: 0))
-                        } else {
-                            ++deletePos
-                        }
-                    }
-                    ++deletePos     // for the AddItem cell
-                }
-            }
-            
-            // remove the complete rows
+            // remove the completed rows
             self.tableView.beginUpdates()
-            self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
+            self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
             self.tableView.endUpdates()
         }
         else
         {
-            // we are showing the completed rows
-            var insertPos = -1
-            
-            for category in list.categories
-            {
-                if category.displayHeader {
-                    ++insertPos
-                }
-                
-                if category.expanded
-                {
-                    for item in category.items
-                    {
-                        // only add previously completed items (not newly completed as those are already being displayed)
-                        if item.completed && arrayContainsItem(itemsCompletedInHideCompletedItemsMode, item: item) == false {
-                            indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
-                        } else {
-                            ++insertPos
-                        }
-                    }
-                    ++insertPos     // for the AddItem cell
-                }
-            }
-            
-            itemsCompletedInHideCompletedItemsMode.removeAll()
-            
             // insert the complete rows
             self.tableView.beginUpdates()
-            self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Fade)
+            self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
             self.tableView.endUpdates()
         }
    
         // need to update the cellTypeArray after show/hide event
-        list.updateCellTypeArray()
+        list.updateIndices()
         
         // this is needed so that operations that rely on view.tag will function correctly
-        self.resetCellViewTags()
+        //self.resetCellViewTags()
         
         self.tableView.reloadData()
     }
     
-    // called when check switch is toggled
-    @IBAction func checkSwitchTapped(sender: UISwitch)
+    // called when the check button is tapped
+    @IBAction func checkButtonTapped(sender: UIButton)
     {
-        let i = sender.tag
-        let senderItem = list.objectAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
+        //let senderItem = list.objectForIndexPath(NSIndexPath(forRow: i, inSection: 0))
+        let senderItem = list.objectForTag(sender.tag)
+        var indexPath: NSIndexPath? = nil
         
         if senderItem is Item {
             let item = senderItem as! Item
-            item.completed = sender.on
-            print("item: \(item.name) is set to \(sender.on)")
             
-            // If we are currently hiding completed items and our item is changed to completed
-            // then add to itemsCompletedInHideCompletedItemsMode array so the item doesn't get re-added
-            // when later switching back to show completed mode.
-            if showCompletedItems == false
-            {
-                // get index of item in itemsCompletedInHideCompletedItemsMode array
-                let i = indexOfItemInArray(itemsCompletedInHideCompletedItemsMode, item: item)
-                
-                if item.completed && i == -1 {
-                    // add to array
-                    itemsCompletedInHideCompletedItemsMode.append(item)
-                }
-                else if !item.completed && i > -1 {
-                    // remove from array
-                    itemsCompletedInHideCompletedItemsMode.removeAtIndex(i)
+            // cycle through the item states
+            switch item.state {
+            case ItemState.Inactive:
+                item.state = ItemState.Incomplete
+                sender.setTitle("INCMP", forState: .Normal)
+            case ItemState.Incomplete:
+                indexPath = list.displayIndexPathForItem(item)
+                item.state = ItemState.Complete
+                sender.setTitle("COMPL", forState: .Normal)
+            case ItemState.Complete:
+                item.state = ItemState.Inactive
+                sender.setTitle("INACT", forState: .Normal)
+            }
+            
+            print("item: \(item.name) is set to \(sender.titleForState(.Normal))")
+            
+            // remove a newly completed row if we are hiding completed items
+            if showCompletedItems == false && item.state == ItemState.Complete {
+                if indexPath != nil {
+                    self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
                 }
             }
             
-            // need to update the counts in the cat cell
+            // need to update the counts in the cat cell count label
             if let category = list.categoryForItem(item) {
-                if let catIndexPath = list.indexPathForCategory(category) {
+                if let catIndexPath = list.displayIndexPathForCategory(category) {
                     if self.tableView.indexPathsForVisibleRows?.contains(catIndexPath) == true {
                         let catCell = tableView.cellForRowAtIndexPath(catIndexPath) as! CategoryCell
                         catCell.catCountLabel.attributedText = self.categoryCountString(category)
                     }
                 }
             }
-            
-            // update tags
-            resetCellViewTags()
+        } else {
+            print("ERROR: checkButtonTapped received an index path that points to a non-item object!")
         }
-        
     }
     
     // item array helper methods
