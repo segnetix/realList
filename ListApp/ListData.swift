@@ -109,6 +109,88 @@ class List
 //
 ///////////////////////////////////////////////////////
     
+    /// Will remove the given item from the list data.
+    func removeItem(item: Item, updateIndices: Bool) -> [NSIndexPath]
+    {
+        var removedPaths = [NSIndexPath]()
+        let indexPath = displayIndexPathForItem(item)
+        
+        if indexPath != nil {
+            let catIdx = item.categoryIndex
+            let itmIdx = item.itemIndex - 1         // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
+            self.categories[catIdx].items.removeAtIndex(itmIdx)
+            removedPaths.append(indexPath!)
+        }
+        
+        if updateIndices {
+            self.updateIndices()
+        }
+        
+        return removedPaths
+    }
+    
+    /// Will insert item after afterObj.
+    func insertItem(item: Item, afterObj: ListObj, updateIndices: Bool)
+    {
+        let catIdx = afterObj.categoryIndex
+        var itmIdx = afterObj.itemIndex - 1         // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
+        let category = categories[catIdx]
+        
+        // check for insert after category, in that case drop at the beginning of the category if expanded, end if collapsed
+        if itmIdx < 0 && category.expanded == false {
+            // collapsed
+            itmIdx = category.items.count
+        } else {
+            // expanded
+            itmIdx = 0
+        }
+        
+        category.items.insert(item, atIndex: itmIdx)
+        
+        if updateIndices {
+            self.updateIndices()
+        }
+    }
+    
+    /// Will insert item before beforeObj.
+    func insertItem(item: Item, beforeObj: ListObj, updateIndices: Bool) -> Category
+    {
+        var catIdx = beforeObj.categoryIndex
+        var itmIdx = beforeObj.itemIndex - 1         // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
+        
+        // check for insert before category, in that case switch to the end of the previous category
+        if catIdx > 0 && itmIdx < 0 {
+            --catIdx        // move to the previous category
+            itmIdx = categories[catIdx].items.count
+        }
+        
+        categories[catIdx].items.insert(item, atIndex: itmIdx)
+        
+        if updateIndices {
+            self.updateIndices()
+        }
+        
+        return categories[catIdx]
+    }
+    
+    /// Will insert item at the .
+    func insertItem(item: Item, inCategory: Category, atPosition: InsertPosition, updateIndices: Bool)
+    {
+        switch atPosition {
+        case .Beginning:
+            inCategory.items.insert(item, atIndex: 0)
+        case .End:
+            let itemCount = inCategory.items.count
+            inCategory.items.insert(item, atIndex: itemCount)
+        default:
+            break
+        }
+        
+        if updateIndices {
+            self.updateIndices()
+        }
+    }
+    
     /// Will remove the item at indexPath.
     /// If the path is to a category, will remove the entire category with items.
     /// Returns an array with the display index paths of any removed rows.
@@ -154,14 +236,14 @@ class List
     {
         let tag = tagForIndexPath(indexPath)
         let catIndex = tag.catIdx
-        let itemIndex = tag.itmIdx
+        let itemIndex = tag.itmIdx - 1          // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
     
         switch atPosition {
         case .Beginning:
             categories[catIndex].items.insert(item, atIndex: 0)
         case .Middle:
-            if itemIndex > 0 {
-                categories[catIndex].items.insert(item, atIndex: itemIndex - 1)     // -1 converts from row tag to category item index
+            if itemIndex >= 0 {
+                categories[catIndex].items.insert(item, atIndex: itemIndex)
             } else {
                 // if itemIndex is 0 then we are moving down past the last item in the category, so just decrement the category and append
                 if catIndex > 0 {
@@ -298,7 +380,7 @@ class List
     }
     
     /// Returns the Category for the given Item.
-    func categoryForItem(item: Item) -> Category?
+    func categoryForObj(item: ListObj) -> Category?
     {
         if item.categoryIndex >= 0 && item.categoryIndex < categories.count {
             return categories[item.categoryIndex]
@@ -505,31 +587,6 @@ class List
         return indexPaths
     }
     
-    /*
-    /// Returns an array of index paths for a category that is being collapsed.
-    func displayIndexPathsForCollapsingCategory(category: Category) -> [NSIndexPath]
-    {
-        var indexPaths = [NSIndexPath]()
-        let catIndexPath = displayIndexPathForCategory(category)
-        
-        if let indexPath = catIndexPath
-        {
-            var insertPos = indexPath.row
-            
-            for item in category.items {
-                if isDisplayedItem(item) {
-                    indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
-                }
-            }
-            
-            // one more for the addItem cell
-            indexPaths.append(NSIndexPath(forRow: ++insertPos, inSection: 0))
-        }
-        
-        return indexPaths
-    }
-    */
-    
     /// Returns index paths for completed rows.
     func indexPathsForCompletedRows() -> [NSIndexPath]
     {
@@ -595,13 +652,16 @@ class List
     {
         var lastObjRow: Int? = nil
         let lastCategory = categories[categories.count-1]
-        let itemCount = lastCategory.items.count
         
-        if itemCount > 0 {
-            let lastItem = lastCategory.items[itemCount-1]
-            lastObjRow = (displayIndexPathForObj(lastItem).indexPath?.row)! + 1
+        if lastCategory.expanded == false {
+            // category is collapsed, compare with category row
+            lastObjRow = displayIndexPathForCategory(lastCategory)?.row
         } else {
-            lastObjRow = (displayIndexPathForObj(lastCategory).indexPath?.row)! + 1
+            // category is expanded, get indexPath to AddItem row
+            let addItemIndexPath = displayIndexPathForObj(lastCategory.addItem)
+            if addItemIndexPath.indexPath != nil {
+                lastObjRow = addItemIndexPath.indexPath!.row
+            }
         }
         
         return lastObjRow == indexPath.row
@@ -617,9 +677,9 @@ class List
         for category in categories
         {
             var itemIndex = 0
+            ++catIndex
             
             if category.displayHeader {
-                ++catIndex
                 ++rowIndex
                 if rowIndex == row {
                     return Tag(catIdx: catIndex, itmIdx: itemIndex)     // categories are always itemIndex 0

@@ -53,7 +53,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var longPressActive = false
     var editingNewItemName = false
     var editingNewCategoryName = false
-    //var itemsCompletedInHideCompletedItemsMode = [Item]()
     
     var list: List! {
         didSet (newList) {
@@ -123,6 +122,16 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         // adjust tableView for iAD banner
         //let insets = UIEdgeInsets(top: 100, left: 20, bottom: 100, right: 20)
         //self.tableView.contentInset = insets
+        
+        // Setting button
+        //let settingsButton = UIButton()
+        let settingsButton: UIButton = UIButton(type: UIButtonType.Custom)
+        settingsButton.setImage(UIImage(named: "settings"), forState: .Normal)
+        settingsButton.frame = CGRectMake(0, 0, 30, 30)
+        settingsButton.addTarget(self, action: Selector("settingsButtonTapped"), forControlEvents: .TouchUpInside)
+        let rightBarButton = UIBarButtonItem()
+        rightBarButton.customView = settingsButton
+        self.navigationItem.rightBarButtonItem = rightBarButton
         
         // set up keyboard show/hide notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardDidShow", name: UIKeyboardDidShowNotification, object: nil)
@@ -310,9 +319,9 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         if obj is Item {
             return kItemViewCellHeight
         } else if obj is Category {
-            return kItemViewCellHeight
+            return kItemViewCellHeight - 8
         } else {
-            return kItemViewCellHeight
+            return kItemViewCellHeight - 8
         }
     }
     
@@ -801,6 +810,148 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             if indexPath != nil && indexPath != sourceIndexPath
             {
                 let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
+                let srcDataObj = list.objectForIndexPath(sourceIndexPath!)
+                let destDataObj = list.objectForIndexPath(indexPath!)
+                
+                // move cells, update the list data source, move items and categories differently
+                if srcDataObj is Item
+                {
+                    let srcItem = srcDataObj as! Item
+                    
+                    // we are moving an item
+                    tableView.beginUpdates()
+                    
+                    // remove the item from its original location
+                    list.removeItem(srcItem, updateIndices: true)
+                    print("removeItem... \(srcItem.name)")
+                    
+                    // insert the item at its new location
+                    if destDataObj is Item
+                    {
+                        let destItem = destDataObj as! Item
+                        if moveDirection == .Down {
+                            list.insertItem(srcItem, afterObj: destItem, updateIndices: true)
+                        } else {
+                            list.insertItem(srcItem, beforeObj: destItem, updateIndices: true)
+                        }
+                        print("insertItem... \(destItem.name)")
+                    }
+                    else if destDataObj is Category
+                    {
+                        var destCat = destDataObj as! Category
+                        
+                        if moveDirection == .Down {
+                            list.insertItem(srcItem, afterObj: destCat, updateIndices: true)
+                        } else {
+                            destCat = list.insertItem(srcItem, beforeObj: destCat, updateIndices: true)
+                        }
+                        
+                        // if moving to a collapsed category, then need to remove the row from the table as it will no longer be displayed
+                        if destCat.expanded == false {
+                            tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+                        }
+                    }
+                    else if destDataObj is AddItem
+                    {
+                        let addItem = destDataObj as! AddItem
+                        
+                        // moving to AddItem cell, so drop just above the AddItem cell
+                        let destCat = list.categoryForObj(addItem)
+                        
+                        if destCat != nil {
+                            list.insertItem(srcItem, inCategory: destCat!, atPosition: .End, updateIndices: true)
+                        }
+                    }
+                    
+                    print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
+                    
+                    tableView.endUpdates()
+                }
+                else if srcDataObj is Category
+                {
+                    // we are moving a category
+                    let srcCategory = srcDataObj as! Category
+                    let srcCategoryIndex = srcCategory.categoryIndex
+                    var dstCategoryIndex = destDataObj!.categoryIndex
+                    
+                    // this is so dropping a category on an item will only move the category if the item is above the dest category when moving up
+                    let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
+                    
+                    if moveDirection == .Up && destDataObj is Item && dstCategoryIndex >= 0 {
+                        ++dstCategoryIndex
+                    }
+                    
+                    print("srcCategoryIndex: \(srcCategoryIndex)  dstCategoryIndex: \(dstCategoryIndex)")
+                    
+                    if srcCategoryIndex >= 0 && dstCategoryIndex >= 0 {
+                        tableView.beginUpdates()
+                        
+                        // remove the category from its original location
+                        list.removeCatetoryAtIndex(srcCategoryIndex)
+                        
+                        list.insertCategory(srcCategory, atIndex: dstCategoryIndex)
+                        
+                        tableView.endUpdates()
+                    }
+                }
+            }
+        } else {
+            print("sourceIndexPath is nil...")
+        }
+        
+        // clean up any snapshot views or displayLink scrolls
+        var cell: UITableViewCell? = nil
+        
+        if indexPath != nil {
+            cell = tableView.cellForRowAtIndexPath(indexPath!)
+        }
+        
+        cell?.alpha = 0.0
+        UIView.animateWithDuration(0.25, animations: { () -> Void in
+            if cell != nil {
+                self.snapshot?.center = cell!.center
+            }
+            self.snapshot?.transform = CGAffineTransformIdentity
+            self.snapshot?.alpha = 0.0
+            
+            // undo fade out
+            cell?.alpha = 1.0
+            }, completion: { (finished: Bool) -> Void in
+                self.sourceIndexPath = nil
+                self.snapshot?.removeFromSuperview()
+                self.snapshot = nil
+                self.tableView.reloadData()
+        })
+        
+        self.prevLocation = nil
+        self.displayLink?.invalidate()
+        self.displayLink = nil
+
+    }
+    
+    /*
+    //////  ORIGINAL VERSION   ///////
+    /// Clean up after a long press gesture.
+    func longPressEnded(indexPath: NSIndexPath?, location: CGPoint)
+    {
+        longPressActive = false
+        
+        // cancel any scroll loop
+        displayLink?.invalidate()
+        displayLink = nil
+        scrollLoopCount = 0
+        
+        // finalize list data with new location for srcIndexObj
+        if sourceIndexPath != nil
+        {
+            var center: CGPoint = snapshot!.center
+            center.y = location.y
+            snapshot?.center = center
+            
+            // check if destination is different from source and is valid
+            if indexPath != nil && indexPath != sourceIndexPath
+            {
+                let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
                 let altIndexPath = indexPath!.row > 0 ? NSIndexPath(forRow: indexPath!.row - 1, inSection: 0) : indexPath!
                 let srcDataObj = list.objectForIndexPath(sourceIndexPath!)
                 //let destDataObj = moveDirection == .Down ? list.objectForIndexPath(indexPath!) : list.objectForIndexPath(altIndexPath)
@@ -809,18 +960,27 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 // move cells, update the list data source, move items and categories differently
                 if srcDataObj is Item
                 {
+                    let srcItem = srcDataObj as! Item
+                    
                     // we are moving an item
                     tableView.beginUpdates()
                     
                     // remove the item from its original location
-                    list.removeItemAtIndexPath(sourceIndexPath!, preserveCategories: true, updateIndices: true)
+                    //list.removeItemAtIndexPath(sourceIndexPath!, preserveCategories: true, updateIndices: true)
+                    list.removeItem(srcItem, updateIndices: true)
+                    print("removeItem... \(srcItem.name)")
                     
                     // insert the item at its new location
                     if destDataObj is Item
                     {
-                        list.insertItemAtIndexPath(srcDataObj as! Item, indexPath: indexPath!, atPosition: .Middle, updateIndices: true)
+                        let destItem = destDataObj as! Item
+                        
+                        // replace with insertItemAfterItem ???
+                        //list.insertItemAtIndexPath(srcItem, indexPath: indexPath!, atPosition: .Middle, updateIndices: true)
+                        list.insertItem(srcItem, afterObj: destItem, updateIndices: true)
+                        print("insertItem... \(destItem.name)")
                     }
-                    else if destDataObj is Category || destDataObj == nil
+                    else if destDataObj is Category || destDataObj is AddItem
                     {
                         // use altIndexPath if moving up to a category
                         if moveDirection == .Up {
@@ -836,8 +996,9 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                         }
                         
                         // cell moved down past the last row, drop at end of last category
-                        if destDataObj == nil {
+                        if destDataObj is AddItem {
                             position = .End
+                            //altIndexPath = indexPath!
                         }
                         
                         // check if dest cat is collapsed
@@ -846,16 +1007,16 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                             
                             if destCat.expanded == false {
                                 // need to alter path to land on the collapsed category
-                                list.insertItemAtIndexPath(srcDataObj as! Item, indexPath: altIndexPath, atPosition: .End, updateIndices: true)
+                                list.insertItemAtIndexPath(srcItem, indexPath: altIndexPath, atPosition: .End, updateIndices: true)
                                 
                                 // also need to remove the row from the table as it will no longer be displayed
                                 tableView.deleteRowsAtIndexPaths([altIndexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
                             } else {
-                                list.insertItemAtIndexPath(srcDataObj as! Item, indexPath: altIndexPath, atPosition: position, updateIndices: true)
+                                list.insertItemAtIndexPath(srcItem, indexPath: altIndexPath, atPosition: position, updateIndices: true)
                             }
                         } else {
                             // moving to AddItem cell, so drop just above the AddItem cell
-                            list.insertItemAtIndexPath(srcDataObj as! Item, indexPath: altIndexPath, atPosition: position, updateIndices: true)
+                            list.insertItemAtIndexPath(srcItem, indexPath: altIndexPath, atPosition: position, updateIndices: true)
                         }
                     }
                     
@@ -868,8 +1029,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 else if srcDataObj is Category
                 {
                     // we are moving a category
-                    let category = srcDataObj as! Category
-                    let srcCategoryIndex = category.categoryIndex
+                    let srcCategory = srcDataObj as! Category
+                    let srcCategoryIndex = srcCategory.categoryIndex
                     var dstCategoryIndex = destDataObj!.categoryIndex
                     
                     //let srcCategoryIndex = list.indicesForObjectAtIndexPath(sourceIndexPath!).categoryIndex
@@ -890,7 +1051,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                         // remove the category from its original location
                         list.removeCatetoryAtIndex(srcCategoryIndex)
                         
-                        list.insertCategory(category, atIndex: dstCategoryIndex)
+                        list.insertCategory(srcCategory, atIndex: dstCategoryIndex)
                         
                         tableView.endUpdates()
                     }
@@ -928,6 +1089,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         self.displayLink?.invalidate()
         self.displayLink = nil
     }
+    */
     
     func scrollUpLoop()
     {
@@ -1162,6 +1324,9 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         return statusBarHeight + navBarHeight
     }
 
+    func settingsButtonTapped() {
+        print("settings button tapped...")
+    }
     
 ////////////////////////////////////////////////////////////////
 //
@@ -1204,7 +1369,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         // this is needed so that operations that rely on view.tag will function correctly
         //self.resetCellViewTags()
         
-        self.tableView.reloadData()
+        //self.tableView.reloadData()
     }
     
     // called when the check button is tapped
@@ -1241,7 +1406,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             }
             
             // need to update the counts in the cat cell count label
-            if let category = list.categoryForItem(item) {
+            if let category = list.categoryForObj(item) {
                 if let catIndexPath = list.displayIndexPathForCategory(category) {
                     if self.tableView.indexPathsForVisibleRows?.contains(catIndexPath) == true {
                         let catCell = tableView.cellForRowAtIndexPath(catIndexPath) as! CategoryCell
