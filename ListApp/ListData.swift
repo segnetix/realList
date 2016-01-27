@@ -137,15 +137,17 @@ class List
         let category = categories[catIdx]
         
         // check for insert after category, in that case drop at the beginning of the category if expanded, end if collapsed
-        if itmIdx < 0 && category.expanded == false {
-            // collapsed
-            itmIdx = category.items.count
-        } else {
-            // expanded
-            itmIdx = 0
+        if itmIdx < 0 {
+            if category.expanded == false {
+                // collapsed
+                itmIdx = category.items.count - 1
+            } else {
+                // expanded
+                itmIdx = -1
+            }
         }
         
-        category.items.insert(item, atIndex: itmIdx)
+        category.items.insert(item, atIndex: itmIdx + 1)
         
         if updateIndices {
             self.updateIndices()
@@ -162,6 +164,9 @@ class List
         if catIdx > 0 && itmIdx < 0 {
             --catIdx        // move to the previous category
             itmIdx = categories[catIdx].items.count
+        } else if itmIdx < 0 {
+            // moved above top row, set to top position in top category
+            itmIdx = 0
         }
         
         categories[catIdx].items.insert(item, atIndex: itmIdx)
