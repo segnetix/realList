@@ -158,12 +158,12 @@ class List
     func insertItem(item: Item, beforeObj: ListObj, updateIndices: Bool) -> Category
     {
         var catIdx = beforeObj.categoryIndex
-        var itmIdx = beforeObj.itemIndex - 1         // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
+        var itmIdx = beforeObj.itemIndex - 1            // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
         
         // check for insert before category, in that case switch to the end of the previous category
         if catIdx > 0 && itmIdx < 0 {
-            --catIdx        // move to the previous category
-            itmIdx = categories[catIdx].items.count
+            --catIdx                                    // move to the previous category
+            itmIdx = categories[catIdx].items.count     // end of the category
         } else if itmIdx < 0 {
             // moved above top row, set to top position in top category
             itmIdx = 0
@@ -178,7 +178,7 @@ class List
         return categories[catIdx]
     }
     
-    /// Will insert item at the .
+    /// Will insert item at either the beginning or the end of the category.
     func insertItem(item: Item, inCategory: Category, atPosition: InsertPosition, updateIndices: Bool)
     {
         switch atPosition {
