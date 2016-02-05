@@ -8,7 +8,7 @@
 
 import UIKit
 import QuartzCore
-//import iAd
+import iAd
 
 let itemCellID     = "ItemCell"
 let categoryCellID = "CategoryCell"
@@ -34,10 +34,13 @@ enum ItemViewCellType {
 let kItemViewScrollRate: CGFloat = 6.0
 let kItemViewCellHeight: CGFloat = 52.0
 
-class ItemViewController: UITableViewController, UITextFieldDelegate
+class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate
 {
+    @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var newCategoryButton: UIBarButtonItem!
     @IBOutlet weak var showHideCompletedButton: UIBarButtonItem!
+    @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
+    @IBOutlet weak var adBanner: ADBannerView!
     
     var inEditMode = false
     var deleteItemIndexPath: NSIndexPath? = nil
@@ -53,10 +56,13 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     var longPressActive = false
     var editingNewItemName = false
     var editingNewCategoryName = false
+    var showAdBanner = true
     
     var list: List! {
         didSet (newList) {
-            self.refreshItems()
+            if tableView != nil {
+                self.refreshItems()
+            }
         }
     }
     
@@ -66,8 +72,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 showHideCompletedButton.title = "hide completed"
             } else {
                 showHideCompletedButton.title = "show completed"
-                // need to clear the array when first hiding completed items
-                //itemsCompletedInHideCompletedItemsMode.removeAll()
             }
             
             if list != nil {
@@ -88,8 +92,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     {
         super.viewDidLoad()
         
+        adBanner.delegate = self
+        
         // Uncomment the following line to preserve selection between presentations
-        self.clearsSelectionOnViewWillAppear = false
+        //self.clearsSelectionOnViewWillAppear = false
         
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         //self.navigationItem.rightBarButtonItem = self.editButtonItem()
@@ -106,10 +112,10 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         //self.navigationController?.setToolbarHidden(false, animated: false)
 
         /*
-        bannerView = ADBannerView(adType: .Banner)
+        adBanner = ADadBanner(adType: .Banner)
         bannerView.translatesAutoresizingMaskIntoConstraints = false
-        bannerView.delegate = self
-        bannerView.hidden = true
+        bannerView = self
+        .hidden = true
         view.addSubview(bannerView)
         
         let viewsDictionary = ["bannerView": bannerView]
@@ -134,8 +140,8 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         self.navigationItem.rightBarButtonItem = rightBarButton
         
         // set up keyboard show/hide notifications
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardDidShow", name: UIKeyboardDidShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardDidHide", name: UIKeyboardDidHideNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
         
         refreshItems()
     }
@@ -154,8 +160,16 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         // showHideCompletedButton state
         //self.setShowHideCompleted(true)
         
+        print("viewDidAppear...")
+        
     }
     
+    override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+        print("viewWillTransitionToSize... \(size)")
+        
+        //self.view.layoutIfNeeded()
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -173,7 +187,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         // return the total number of rows in our item table view (categories + items)
         if let list = list {
@@ -192,7 +206,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
     {
         let obj = list.objectForIndexPath(indexPath)
         let tag = obj != nil ? obj!.tag() : -1
@@ -314,7 +328,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         
     }
     
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
         let obj = list.objectForIndexPath(indexPath)
         if obj is Item {
             return kItemViewCellHeight
@@ -336,22 +350,21 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
     }
     */
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
         print("didSelectRowAtIndexPath...!!!")
     }
     
     // override to support conditional editing of the table view
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
         let obj = list.objectForIndexPath(indexPath)
         
         return obj is Item || obj is Category
-        //return list.cellTypeAtIndex(indexPath.row) != ItemViewCellType.AddItem
     }
     
     // override to support editing the table view
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath)
+    func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath)
     {
         if editingStyle == .Delete {
             deleteItemIndexPath = indexPath
@@ -373,20 +386,54 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
 ////////////////////////////////////////////////////////////////
     
     
-    func keyboardDidShow() {
-        //print("keyboardDidShow")
+    func keyboardWillShow(notification: NSNotification) {
         inEditMode = true
+        
+        var info = notification.userInfo!
+        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
+        let keyboardHeight = keyboardFrame.height
+        
+        self.tableView.frame.size.height = self.view.frame.height - keyboardHeight
+        print("tableView.height \(self.tableView.frame.size.height)")
+        
+        // while the keyboard is visible
+        UIView.animateWithDuration(0.3, animations: { () -> Void in
+            self.view.layoutIfNeeded()
+        })
     }
     
-    func keyboardDidHide() {
+    func keyboardWillHide(notification: NSNotification) {
         //print("keyboardDidHide")
         inEditMode = false
         editingNewCategoryName = false
         editingNewItemName = false
+        
+        self.tableView.frame.size.height = self.view.frame.height
+        
+        UIView.animateWithDuration(0.3, animations: { () -> Void in
+            self.view.layoutIfNeeded()
+        })
     }
     
-    func textFieldShouldReturn(textField: UITextField) -> Bool
-    {
+    func textFieldShouldBeginEditing(textField: UITextField) -> Bool {
+        let obj = list.objectForTag(textField.tag)
+        
+        // scroll the editing cell into view if necessary
+        if obj != nil {
+            let indexPath = list.displayIndexPathForObj(obj!).indexPath
+            
+            if indexPath != nil {
+                if self.tableView.indexPathsForVisibleRows?.contains(indexPath!) == false
+                {
+                    tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Bottom, animated: false)
+                }
+            }
+        }
+        
+        return true
+    }
+    
+    func textFieldShouldReturn(textField: UITextField) -> Bool {
         textField.userInteractionEnabled = false
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
@@ -412,11 +459,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
                 list.updateIndices()
             }
             editingNewCategoryName = false
-        }
-        
-        // do we need this???
-        UIView.animateWithDuration(0.25) {
-            self.navigationController?.navigationBarHidden = false
         }
         
         return true
@@ -456,8 +498,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    @IBAction func addCategoryButtonTapped(sender: UIButton)
-    {
+    @IBAction func addCategoryButtonTapped(sender: UIBarButtonItem) {
         var newCategory: Category
         
         if list.categories[0].displayHeader == false {
@@ -929,168 +970,6 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
 
     }
     
-    /*
-    //////  ORIGINAL VERSION   ///////
-    /// Clean up after a long press gesture.
-    func longPressEnded(indexPath: NSIndexPath?, location: CGPoint)
-    {
-        longPressActive = false
-        
-        // cancel any scroll loop
-        displayLink?.invalidate()
-        displayLink = nil
-        scrollLoopCount = 0
-        
-        // finalize list data with new location for srcIndexObj
-        if sourceIndexPath != nil
-        {
-            var center: CGPoint = snapshot!.center
-            center.y = location.y
-            snapshot?.center = center
-            
-            // check if destination is different from source and is valid
-            if indexPath != nil && indexPath != sourceIndexPath
-            {
-                let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
-                let altIndexPath = indexPath!.row > 0 ? NSIndexPath(forRow: indexPath!.row - 1, inSection: 0) : indexPath!
-                let srcDataObj = list.objectForIndexPath(sourceIndexPath!)
-                //let destDataObj = moveDirection == .Down ? list.objectForIndexPath(indexPath!) : list.objectForIndexPath(altIndexPath)
-                var destDataObj = list.objectForIndexPath(indexPath!)
-                
-                // move cells, update the list data source, move items and categories differently
-                if srcDataObj is Item
-                {
-                    let srcItem = srcDataObj as! Item
-                    
-                    // we are moving an item
-                    tableView.beginUpdates()
-                    
-                    // remove the item from its original location
-                    //list.removeItemAtIndexPath(sourceIndexPath!, preserveCategories: true, updateIndices: true)
-                    list.removeItem(srcItem, updateIndices: true)
-                    print("removeItem... \(srcItem.name)")
-                    
-                    // insert the item at its new location
-                    if destDataObj is Item
-                    {
-                        let destItem = destDataObj as! Item
-                        
-                        // replace with insertItemAfterItem ???
-                        //list.insertItemAtIndexPath(srcItem, indexPath: indexPath!, atPosition: .Middle, updateIndices: true)
-                        list.insertItem(srcItem, afterObj: destItem, updateIndices: true)
-                        print("insertItem... \(destItem.name)")
-                    }
-                    else if destDataObj is Category || destDataObj is AddItem
-                    {
-                        // use altIndexPath if moving up to a category
-                        if moveDirection == .Up {
-                            destDataObj = list.objectForIndexPath(altIndexPath)
-                        }
-                        
-                        // use dirModifier to jump over a dest category when moving up (down is handled by landing on the new category)
-                        var position = (moveDirection == .Down) ? InsertPosition.Beginning : InsertPosition.End
-                        
-                        // are we are moving above top row (then reset dest position to beginning)
-                        if indexPath!.row == 0 {
-                            position = .Beginning
-                        }
-                        
-                        // cell moved down past the last row, drop at end of last category
-                        if destDataObj is AddItem {
-                            position = .End
-                            //altIndexPath = indexPath!
-                        }
-                        
-                        // check if dest cat is collapsed
-                        if destDataObj is Category {
-                            let destCat = destDataObj as! Category
-                            
-                            if destCat.expanded == false {
-                                // need to alter path to land on the collapsed category
-                                list.insertItemAtIndexPath(srcItem, indexPath: altIndexPath, atPosition: .End, updateIndices: true)
-                                
-                                // also need to remove the row from the table as it will no longer be displayed
-                                tableView.deleteRowsAtIndexPaths([altIndexPath], withRowAnimation: UITableViewRowAnimation.Automatic)
-                            } else {
-                                list.insertItemAtIndexPath(srcItem, indexPath: altIndexPath, atPosition: position, updateIndices: true)
-                            }
-                        } else {
-                            // moving to AddItem cell, so drop just above the AddItem cell
-                            list.insertItemAtIndexPath(srcItem, indexPath: altIndexPath, atPosition: position, updateIndices: true)
-                        }
-                    }
-                    
-                    //list.updateIndices()
-                    
-                    print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
-                    
-                    tableView.endUpdates()
-                }
-                else if srcDataObj is Category
-                {
-                    // we are moving a category
-                    let srcCategory = srcDataObj as! Category
-                    let srcCategoryIndex = srcCategory.categoryIndex
-                    var dstCategoryIndex = destDataObj!.categoryIndex
-                    
-                    //let srcCategoryIndex = list.indicesForObjectAtIndexPath(sourceIndexPath!).categoryIndex
-                    //var dstCategoryIndex = list.indicesForObjectAtIndexPath(indexPath!).categoryIndex
-                    
-                    // this is so dropping a category on an item will only move the category if the item is above the dest category when moving up
-                    let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
-
-                    if moveDirection == .Up && destDataObj is Item && dstCategoryIndex >= 0 {
-                        ++dstCategoryIndex
-                    }
-                    
-                    print("srcCategoryIndex: \(srcCategoryIndex)  dstCategoryIndex: \(dstCategoryIndex)")
-                    
-                    if srcCategoryIndex >= 0 && dstCategoryIndex >= 0 {
-                        tableView.beginUpdates()
-                        
-                        // remove the category from its original location
-                        list.removeCatetoryAtIndex(srcCategoryIndex)
-                        
-                        list.insertCategory(srcCategory, atIndex: dstCategoryIndex)
-                        
-                        tableView.endUpdates()
-                    }
-                }
-            }
-        } else {
-            print("sourceIndexPath is nil...")
-        }
-        
-        // clean up any snapshot views or displayLink scrolls
-        var cell: UITableViewCell? = nil
-        
-        if indexPath != nil {
-            cell = tableView.cellForRowAtIndexPath(indexPath!)
-        }
-        
-        cell?.alpha = 0.0
-        UIView.animateWithDuration(0.25, animations: { () -> Void in
-            if cell != nil {
-                self.snapshot?.center = cell!.center
-            }
-            self.snapshot?.transform = CGAffineTransformIdentity
-            self.snapshot?.alpha = 0.0
-            
-            // undo fade out
-            cell?.alpha = 1.0
-        }, completion: { (finished: Bool) -> Void in
-            self.sourceIndexPath = nil
-            self.snapshot?.removeFromSuperview()
-            self.snapshot = nil
-            self.tableView.reloadData()
-        })
-        
-        self.prevLocation = nil
-        self.displayLink?.invalidate()
-        self.displayLink = nil
-    }
-    */
-    
     func scrollUpLoop()
     {
         let currentOffset = tableView.contentOffset
@@ -1194,6 +1073,7 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
             self.title = list!.name
             list.showCompletedItems = self.showCompletedItems
             tableView.reloadData()
+            //tableView.reloadData()
         } else {
             self.title = "<no selection>"
             tableView.reloadData()
@@ -1326,6 +1206,9 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
 
     func settingsButtonTapped() {
         print("settings button tapped...")
+        
+        showAdBanner = !showAdBanner
+        layoutAnimated(true)
     }
     
 ////////////////////////////////////////////////////////////////
@@ -1438,22 +1321,78 @@ class ItemViewController: UITableViewController, UITextFieldDelegate
         return -1
     }
     
-    /*
-    func bannerViewActionShouldBegin(banner: ADBannerView!, willLeaveApplication willLeave: Bool) -> Bool {
-        print("bannerViewActionShouldBegin")
-        return true
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - AdBanner methods
+//
+////////////////////////////////////////////////////////////////
+    
+    func bannerViewActionShouldBegin(banner: ADBannerView!, willLeaveApplication willLeave: Bool) -> Bool
+    {
+        print("Banner view is beginning an ad action")
+        let shouldExecuteAction = self.allowActionToRun()     // your app implements this method
+        
+        if !willLeave && shouldExecuteAction
+        {
+            // insert code here to suspend any services that might conflict with the advertisement
+        }
+        
+        return shouldExecuteAction;
+    }
+    
+    func bannerViewActionDidFinish(banner: ADBannerView!) {
+        // insert code here to resume any services paused by the ad banner action
+        // must execute quickly
+        print("bannerViewActionDidFinish")
     }
     
     func bannerViewDidLoadAd(banner: ADBannerView!) {
         print("bannerViewDidLoadAd")
-        self.bannerView.hidden = false
+        self.adBanner.hidden = false
+        
+        self.layoutAnimated(true)
     }
     
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
-        print("didFailToReceiveAdWithError")
-        self.bannerView.hidden = true
+        print("didFailToReceiveAdWithError: \(error)")
+        self.adBanner.hidden = true
+        
+        self.layoutAnimated(true)
     }
-    */
+    
+    func allowActionToRun() -> Bool {
+        // determine if we will allow an add action to take over the screen
+
+        return true
+    }
+    
+    // move the adBanner on and off the screen
+    func layoutAnimated(animated: Bool) {
+        let bannerHeight = adBanner.frame.size.height
+        let bannerXpos = self.view.frame.size.height
+        
+        /*
+        if adBanner.bannerLoaded {
+            adBanner.frame.origin.y = xPos - bannerHeight
+        } else {
+            adBanner.frame.origin.y = xPos
+        }
+        */
+        
+        if showAdBanner {
+            self.tableView.frame.size.height = self.view.frame.height - bannerHeight
+            adBanner.frame.origin.y = bannerXpos - bannerHeight
+        } else {
+            self.tableView.frame.size.height = self.view.frame.height
+            adBanner.frame.origin.y = bannerXpos
+        }
+        
+        print("showAdBanner: xPos \(adBanner.frame.origin.y)")
+        
+        UIView.animateWithDuration(animated ? 0.5 : 0.0, animations: { () -> Void in
+            self.view.layoutIfNeeded()
+        })
+    }
     
 }
 
