@@ -176,53 +176,18 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="96F-pd-1Yj" firstAttribute="top" secondItem="cIg-QC-tHH" secondAttribute="bottom" id="1H0-6e-WH4"/>
-                            <constraint firstItem="cIg-QC-tHH" firstAttribute="leading" secondItem="Gbn-SU-SIi" secondAttribute="leading" id="1zp-Ce-sP7"/>
                             <constraint firstItem="cIg-QC-tHH" firstAttribute="top" secondItem="ATl-Ia-AoT" secondAttribute="bottom" id="3oZ-MK-hEb"/>
-                            <constraint firstAttribute="trailingMargin" secondItem="cIg-QC-tHH" secondAttribute="trailing" id="4N9-bd-Ara"/>
-                            <constraint firstItem="ATl-Ia-AoT" firstAttribute="top" secondItem="Gbn-SU-SIi" secondAttribute="top" id="4cI-fX-70P"/>
-                            <constraint firstAttribute="trailing" secondItem="cIg-QC-tHH" secondAttribute="trailing" id="56m-FU-U4Y"/>
-                            <constraint firstItem="ATl-Ia-AoT" firstAttribute="top" secondItem="YUw-vf-Peu" secondAttribute="bottom" id="5kk-zs-pLn"/>
                             <constraint firstAttribute="trailing" secondItem="ATl-Ia-AoT" secondAttribute="trailing" id="7MF-bk-JaJ"/>
-                            <constraint firstItem="cIg-QC-tHH" firstAttribute="top" secondItem="Gbn-SU-SIi" secondAttribute="topMargin" id="CpT-xi-fdm"/>
-                            <constraint firstItem="cIg-QC-tHH" firstAttribute="top" secondItem="Gbn-SU-SIi" secondAttribute="topMargin" id="Do0-eD-q4z"/>
                             <constraint firstItem="ATl-Ia-AoT" firstAttribute="leading" secondItem="Gbn-SU-SIi" secondAttribute="leading" id="Imd-Tv-SYi"/>
-                            <constraint firstItem="96F-pd-1Yj" firstAttribute="top" secondItem="ATl-Ia-AoT" secondAttribute="bottom" id="NYd-O4-9EX"/>
-                            <constraint firstAttribute="trailing" secondItem="cIg-QC-tHH" secondAttribute="trailing" constant="120" id="QlN-wP-k8e"/>
-                            <constraint firstItem="cIg-QC-tHH" firstAttribute="top" secondItem="Gbn-SU-SIi" secondAttribute="top" id="YL0-TY-5mh"/>
-                            <constraint firstItem="cIg-QC-tHH" firstAttribute="leading" secondItem="Gbn-SU-SIi" secondAttribute="leadingMargin" id="bed-fB-lAT"/>
                             <constraint firstItem="ATl-Ia-AoT" firstAttribute="top" secondItem="Gbn-SU-SIi" secondAttribute="top" id="c8r-ak-smE"/>
-                            <constraint firstItem="ATl-Ia-AoT" firstAttribute="top" secondItem="YUw-vf-Peu" secondAttribute="bottom" id="dU4-XN-UHO"/>
                             <constraint firstItem="cIg-QC-tHH" firstAttribute="leading" secondItem="Gbn-SU-SIi" secondAttribute="leading" id="hNn-pd-HcJ"/>
-                            <constraint firstItem="cIg-QC-tHH" firstAttribute="leading" secondItem="ATl-Ia-AoT" secondAttribute="leading" id="w2U-3X-X4B"/>
-                            <constraint firstItem="ATl-Ia-AoT" firstAttribute="top" secondItem="YUw-vf-Peu" secondAttribute="bottom" id="wh1-cO-TPh"/>
-                            <constraint firstItem="cIg-QC-tHH" firstAttribute="top" secondItem="ATl-Ia-AoT" secondAttribute="top" id="xUT-K9-pUo"/>
                         </constraints>
-                        <variation key="default">
-                            <mask key="constraints">
-                                <exclude reference="4cI-fX-70P"/>
-                                <exclude reference="5kk-zs-pLn"/>
-                                <exclude reference="dU4-XN-UHO"/>
-                                <exclude reference="wh1-cO-TPh"/>
-                                <exclude reference="1zp-Ce-sP7"/>
-                                <exclude reference="4N9-bd-Ara"/>
-                                <exclude reference="56m-FU-U4Y"/>
-                                <exclude reference="CpT-xi-fdm"/>
-                                <exclude reference="Do0-eD-q4z"/>
-                                <exclude reference="QlN-wP-k8e"/>
-                                <exclude reference="YL0-TY-5mh"/>
-                                <exclude reference="bed-fB-lAT"/>
-                                <exclude reference="w2U-3X-X4B"/>
-                                <exclude reference="xUT-K9-pUo"/>
-                                <exclude reference="NYd-O4-9EX"/>
-                            </mask>
-                        </variation>
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="hVo-Wt-zbt"/>
                     <connections>
                         <outlet property="adBanner" destination="cIg-QC-tHH" id="Dse-Ds-VbI"/>
                         <outlet property="tableView" destination="ATl-Ia-AoT" id="PLI-Wk-Zed"/>
-                        <outlet property="tableViewBottomConstraint" destination="NYd-O4-9EX" id="JEe-iT-X5U"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3Du-b9-vaA" userLabel="First Responder" sceneMemberID="firstResponder"/>

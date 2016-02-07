@@ -31,18 +31,15 @@ class List
 {
     var name: String
     var categories = [Category]()
-    //var cellTypeArray = [ItemViewCellType]()
     
     var showCompletedItems: Bool = true {
         didSet(newShow) {
-            //self.updateCellTypeArray()
             self.updateIndices()
         }
     }
     
     var showInactiveItems: Bool = true {
         didSet(newShow) {
-            //self.updateCellTypeArray()
             self.updateIndices()
         }
     }
@@ -610,7 +607,36 @@ class List
                 {
                     if item.state == ItemState.Complete {
                         indexPaths.append(NSIndexPath(forRow: ++pos, inSection: 0))
-                    } else {
+                    } else if item.state != ItemState.Inactive || showInactiveItems {
+                        ++pos
+                    }
+                }
+                ++pos     // for the AddItem cell
+            }
+        }
+        
+        return indexPaths
+    }
+    
+    /// Returns index paths for inactive rows.
+    func indexPathsForInactiveRows() -> [NSIndexPath]
+    {
+        var indexPaths = [NSIndexPath]()
+        var pos = -1
+        
+        for category in categories
+        {
+            if category.displayHeader {
+                ++pos
+            }
+            
+            if category.expanded
+            {
+                for item in category.items
+                {
+                    if item.state == ItemState.Inactive {
+                        indexPaths.append(NSIndexPath(forRow: ++pos, inSection: 0))
+                    } else if item.state != ItemState.Complete || showCompletedItems {
                         ++pos
                     }
                 }

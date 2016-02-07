@@ -37,9 +37,6 @@ let kItemViewCellHeight: CGFloat = 52.0
 class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate
 {
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var newCategoryButton: UIBarButtonItem!
-    @IBOutlet weak var showHideCompletedButton: UIBarButtonItem!
-    @IBOutlet weak var tableViewBottomConstraint: NSLayoutConstraint!
     @IBOutlet weak var adBanner: ADBannerView!
     
     var inEditMode = false
@@ -52,11 +49,11 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     var prevLocation: CGPoint? = nil
     var snapshot: UIView? = nil
     var displayLink: CADisplayLink? = nil
-    var scrollLoopCount = 0     // debugging var
     var longPressActive = false
     var editingNewItemName = false
     var editingNewCategoryName = false
     var showAdBanner = true
+    let exampleTransitionDelegate = SettingsTransitioningDelegate()
     
     var list: List! {
         didSet (newList) {
@@ -68,17 +65,21 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     
     var showCompletedItems: Bool = true {
         didSet(newShow) {
-            if showCompletedItems {
-                showHideCompletedButton.title = "hide completed"
-            } else {
-                showHideCompletedButton.title = "show completed"
-            }
-            
             if list != nil {
                 list.showCompletedItems = self.showCompletedItems
             }
             
-            self.updateShowHideCompletedRows()
+            self.showHideCompletedRows()
+        }
+    }
+    
+    var showInactiveItems: Bool = true {
+        didSet(newShow) {
+            if list != nil {
+                list.showInactiveItems = self.showInactiveItems
+            }
+            
+            self.showHideInactiveRows()
         }
     }
     
@@ -103,34 +104,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         // set up long press gesture recognizer for the cell move functionality
         longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
         self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
-        
-        //self.tableView.estimatedRowHeight = kItemViewCellHeight
-        //self.tableView.rowHeight = UITableViewAutomaticDimension
-        
-        //self.tableView.backgroundColor = UIColor.clearColor()
-        
-        //self.navigationController?.setToolbarHidden(false, animated: false)
 
-        /*
-        adBanner = ADadBanner(adType: .Banner)
-        bannerView.translatesAutoresizingMaskIntoConstraints = false
-        bannerView = self
-        .hidden = true
-        view.addSubview(bannerView)
-        
-        let viewsDictionary = ["bannerView": bannerView]
-        view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|[bannerView]|", options: [], metrics: nil, views: viewsDictionary))
-        view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:[bannerView]|", options: [], metrics: nil, views: viewsDictionary))
-        */
-        
-        //let bannerHeight = bannerView.frame.height
-        
-        // adjust tableView for iAD banner
-        //let insets = UIEdgeInsets(top: 100, left: 20, bottom: 100, right: 20)
-        //self.tableView.contentInset = insets
-        
-        // Setting button
-        //let settingsButton = UIButton()
+        // settings button
         let settingsButton: UIButton = UIButton(type: UIButtonType.Custom)
         settingsButton.setImage(UIImage(named: "settings"), forState: .Normal)
         settingsButton.frame = CGRectMake(0, 0, 30, 30)
@@ -138,6 +113,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         let rightBarButton = UIBarButtonItem()
         rightBarButton.customView = settingsButton
         self.navigationItem.rightBarButtonItem = rightBarButton
+        
+        // settingsVC
+        modalPresentationStyle = UIModalPresentationStyle.Custom
         
         // set up keyboard show/hide notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
@@ -149,35 +127,21 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
-        //navigationController?.hidesBarsOnSwipe = true
-        
-        // in this case, it's good to combine hidesBarsOnTap with hidesBarsWhenKeyboardAppears
-        // so the user can get back to the navigation bar to save
-        //navigationController?.hidesBarsOnTap = true
-        //navigationController?.hidesBarsWhenKeyboardAppears = true
-        //navigationController?.hidesBarsOnSwipe = false
-        
-        // showHideCompletedButton state
-        //self.setShowHideCompleted(true)
-        
-        print("viewDidAppear...")
-        
     }
     
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
         print("viewWillTransitionToSize... \(size)")
-        
-        //self.view.layoutIfNeeded()
+
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
+        
     }
     
     
-    required init(coder aDecoder: NSCoder)
-    {
+    required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)!
     }
     
@@ -192,13 +156,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         // return the total number of rows in our item table view (categories + items)
         if let list = list {
             let displayCount = list.totalDisplayCount()
-
-            /*
-            if itemsCompletedInHideCompletedItemsMode.count > 0 {
-                print("tableView:numberOfRowsInSection itemsCompletedInHideCompletedItemsMode.count is > 0...!!!")
-            }
-            displayCount += itemsCompletedInHideCompletedItemsMode.count
-            */
             
             return displayCount
         } else {
@@ -247,13 +204,20 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             
             cell.tempCheckButton.tag = tag
             
-            // item title
+            // set item name
             let title = list.titleForObjectAtIndexPath(indexPath)
             if let cellTitle = title {
-                cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")    // for debugging
-                //cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                      // for production
+                //cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")    // for debugging
+                cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                      // for production
             } else {
                 cell.itemName.attributedText = makeAttributedString(title: "cellTitle is nil", subtitle: "")
+            }
+            
+            // set item name text color
+            if item.state == ItemState.Inactive {
+                cell.itemName.textColor = UIColor.grayColor()
+            } else {
+                cell.itemName.textColor = UIColor.blackColor()
             }
             
             // cell separator
@@ -292,8 +256,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             // category title
             let title = list.titleForObjectAtIndexPath(indexPath)
             if let cellTitle = title {
-                cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.categoryName.tag)")
-                //cell.itemName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")
+                //cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.categoryName.tag)")
+                cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")
             } else {
                 cell.categoryName?.attributedText = makeAttributedString(title: "", subtitle: "")
             }
@@ -386,13 +350,15 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
 ////////////////////////////////////////////////////////////////
     
     
-    func keyboardWillShow(notification: NSNotification) {
+    func keyboardWillShow(notification: NSNotification)
+    {
         inEditMode = true
         
         var info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
         let keyboardHeight = keyboardFrame.height
         
+        // need to shrink the tableView height so it shows above the keyboard
         self.tableView.frame.size.height = self.view.frame.height - keyboardHeight
         print("tableView.height \(self.tableView.frame.size.height)")
         
@@ -402,13 +368,24 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         })
     }
     
-    func keyboardWillHide(notification: NSNotification) {
-        //print("keyboardDidHide")
+    func keyboardWillHide(notification: NSNotification)
+    {
         inEditMode = false
         editingNewCategoryName = false
         editingNewItemName = false
         
-        self.tableView.frame.size.height = self.view.frame.height
+        // need to restore the tableView frame based on presence of the ad banner
+        let bannerHeight = adBanner.frame.size.height
+        let bannerXpos = self.view.frame.size.height
+        
+        if showAdBanner || adBanner.bannerLoaded {
+            self.tableView.frame.size.height = self.view.frame.height - bannerHeight
+            adBanner.frame.origin.y = bannerXpos - bannerHeight
+        } else {
+            self.tableView.frame.size.height = self.view.frame.height
+            adBanner.frame.origin.y = bannerXpos
+        }
+        
         
         UIView.animateWithDuration(0.3, animations: { () -> Void in
             self.view.layoutIfNeeded()
@@ -498,7 +475,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         }
     }
     
-    @IBAction func addCategoryButtonTapped(sender: UIBarButtonItem) {
+    func addNewCategory()
+    {
         var newCategory: Category
         
         if list.categories[0].displayHeader == false {
@@ -525,7 +503,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 
                 // set up a selector event to fire when the new cell has scrolled into place
                 NSObject.cancelPreviousPerformRequestsWithTarget(self)
-                self.performSelector("scrollToCategoryEnded:", withObject: nil, afterDelay: 0.1)
+                self.performSelector("scrollToCategoryEnded:", withObject: nil, afterDelay: 0.5)
             } else {
                 // new cell is already visible
                 print("new cell is already visible")
@@ -715,11 +693,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             if touchLocation.y < (tableView.bounds.height - kScrollZoneHeight) {
                 displayLink!.invalidate()
                 displayLink = nil
-                scrollLoopCount = 0
             } else if touchLocation.y > (topBarHeight + kScrollZoneHeight) {
                 displayLink!.invalidate()
                 displayLink = nil
-                scrollLoopCount = 0
             }
         }
 
@@ -838,7 +814,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         // cancel any scroll loop
         displayLink?.invalidate()
         displayLink = nil
-        scrollLoopCount = 0
         
         // finalize list data with new location for srcIndexObj
         if sourceIndexPath != nil
@@ -1073,7 +1048,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             self.title = list!.name
             list.showCompletedItems = self.showCompletedItems
             tableView.reloadData()
-            //tableView.reloadData()
         } else {
             self.title = "<no selection>"
             tableView.reloadData()
@@ -1197,19 +1171,28 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     }
 
     // calculates the top bar height, inlcuding the status bar and nav bar (if present)
-    func getTopBarHeight() -> CGFloat {
+    func getTopBarHeight() -> CGFloat
+    {
         let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height
         let navBarHeight = self.navigationController!.navigationBar.frame.size.height
         
         return statusBarHeight + navBarHeight
     }
 
-    func settingsButtonTapped() {
+    func settingsButtonTapped()
+    {
         print("settings button tapped...")
         
-        showAdBanner = !showAdBanner
-        layoutAnimated(true)
+        transitioningDelegate = exampleTransitionDelegate
+        let vc = SettingsViewController()
+        vc.transitioningDelegate = exampleTransitionDelegate
+        vc.showCompletedItems = list.showCompletedItems
+        vc.showInactiveItems = list.showInactiveItems
+        vc.itemVC = self
+        presentViewController(vc, animated: true, completion: nil)
+
     }
+    
     
 ////////////////////////////////////////////////////////////////
 //
@@ -1217,18 +1200,10 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
 //
 ////////////////////////////////////////////////////////////////
     
-    @IBAction func showHideCategoryButtonTapped(sender: UIBarButtonItem)
-    {
-        showCompletedItems = !showCompletedItems
-    }
-    
-    func setShowHideCompleted(show: Bool) {
-        showCompletedItems = show
-    }
-    
     /// Refreshes the ItemVC item rows with animation after a change to showHideCompleted
-    func updateShowHideCompletedRows()
+    func showHideCompletedRows()
     {
+        // gets array of paths
         let indexPaths = list.indexPathsForCompletedRows()
         
         if showCompletedItems == false
@@ -1248,11 +1223,30 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
    
         // need to update the cellTypeArray after show/hide event
         list.updateIndices()
+    }
+    
+    /// Refreshes the ItemVC item rows with animation after a change to showHideInactive
+    func showHideInactiveRows()
+    {
+        let indexPaths = list.indexPathsForInactiveRows()
         
-        // this is needed so that operations that rely on view.tag will function correctly
-        //self.resetCellViewTags()
+        if showInactiveItems == false
+        {
+            // remove the inactive rows
+            self.tableView.beginUpdates()
+            self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
+            self.tableView.endUpdates()
+        }
+        else
+        {
+            // insert the inactive rows
+            self.tableView.beginUpdates()
+            self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
+            self.tableView.endUpdates()
+        }
         
-        //self.tableView.reloadData()
+        // need to update the cellTypeArray after show/hide event
+        list.updateIndices()
     }
     
     // called when the check button is tapped
@@ -1264,6 +1258,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         if senderItem is Item {
             let item = senderItem as! Item
+            indexPath = list.displayIndexPathForItem(item)
             
             // cycle through the item states
             switch item.state {
@@ -1271,7 +1266,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 item.state = ItemState.Incomplete
                 sender.setTitle("INCMP", forState: .Normal)
             case ItemState.Incomplete:
-                indexPath = list.displayIndexPathForItem(item)
                 item.state = ItemState.Complete
                 sender.setTitle("COMPL", forState: .Normal)
             case ItemState.Complete:
@@ -1279,10 +1273,27 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 sender.setTitle("INACT", forState: .Normal)
             }
             
-            print("item: \(item.name) is set to \(sender.titleForState(.Normal))")
+            // set item name text color
+            if indexPath != nil {
+                let cell = tableView.cellForRowAtIndexPath(indexPath!) as! ItemCell
+                if item.state == ItemState.Inactive {
+                    cell.itemName.textColor = UIColor.grayColor()
+                } else {
+                    cell.itemName.textColor = UIColor.blackColor()
+                }
+            }
+            
+            //print("item: \(item.name) is set to \(sender.titleForState(.Normal))")
             
             // remove a newly completed row if we are hiding completed items
             if showCompletedItems == false && item.state == ItemState.Complete {
+                if indexPath != nil {
+                    self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+                }
+            }
+            
+            // remove a newly inactive row if we are hiding inactive items
+            if showInactiveItems == false && item.state == ItemState.Inactive {
                 if indexPath != nil {
                     self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
                 }
@@ -1297,6 +1308,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                     }
                 }
             }
+            
         } else {
             print("ERROR: checkButtonTapped received an index path that points to a non-item object!")
         }
@@ -1371,15 +1383,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         let bannerHeight = adBanner.frame.size.height
         let bannerXpos = self.view.frame.size.height
         
-        /*
-        if adBanner.bannerLoaded {
-            adBanner.frame.origin.y = xPos - bannerHeight
-        } else {
-            adBanner.frame.origin.y = xPos
-        }
-        */
-        
-        if showAdBanner {
+        if showAdBanner || adBanner.bannerLoaded {
             self.tableView.frame.size.height = self.view.frame.height - bannerHeight
             adBanner.frame.origin.y = bannerXpos - bannerHeight
         } else {
