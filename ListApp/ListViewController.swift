@@ -87,7 +87,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         super.init(coder: aDecoder)!
         
         // adds temp test items
-        addTestItems()
+        //addTestItems()
     }
     
 ////////////////////////////////////////////////////////////////
@@ -131,6 +131,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             cell.listName.attributedText = makeAttributedString(title: list.name, subtitle: "")
             cell.listName.tag = indexPath.row
             cell.contentView.tag = indexPath.row
+            
+            // list background color
+            if list.listColor != nil {
+                cell.backgroundColor = list.listColor
+            } else {
+                cell.backgroundColor = UIColor.whiteColor()
+            }
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
             let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
@@ -648,8 +655,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 
     func selectList(index: Int)
     {
-        if lists.count > index && index >= 0 {
-            delegate?.listSelected(lists[index])
+        selectionIndex = index
+        
+        if lists.count > selectionIndex && selectionIndex >= 0 {
+            let selectedList = lists[selectionIndex]
+            delegate?.listSelected(selectedList)
             
             // deselect all cells
             var i = 0
@@ -660,8 +670,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             }
             
             // then select the current cell
-            let selectedCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: index, inSection: 0))
-            selectedCell?.backgroundColor = UIColor(colorLiteralRed: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
+            let selectedCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: selectionIndex, inSection: 0))
+            if selectedList.listColor != nil {
+                selectedCell?.backgroundColor = selectedList.listColor!
+            } else {
+                selectedCell?.backgroundColor = UIColor(colorLiteralRed: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
+            }
         }
     }
     

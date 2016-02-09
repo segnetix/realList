@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B03C467B1C66F21400B66CBD /* ItemDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */; };
+		B03C467D1C66F34D00B66CBD /* ItemDetailPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */; };
+		B03C467F1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */; };
+		B03C46811C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */; };
 		B07828981C36000B009D356F /* ListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07828971C36000B009D356F /* ListCell.swift */; };
 		B078289A1C360020009D356F /* ItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07828991C360020009D356F /* ItemCell.swift */; };
 		B0854A891C3895DA00B9D2F7 /* CategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */; };
@@ -28,6 +32,10 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemDetailViewController.swift; sourceTree = "<group>"; };
+		B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailPresentationController.swift; path = ../ItemDetailPresentationController.swift; sourceTree = "<group>"; };
+		B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailTransitioningDelegate.swift; path = ../ItemDetailTransitioningDelegate.swift; sourceTree = "<group>"; };
+		B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemDetailAnimatedTransitioning.swift; sourceTree = "<group>"; };
 		B07828971C36000B009D356F /* ListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListCell.swift; sourceTree = "<group>"; };
 		B07828991C360020009D356F /* ItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemCell.swift; sourceTree = "<group>"; };
 		B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryCell.swift; sourceTree = "<group>"; };
@@ -92,10 +100,14 @@
 				B07828991C360020009D356F /* ItemCell.swift */,
 				B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */,
 				B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */,
+				B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */,
 				B0930D691C652DA5007EBAA0 /* SettingsViewController.swift */,
-				B0930D6B1C652DE9007EBAA0 /* SettingsPresentationController.swift */,
-				B0930D6D1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift */,
+				B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */,
 				B0930D6F1C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift */,
+				B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */,
+				B0930D6B1C652DE9007EBAA0 /* SettingsPresentationController.swift */,
+				B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */,
+				B0930D6D1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift */,
 				B0A3026F1C349F7A00F6FB44 /* Main.storyboard */,
 				B0A302721C349F7A00F6FB44 /* Assets.xcassets */,
 				B0A302741C349F7A00F6FB44 /* LaunchScreen.storyboard */,
@@ -179,9 +191,12 @@
 				B0930D6A1C652DA5007EBAA0 /* SettingsViewController.swift in Sources */,
 				B0A3026E1C349F7A00F6FB44 /* ViewController.swift in Sources */,
 				B0FF8C371C4AE58900C0A33C /* AddListCell.swift in Sources */,
+				B03C467D1C66F34D00B66CBD /* ItemDetailPresentationController.swift in Sources */,
 				B0930D701C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift in Sources */,
 				B0930D6E1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift in Sources */,
+				B03C467B1C66F21400B66CBD /* ItemDetailViewController.swift in Sources */,
 				B0A302881C35915B00F6FB44 /* ListData.swift in Sources */,
+				B03C46811C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift in Sources */,
 				B0A3026C1C349F7A00F6FB44 /* AppDelegate.swift in Sources */,
 				B0854A891C3895DA00B9D2F7 /* CategoryCell.swift in Sources */,
 				B07828981C36000B009D356F /* ListCell.swift in Sources */,
@@ -190,6 +205,7 @@
 				B0A3027E1C34A1C800F6FB44 /* ListViewController.swift in Sources */,
 				B0930D6C1C652DE9007EBAA0 /* SettingsPresentationController.swift in Sources */,
 				B0A302801C34A31C00F6FB44 /* ItemViewController.swift in Sources */,
+				B03C467F1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

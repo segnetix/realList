@@ -1,5 +1,5 @@
 //
-//  SettingsPresentationController.swift
+//  ItemDetailPresentationController.swift
 //  ListApp
 //
 //  Created by Steven Gentry on 2/5/16.
@@ -8,14 +8,14 @@
 
 import UIKit
 
-class SettingsPresentationController: UIPresentationController, UIAdaptivePresentationControllerDelegate {
+class ItemDetailPresentationController: UIPresentationController, UIAdaptivePresentationControllerDelegate {
     
     var chromeView: UIView = UIView()
     
     override init(presentedViewController: UIViewController, presentingViewController: UIViewController) {
         super.init(presentedViewController:presentedViewController, presentingViewController:presentingViewController)
-        chromeView.backgroundColor = UIColor(white: 0.0, alpha: 0.4)
-        chromeView.alpha = 0.0
+        chromeView.backgroundColor = UIColor.whiteColor()
+        chromeView.alpha = 1.0
         
         let tap = UITapGestureRecognizer(target: self, action: "chromeViewTapped:")
         chromeView.addGestureRecognizer(tap)
@@ -38,13 +38,12 @@ class SettingsPresentationController: UIPresentationController, UIAdaptivePresen
     
     override func sizeForChildContentContainer(container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize
     {
-        // adaptive sizing width, min 150, max 240
-        let parentWidth = parentSize.width
-        let childWidth = min(max(parentWidth/3.0, 150), 240)
+        // adaptive sizing width, min 100, max 200
+        //let parentWidth = parentSize.width
+        //let childWidth = min(max(parentWidth/3.0, 120), 200)
         
-        print(childWidth)
-        
-        return CGSizeMake(CGFloat((floorf(Float(childWidth)))), parentSize.height)
+        //return CGSizeMake(CGFloat((floorf(Float(childWidth)))), parentSize.height)
+        return CGSizeMake(parentSize.width, parentSize.height)
     }
     
     override func presentationTransitionWillBegin() {

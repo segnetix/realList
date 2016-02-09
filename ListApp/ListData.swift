@@ -10,10 +10,10 @@ import UIKit
 
 let kItemIndexMax = 100000
 
-enum ItemState {
-    case Inactive
-    case Incomplete
-    case Complete
+enum ItemState: Int {
+    case Inactive = 0
+    case Incomplete = 1
+    case Complete = 2
 }
 
 ////////////////////////////////////////////////////////////////
@@ -27,10 +27,11 @@ enum ItemState {
 // 3. if the user adds a category with an empty name then the data model will set the name to a single space char
 // 4. if the user deletes the last category then the last category is not deleted but the name is set to a single space char
 
-class List
+class List: NSObject, NSCoding
 {
     var name: String
     var categories = [Category]()
+    var listColor: UIColor? = nil
     
     var showCompletedItems: Bool = true {
         didSet(newShow) {
@@ -44,14 +45,71 @@ class List
         }
     }
     
-    // designated initializer for a List
+    // new list initializer
     init(name: String) {
         self.name = name
     }
     
 ///////////////////////////////////////////////////////
 //
-//  MARK: New initializers for Category and Item objects
+//  MARK: List data I/O methods
+//
+///////////////////////////////////////////////////////
+    
+    // Memberwise initializer
+    init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, listColor: UIColor?, categories: [Category]?) {
+        if let name = name {
+            self.name = name
+        } else {
+            self.name = ""
+        }
+        
+        if showCompletedItems != nil {
+            self.showCompletedItems = showCompletedItems!
+        } else {
+            self.showCompletedItems = true
+        }
+        
+        if showInactiveItems != nil {
+            self.showInactiveItems = showInactiveItems!
+        } else {
+            self.showInactiveItems = true
+        }
+        
+        if let listColor = listColor {
+            self.listColor = listColor
+        }
+        
+        if let categories = categories {
+            self.categories = categories
+        }
+        
+        super.init()
+        
+        self.updateIndices()
+    }
+    
+    required convenience init?(coder decoder: NSCoder) {
+        let name = decoder.decodeObjectForKey("name") as? String
+        let showCompletedItems = decoder.decodeObjectForKey("showCompletedItems") as? Bool
+        let showInactiveItems = decoder.decodeObjectForKey("showInactiveItems") as? Bool
+        let listColor = decoder.decodeObjectForKey("listColor") as? UIColor
+        let categories = decoder.decodeObjectForKey("categories") as? [Category]
+        
+        self.init(name: name, showCompletedItems: showCompletedItems, showInactiveItems: showInactiveItems, listColor: listColor, categories: categories)
+    }
+    
+    func encodeWithCoder(coder: NSCoder) {
+        coder.encodeObject(self.name, forKey: "name")
+        coder.encodeObject(self.showCompletedItems, forKey: "showCompletedItems")
+        coder.encodeObject(self.showInactiveItems, forKey: "showInactiveItems")
+        coder.encodeObject(self.listColor, forKey: "listColor")
+        coder.encodeObject(self.categories, forKey: "categories")
+    }
+    
+///////////////////////////////////////////////////////
+//
+//  MARK: Initializers for Category and Item objects
 //
 ///////////////////////////////////////////////////////
     
@@ -219,7 +277,7 @@ class List
                     removedPaths.append(indexPath)
                 } else {
                     // remove an entire category and it's items
-                    removedPaths = displayIndexPathsForCategory(indexPath)
+                    removedPaths = displayIndexPathsForCategoryFromIndexPath(indexPath)
                     self.categories.removeAtIndex(catIndex)
                 }
             }
@@ -553,7 +611,7 @@ class List
     }
     
     /// Returns the index paths for a Category at given index path, all of its Items and the AddItem row.
-    func displayIndexPathsForCategory(indexPath: NSIndexPath) -> [NSIndexPath]
+    func displayIndexPathsForCategoryFromIndexPath(indexPath: NSIndexPath) -> [NSIndexPath]
     {
         let category = categoryForIndexPath(indexPath)
         
@@ -756,19 +814,24 @@ class List
 
 ////////////////////////////////////////////////////////////////
 //
-//  MARK: - Category class
+//  MARK: - ListObj class
 //
 ////////////////////////////////////////////////////////////////
 
-class ListObj
+class ListObj: NSObject
 {
     var name: String
     var categoryIndex: Int
     var itemIndex: Int
     
-    init(name: String)
+    init(name: String?)
     {
-        self.name = name
+        if let name = name {
+            self.name = name
+        } else {
+            self.name = ""
+        }
+        
         self.categoryIndex = 0
         self.itemIndex = 0
     }
@@ -784,7 +847,13 @@ class ListObj
     }
 }
 
-class Category: ListObj
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Category class
+//
+////////////////////////////////////////////////////////////////
+
+class Category: ListObj, NSCoding
 {
     var items = [Item]()
     var addItem = AddItem()
@@ -795,10 +864,47 @@ class Category: ListObj
         }
     }
     
-    // designated initializer for a Category
+    // new category initializer
     init(name: String, displayHeader: Bool) {
         self.displayHeader = displayHeader
         super.init(name: name)
+    }
+    
+    // memberwise initializer
+    init(name: String?, expanded: Bool?, displayHeader: Bool?, items: [Item]?) {
+        if let expanded = expanded {
+            self.expanded = expanded
+        } else {
+            self.expanded = true
+        }
+        
+        if let displayHeader = displayHeader {
+            self.displayHeader = displayHeader
+        } else {
+            self.displayHeader = true
+        }
+        
+        if let items = items {
+            self.items = items
+        }
+        
+        super.init(name: name)
+    }
+    
+    required convenience init?(coder decoder: NSCoder) {
+        let name = decoder.decodeObjectForKey("name") as? String
+        let expanded = decoder.decodeObjectForKey("expanded") as? Bool
+        let displayHeader = decoder.decodeObjectForKey("displayHeader") as? Bool
+        let items = decoder.decodeObjectForKey("items") as? [Item]
+        
+        self.init(name: name, expanded: expanded, displayHeader: displayHeader, items: items)
+    }
+    
+    func encodeWithCoder(coder: NSCoder) {
+        coder.encodeObject(self.name, forKey: "name")
+        coder.encodeObject(self.expanded, forKey: "expanded")
+        coder.encodeObject(self.displayHeader, forKey: "displayHeader")
+        coder.encodeObject(self.items, forKey: "items")
     }
     
     // updates the indices for all items in this category
@@ -821,6 +927,7 @@ class Category: ListObj
     func itemsActive() -> Int     {var i=0; for item in items {if item.state != ItemState.Inactive   {++i}}; return i}
     func itemsInactive() -> Int   {var i=0; for item in items {if item.state == ItemState.Inactive   {++i}}; return i}
     func itemsIncomplete() -> Int {var i=0; for item in items {if item.state == ItemState.Incomplete {++i}}; return i}
+    
 }
 
 ////////////////////////////////////////////////////////////////
@@ -829,16 +936,46 @@ class Category: ListObj
 //
 ////////////////////////////////////////////////////////////////
 
-class Item: ListObj
+class Item: ListObj, NSCoding
 {
     var state: ItemState
+    var note: String
     
-    // designated initializer for an Item
+    // new item initializer
     init(name: String, state: ItemState)
     {
         self.state = state
+        self.note = ""
         super.init(name: name)
     }
+
+    // memberwise initializer
+    init(name: String?, note: String?, state: ItemState) {
+        if let note = note {
+            self.note = note
+        } else {
+            self.note = ""
+        }
+        
+        self.state = state
+        
+        super.init(name: name)
+    }
+    
+    required convenience init?(coder decoder: NSCoder) {
+        let name = decoder.decodeObjectForKey("name") as? String
+        let note = decoder.decodeObjectForKey("note") as? String
+        let state = decoder.decodeIntForKey("state") as Int32?
+        
+        self.init(name: name, note: note, state: state == 0 ? ItemState.Inactive : state == 1 ? ItemState.Incomplete : ItemState.Complete)
+    }
+    
+    func encodeWithCoder(coder: NSCoder) {
+        coder.encodeObject(self.name, forKey: "name")
+        coder.encodeObject(self.note, forKey: "note")
+        coder.encodeInteger(state.rawValue, forKey: "state")
+    }
+    
 }
 
 ////////////////////////////////////////////////////////////////
@@ -892,5 +1029,4 @@ struct Tag
         return (cIdx, tag - (cIdx * kItemIndexMax))
     }
 }
-
 
