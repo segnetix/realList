@@ -40,6 +40,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     var longPressActive = false    
     var selectionIndex = -1
     var editingNewListName = false
+    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     weak var delegate: ListSelectionDelegate?
     
@@ -62,6 +63,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // selectionIndex can be set by the AppDelegate with an initial list selection on app start (from saved state)
         self.selectList(selectionIndex)
+        
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -248,15 +250,25 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
     
-    /*
-    override func prefersStatusBarHidden() -> Bool {
-        return navigationController?.navigationBarHidden == true
-    }
     
-    override func preferredStatusBarUpdateAnimation() -> UIStatusBarAnimation {
-        return UIStatusBarAnimation.Slide
+    func textFieldShouldBeginEditing(textField: UITextField) -> Bool
+    {
+        // scroll the editing cell into view if necessary
+        let indexPath = NSIndexPath(forRow: textField.tag, inSection: 0)
+        
+        if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false
+        {
+            tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: UITableViewScrollPosition.Bottom, animated: false)
+        }
+        
+        // this clears an initial space in a new cell name
+        if textField.text == " " {
+            textField.text = ""
+        }
+        
+        return true
     }
-    */
+
     
     func listNameDidChange(textField: UITextField)
     {
@@ -286,6 +298,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 lists.removeLast()
                 self.tableView.reloadData()
             }
+            appDelegate.saveAll()
         }
         
         editingNewListName = false
@@ -309,6 +322,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cell = tableView.cellForRowAtIndexPath(indexPath) as! ListCell
         
         inEditMode = true
+        editingNewListName = true
         cell.listName.userInteractionEnabled = true
         cell.listName.becomeFirstResponder()
         editingNewListName = true
@@ -676,6 +690,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             } else {
                 selectedCell?.backgroundColor = UIColor(colorLiteralRed: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
             }
+            
+            appDelegate.saveState()
         }
     }
     

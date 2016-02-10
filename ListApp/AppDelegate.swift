@@ -47,17 +47,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         print("applicationWillResignActive...")
         
-        // save current selection
-        NSUserDefaults.standardUserDefaults().setObject(listViewController!.selectionIndex, forKey: "selectionIndex")
-        
-        // save the list data
-        if let listVC = listViewController {
-            let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: ArchiveURL.path!)
-            
-            if !successfulSave {
-                print("Failed to save list data...")
-            }
-        }
+        // save state and data
+        saveAll()
     }
 
     func applicationDidEnterBackground(application: UIApplication) {
@@ -101,6 +92,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         print("applicationWillTerminate...")
         
+    }
+    
+    func saveState() {
+        // save current selection
+        NSUserDefaults.standardUserDefaults().setObject(listViewController!.selectionIndex, forKey: "selectionIndex")
+        
+        //let listViewIsVisible = listViewController?.view.hidden == false
+        //NSUserDefaults.standardUserDefaults().setObject(listViewIsVisible, forKey: "listViewIsVisible")
+        
+        //print("listViewIsVisible: \(listViewIsVisible)")
+    }
+    
+    func saveListData() {
+        // save the list data
+        if let listVC = listViewController {
+            let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: ArchiveURL.path!)
+            
+            if !successfulSave {
+                print("Failed to save list data...")
+            }
+        }
+    }
+    
+    func saveAll() {
+        saveState()
+        saveListData()
     }
 }
 

@@ -57,6 +57,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     var showAdBanner = true
     let settingsTransitionDelegate = SettingsTransitioningDelegate()
     let itemDetailTransitionDelegate = ItemDetailTransitioningDelegate()
+    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     var list: List! {
         didSet (newList) {
@@ -435,6 +436,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 list.updateIndices()
             }
             editingNewItemName = false
+            appDelegate.saveListData()
         } else if editingNewCategoryName
         {
             if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
@@ -445,6 +447,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 list.updateIndices()
             }
             editingNewCategoryName = false
+            appDelegate.saveListData()
         }
         
         return true
@@ -1056,7 +1059,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             self.title = list!.name
             tableView.reloadData()
         } else {
-            self.title = "<no selection>"
+            self.title = "Items"
             tableView.reloadData()
         }
     }
