@@ -32,9 +32,9 @@ enum ItemViewCellType {
 }
 
 let kItemViewScrollRate: CGFloat = 6.0
-let kItemCellHeight: CGFloat = 52.0
-let kCategoryCellHeight: CGFloat = 40.0
-let kAddItemCellHeight: CGFloat = 40.0
+let kItemCellHeight: CGFloat = 56.0
+let kCategoryCellHeight: CGFloat = 44.0
+let kAddItemCellHeight: CGFloat = 44.0
 
 class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate
 {
@@ -179,17 +179,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
             cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
 
-            // set tempCheckButton state
-            switch item.state {
-            case ItemState.Inactive:
-                cell.tempCheckButton.setTitle("INACT", forState: .Normal)
-            case ItemState.Incomplete:
-                cell.tempCheckButton.setTitle("INCMP", forState: .Normal)
-            case ItemState.Complete:
-                cell.tempCheckButton.setTitle("COMPL", forState: .Normal)
-            }
-            
-            cell.tempCheckButton.tag = tag
+            cell.checkBox.checkBoxInit(item, list: list, itemVC: self, tag: tag)
             
             // set item name
             let title = list.titleForObjectAtIndexPath(indexPath)
@@ -436,7 +426,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 list.updateIndices()
             }
             editingNewItemName = false
-            appDelegate.saveListData()
         } else if editingNewCategoryName
         {
             if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
@@ -447,9 +436,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 list.updateIndices()
             }
             editingNewCategoryName = false
-            appDelegate.saveListData()
         }
         
+        appDelegate.saveListData()
         return true
     }
     
@@ -528,6 +517,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 newCatIndexPath = nil
             }
         }
+        
+        appDelegate.saveAll()
     }
     
     func scrollToCategoryEnded(scrollView: UIScrollView)
@@ -1113,7 +1104,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 if cell is ItemCell {
                     let itemCell = cell as! ItemCell
                     itemCell.itemName!.tag = tag
-                    itemCell.tempCheckButton!.tag = tag
+                    itemCell.checkBox!.tag = tag
                 } else if cell is CategoryCell {
                     (cell as! CategoryCell).categoryName!.tag = tag
                 } else if cell is AddItemCell {
@@ -1196,20 +1187,22 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     {
         print("settings button tapped...")
         
-        transitioningDelegate = settingsTransitionDelegate
-        let vc = SettingsViewController()
-        vc.transitioningDelegate = settingsTransitionDelegate
-        vc.showCompletedItems = list.showCompletedItems
-        vc.showInactiveItems = list.showInactiveItems
-        vc.itemVC = self
-        presentViewController(vc, animated: true, completion: nil)
+        if let list = list {
+            transitioningDelegate = settingsTransitionDelegate
+            let vc = SettingsViewController()
+            vc.transitioningDelegate = settingsTransitionDelegate
+            vc.showCompletedItems = list.showCompletedItems
+            vc.showInactiveItems = list.showInactiveItems
+            vc.itemVC = self
+            presentViewController(vc, animated: true, completion: nil)
+        }
 
     }
     
     func loadItemDetailView(item: Item)
     {
         transitioningDelegate = itemDetailTransitionDelegate
-        let vc = ItemDetailViewController(item: item)
+        let vc = ItemDetailViewController(item: item, list: list)
         vc.transitioningDelegate = itemDetailTransitionDelegate
         vc.itemVC = self
         presentViewController(vc, animated: true, completion: nil)
@@ -1271,28 +1264,21 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         list.updateIndices()
     }
     
-    // called when the check button is tapped
-    @IBAction func checkButtonTapped(sender: UIButton)
-    {
-        print("checkButtonTapped: \(sender.tag)")
-        let senderItem = list.objectForTag(sender.tag)
+    // called from the checkBox button when it is tapped
+    func checkButtonTapped(checkBox: CheckBox) {
+        print("checkButtonTapped: \(checkBox.tag)")
+        let senderItem = list.objectForTag(checkBox.tag)
         var indexPath: NSIndexPath? = nil
         
         if senderItem is Item {
             let item = senderItem as! Item
             indexPath = list.displayIndexPathForItem(item)
             
-            // cycle through the item states
+            // cycle item state
             switch item.state {
-            case ItemState.Inactive:
-                item.state = ItemState.Incomplete
-                sender.setTitle("INCMP", forState: .Normal)
-            case ItemState.Incomplete:
-                item.state = ItemState.Complete
-                sender.setTitle("COMPL", forState: .Normal)
-            case ItemState.Complete:
-                item.state = ItemState.Inactive
-                sender.setTitle("INACT", forState: .Normal)
+            case ItemState.Incomplete:  item.state = ItemState.Complete
+            case ItemState.Complete:    item.state = ItemState.Inactive
+            case ItemState.Inactive:    item.state = ItemState.Incomplete
             }
             
             // set item name text color
@@ -1305,7 +1291,55 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 }
             }
             
-            //print("item: \(item.name) is set to \(sender.titleForState(.Normal))")
+            // remove a newly completed row if we are hiding completed items
+            if list.showCompletedItems == false && item.state == ItemState.Complete {
+                if indexPath != nil {
+                    self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+                }
+            }
+            
+            // remove a newly inactive row if we are hiding inactive items
+            if list.showInactiveItems == false && item.state == ItemState.Inactive {
+                if indexPath != nil {
+                    self.tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+                }
+            }
+            
+            // need to update the counts in the cat cell count label
+            if let category = list.categoryForObj(item) {
+                if let catIndexPath = list.displayIndexPathForCategory(category) {
+                    if self.tableView.indexPathsForVisibleRows?.contains(catIndexPath) == true {
+                        let catCell = tableView.cellForRowAtIndexPath(catIndexPath) as! CategoryCell
+                        catCell.catCountLabel.attributedText = self.categoryCountString(category)
+                    }
+                }
+            }
+        } else {
+            print("ERROR: checkButtonTapped received an index path that points to a non-item object!")
+        }
+
+    }
+    
+    // called after the item state has changed
+    func checkButtonTapped_postStateChange(checkBox: CheckBox)
+    {
+        print("checkButtonTapped: \(checkBox.tag)")
+        let senderItem = list.objectForTag(checkBox.tag)
+        var indexPath: NSIndexPath? = nil
+        
+        if senderItem is Item {
+            let item = senderItem as! Item
+            indexPath = list.displayIndexPathForItem(item)
+            
+            // set item name text color
+            if indexPath != nil {
+                let cell = tableView.cellForRowAtIndexPath(indexPath!) as! ItemCell
+                if item.state == ItemState.Inactive {
+                    cell.itemName.textColor = UIColor.lightGrayColor()
+                } else {
+                    cell.itemName.textColor = UIColor.blackColor()
+                }
+            }
             
             // remove a newly completed row if we are hiding completed items
             if list.showCompletedItems == false && item.state == ItemState.Complete {
@@ -1331,6 +1365,11 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 }
             }
             
+            // update the row after changes
+            //if indexPath != nil {
+            //    print("reloadRowsAtIndexPaths: \(indexPath!.row)")
+            //    tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
+            //}
         } else {
             print("ERROR: checkButtonTapped received an index path that points to a non-item object!")
         }

@@ -19,7 +19,7 @@ protocol ItemCellDelegate: class
 
 class ItemCell: UITableViewCell
 {
-    @IBOutlet weak var tempCheckButton: UIButton!
+    @IBOutlet weak var checkBox: CheckBox!
     @IBOutlet weak var itemName: UITextField!
     @IBOutlet weak var itemNote: UILabel!
     

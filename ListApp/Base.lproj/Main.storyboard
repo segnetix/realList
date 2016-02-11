@@ -36,64 +36,49 @@
                                                     <attributedString key="attributedText"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done"/>
                                                 </textField>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Item Notes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ug1-Vs-VEu">
-                                                    <rect key="frame" x="60" y="21" width="507" height="16"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="Item Notes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ug1-Vs-VEu">
+                                                    <rect key="frame" x="60" y="21" width="507" height="6"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="b3w-fy-jQC">
-                                                    <rect key="frame" x="0.0" y="0.0" width="52" height="44"/>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="b3w-fy-jQC" customClass="CheckBox" customModule="ListApp" customModuleProvider="target">
+                                                    <rect key="frame" x="8" y="-7" width="44" height="45"/>
                                                     <constraints>
-                                                        <constraint firstAttribute="width" constant="52" id="DEO-tL-uYY"/>
-                                                        <constraint firstAttribute="height" relation="greaterThanOrEqual" constant="44" id="DMT-DF-wyr"/>
+                                                        <constraint firstAttribute="width" constant="44" id="DEO-tL-uYY"/>
+                                                        <constraint firstAttribute="height" constant="44" id="DMT-DF-wyr"/>
                                                     </constraints>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                                    <state key="normal" title="1">
+                                                    <state key="normal">
                                                         <color key="titleColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                     </state>
-                                                    <connections>
-                                                        <action selector="checkButtonTapped:" destination="qcG-gI-ddh" eventType="touchUpInside" id="XJd-X1-B6X"/>
-                                                    </connections>
                                                 </button>
                                             </subviews>
                                             <constraints>
                                                 <constraint firstItem="ek5-bB-UcJ" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="top" id="0AG-hw-4t3"/>
-                                                <constraint firstItem="ek5-bB-UcJ" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="topMargin" id="7pP-x3-S4b"/>
-                                                <constraint firstItem="ug1-Vs-VEu" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" id="8XS-Ex-Jr4"/>
                                                 <constraint firstAttribute="trailing" secondItem="ek5-bB-UcJ" secondAttribute="trailing" id="GAn-7A-Ikl"/>
-                                                <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" symbolic="YES" id="Gfc-PN-1Xh"/>
-                                                <constraint firstAttribute="trailing" secondItem="ug1-Vs-VEu" secondAttribute="trailing" id="I2v-cD-uFG"/>
-                                                <constraint firstAttribute="trailingMargin" secondItem="ek5-bB-UcJ" secondAttribute="trailing" id="Mjf-hp-FpB"/>
-                                                <constraint firstAttribute="bottom" secondItem="ug1-Vs-VEu" secondAttribute="bottom" id="Un2-LO-fsC"/>
                                                 <constraint firstItem="ug1-Vs-VEu" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" id="Ut2-4b-DnH"/>
-                                                <constraint firstItem="b3w-fy-jQC" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="top" id="at5-YM-jz0"/>
-                                                <constraint firstItem="ug1-Vs-VEu" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="top" id="fwB-At-rvk"/>
-                                                <constraint firstAttribute="bottom" secondItem="b3w-fy-jQC" secondAttribute="bottom" id="hhC-bL-ONo"/>
+                                                <constraint firstItem="b3w-fy-jQC" firstAttribute="centerY" secondItem="AZO-88-8cc" secondAttribute="centerY" id="cIZ-xb-PTX"/>
                                                 <constraint firstAttribute="bottom" secondItem="ug1-Vs-VEu" secondAttribute="bottom" constant="4" id="i46-pq-z9n"/>
+                                                <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" symbolic="YES" id="jsU-Dy-dVn"/>
                                                 <constraint firstItem="ug1-Vs-VEu" firstAttribute="top" secondItem="ek5-bB-UcJ" secondAttribute="bottom" id="kLn-3h-ii4"/>
                                                 <constraint firstAttribute="trailing" secondItem="ug1-Vs-VEu" secondAttribute="trailing" id="oCD-Ys-ADr"/>
-                                                <constraint firstAttribute="bottomMargin" secondItem="ek5-bB-UcJ" secondAttribute="bottom" id="py0-c6-1Yx"/>
-                                                <constraint firstItem="b3w-fy-jQC" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leading" id="tAB-1R-QC4"/>
+                                                <constraint firstItem="b3w-fy-jQC" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leading" constant="8" id="pdu-Nh-Lux"/>
+                                                <constraint firstItem="b3w-fy-jQC" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leading" constant="20" symbolic="YES" id="tAB-1R-QC4"/>
+                                                <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" id="uaJ-dA-h4J"/>
                                             </constraints>
                                             <variation key="default">
                                                 <mask key="constraints">
-                                                    <exclude reference="7pP-x3-S4b"/>
-                                                    <exclude reference="Mjf-hp-FpB"/>
-                                                    <exclude reference="py0-c6-1Yx"/>
-                                                    <exclude reference="8XS-Ex-Jr4"/>
-                                                    <exclude reference="I2v-cD-uFG"/>
-                                                    <exclude reference="Un2-LO-fsC"/>
-                                                    <exclude reference="fwB-At-rvk"/>
+                                                    <exclude reference="tAB-1R-QC4"/>
+                                                    <exclude reference="jsU-Dy-dVn"/>
                                                 </mask>
                                             </variation>
                                         </tableViewCellContentView>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                         <connections>
+                                            <outlet property="checkBox" destination="b3w-fy-jQC" id="ncn-QF-v5v"/>
                                             <outlet property="itemName" destination="ek5-bB-UcJ" id="Pnn-R8-IcF"/>
                                             <outlet property="itemNote" destination="ug1-Vs-VEu" id="psY-L5-kha"/>
-                                            <outlet property="tempCheckButton" destination="b3w-fy-jQC" id="DHm-3N-U2k"/>
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="CategoryCell" id="STC-IF-0Ob" userLabel="CategoryCell" customClass="CategoryCell" customModule="ListApp" customModuleProvider="target">
@@ -237,7 +222,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="KOg-sp-vFR">
-                                            <rect key="frame" x="20" y="8" width="539" height="43"/>
+                                            <rect key="frame" x="12" y="0.0" width="555" height="59"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="483" id="jcx-sb-g8L"/>
                                             </constraints>
@@ -251,11 +236,23 @@
                                         </textField>
                                     </subviews>
                                     <constraints>
+                                        <constraint firstAttribute="bottom" secondItem="KOg-sp-vFR" secondAttribute="bottom" id="2bJ-If-LZc"/>
                                         <constraint firstItem="KOg-sp-vFR" firstAttribute="leading" secondItem="LfD-kY-ebN" secondAttribute="leadingMargin" constant="12" id="4n6-db-sqs"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="KOg-sp-vFR" secondAttribute="trailing" id="Bmu-lk-hsz"/>
+                                        <constraint firstAttribute="trailing" secondItem="KOg-sp-vFR" secondAttribute="trailing" id="JeP-iR-rGX"/>
+                                        <constraint firstItem="KOg-sp-vFR" firstAttribute="top" secondItem="LfD-kY-ebN" secondAttribute="top" id="KuG-cW-dDe"/>
+                                        <constraint firstItem="KOg-sp-vFR" firstAttribute="leading" secondItem="LfD-kY-ebN" secondAttribute="leading" constant="12" id="PKz-GU-PeE"/>
                                         <constraint firstAttribute="bottomMargin" secondItem="KOg-sp-vFR" secondAttribute="bottom" id="tAX-8K-hvN"/>
                                         <constraint firstItem="KOg-sp-vFR" firstAttribute="top" secondItem="LfD-kY-ebN" secondAttribute="topMargin" id="uyK-Vv-qis"/>
                                     </constraints>
+                                    <variation key="default">
+                                        <mask key="constraints">
+                                            <exclude reference="4n6-db-sqs"/>
+                                            <exclude reference="Bmu-lk-hsz"/>
+                                            <exclude reference="tAX-8K-hvN"/>
+                                            <exclude reference="uyK-Vv-qis"/>
+                                        </mask>
+                                    </variation>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>

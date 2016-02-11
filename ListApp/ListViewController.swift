@@ -12,6 +12,7 @@ import QuartzCore
 let listCellID = "ListCell"
 let addListCellId = "AddListCell"
 let kScrollZoneHeight: CGFloat = 50.0
+let selectedCellColor: UIColor = UIColor(colorLiteralRed: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
 
 // ListSelectionDelegate protocol
 protocol ListSelectionDelegate: class
@@ -22,7 +23,7 @@ protocol ListSelectionDelegate: class
 }
 
 let kListViewScrollRate: CGFloat = 6.0
-let kListViewCellHeight: CGFloat = 52.0
+let kListViewCellHeight: CGFloat = 60.0
 
 class ListViewController: UITableViewController, UITextFieldDelegate
 {
@@ -135,8 +136,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             cell.contentView.tag = indexPath.row
             
             // list background color
-            if list.listColor != nil {
-                cell.backgroundColor = list.listColor
+            if cell.selected {
+                cell.backgroundColor = selectedCellColor
             } else {
                 cell.backgroundColor = UIColor.whiteColor()
             }
@@ -685,11 +686,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             
             // then select the current cell
             let selectedCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: selectionIndex, inSection: 0))
-            if selectedList.listColor != nil {
-                selectedCell?.backgroundColor = selectedList.listColor!
-            } else {
-                selectedCell?.backgroundColor = UIColor(colorLiteralRed: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
-            }
+            selectedCell?.backgroundColor = selectedCellColor
             
             appDelegate.saveState()
         }

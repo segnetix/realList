@@ -16,11 +16,13 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
     var closeButton: UIButton = UIButton()
     weak var itemVC: ItemViewController?
     weak var item: Item?
+    weak var list: List?
     
-    init(item: Item) {
+    init(item: Item, list: List) {
         super.init(nibName: nil, bundle: nil)
         modalPresentationStyle = UIModalPresentationStyle.Custom
         self.item = item
+        self.list = list
         createUI()
     }
     
@@ -38,12 +40,12 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         view.addSubview(containerView)
         
         // Set some constants to use when creating constraints
-        let titleFontSize: CGFloat = view.bounds.size.width > 667.0 ? 40.0 : 22.0
-        let bodyFontSize: CGFloat = view.bounds.size.width > 667.0 ? 40.0 : 22.0
-        let noteFontSize: CGFloat = 15.0
+        //let titleFontSize: CGFloat = view.bounds.size.width > 667.0 ? 40.0 : 22.0
+        //let bodyFontSize: CGFloat = view.bounds.size.width > 667.0 ? 40.0 : 22.0
+        //let noteFontSize: CGFloat = 15.0
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = UIFont.boldSystemFontOfSize(titleFontSize)
+        titleLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleTitle1)
         if item?.state != ItemState.Inactive {
             titleLabel.textColor = UIColor.blackColor()
         } else {
@@ -54,11 +56,16 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         containerView.addSubview(titleLabel)
         
         noteTextView.translatesAutoresizingMaskIntoConstraints = false
-        noteTextView.font = UIFont.systemFontOfSize(noteFontSize)
         noteTextView.textColor = UIColor.blackColor()
         noteTextView.layer.borderColor = containerView.tintColor.CGColor
-        noteTextView.layer.borderWidth = 1.0;
-        noteTextView.layer.cornerRadius = 5.0;
+        if list != nil && list!.listColor != nil {
+            noteTextView.layer.borderColor = list!.listColor!.CGColor
+        } else {
+            noteTextView.layer.borderColor = containerView.tintColor.CGColor
+        }
+        noteTextView.layer.borderWidth = 2.0
+        noteTextView.layer.cornerRadius = 5.0
+        noteTextView.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
         noteTextView.textAlignment = NSTextAlignment.Left
         noteTextView.returnKeyType = UIReturnKeyType.Done
         noteTextView.delegate = self
@@ -67,7 +74,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setTitle("Close", forState: UIControlState.Normal)
         closeButton.setTitleColor(containerView.tintColor, forState: UIControlState.Normal)
-        closeButton.titleLabel!.font = UIFont.systemFontOfSize(bodyFontSize)
+        closeButton.titleLabel!.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
         closeButton.addTarget(self, action: "close:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(closeButton)
         
@@ -114,7 +121,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         
         containerView.addConstraints(
             NSLayoutConstraint.constraintsWithVisualFormat(
-                "V:|-50-[titleLabel]-[noteTextView(200)]-(>=40)-[closeButton]-50-|",
+                "V:|-24-[titleLabel]-[noteTextView(180)]-(>=20)-[closeButton]-24-|",
                 options: NSLayoutFormatOptions(rawValue: 0),
                 metrics: nil,
                 views: views))
@@ -132,6 +139,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
     func close(sender: UIButton) {
         item?.note = noteTextView.text
         itemVC?.tableView.reloadData()
+        itemVC?.appDelegate.saveAll()
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
 

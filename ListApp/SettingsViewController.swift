@@ -315,6 +315,7 @@ class SettingsViewController: UIViewController
     }
     
     func close(sender: UIButton) {
+        itemVC?.appDelegate.saveAll()
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     

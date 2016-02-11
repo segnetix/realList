@@ -13,6 +13,7 @@
 		B03C46811C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */; };
 		B07828981C36000B009D356F /* ListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07828971C36000B009D356F /* ListCell.swift */; };
 		B078289A1C360020009D356F /* ItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07828991C360020009D356F /* ItemCell.swift */; };
+		B07AB8A21C6BCF99001F8F81 /* CheckBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */; };
 		B0854A891C3895DA00B9D2F7 /* CategoryCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */; };
 		B0930D5E1C63C951007EBAA0 /* iAd.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0930D5D1C63C951007EBAA0 /* iAd.framework */; };
 		B0930D6A1C652DA5007EBAA0 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0930D691C652DA5007EBAA0 /* SettingsViewController.swift */; };
@@ -38,6 +39,7 @@
 		B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemDetailAnimatedTransitioning.swift; sourceTree = "<group>"; };
 		B07828971C36000B009D356F /* ListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListCell.swift; sourceTree = "<group>"; };
 		B07828991C360020009D356F /* ItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemCell.swift; sourceTree = "<group>"; };
+		B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckBox.swift; sourceTree = "<group>"; };
 		B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryCell.swift; sourceTree = "<group>"; };
 		B0930D5D1C63C951007EBAA0 /* iAd.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = iAd.framework; path = System/Library/Frameworks/iAd.framework; sourceTree = SDKROOT; };
 		B0930D691C652DA5007EBAA0 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -98,6 +100,7 @@
 				B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */,
 				B0FF8C361C4AE58900C0A33C /* AddListCell.swift */,
 				B07828991C360020009D356F /* ItemCell.swift */,
+				B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */,
 				B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */,
 				B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */,
 				B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */,
@@ -195,6 +198,7 @@
 				B0930D701C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift in Sources */,
 				B0930D6E1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift in Sources */,
 				B03C467B1C66F21400B66CBD /* ItemDetailViewController.swift in Sources */,
+				B07AB8A21C6BCF99001F8F81 /* CheckBox.swift in Sources */,
 				B0A302881C35915B00F6FB44 /* ListData.swift in Sources */,
 				B03C46811C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift in Sources */,
 				B0A3026C1C349F7A00F6FB44 /* AppDelegate.swift in Sources */,
