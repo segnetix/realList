@@ -131,7 +131,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             cell.listName.userInteractionEnabled = false
             cell.listName.delegate = self
             cell.listName.addTarget(self, action: "listNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
-            cell.listName.attributedText = makeAttributedString(title: list.name, subtitle: "")
+            cell.listName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
+            cell.listName.text = list.name
             cell.listName.tag = indexPath.row
             cell.contentView.tag = indexPath.row
             
@@ -692,6 +693,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
+    /*
     func makeAttributedString(title title: String, subtitle: String) -> NSAttributedString {
         let titleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleBody), NSForegroundColorAttributeName: UIColor.blackColor()]
         let subtitleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleSubheadline)]
@@ -703,6 +705,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         return titleString
     }
+    */
     
     func getTopBarHeight() -> CGFloat {
         let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height

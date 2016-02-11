@@ -45,7 +45,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         //let noteFontSize: CGFloat = 15.0
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleTitle1)
+        titleLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
         if item?.state != ItemState.Inactive {
             titleLabel.textColor = UIColor.blackColor()
         } else {
@@ -74,7 +74,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setTitle("Close", forState: UIControlState.Normal)
         closeButton.setTitleColor(containerView.tintColor, forState: UIControlState.Normal)
-        closeButton.titleLabel!.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+        closeButton.titleLabel!.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
         closeButton.addTarget(self, action: "close:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(closeButton)
         

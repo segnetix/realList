@@ -40,7 +40,7 @@ class SettingsPresentationController: UIPresentationController, UIAdaptivePresen
     {
         // adaptive sizing width, min 150, max 240
         let parentWidth = parentSize.width
-        let childWidth = min(max(parentWidth/3.0, 150), 240)
+        let childWidth = min(max(parentWidth/2.0, 180), 260)
         
         print(childWidth)
         

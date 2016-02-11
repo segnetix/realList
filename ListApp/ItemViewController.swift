@@ -115,7 +115,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
-        print("viewWillTransitionToSize... \(size)")
+        //print("viewWillTransitionToSize... \(size)")
 
     }
     override func didReceiveMemoryWarning() {
@@ -125,9 +125,10 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     }
     
     override func viewWillLayoutSubviews() {
-        print("viewWillLayoutSubviews with width: \(self.view.frame.width)")
+        //print("viewWillLayoutSubviews with width: \(self.view.frame.width)")
         
     }
+    
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)!
     }
@@ -165,6 +166,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             cell.itemName.userInteractionEnabled = false
             cell.itemName.delegate = self
             cell.itemName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+            cell.itemName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
             cell.itemName!.tag = tag
             cell.contentView.tag = tag
             
@@ -184,10 +186,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             // set item name
             let title = list.titleForObjectAtIndexPath(indexPath)
             if let cellTitle = title {
-                //cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.itemName.tag)")   // for development/debugging
-                cell.itemName.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                         // for production
+                cell.itemName.text = cellTitle
             } else {
-                cell.itemName.attributedText = makeAttributedString(title: "cellTitle is nil", subtitle: "")
+                cell.itemName.text = "cellTitle is nil"
             }
             
             // set item name text color
@@ -227,6 +228,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             cell.categoryName.userInteractionEnabled = false
             cell.categoryName.delegate = self
             cell.categoryName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+            cell.categoryName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
             cell.categoryName!.tag = tag
             cell.contentView.tag = tag
             
@@ -245,13 +247,13 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             let title = list.titleForObjectAtIndexPath(indexPath)
             if let cellTitle = title {
                 //cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.categoryName.tag)")      // for development/debugging
-                cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "")                                // for production
+                cell.categoryName?.text = cellTitle
             } else {
-                cell.categoryName?.attributedText = makeAttributedString(title: "", subtitle: "")
+                cell.categoryName?.text = ""
             }
             
             // catCountLabel
-            cell.catCountLabel.attributedText = categoryCountString(category)
+            cell.catCountLabel.text = categoryCountString(category)
             cell.catCountLabel.textAlignment = NSTextAlignment.Right
             
             // cell separator
@@ -534,6 +536,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         newCatIndexPath = nil
     }
     
+    /*
     func makeAttributedString(title title: String, subtitle: String) -> NSAttributedString {
         let titleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleBody), NSForegroundColorAttributeName: UIColor.blackColor()]
         let subtitleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleSubheadline)]
@@ -545,10 +548,11 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         return titleString
     }
+    */
     
-    func categoryCountString(category: Category) -> NSAttributedString
+    func categoryCountString(category: Category) -> String
     {
-        return makeAttributedString(title: String("\(category.itemsComplete())/\(category.items.count)"), subtitle: "")
+        return "\(category.itemsComplete())/\(category.items.count)"
     }
 
     
@@ -1185,7 +1189,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
 
     func settingsButtonTapped()
     {
-        print("settings button tapped...")
+        //print("settings button tapped...")
         
         if let list = list {
             transitioningDelegate = settingsTransitionDelegate
@@ -1310,7 +1314,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 if let catIndexPath = list.displayIndexPathForCategory(category) {
                     if self.tableView.indexPathsForVisibleRows?.contains(catIndexPath) == true {
                         let catCell = tableView.cellForRowAtIndexPath(catIndexPath) as! CategoryCell
-                        catCell.catCountLabel.attributedText = self.categoryCountString(category)
+                        catCell.catCountLabel.text = self.categoryCountString(category)
                     }
                 }
             }
@@ -1360,7 +1364,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 if let catIndexPath = list.displayIndexPathForCategory(category) {
                     if self.tableView.indexPathsForVisibleRows?.contains(catIndexPath) == true {
                         let catCell = tableView.cellForRowAtIndexPath(catIndexPath) as! CategoryCell
-                        catCell.catCountLabel.attributedText = self.categoryCountString(category)
+                        catCell.catCountLabel.text = self.categoryCountString(category)
                     }
                 }
             }

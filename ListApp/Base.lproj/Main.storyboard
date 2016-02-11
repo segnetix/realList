@@ -89,7 +89,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="nPQ-Yu-QYm" userLabel="Category Name">
-                                                    <rect key="frame" x="20" y="8" width="522" height="15"/>
+                                                    <rect key="frame" x="20" y="0.0" width="522" height="31"/>
                                                     <attributedString key="attributedText"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done"/>
                                                 </textField>
@@ -110,12 +110,15 @@
                                                 <constraint firstItem="nPQ-Yu-QYm" firstAttribute="centerY" secondItem="F5V-gG-q6K" secondAttribute="centerY" id="lYH-kz-FIR"/>
                                                 <constraint firstAttribute="bottomMargin" secondItem="37Y-n0-dxM" secondAttribute="bottom" id="lle-i8-791"/>
                                                 <constraint firstItem="37Y-n0-dxM" firstAttribute="leading" secondItem="nPQ-Yu-QYm" secondAttribute="trailing" constant="8" symbolic="YES" id="sVq-vx-3x2"/>
+                                                <constraint firstAttribute="bottom" secondItem="nPQ-Yu-QYm" secondAttribute="bottom" id="t4b-Uk-mNP"/>
+                                                <constraint firstItem="nPQ-Yu-QYm" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="top" id="wY8-Tf-3VY"/>
                                                 <constraint firstItem="37Y-n0-dxM" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="topMargin" id="y3l-V3-lGE"/>
                                                 <constraint firstItem="nPQ-Yu-QYm" firstAttribute="leading" secondItem="F5V-gG-q6K" secondAttribute="leadingMargin" constant="12" id="yfe-7y-e31"/>
                                             </constraints>
                                             <variation key="default">
                                                 <mask key="constraints">
                                                     <exclude reference="LDr-aD-irQ"/>
+                                                    <exclude reference="hDD-3Q-A0C"/>
                                                     <exclude reference="9sh-XE-m1b"/>
                                                 </mask>
                                             </variation>
