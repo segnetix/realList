@@ -1,0 +1,12 @@
+
+/* Class = "UIButton"; normalTitle = "new item"; ObjectID = "9Rm-EG-YMt"; */
+"9Rm-EG-YMt.normalTitle" = "nouvel article";
+
+/* Class = "UIButton"; normalTitle = "new list"; ObjectID = "Kcl-ny-7ll"; */
+"Kcl-ny-7ll.normalTitle" = "nouvelle liste";
+
+/* Class = "UINavigationItem"; title = "Lists"; ObjectID = "eUa-Gb-6wx"; */
+"eUa-Gb-6wx.title" = "Listes";
+
+/* Class = "UILabel"; text = "Item Notes"; ObjectID = "ug1-Vs-VEu"; */
+"ug1-Vs-VEu.text" = "Notes Point";

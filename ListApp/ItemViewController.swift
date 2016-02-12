@@ -310,10 +310,12 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     }
     */
     
+    /*
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
     {
         print("didSelectRowAtIndexPath...!!!")
     }
+    */
     
     // override to support conditional editing of the table view
     func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
@@ -577,7 +579,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                     let category = obj as! Category
                     
                     category.expanded = !category.expanded
-                    print("cellSingleTapAction was hit for category '\(obj!.name)' with tag \(tag)")
+                    //print("cellSingleTapAction was hit for category '\(obj!.name)' with tag \(tag)")
                     
                     // get display index paths for this category
                     let indexPaths = list.displayIndexPathsForCategory(category)    // includes AddItem cell path
@@ -797,7 +799,13 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                         //print("cellAtIndexPathIsAddCellCategoryPair", indexPath!.row, moveDirection)
                         
                         if moveDirection == .Down {
-                            indexPath = NSIndexPath(forRow: indexPath!.row + 1, inSection: 0)
+                            let rowCount = list.totalDisplayCount()
+                            // this is to prevent dragging past the last row
+                            if indexPath!.row < rowCount-1 {
+                                indexPath = NSIndexPath(forRow: indexPath!.row + 1, inSection: 0)
+                            } else {
+                                indexPath = NSIndexPath(forRow: indexPath!.row, inSection: 0)
+                            }
                         } else {
                             indexPath = NSIndexPath(forRow: indexPath!.row - 1, inSection: 0)
                         }
@@ -846,7 +854,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                     
                     // remove the item from its original location
                     list.removeItem(srcItem, updateIndices: true)
-                    print("removeItem... \(srcItem.name)")
+                    //print("removeItem... \(srcItem.name)")
                     
                     // insert the item at its new location
                     if destDataObj is Item
@@ -857,7 +865,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                         } else {
                             list.insertItem(srcItem, beforeObj: destItem, updateIndices: true)
                         }
-                        print("insertItem... \(destItem.name)")
+                        //print("insertItem... \(destItem.name)")
                     }
                     else if destDataObj is Category
                     {
@@ -886,7 +894,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                         }
                     }
                     
-                    print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
+                    //print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
                     
                     tableView.endUpdates()
                 }
@@ -904,7 +912,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                         ++dstCategoryIndex
                     }
                     
-                    print("srcCategoryIndex: \(srcCategoryIndex)  dstCategoryIndex: \(dstCategoryIndex)")
+                    //print("srcCategoryIndex: \(srcCategoryIndex)  dstCategoryIndex: \(dstCategoryIndex)")
                     
                     if srcCategoryIndex >= 0 && dstCategoryIndex >= 0 {
                         tableView.beginUpdates()
@@ -996,14 +1004,17 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     
     func confirmDelete(objName: String, isItem: Bool)
     {
-        let objType = isItem ? "item" : "category"
-        let alert = UIAlertController(title: "Delete \(objType.capitalizedString)", message: "Are you sure you want to permanently delete the \(objType) \(objName)?", preferredStyle: .Alert)
+        let DeleteItemTitle = NSLocalizedString("Delete_Item_Title", comment: "A title in an alert asking if the user wants to delete an item.")
+        let DeleteItemMessage = String(format: NSLocalizedString("Delete_Item_Message", comment: "Are you sure you want to permanently delete the item %@?"), objName)
+        let DeleteCategoryTitle = NSLocalizedString("Delete_Category_Title", comment: "A title in an alert asking if the user wants to delete a category.")
+        let DeleteCategoryMessage = String(format: NSLocalizedString("Delete_Category_Message", comment: "Are you sure you want to permanently delete the category %@ and all of the items in it?"), objName)
         
-        let DeleteAction = UIAlertAction(title: "Delete", style: .Destructive, handler: handleDeleteItem)
-        let CancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: cancelDeleteItem)
+        let alert = UIAlertController(title: isItem ? DeleteItemTitle : DeleteCategoryTitle, message: isItem ? DeleteItemMessage : DeleteCategoryMessage, preferredStyle: .Alert)
+        let deleteAction = UIAlertAction(title: NSLocalizedString("Delete", comment: "The Delete button title"), style: .Destructive, handler: handleDeleteItem)
+        let cancelAction = UIAlertAction(title: NSLocalizedString("Cancel", comment: "The Cancel button title"), style: .Cancel, handler: cancelDeleteItem)
         
-        alert.addAction(DeleteAction)
-        alert.addAction(CancelAction)
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
         
         // Support display in iPad
         alert.popoverPresentationController?.sourceView = self.view

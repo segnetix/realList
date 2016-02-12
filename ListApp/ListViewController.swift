@@ -619,13 +619,15 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     func confirmDelete(listName: String)
     {
-        let alert = UIAlertController(title: "Delete List", message: "Are you sure you want to permanently delete the list \(listName)?", preferredStyle: .Alert)
+        let DeleteListTitle = NSLocalizedString("Delete_List", comment: "A title in an alert asking if the user wants to delete a list.")
+        let DeleteListMessage = String(format: NSLocalizedString("Delete_List_Message", comment: "Are you sure you want to permanently delete the list %@?"), listName)
         
-        let DeleteAction = UIAlertAction(title: "Delete", style: .Destructive, handler: handleDeleteList)
-        let CancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: cancelDeleteList)
+        let alert = UIAlertController(title: DeleteListTitle, message: DeleteListMessage, preferredStyle: .Alert)
+        let deleteAction = UIAlertAction(title: NSLocalizedString("Delete", comment: "The Delete button title"), style: .Destructive, handler: handleDeleteList)
+        let cancelAction = UIAlertAction(title: NSLocalizedString("Cancel", comment: "The Cancel button title"), style: .Cancel, handler: cancelDeleteList)
         
-        alert.addAction(DeleteAction)
-        alert.addAction(CancelAction)
+        alert.addAction(deleteAction)
+        alert.addAction(cancelAction)
         
         // Support display in iPad
         alert.popoverPresentationController?.sourceView = self.view
