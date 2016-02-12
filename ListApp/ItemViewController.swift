@@ -796,8 +796,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                     {
                         let moveDirection = location.y < prevLocation!.y ? MoveDirection.Up : MoveDirection.Down
                         
-                        //print("cellAtIndexPathIsAddCellCategoryPair", indexPath!.row, moveDirection)
-                        
                         if moveDirection == .Down {
                             let rowCount = list.totalDisplayCount()
                             // this is to prevent dragging past the last row
@@ -1065,7 +1063,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             self.title = list!.name
             tableView.reloadData()
         } else {
-            self.title = "Items"
+            self.title = NSLocalizedString("Items", comment: "Items - the view controller title for and empty list of items.")
             tableView.reloadData()
         }
     }
@@ -1180,10 +1178,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         if cell is AddItemCell && nextCell is CategoryCell {
             isPair = true
-            //print("isPair...")
         } else if cell is CategoryCell && prevCell is AddItemCell {
             isPair = true
-            //print("isPair...")
         }
         
         return isPair

@@ -1,0 +1,24 @@
+/* 
+  Localizable.strings
+  ListApp
+
+  Created by Steven Gentry on 2/11/16.
+  Copyright © 2016 Steven Gentry. All rights reserved.
+*/
+
+Delete_List_Title = "Poista lista";
+Delete_List_Message = "Oletko varma, että haluat poistaa pysyvästi luettelosta '%@'?";
+Delete = "Poistaa";
+Cancel = "Peruuttaa";
+Close = "Lähellä";
+Items = "Tuotteet";
+Delete_Item_Title = "Poista Kohta";
+Delete_Category_Title = "Poista Luokka";
+Delete_Item_Message = "Oletko varma, että haluat pysyvästi poistaa kohteen '%@'?";
+Delete_Category_Message = "Oletko varma, että haluat poistaa pysyvästi luokkaan '%@' ja kaikki kohteet siinä?";
+Hide_Completed = "Piilota Valmiit kohteet";
+Show_Completed = "Näyttö Valmiit kohteet";
+Hide_Inactive = "Piilota Ei-aktiiviset kohteet";
+Show_Inactive = "Näyttö Ei-aktiiviset kohteet";
+Settings = "Asetukset";
+New_Category = "Nusi Luokka";

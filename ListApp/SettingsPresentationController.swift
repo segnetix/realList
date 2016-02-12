@@ -38,9 +38,9 @@ class SettingsPresentationController: UIPresentationController, UIAdaptivePresen
     
     override func sizeForChildContentContainer(container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize
     {
-        // adaptive sizing width, min 150, max 240
+        // adaptive sizing width, min 220, max 300
         let parentWidth = parentSize.width
-        let childWidth = min(max(parentWidth/2.0, 180), 260)
+        let childWidth = min(max(parentWidth/2.0, 220), 300)
         
         print(childWidth)
         

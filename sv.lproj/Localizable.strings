@@ -1,0 +1,24 @@
+/* 
+  Localizable.strings
+  ListApp
+
+  Created by Steven Gentry on 2/11/16.
+  Copyright © 2016 Steven Gentry. All rights reserved.
+*/
+
+Delete_List_Title = "Radera lista";
+Delete_List_Message = "Är du säker på att du vill ta bort listan '%@'?";
+Delete = "Radera";
+Cancel = "Annullera";
+Close = "Stänga";
+Items = "objekt";
+Delete_Item_Title = "Ta bort objekt";
+Delete_Category_Title = "Ta bort kategori";
+Delete_Item_Message = "Är du säker på att du vill ta bort posten '%@'?";
+Delete_Category_Message = "Är du säker på att du vill ta bort kategorin '%@' och alla objekt i det?";
+Hide_Completed = "Dölja Färdig artiklar";
+Show_Completed = "Visa Färdig artiklar";
+Hide_Inactive = "Dölja inaktiva artiklar";
+Show_Inactive = "Visa inaktiva artiklar";
+Settings = "inställningar";
+New_Category = "ny kategori";

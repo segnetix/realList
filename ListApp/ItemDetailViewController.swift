@@ -72,7 +72,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         containerView.addSubview(noteTextView)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setTitle("Close", forState: UIControlState.Normal)
+        closeButton.setTitle(NSLocalizedString("Close", comment: "Close - title for a button to dismiss a view."), forState: UIControlState.Normal)
         closeButton.setTitleColor(containerView.tintColor, forState: UIControlState.Normal)
         closeButton.titleLabel!.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
         closeButton.addTarget(self, action: "close:", forControlEvents: UIControlEvents.TouchUpInside)

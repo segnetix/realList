@@ -7,10 +7,18 @@
 */
 
 Delete_List_Title = "Liste löschen";
-Delete_List_Message = "Sind Sie sicher, dass Sie permanent die Liste %@ löschen?";
+Delete_List_Message = "Sind Sie sicher, dass Sie permanent die Liste '%@' löschen?";
 Delete = "Löschen";
 Cancel = "Stornieren";
+Close = "Schließen";
+Items = "Artikel";
 Delete_Item_Title = "Löschen Sie den Artikel";
 Delete_Category_Title = "Löschen Sie die Kategorie";
-Delete_Item_Message = "Sind Sie sicher, dass Sie auf das Element dauerhaft %@ löschen?";
-Delete_Category_Message = "Sind Sie sicher, Sie wollen dauerhaft die Kategorie %@ und alle Elemente in es löschen?";
+Delete_Item_Message = "Sind Sie sicher, dass Sie auf das Element dauerhaft '%@' löschen?";
+Delete_Category_Message = "Sind Sie sicher, Sie wollen dauerhaft die Kategorie '%@' und alle Elemente in es löschen?";
+Hide_Completed = "Verstecken Abgeschlossen";
+Show_Completed = "Anzeige Abgeschlossen";
+Hide_Inactive = "Verbergen Inaktive";
+Show_Inactive = "Anzeige Inaktive";
+Settings = "Einstellungen";
+New_Category = "Neue Kategorie";

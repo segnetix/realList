@@ -1,0 +1,24 @@
+/* 
+  Localizable.strings
+  ListApp
+
+  Created by Steven Gentry on 2/11/16.
+  Copyright © 2016 Steven Gentry. All rights reserved.
+*/
+
+Delete_List_Title = "Eliminar Lista";
+Delete_List_Message = "¿Está seguro de que desea eliminar permanentemente la lista '%@'?";
+Delete = "Borrar";
+Cancel = "Cancelar";
+Close = "Cerca";
+Items = "Elementos";
+Delete_Item_Title = "Eliminar Elemento";
+Delete_Category_Title = "Eliminar Categoría";
+Delete_Item_Message = "¿Está seguro de que quiere eliminar permanentemente el elemento '%@'?";
+Delete_Category_Message = "¿Seguro que desea eliminar permanentemente la categoría '% @' y todos los elementos que contiene?";
+Hide_Completed = "Ocultar Completada";
+Show_Completed = "Mostrar Completado";
+Hide_Inactive = "Ocultar Inactiva";
+Show_Inactive = "Mostrar Inactiva";
+Settings = "Ajustes";
+New_Category = "Nueva Categoría";

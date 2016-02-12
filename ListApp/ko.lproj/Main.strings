@@ -1,0 +1,12 @@
+
+/* Class = "UIButton"; normalTitle = "new item"; ObjectID = "9Rm-EG-YMt"; */
+"9Rm-EG-YMt.normalTitle" = "새 항목";
+
+/* Class = "UIButton"; normalTitle = "new list"; ObjectID = "Kcl-ny-7ll"; */
+"Kcl-ny-7ll.normalTitle" = "새 목록";
+
+/* Class = "UINavigationItem"; title = "Lists"; ObjectID = "eUa-Gb-6wx"; */
+"eUa-Gb-6wx.title" = "기울기";
+
+/* Class = "UILabel"; text = "Item Notes"; ObjectID = "ug1-Vs-VEu"; */
+"ug1-Vs-VEu.text" = "상품주의 사항";

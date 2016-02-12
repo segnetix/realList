@@ -56,9 +56,9 @@ class SettingsViewController: UIViewController
     var showCompletedItems: Bool = true {
         didSet(newShow) {
             if showCompletedItems {
-                showHideCompletedButton.setTitle("Hide Completed", forState: UIControlState.Normal)
+                showHideCompletedButton.setTitle(NSLocalizedString("Hide_Completed", comment: "Button title to hide completed items."), forState: UIControlState.Normal)
             } else {
-                showHideCompletedButton.setTitle("Show Completed", forState: UIControlState.Normal)
+                showHideCompletedButton.setTitle(NSLocalizedString("Show_Completed", comment: "Button title to show completed items."), forState: UIControlState.Normal)
             }
             
             if itemVC != nil && itemVC!.list != nil {
@@ -70,9 +70,9 @@ class SettingsViewController: UIViewController
     var showInactiveItems: Bool = true {
         didSet(newShow) {
             if showInactiveItems {
-                showHideInactiveButton.setTitle("Hide Inactive", forState: UIControlState.Normal)
+                showHideInactiveButton.setTitle(NSLocalizedString("Hide_Inactive", comment: "Button title to hide inactive items."), forState: UIControlState.Normal)
             } else {
-                showHideInactiveButton.setTitle("Show Inactive", forState: UIControlState.Normal)
+                showHideInactiveButton.setTitle(NSLocalizedString("Show_Inactive", comment: "Button title to show inactive items."), forState: UIControlState.Normal)
             }
             
             if itemVC != nil && itemVC!.list != nil {
@@ -183,21 +183,21 @@ class SettingsViewController: UIViewController
         let closeButtonFontSize: CGFloat = 20.0
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = "Settings"
+        titleLabel.text = NSLocalizedString("Settings", comment: "Title for the Settings view.")
         titleLabel.font = UIFont.boldSystemFontOfSize(titleFontSize)
         titleLabel.textColor = UIColor.whiteColor()
         titleLabel.textAlignment = NSTextAlignment.Center
         containerView.addSubview(titleLabel)
         
         newCategoryButton.translatesAutoresizingMaskIntoConstraints = false
-        newCategoryButton.setTitle("New Category", forState: UIControlState.Normal)
+        newCategoryButton.setTitle(NSLocalizedString("New_Category", comment: "Title for the New Category button."), forState: UIControlState.Normal)
         newCategoryButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
         newCategoryButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
         newCategoryButton.addTarget(self, action: "newCategory:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(newCategoryButton)
         
         showHideCompletedButton.translatesAutoresizingMaskIntoConstraints = false
-        showHideCompletedButton.setTitle("Hide Completed Items", forState: UIControlState.Normal)
+        //showHideCompletedButton.setTitle("Hide Completed Items", forState: UIControlState.Normal)
         showHideCompletedButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
         showHideCompletedButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
         showHideCompletedButton.addTarget(self, action: "showHideCompletedItems:", forControlEvents: UIControlEvents.TouchUpInside)
@@ -205,7 +205,7 @@ class SettingsViewController: UIViewController
         containerView.addSubview(showHideCompletedButton)
         
         showHideInactiveButton.translatesAutoresizingMaskIntoConstraints = false
-        showHideInactiveButton.setTitle("Hide Inactive Items", forState: UIControlState.Normal)
+        //showHideInactiveButton.setTitle("Hide Inactive Items", forState: UIControlState.Normal)
         showHideInactiveButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
         showHideInactiveButton.tintColor = UIColor.blackColor()
         showHideInactiveButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
@@ -214,7 +214,7 @@ class SettingsViewController: UIViewController
         containerView.addSubview(showHideInactiveButton)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setTitle("Close", forState: UIControlState.Normal)
+        closeButton.setTitle(NSLocalizedString("Close", comment: "Close - title for a button to dismiss a view."), forState: UIControlState.Normal)
         closeButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
         closeButton.titleLabel!.font = UIFont.systemFontOfSize(closeButtonFontSize)
         closeButton.addTarget(self, action: "close:", forControlEvents: UIControlEvents.TouchUpInside)

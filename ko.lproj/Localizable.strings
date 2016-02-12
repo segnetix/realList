@@ -1,0 +1,24 @@
+/* 
+  Localizable.strings
+  ListApp
+
+  Created by Steven Gentry on 2/11/16.
+  Copyright © 2016 Steven Gentry. All rights reserved.
+*/
+
+Delete_List_Title = "목록 삭제";
+Delete_List_Message = "당신은 영구적으로이 목록을 삭제 하시겠습니까?";
+Delete = "지우다";
+Cancel = "취소";
+Close = "닫기";
+Items = "항목";
+Delete_Item_Title = "항목 삭제";
+Delete_Category_Title = "카테고리 삭제";
+Delete_Item_Message = "영구적이 항목을 삭제 하시겠습니까?";
+Delete_Category_Message = "영구적이 분류하고있는 모든 항목을 삭제 하시겠습니까?";
+Hide_Completed = "완성 된 항목 숨기기";
+Show_Completed = "쇼 완료 항목";
+Hide_Inactive = "비활성 카테고리 숨기기";
+Show_Inactive = "비활성 카테고리보기";
+Settings = "설정";
+New_Category = "새로운 카테고리";

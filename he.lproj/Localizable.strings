@@ -1,0 +1,24 @@
+/* 
+  Localizable.strings
+  ListApp
+
+  Created by Steven Gentry on 2/11/16.
+  Copyright © 2016 Steven Gentry. All rights reserved.
+*/
+
+Delete_List_Title = "מחק רשימה";
+Delete_List_Message = "האם אתה בטוח שאתה רוצה למחוק את רשימת לצמיתות '%@'?";
+Delete = "לִמְחוֹק";
+Cancel = "לְבַטֵל";
+Close = "לִסְגוֹר";
+Items = "פריטים";
+Delete_Item_Title = "מחק פריט";
+Delete_Category_Title = "מחק קטגוריה";
+Delete_Item_Message = "האם אתה בטוח שאתה רוצה למחוק את פריט לצמיתות '%@'?";
+Delete_Category_Message = "האם אתה בטוח שברצונך למחוק את הקטגוריה לצמיתות '@%' וכל הפריטים בו?";
+Hide_Completed = "הסתר פריטים שהושלמו";
+Show_Completed = "הצג פריטים שהושלמו";
+Hide_Inactive = "הסתר פריטים לא פעילים";
+Show_Inactive = "הצגת פריטים לא פעילים";
+Settings = "את הגדרות";
+New_Category = "קטגוריה חדשה";
