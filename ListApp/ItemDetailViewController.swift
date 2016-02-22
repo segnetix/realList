@@ -138,8 +138,10 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
     
     func close(sender: UIButton) {
         item?.note = noteTextView.text
+        item?.needToSave = true
         itemVC?.tableView.reloadData()
         itemVC?.appDelegate.saveAll()
+        
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
 

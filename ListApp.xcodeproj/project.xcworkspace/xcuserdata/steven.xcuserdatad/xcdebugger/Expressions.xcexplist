@@ -6,6 +6,14 @@
          contextName = "List.removeItemAtIndexPath(NSIndexPath, preserveCategories : Bool) -&gt; [NSIndexPath]?:ListData.swift">
       </ContextState>
       <ContextState
+         contextName = "List.objectForIndexPath(NSIndexPath) -&gt; ListObj?:ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "item.name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ItemViewController.tableView(UITableView, commitEditingStyle : UITableViewCellEditingStyle, forRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
@@ -16,6 +24,14 @@
             </PersistentString>
             <PersistentString
                value = "(item as! Item).name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.listDeleted(List) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "list">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -37,10 +53,13 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ItemViewController.listDeleted(List) -&gt; ():ItemViewController.swift">
+         contextName = "Item.saveRecord(CKRecord, categoryRecord : CKRecord, database : CKDatabase) -&gt; ():ListData.swift">
          <PersistentStrings>
             <PersistentString
-               value = "list">
+               value = "dirty">
+            </PersistentString>
+            <PersistentString
+               value = "name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -49,14 +68,6 @@
          <PersistentStrings>
             <PersistentString
                value = "inEditMode">
-            </PersistentString>
-         </PersistentStrings>
-      </ContextState>
-      <ContextState
-         contextName = "List.objectForIndexPath(NSIndexPath) -&gt; ListObj?:ListData.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "item.name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -174,6 +185,17 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "List.saveToCloud() -&gt; ():ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "listRecord">
+            </PersistentString>
+            <PersistentString
+               value = "recordID">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ItemViewController.tableView(UITableView, didSelectRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
@@ -207,13 +229,29 @@
          contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "list.categories[selectedCategory].items[i].name">
-            </PersistentString>
-            <PersistentString
                value = "textField.text">
             </PersistentString>
             <PersistentString
+               value = "list.categories[selectedCategory].items[i].name">
+            </PersistentString>
+            <PersistentString
                value = "selectedCategory">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "AppDelegate.getLocalList(String) -&gt; List?:AppDelegate.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "recordIDName">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "AppDelegate.mergeCloudData() -&gt; ():AppDelegate.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "localItem.name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

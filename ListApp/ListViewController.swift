@@ -280,8 +280,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // update ItemVC list name
         delegate?.listNameChanged(textField.text!)
-        
-        print(lists[i].name)
     }
 
     
@@ -297,13 +295,22 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         {
             if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
             {
+                // delete from lists array
                 lists.removeLast()
                 self.tableView.reloadData()
             }
-            appDelegate.saveAll()
+            //appDelegate.saveListData(false)
         }
         
         editingNewListName = false
+        
+        /*
+        // update list in cloud
+        let updatedList = lists[textField.tag]
+        updatedList.saveToCloud()
+        */
+        
+        appDelegate.saveListData(true)
         
         return true
     }
@@ -316,7 +323,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         newList.addCategory("", displayHeader: false, updateIndices: true)
         
-        //newList.updateCellTypeArray()
         self.tableView.reloadData()
         
         // set up editing mode for list name
@@ -619,7 +625,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     func confirmDelete(listName: String)
     {
-        let DeleteListTitle = NSLocalizedString("Delete_List", comment: "A title in an alert asking if the user wants to delete a list.")
+        let DeleteListTitle = NSLocalizedString("Delete_List_Title", comment: "A title in an alert asking if the user wants to delete a list.")
         let DeleteListMessage = String(format: NSLocalizedString("Delete_List_Message", comment: "Are you sure you want to permanently delete the list %@?"), listName)
         
         let alert = UIAlertController(title: DeleteListTitle, message: DeleteListMessage, preferredStyle: .Alert)
@@ -646,11 +652,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             let deletedList = lists[indexPath.row]
             self.delegate?.listDeleted(deletedList)
             
-            /////////
-            // TBD: *******  verify that underlying categories and items are also deleted!!!!!!!  *******
-            /////////
-            // delete the row from the data source
+            // delete the list from cloud storage
+            let list = lists[indexPath.row]
+            list.deleteFromCloud()
+            
+            // delete the list from the data source
             lists.removeAtIndex(indexPath.row)
+            
+            // delete list index path from the table view
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
             self.tableView.reloadData()
             deleteListIndexPath = nil
@@ -681,7 +690,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             
             // deselect all cells
             var i = 0
-            for _ in lists {
+            for list in lists {
+                list.order = i
                 let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
                 cell?.backgroundColor = UIColor.whiteColor()
                 ++i
@@ -694,20 +704,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             appDelegate.saveState()
         }
     }
-    
-    /*
-    func makeAttributedString(title title: String, subtitle: String) -> NSAttributedString {
-        let titleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleBody), NSForegroundColorAttributeName: UIColor.blackColor()]
-        let subtitleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleSubheadline)]
-        
-        let titleString = NSMutableAttributedString(string: "\(title)\n", attributes: titleAttributes)
-        let subtitleString = NSAttributedString(string: subtitle, attributes: subtitleAttributes)
-        
-        titleString.appendAttributedString(subtitleString)
-        
-        return titleString
-    }
-    */
     
     func getTopBarHeight() -> CGFloat {
         let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height
@@ -736,6 +732,21 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         snapshot.layer.shadowOpacity = 0.4
         
         return snapshot
+    }
+    
+    // reorder lists according to order number
+    func reorderListObjects()
+    {
+        // sort lists
+        lists.sortInPlace { $0.order < $1.order }
+        
+        for list in lists {
+            list.categories.sortInPlace { $0.order < $1.order }
+            
+            for category in list.categories {
+                category.items.sortInPlace { $0.order < $1.order }
+            }
+        }
     }
     
 ////////////////////////////////////////////////////////////////

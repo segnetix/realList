@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B02174D21C6D57110087D5A3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B02174D41C6D57110087D5A3 /* Localizable.strings */; };
+		B02175241C6FD6640087D5A3 /* CloudKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B02175231C6FD6640087D5A3 /* CloudKit.framework */; };
 		B03C467B1C66F21400B66CBD /* ItemDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */; };
 		B03C467D1C66F34D00B66CBD /* ItemDetailPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */; };
 		B03C467F1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */; };
@@ -89,6 +90,11 @@
 		B021751C1C6D7F4C0087D5A3 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Main.strings"; sourceTree = "<group>"; };
 		B021751D1C6D7F4D0087D5A3 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/LaunchScreen.strings"; sourceTree = "<group>"; };
 		B021751E1C6D7F4D0087D5A3 /* pt-BR */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "pt-BR"; path = "pt-BR.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		B021751F1C6E46830087D5A3 /* ms */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ms; path = ms.lproj/Main.strings; sourceTree = "<group>"; };
+		B02175201C6E46830087D5A3 /* ms */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ms; path = ms.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
+		B02175211C6E46830087D5A3 /* ms */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ms; path = ms.lproj/Localizable.strings; sourceTree = "<group>"; };
+		B02175221C6FD6590087D5A3 /* ListApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = ListApp.entitlements; sourceTree = "<group>"; };
+		B02175231C6FD6640087D5A3 /* CloudKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CloudKit.framework; path = System/Library/Frameworks/CloudKit.framework; sourceTree = SDKROOT; };
 		B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemDetailViewController.swift; sourceTree = "<group>"; };
 		B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailPresentationController.swift; path = ../ItemDetailPresentationController.swift; sourceTree = "<group>"; };
 		B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailTransitioningDelegate.swift; path = ../ItemDetailTransitioningDelegate.swift; sourceTree = "<group>"; };
@@ -122,6 +128,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0930D5E1C63C951007EBAA0 /* iAd.framework in Frameworks */,
+				B02175241C6FD6640087D5A3 /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -131,6 +138,7 @@
 		B0A3025F1C349F7A00F6FB44 = {
 			isa = PBXGroup;
 			children = (
+				B02175231C6FD6640087D5A3 /* CloudKit.framework */,
 				B0930D5D1C63C951007EBAA0 /* iAd.framework */,
 				B0A3026A1C349F7A00F6FB44 /* ListApp */,
 				B0A302691C349F7A00F6FB44 /* Products */,
@@ -148,6 +156,7 @@
 		B0A3026A1C349F7A00F6FB44 /* ListApp */ = {
 			isa = PBXGroup;
 			children = (
+				B02175221C6FD6590087D5A3 /* ListApp.entitlements */,
 				B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */,
 				B0A3026D1C349F7A00F6FB44 /* ViewController.swift */,
 				B0A302871C35915B00F6FB44 /* ListData.swift */,
@@ -209,6 +218,11 @@
 					B0A302671C349F7A00F6FB44 = {
 						CreatedOnToolsVersion = 7.2;
 						DevelopmentTeam = R6ERNS2DRK;
+						SystemCapabilities = {
+							com.apple.iCloud = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -237,6 +251,7 @@
 				el,
 				ar,
 				"pt-BR",
+				ms,
 			);
 			mainGroup = B0A3025F1C349F7A00F6FB44;
 			productRefGroup = B0A302691C349F7A00F6FB44 /* Products */;
@@ -314,6 +329,7 @@
 				B02175001C6D7DF80087D5A3 /* el */,
 				B02175031C6D7E070087D5A3 /* ar */,
 				B021751E1C6D7F4D0087D5A3 /* pt-BR */,
+				B02175211C6E46830087D5A3 /* ms */,
 			);
 			name = Localizable.strings;
 			path = ..;
@@ -341,6 +357,7 @@
 				B02174FE1C6D7DF80087D5A3 /* el */,
 				B02175011C6D7E070087D5A3 /* ar */,
 				B021751C1C6D7F4C0087D5A3 /* pt-BR */,
+				B021751F1C6E46830087D5A3 /* ms */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
@@ -367,6 +384,7 @@
 				B02174FF1C6D7DF80087D5A3 /* el */,
 				B02175021C6D7E070087D5A3 /* ar */,
 				B021751D1C6D7F4D0087D5A3 /* pt-BR */,
+				B02175201C6E46830087D5A3 /* ms */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -461,6 +479,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ListApp/ListApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = ListApp/Info.plist;
@@ -475,6 +494,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ListApp/ListApp.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = ListApp/Info.plist;

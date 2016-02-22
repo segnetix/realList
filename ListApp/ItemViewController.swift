@@ -442,7 +442,27 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             editingNewCategoryName = false
         }
         
-        appDelegate.saveListData()
+        appDelegate.saveListData(true)
+        
+        // the following code should be handled by the call above to saveListData
+        /*
+        // update object change in cloud
+        let obj = list.objectForTag(textField.tag)
+        
+        if obj is Category {
+            let category = obj as! Category
+            if list.listRecord != nil {
+                category.saveToCloud(list.listRecord!)
+            }
+        } else if obj is Item {
+            let item = obj as! Item
+            let category = list.categoryForObj(item)
+            if category != nil && category?.categoryRecord != nil {
+                item.saveToCloud(category!.categoryRecord!)
+            }
+        }
+        */
+        
         return true
     }
     
@@ -538,20 +558,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         newCatIndexPath = nil
     }
     
-    /*
-    func makeAttributedString(title title: String, subtitle: String) -> NSAttributedString {
-        let titleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleBody), NSForegroundColorAttributeName: UIColor.blackColor()]
-        let subtitleAttributes = [NSFontAttributeName: UIFont.preferredFontForTextStyle(UIFontTextStyleSubheadline)]
-        
-        let titleString = NSMutableAttributedString(string: "\(title)\n", attributes: titleAttributes)
-        let subtitleString = NSAttributedString(string: subtitle, attributes: subtitleAttributes)
-        
-        titleString.appendAttributedString(subtitleString)
-        
-        return titleString
-    }
-    */
-    
     func categoryCountString(category: Category) -> String
     {
         return "\(category.itemsComplete())/\(category.items.count)"
@@ -582,14 +588,14 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                     //print("cellSingleTapAction was hit for category '\(obj!.name)' with tag \(tag)")
                     
                     // get display index paths for this category
-                    let indexPaths = list.displayIndexPathsForCategory(category)    // includes AddItem cell path
+                    let indexPaths = list.displayIndexPathsForCategory(category, includeAddItemIndexPath: true)    // includes AddItem cell path
                     
                     self.tableView.beginUpdates()
                     if category.expanded {
                         // insert the expanded rows into the table view
                         self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
                     } else {
-                        // delete the collapsed rows from the table view
+                        // remove the collapsed rows from the table view
                         self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
                     }
                     self.tableView.endUpdates()
@@ -1026,17 +1032,30 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         if let indexPath = deleteItemIndexPath, currentList = list
         {
             tableView.beginUpdates()
+            
             // Delete the row(s) from the data source and return display paths of the removed rows
             var removedPaths: [NSIndexPath]
             var preserveCat = true
             
-            if list.objectForIndexPath(indexPath) is Category {
+            let deleteObj = currentList.objectForIndexPath(indexPath)
+            
+            if deleteObj is Category {
                 preserveCat = false
+                let cat = deleteObj as! Category
+                cat.deleteFromCloud()
+            } else if deleteObj is Item {
+                let item = deleteObj as! Item
+                item.deleteFromCloud()
             }
             
+            // model delete
             removedPaths = currentList.removeItemAtIndexPath(indexPath, preserveCategories: preserveCat, updateIndices: true)
+            
+            // table view delete
             tableView.deleteRowsAtIndexPaths(removedPaths, withRowAnimation: .Automatic)
+            
             deleteItemIndexPath = nil
+            
             tableView.endUpdates()
             
             resetCellViewTags()
@@ -1219,7 +1238,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         presentViewController(vc, animated: true, completion: nil)
     }
     
-    
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - ShowHideCompleted methods
@@ -1291,6 +1309,14 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             case ItemState.Complete:    item.state = ItemState.Inactive
             case ItemState.Inactive:    item.state = ItemState.Incomplete
             }
+            
+            /*
+            // update cloud storage with the state change
+            item.saveToCloud(nil)
+            */
+            
+            // instead we will call saveListData - cloudOnly mode
+            appDelegate.saveListData(true)
             
             // set item name text color
             if indexPath != nil {

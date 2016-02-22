@@ -1,0 +1,24 @@
+/* 
+  Localizable.strings
+  ListApp
+
+  Created by Steven Gentry on 2/11/16.
+  Copyright © 2016 Steven Gentry. All rights reserved.
+*/
+
+Delete_List_Title = "Padam Senarai";
+Delete_List_Message = "Adakah anda pasti anda mahu memadam senarai '%@' selama-lamanya?";
+Delete = "Padam";
+Cancel = "Batal";
+Close = "Menutup";
+Items = "Barangan";
+Delete_Item_Title = "Padam Item";
+Delete_Category_Title = "Padam Kategori";
+Delete_Item_Message = "Adakah anda pasti anda mahu memadam secara kekal item '%@'?";
+Delete_Category_Message = "Adakah anda pasti anda mahu memadam secara kekal kategori '%@' dan semua barang-barang di dalamnya?";
+Hide_Completed = "Sembunyi barangan siap";
+Show_Completed = "Tunjukkan barangan siap";
+Hide_Inactive = "Sembunyi barangan Tidak Aktif";
+Show_Inactive = "Tunjukkan barangan Tidak Aktif";
+Settings = "Tetapan";
+New_Category = "Kategori baru";
