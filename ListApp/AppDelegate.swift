@@ -26,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var listArray = [CKRecord]()
     var categoryArray = [CKRecord]()
     var itemArray = [CKRecord]()
+    var subscriptionSaved = false
     
     // iCloud
     let container = CKContainer.defaultContainer()
@@ -51,9 +52,126 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         privateDatabase = container.privateCloudDatabase
         
+        // restore the subscription state
+        if let subSaved = NSUserDefaults.standardUserDefaults().objectForKey("subscriptionSaved") as? Bool {
+            self.subscriptionSaved = subSaved
+        }
+        
+        // Push notification setup
+        let notificationSettings = UIUserNotificationSettings(forTypes: UIUserNotificationType.None, categories: nil)
+        application.registerUserNotificationSettings(notificationSettings)
+        application.registerForRemoteNotifications()
+        
+        subscribe()
+        
         return true
     }
-
+    
+    // set up cloud change event subscription (if not yet done)
+    func subscribe() {
+        if !self.subscriptionSaved {
+            print("need to create a subscription...")
+            
+            // assume that we have subscribed successfully
+            self.subscriptionSaved = true
+            NSUserDefaults.standardUserDefaults().setObject(self.subscriptionSaved, forKey: "subscriptionSaved")
+            NSUserDefaults.standardUserDefaults().synchronize()
+            
+            // set up list, category and item record subscriptions
+            let predicate = NSPredicate(format: "TRUEPREDICATE")
+            
+            let listSubscription = CKSubscription(recordType: ListsRecordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
+            let categorySubscription = CKSubscription(recordType: CategoriesRecordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
+            let itemSubscription = CKSubscription(recordType: ItemsRecordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
+            
+            // list subscription
+            if let database = privateDatabase {
+                database.saveSubscription(listSubscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
+                    if error == nil {
+                        NSUserDefaults.standardUserDefaults().setObject(true, forKey: "subscriptionSaved")
+                        NSUserDefaults.standardUserDefaults().synchronize()
+                    } else {
+                        print("saveSubscription error for lists: \(error!.localizedDescription)")
+                        self.subscriptionSaved = false
+                    }
+                }
+            }
+            
+            // category subscription
+            if let database = privateDatabase {
+                database.saveSubscription(categorySubscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
+                    if error == nil {
+                        NSUserDefaults.standardUserDefaults().setObject(true, forKey: "subscriptionSaved")
+                        NSUserDefaults.standardUserDefaults().synchronize()
+                    } else {
+                        print("saveSubscription error for categories: \(error!.localizedDescription)")
+                        self.subscriptionSaved = false
+                    }
+                }
+            }
+            
+            // item subscription
+            if let database = privateDatabase {
+                database.saveSubscription(itemSubscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
+                    if error == nil {
+                        NSUserDefaults.standardUserDefaults().setObject(true, forKey: "subscriptionSaved")
+                        NSUserDefaults.standardUserDefaults().synchronize()
+                    } else {
+                        print("saveSubscription error for items: \(error!.localizedDescription)")
+                        self.subscriptionSaved = false
+                    }
+                }
+            }
+        } else {
+            print("no need to save subscription...")
+        }
+    }
+    
+    func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
+        print("didFailToRegisterForRemoteNotificationsWithError: \(error)")
+    }
+    
+    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
+        print("didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
+        subscribe()
+    }
+    
+    func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject])
+    {
+        let cloudKitNotification = CKNotification(fromRemoteNotificationDictionary: userInfo as! [String : NSObject])
+        
+        if cloudKitNotification.notificationType == .Query {
+            let queryNotification = cloudKitNotification as! CKQueryNotification
+            if queryNotification.queryNotificationReason == .RecordDeleted {
+                // If the record has been deleted in CloudKit then delete the local copy here
+                print("CloudKit: delete notification... \(queryNotification.recordID!.recordName)")
+                dispatch_async(dispatch_get_main_queue()) {
+                    if queryNotification.recordID != nil {
+                        self.deleteRecord(queryNotification.recordID!.recordName)
+                    } else {
+                        print("queryNotification gave nil recordID...!")
+                    }
+                }
+            } else {
+                // If the record has been created or changed, we fetch the data from CloudKit
+                if let database = privateDatabase {
+                    database.fetchRecordWithID(queryNotification.recordID!, completionHandler: { (record: CKRecord?, error: NSError?) -> Void in
+                        if error != nil {
+                            // Handle the error here
+                            print("Notification error: \(error?.localizedDescription)")
+                            return
+                        }
+                        if record != nil {
+                            dispatch_async(dispatch_get_main_queue()) {
+                                self.updateFromRecord(record!, forceUpdate: true)
+                            }
+                        }
+                    })
+                }
+            }
+        }
+    }
+    
     func applicationWillResignActive(application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
@@ -179,10 +297,208 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         print("all list data saved locally...")
     }
     
+    // create or update a local object with the given record
+    func updateFromRecord(record: CKRecord, forceUpdate: Bool)
+    {
+        print("CloudKit: update notification... \(record["name"])")
+        var list: List?
+        var category: Category?
+        var item: Item?
+        var update: Bool = forceUpdate
+        let localObj = getLocalObject(record.recordID.recordName)
+        
+        // compare the cloud version with local version
+        var cloudDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
+        var localDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
+        
+        // get cloud data mod time and local data mod time
+        if record.modificationDate != nil { cloudDataTime = record.modificationDate! }
+        
+        switch record.recordType {
+        case ListsRecordType:
+            if localObj is List {
+                list = localObj as? List
+                if list!.modificationDate != nil {
+                    localDataTime = list!.modificationDate!
+                }
+            }
+        case CategoriesRecordType:
+            if localObj is Category {
+                category = localObj as? Category
+                if category!.modificationDate != nil {
+                    localDataTime = category!.modificationDate!
+                }
+            }
+        case ItemsRecordType:
+            if localObj is Item {
+                item = localObj as? Item
+                if item!.modificationDate != nil {
+                    localDataTime = item!.modificationDate!
+                }
+            }
+        default:
+            print("updateFromRecord: record not found in local data...!")
+            return
+        }
+        
+        // if not forcing the update then check if cloud data is newer than local data
+        if !forceUpdate {
+            update = cloudDataTime.compare(localDataTime) == NSComparisonResult.OrderedDescending
+        }
+
+        if update && (list != nil || category != nil || item != nil) {
+            // local record exists, so update
+            switch record.recordType {
+            case ListsRecordType:
+                if list != nil {
+                    if let name               = record["name"]               { list!.name = name as! String }
+                    if let showCompletedItems = record["showCompletedItems"] { list!.showCompletedItems = showCompletedItems as! Bool }
+                    if let showInactiveItems  = record["showInactiveItems"]  { list!.showInactiveItems = showInactiveItems as! Bool }
+                    if let listColor          = record["listColor"]          { list!.listColor = getUIColorFromRGB(listColor as! Int) }
+                    if let order              = record["order"]              { list!.order = order as! Int }
+                    
+                    list!.listRecord = record
+                    print("updated list: \(list!.name)")
+                }
+            case CategoriesRecordType:
+                if category != nil {
+                    if let name          = record["name"]          { category!.name = name as! String }
+                    if let expanded      = record["expanded"]      { category!.expanded = expanded as! Bool }
+                    if let displayHeader = record["displayHeader"] { category!.displayHeader = displayHeader as! Bool }
+                    if let order         = record["order"]         { category!.order = order as! Int }
+                    
+                    category!.categoryRecord = record
+                    print("updated category: \(category!.name)")
+                }
+            case ItemsRecordType:
+                if item != nil {
+                    if let name  = record["name"]  { item!.name  = name as! String }
+                    if let note  = record["note"]  { item!.note  = note as! String }
+                    if let order = record["order"] { item!.order = order as! Int }
+                    
+                    item!.state = ItemState.Incomplete
+                    if let itemState = record["state"] as? Int {
+                        item!.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
+                    }
+                    item!.itemRecord = record
+                    print("updated item: \(item!.name)")
+                }
+            default:
+                break
+            }
+        } else {
+            // local record does not exist, so add
+            switch record.recordType {
+            case ListsRecordType:
+                print("adding a new category: \(record["name"])")
+                let newList = List(name: "", createRecord: false)
+                
+                if let name               = record["name"]               { newList.name = name as! String }
+                if let showCompletedItems = record["showCompletedItems"] { newList.showCompletedItems = showCompletedItems as! Bool }
+                if let showInactiveItems  = record["showInactiveItems"]  { newList.showInactiveItems = showInactiveItems as! Bool }
+                if let listColor          = record["listColor"]          { newList.listColor = getUIColorFromRGB(listColor as! Int) }
+                if let order              = record["order"]              { newList.order = order as! Int }
+                
+                newList.listRecord = record
+                newList.listReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
+                
+                if let listVC = listViewController {
+                    listVC.lists.append(newList)
+                    print("added new list: \(newList.name)")
+                }
+            case CategoriesRecordType:
+                print("adding a new category: \(record["name"])")
+                if let list = getListFromReference(record) {
+                    let newCategory = list.addCategory("", displayHeader: true, updateIndices: true, createRecord: false)
+                    
+                    if let name          = record["name"]          { newCategory.name          = name as! String }
+                    if let displayHeader = record["displayHeader"] { newCategory.displayHeader = displayHeader as! Bool }
+                    if let expanded      = record["expanded"]      { newCategory.expanded      = expanded as! Bool }
+                    if let order         = record["order"]         { newCategory.order = order as! Int }
+                    
+                    newCategory.categoryRecord = record
+                    newCategory.categoryReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
+                    print("added new category: \(newCategory.name)")
+                } else {
+                    print("category \(record["name"]) can't find list \(record["owningList"])")
+                }
+            case ItemsRecordType:
+                print("adding a new item: \(record["name"])")
+                if let category = getCategoryFromReference(record) {
+                    if category.categoryRecord != nil {
+                        if let list = getListFromReference(category.categoryRecord!) {
+                            let item = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true, createRecord: false)
+                            
+                            if let newItem = item {
+                                if let name  = record["name"]  { newItem.name  = name as! String }
+                                if let note  = record["note"]  { newItem.note  = note as! String }
+                                if let order = record["order"] { newItem.order = order as! Int }
+                                
+                                if let itemState = record["state"] as? Int {
+                                    newItem.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
+                                }
+                                
+                                newItem.itemRecord = record
+                                print("added new item: \(newItem.name)")
+                            }
+                        }
+                    }
+                } else {
+                    print("item \(record["name"]) can't find category \(record["owningCategory"])")
+                }
+            default:
+                break
+            }
+        }
+        
+        // now reorder and refresh the table view
+        self.reorderListData()
+    }
+    
+    // deletes local data associated with the given recordName
+    func deleteRecord(recordName: String)
+    {
+        if let listVC = listViewController {
+            if let obj = getLocalObject(recordName) {
+                if obj is List {
+                    let list = obj as! List
+                    let i = listVC.lists.indexOf(list)
+                    if i != nil {
+                        listVC.lists.removeAtIndex(i!)
+                    }
+                } else if obj is Category {
+                    let category = obj as! Category
+                    let list = listVC.getListForCategory(category)
+                    if list != nil {
+                        let i = list!.categories.indexOf(category)
+                        if i != nil {
+                            list!.categories.removeAtIndex(i!)
+                        }
+                    }
+                } else if obj is Item {
+                    let item = obj as! Item
+                    let category = listVC.getCategoryForItem(item)
+                    if category != nil {
+                        let i = category!.items.indexOf(item)
+                        if i != nil {
+                            category!.items.removeAtIndex(i!)
+                        }
+                    }
+                }
+            } else {
+                print("deleteRecord: recordName not found...!")
+            }
+        }
+        
+        // now reorder and refresh the table view
+        self.reorderListData()
+    }
+    
     func addToUpdateRecords(record: CKRecord, obj: AnyObject) {
         updateRecords[record] = obj
     }
     
+    // sends all records needing updating to cloud storage
     func batchRecordUpdate()
     {
         if let database = privateDatabase {
@@ -194,7 +510,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
             
             saveRecordsOperation.recordsToSave = ckRecords
-            saveRecordsOperation.savePolicy = .IfServerRecordUnchanged
+            saveRecordsOperation.savePolicy = .ChangedKeys
+            
             saveRecordsOperation.perRecordCompletionBlock = { record, error in
                 // deal with conflicts
                 // set completionHandler of wrapper operation if it's the case
@@ -215,29 +532,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     let obj = self.updateRecords[record!]
                     if obj is List {
                         let list = obj as! List
-                        print("batch update: \(list.name) \(error!.localizedDescription)")
-                        
+                        print("batch update error: \(list.name) \(error!.localizedDescription)")
                     } else if obj is Category {
                         let category = obj as! Category
-                        print("batch update: \(category.name) \(error!.localizedDescription)")
+                        print("batch update error: \(category.name) \(error!.localizedDescription)")
                     } else if obj is Item {
                         let item = obj as! Item
-                        print("batch update: \(item.name) \(error!.localizedDescription)")
+                        print("batch update error: \(item.name) \(error!.localizedDescription)")
                     }
                 }
             }
             
             saveRecordsOperation.modifyRecordsCompletionBlock = { savedRecords, deletedRecordIDs, error in
-                // deal with conflicts
-                // set completionHandler of wrapper operation if it's the case
                 if error == nil {
                     print("batch save operation complete!")
                 } else {
                     print("batch save error: \(error!.localizedDescription)")
                 }
-                
             }
             
+            // execute the batch save operation
             database.addOperation(saveRecordsOperation)
         }
     }
@@ -253,7 +567,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             // set up query operations
             let truePredicate = NSPredicate(value: true)
-            
+
             let listQuery = CKQuery(recordType: ListsRecordType, predicate: truePredicate)
             let categoryQuery = CKQuery(recordType: CategoriesRecordType, predicate: truePredicate)
             let itemQuery = CKQuery(recordType: ItemsRecordType, predicate: truePredicate)
@@ -338,138 +652,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
+    // after fetching cloud data, merge with local data
     func mergeCloudData()
     {
         print("mergeCloudData")
         
         for cloudList in listArray
         {
-            if let localList = getLocalList(cloudList.recordID.recordName) {
-                // compare the cloud version with local version
-                var cloudDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
-                var localDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
-                
-                if cloudList.modificationDate != nil { cloudDataTime = cloudList.modificationDate! }
-                if localList.modificationDate != nil { localDataTime = localList.modificationDate! }
-                
-                if cloudDataTime.compare(localDataTime) == NSComparisonResult.OrderedDescending {
-                    // cloud data is newer -- update local record
-                    if let name               = cloudList["name"]               { localList.name = name as! String }
-                    if let showCompletedItems = cloudList["showCompletedItems"] { localList.showCompletedItems = showCompletedItems as! Bool }
-                    if let showInactiveItems  = cloudList["showInactiveItems"]  { localList.showInactiveItems = showInactiveItems as! Bool }
-                    if let listColor          = cloudList["listColor"]          { localList.listColor = getUIColorFromRGB(listColor as! Int) }
-                    if let order              = cloudList["order"]              { localList.order = order as! Int }
-                    
-                    localList.listRecord = cloudList
-                    print("updated list: \(localList.name)")
-                }
-            } else {
-                // local version does not exist, so add
-                if let listVC = listViewController
-                {
-                    let newList = List(name: "")
-                    
-                    if let name               = cloudList["name"]               { newList.name = name as! String }
-                    if let showCompletedItems = cloudList["showCompletedItems"] { newList.showCompletedItems = showCompletedItems as! Bool }
-                    if let showInactiveItems  = cloudList["showInactiveItems"]  { newList.showInactiveItems = showInactiveItems as! Bool }
-                    if let listColor          = cloudList["listColor"]          { newList.listColor = getUIColorFromRGB(listColor as! Int) }
-                    if let order              = cloudList["order"]              { newList.order = order as! Int }
-                    
-                    newList.listRecord = cloudList
-                    
-                    listVC.lists.append(newList)
-                    print("added new list: \(newList.name)")
-                }
-            }
+            updateFromRecord(cloudList, forceUpdate: false)
         }
         
         for cloudCategory in categoryArray
         {
-            if let localCategory = getLocalCategory(cloudCategory.recordID.recordName) {
-                // compare the cloud version with local version
-                var cloudDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
-                var localDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
-                
-                if cloudCategory.modificationDate != nil { cloudDataTime = cloudCategory.modificationDate! }
-                if localCategory.modificationDate != nil { localDataTime = localCategory.modificationDate! }
-                
-                if cloudDataTime.compare(localDataTime) == NSComparisonResult.OrderedDescending {
-                    // cloud data is newer -- update local record
-                    if let name          = cloudCategory["name"]          { localCategory.name = name as! String }
-                    if let expanded      = cloudCategory["expanded"]      { localCategory.expanded = expanded as! Bool }
-                    if let displayHeader = cloudCategory["displayHeader"] { localCategory.displayHeader = displayHeader as! Bool }
-                    if let order         = cloudCategory["order"]         { localCategory.order = order as! Int }
-                    
-                    localCategory.categoryRecord = cloudCategory
-                    print("updated category: \(localCategory.name)")
-                }
-            } else {
-                // local version of this category does not exist, so add
-                print("adding a new category: \(cloudCategory["name"])")
-                if let list = getListFromReference(cloudCategory) {
-                    var newCategory = list.addCategory("", displayHeader: true, updateIndices: true)
-                    
-                    if let name          = cloudCategory["name"]          { newCategory.name          = name as! String }
-                    if let displayHeader = cloudCategory["displayHeader"] { newCategory.displayHeader = displayHeader as! Bool }
-                    if let expanded      = cloudCategory["expanded"]      { newCategory.expanded      = expanded as! Bool }
-                    if let order         = cloudCategory["order"]         { newCategory.order = order as! Int }
-                    
-                    newCategory.categoryRecord = cloudCategory
-                    print("added new category: \(newCategory.name)")
-                }
-            }
+            updateFromRecord(cloudCategory, forceUpdate: false)
         }
         
         for cloudItem in itemArray
         {
-            if let localItem = getLocalItem(cloudItem.recordID.recordName) {
-                // compare the cloud version with local version
-                var cloudDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
-                var localDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
-                
-                if cloudItem.modificationDate != nil { cloudDataTime = cloudItem.modificationDate! }
-                if localItem.modificationDate != nil { localDataTime = localItem.modificationDate! }
-                
-                if cloudDataTime.compare(localDataTime) == NSComparisonResult.OrderedDescending {
-                    // cloud data is newer -- update local record
-                    if let name  = cloudItem["name"]  { localItem.name  = name as! String }
-                    if let note  = cloudItem["note"]  { localItem.note  = note as! String }
-                    if let order = cloudItem["order"] { localItem.order = order as! Int }
-                    
-                    localItem.state = ItemState.Incomplete
-                    if let itemState = cloudItem["state"] as? Int {
-                        localItem.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
-                    }
-                    
-                    localItem.itemRecord = cloudItem
-                    print("updated item: \(localItem.name)")
-                }
-            } else {
-                // local version of this item does not exist, so add
-                print("adding a new item: \(cloudItem["name"])")
-                if let category = getCategoryFromReference(cloudItem) {
-                    if category.categoryRecord != nil {
-                        if let list = getListFromReference(category.categoryRecord!) {
-                            var item = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true)
-                            
-                            if let newItem = item {
-                                if let name  = cloudItem["name"]  { newItem.name  = name as! String }
-                                if let note  = cloudItem["note"]  { newItem.note  = note as! String }
-                                if let order = cloudItem["order"] { newItem.order = order as! Int }
-                                
-                                if let itemState = cloudItem["state"] as? Int {
-                                    newItem.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
-                                }
-                                
-                                newItem.itemRecord = cloudItem
-                                print("added new item: \(newItem.name)")
-                            }
-                        }
-                    }
-                }
-            }
+           updateFromRecord(cloudItem, forceUpdate: false)
         }
         
+        self.reorderListData()
+    }
+    
+    func reorderListData()
+    {
         if let listVC = listViewController {
             listVC.reorderListObjects()
             listVC.tableView.reloadData()
@@ -478,6 +685,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         if let itemVC = itemViewController {
             itemVC.tableView.reloadData()
         }
+    }
+    
+    // returns a ListData object from the given recordName
+    func getLocalObject(recordIDName: String) -> AnyObject?
+    {
+        if let listVC = listViewController {
+            for list in listVC.lists {
+                if list.listRecord != nil {
+                    if list.listRecord!.recordID.recordName == recordIDName {
+                        return list
+                    }
+                    
+                    for category in list.categories {
+                        if category.categoryRecord != nil {
+                            if category.categoryRecord!.recordID.recordName == recordIDName {
+                                return category
+                            }
+                            
+                            for item in category.items {
+                                if item.itemRecord != nil {
+                                    if item.itemRecord!.recordID.recordName == recordIDName {
+                                        return item
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return nil
     }
     
     // returns a List object matching the given CKRecordID
@@ -529,7 +768,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         return nil
     }
-
+ 
     func getListFromReference(categoryRecord: CKRecord) -> List?
     {
         if let listReference = categoryRecord["owningList"] as? CKReference {

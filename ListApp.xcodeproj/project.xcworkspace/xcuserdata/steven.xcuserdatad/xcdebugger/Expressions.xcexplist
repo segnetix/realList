@@ -243,7 +243,13 @@
          contextName = "AppDelegate.getLocalList(String) -&gt; List?:AppDelegate.swift">
          <PersistentStrings>
             <PersistentString
+               value = "list.listRecord!.recordID.recordName">
+            </PersistentString>
+            <PersistentString
                value = "recordIDName">
+            </PersistentString>
+            <PersistentString
+               value = "list.name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

@@ -41,20 +41,29 @@ class List: NSObject, NSCoding
     var modificationDate: NSDate?
     var listRecord: CKRecord?
     var listReference: CKReference?
-    var order: Int = 0 { didSet { needToSave = true } }
+    var order: Int = 0 {
+        didSet {
+            if order != oldValue {
+                needToSave = true
+            }
+        }
+    }
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     var showCompletedItems: Bool = true { didSet { self.updateIndices(); needToSave = true } }
     var showInactiveItems:  Bool = true { didSet { self.updateIndices(); needToSave = true } }
     
     // new list initializer
-    init(name: String)
+    init(name: String, createRecord: Bool)
     {
         self.name = name
         
-        // new list needs a new record and reference
-        listRecord = CKRecord.init(recordType: ListsRecordType)
-        listReference = CKReference.init(record: listRecord!, action: CKReferenceAction.DeleteSelf)
-        modificationDate = NSDate.init()
+        if createRecord {
+            // new list needs a new record and reference
+            self.listRecord = CKRecord.init(recordType: ListsRecordType)
+            self.listReference = CKReference.init(record: listRecord!, action: CKReferenceAction.DeleteSelf)
+        }
+        
+        self.modificationDate = NSDate.init()
     }
     
 ///////////////////////////////////////////////////////
@@ -97,6 +106,8 @@ class List: NSObject, NSCoding
     // local storage
     func encodeWithCoder(coder: NSCoder)
     {
+        self.modificationDate = NSDate.init()
+        
         coder.encodeObject(self.name, forKey: "name")
         coder.encodeObject(self.showCompletedItems, forKey: "showCompletedItems")
         coder.encodeObject(self.showInactiveItems, forKey: "showInactiveItems")
@@ -136,7 +147,7 @@ class List: NSObject, NSCoding
     // saves this list record to the cloud
     func saveRecord(listRecord: CKRecord, database: CKDatabase)
     {
-        print("saveRecord for Lists called... \(name)")
+        print("saveRecord for List \(name)")
         var rgbColor = NSNumber(integer: 0)
         
         if listColor != nil {
@@ -193,9 +204,9 @@ class List: NSObject, NSCoding
         return -1
     }
     
-    func addCategory(name: String, displayHeader: Bool, updateIndices: Bool) -> Category
+    func addCategory(name: String, displayHeader: Bool, updateIndices: Bool, createRecord: Bool) -> Category
     {
-        let category = Category(name: name, displayHeader: displayHeader)
+        let category = Category(name: name, displayHeader: displayHeader, createRecord: createRecord)
         categories.append(category)
         
         if updateIndices {
@@ -205,13 +216,13 @@ class List: NSObject, NSCoding
         return category
     }
     
-    func addItem(category: Category, name: String, state: ItemState, updateIndices: Bool) -> Item?
+    func addItem(category: Category, name: String, state: ItemState, updateIndices: Bool, createRecord: Bool) -> Item?
     {
         let indexForCat = indexForCategory(category)
         var item: Item? = nil
         
         if indexForCat > -1 {
-            item = Item(name: name, state: state)
+            item = Item(name: name, state: state, createRecord: createRecord)
             category.items.append(item!)
         } else {
             print("ERROR: addItem given invalid category!")
@@ -919,9 +930,15 @@ class ListObj: NSObject
     var name: String { didSet { needToSave = true } }
     var categoryIndex: Int
     var itemIndex: Int
-    var needToSave: Bool = true
+    var needToSave: Bool = false
     var needToDelete: Bool = false
-    var order: Int = 0 { didSet { needToSave = true } }
+    var order: Int = 0 {
+        didSet {
+            if order != oldValue {
+                needToSave = true
+            }
+        }
+    }
     
     init(name: String?)
     {
@@ -963,14 +980,17 @@ class Category: ListObj, NSCoding
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     // new category initializer
-    init(name: String, displayHeader: Bool)
+    init(name: String, displayHeader: Bool, createRecord: Bool)
     {
         self.displayHeader = displayHeader
         self.modificationDate = NSDate.init()
         
-        // new category needs a new record and reference
-        categoryRecord = CKRecord.init(recordType: CategoriesRecordType)
-        categoryReference = CKReference.init(record: categoryRecord!, action: CKReferenceAction.DeleteSelf)
+        if createRecord {
+            // new category needs a new record and reference
+            categoryRecord = CKRecord.init(recordType: CategoriesRecordType)
+            categoryReference = CKReference.init(record: categoryRecord!, action: CKReferenceAction.DeleteSelf)
+        }
+        
         modificationDate = NSDate.init()
         
         super.init(name: name)
@@ -1004,6 +1024,8 @@ class Category: ListObj, NSCoding
     
     func encodeWithCoder(coder: NSCoder)
     {
+        self.modificationDate = NSDate.init()
+        
         coder.encodeObject(self.name, forKey: "name")
         coder.encodeObject(self.expanded, forKey: "expanded")
         coder.encodeObject(self.displayHeader, forKey: "displayHeader")
@@ -1116,14 +1138,17 @@ class Item: ListObj, NSCoding
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     // new item initializer
-    init(name: String, state: ItemState)
+    init(name: String, state: ItemState, createRecord: Bool)
     {
         self.state = state
         self.note = ""
         self.modificationDate = NSDate.init()
         
-        // new item needs a new record
-        itemRecord = CKRecord.init(recordType: ItemsRecordType)
+        if createRecord {
+            // new item needs a new record
+            itemRecord = CKRecord.init(recordType: ItemsRecordType)
+        }
+        
         modificationDate = NSDate.init()
         
         super.init(name: name)
@@ -1155,6 +1180,8 @@ class Item: ListObj, NSCoding
     
     func encodeWithCoder(coder: NSCoder)
     {
+        self.modificationDate = NSDate.init()
+        
         coder.encodeObject(self.name, forKey: "name")
         coder.encodeObject(self.note, forKey: "note")
         coder.encodeInteger(state.rawValue, forKey: "state")

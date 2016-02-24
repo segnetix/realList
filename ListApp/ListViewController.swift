@@ -318,10 +318,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     @IBAction func addListButtonTapped(sender: UIButton)
     {
         // create a new list and append
-        let newList = List(name: "")
+        let newList = List(name: "", createRecord: true)
         lists.append(newList)
         
-        newList.addCategory("", displayHeader: false, updateIndices: true)
+        newList.addCategory("", displayHeader: false, updateIndices: true, createRecord: true)
         
         self.tableView.reloadData()
         
@@ -575,6 +575,15 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.prevLocation = nil
         self.displayLink?.invalidate()
         self.displayLink = nil
+        
+        // need to reset the list order values
+        var i = -1
+        for list in lists {
+            list.order = ++i
+        }
+        
+        // and save data changes locally and to the cloud
+        appDelegate.saveListData(true)
     }
     
     func scrollUpLoop()
@@ -591,8 +600,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             longPressMoved(path, location: location)
             prevLocation = location
         }
-        
-        //tableView.contentInset = UIEdgeInsetsMake(0, 0, -120, 0) //values passed are - top, left, bottom, right
     }
     
     func scrollDownLoop()
@@ -749,121 +756,149 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
+    func getListForCategory(category: Category) -> List?
+    {
+        for list in lists {
+            for category in list.categories {
+                if category === category {
+                    return list
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    func getCategoryForItem(category: Item) -> Category?
+    {
+        for list in lists {
+            for category in list.categories {
+                for item in category.items {
+                    if item === item {
+                        return category
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
 ////////////////////////////////////////////////////////////////
     
     func addTestItems()
     {
         // list1
-        let list1 = List(name: "Costco")
+        let list1 = List(name: "Costco", createRecord: true)
         lists.append(list1)
         
-        let cat1_1 = list1.addCategory("Fruits and Veggies", displayHeader: true, updateIndices: false)
-        let cat1_2 = list1.addCategory("Meats", displayHeader: true, updateIndices: false)
-        let cat1_3 = list1.addCategory("Other", displayHeader: true, updateIndices: false)
+        let cat1_1 = list1.addCategory("Fruits and Veggies", displayHeader: true, updateIndices: false, createRecord: true)
+        let cat1_2 = list1.addCategory("Meats", displayHeader: true, updateIndices: false, createRecord: true)
+        let cat1_3 = list1.addCategory("Other", displayHeader: true, updateIndices: false, createRecord: true)
         
-        list1.addItem(cat1_1, name: "Carrots", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Squash", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Tomatoes", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Potatoes", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Apples", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Oranges", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Lettuce", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Onions", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Bananas", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Strawberries", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Grapes", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_1, name: "Peaches", state: ItemState.Incomplete, updateIndices: false)
+        list1.addItem(cat1_1, name: "Carrots", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Squash", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Tomatoes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Potatoes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Apples", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Oranges", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Lettuce", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Onions", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Bananas", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Strawberries", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Grapes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_1, name: "Peaches", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         
-        list1.addItem(cat1_2, name: "Chicken", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_2, name: "Sirloin", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_2, name: "Salmon", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_2, name: "Cod", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_2, name: "Halibut", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_2, name: "Ham", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_2, name: "Bison", state: ItemState.Incomplete, updateIndices: false)
+        list1.addItem(cat1_2, name: "Chicken", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_2, name: "Sirloin", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_2, name: "Salmon", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_2, name: "Cod", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_2, name: "Halibut", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_2, name: "Ham", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_2, name: "Bison", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         
-        list1.addItem(cat1_3, name: "Water", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_3, name: "Dinty Moore", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_3, name: "Noodle Chicken Bag", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_3, name: "Tea Bags", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_3, name: "Vegtable Soup", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_3, name: "Cookie Mix", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_3, name: "Salad fixings", state: ItemState.Incomplete, updateIndices: false)
-        list1.addItem(cat1_3, name: "Salad dressing", state: ItemState.Incomplete, updateIndices: false)
+        list1.addItem(cat1_3, name: "Water", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_3, name: "Dinty Moore", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_3, name: "Noodle Chicken Bag", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_3, name: "Tea Bags", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_3, name: "Vegtable Soup", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_3, name: "Cookie Mix", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_3, name: "Salad fixings", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list1.addItem(cat1_3, name: "Salad dressing", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         
         // list2
-        let list2 = List(name: "Safeway")
+        let list2 = List(name: "Safeway", createRecord: true)
         lists.append(list2)
         
-        let cat2_1 = list2.addCategory("", displayHeader: false, updateIndices: false)
+        let cat2_1 = list2.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
         
-        list2.addItem(cat2_1, name: "Juice", state: ItemState.Incomplete, updateIndices: false)
-        list2.addItem(cat2_1, name: "Cream Cheese", state: ItemState.Incomplete, updateIndices: false)
-        list2.addItem(cat2_1, name: "Deli Ham", state: ItemState.Incomplete, updateIndices: false)
-        list2.addItem(cat2_1, name: "Potatoes", state: ItemState.Incomplete, updateIndices: false)
-        list2.addItem(cat2_1, name: "Bananas", state: ItemState.Incomplete, updateIndices: false)
-        list2.addItem(cat2_1, name: "Oranges", state: ItemState.Incomplete, updateIndices: false)
+        list2.addItem(cat2_1, name: "Juice", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list2.addItem(cat2_1, name: "Cream Cheese", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list2.addItem(cat2_1, name: "Deli Ham", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list2.addItem(cat2_1, name: "Potatoes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list2.addItem(cat2_1, name: "Bananas", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list2.addItem(cat2_1, name: "Oranges", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         
         // list3
-        let list3 = List(name: "King Sooper")
+        let list3 = List(name: "King Sooper", createRecord: true)
         lists.append(list3)
         
-        let cat3_1 = list3.addCategory("", displayHeader: false, updateIndices: false)
+        let cat3_1 = list3.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
         
-        list3.addItem(cat3_1, name: "Bread", state: ItemState.Incomplete, updateIndices: false)
-        list3.addItem(cat3_1, name: "Tomatoes", state: ItemState.Incomplete, updateIndices: false)
-        list3.addItem(cat3_1, name: "Coffee", state: ItemState.Incomplete, updateIndices: false)
-        list3.addItem(cat3_1, name: "Syrup", state: ItemState.Incomplete, updateIndices: false)
-        list3.addItem(cat3_1, name: "Dog toys", state: ItemState.Incomplete, updateIndices: false)
-        list3.addItem(cat3_1, name: "Leggings", state: ItemState.Incomplete, updateIndices: false)
+        list3.addItem(cat3_1, name: "Bread", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list3.addItem(cat3_1, name: "Tomatoes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list3.addItem(cat3_1, name: "Coffee", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list3.addItem(cat3_1, name: "Syrup", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list3.addItem(cat3_1, name: "Dog toys", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list3.addItem(cat3_1, name: "Leggings", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         
         // list4
-        let list4 = List(name: "Trail Mannor")
+        let list4 = List(name: "Trail Mannor", createRecord: true)
         lists.append(list4)
         
-        let cat4_1 = list4.addCategory("", displayHeader: false, updateIndices: false)
+        let cat4_1 = list4.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
         
-        list4.addItem(cat4_1, name: "Bread", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Popcorn", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Ramen noodles", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Sleeping bags", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Soap", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Towles", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Food", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Bacon", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Cereal", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Coffee", state: ItemState.Incomplete, updateIndices: false)
-        list4.addItem(cat4_1, name: "Water", state: ItemState.Incomplete, updateIndices: false)
+        list4.addItem(cat4_1, name: "Bread", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Popcorn", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Ramen noodles", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Sleeping bags", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Soap", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Towles", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Food", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Bacon", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Cereal", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Coffee", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Water", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         
         // list5
-        let list5 = List(name: "Home Depot")
+        let list5 = List(name: "Home Depot", createRecord: true)
         lists.append(list5)
         
-        let cat5_1 = list5.addCategory("", displayHeader: false, updateIndices: false)
+        let cat5_1 = list5.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
         
-        list5.addItem(cat5_1, name: "Paint", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Nails", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Extension cord", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Toilet kit", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Shower head", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Garden hose", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Lights", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "3/8' plywood", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Power tools", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Potting soil", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Cat 6 cable", state: ItemState.Incomplete, updateIndices: false)
-        list5.addItem(cat5_1, name: "Wall plates", state: ItemState.Incomplete, updateIndices: false)
+        list5.addItem(cat5_1, name: "Paint", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Nails", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Extension cord", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Toilet kit", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Shower head", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Garden hose", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Lights", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "3/8' plywood", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Power tools", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Potting soil", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Cat 6 cable", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list5.addItem(cat5_1, name: "Wall plates", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         
         // list6
-        let list6 = List(name: "Walmart")
+        let list6 = List(name: "Walmart", createRecord: true)
         lists.append(list6)
         
-        let cat6_1 = list6.addCategory("", displayHeader: false, updateIndices: false)
+        let cat6_1 = list6.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
         
-        list6.addItem(cat6_1, name: "Dog Shampoo", state: ItemState.Incomplete, updateIndices: false)
-        list6.addItem(cat6_1, name: "Chips", state: ItemState.Incomplete, updateIndices: false)
-        list6.addItem(cat6_1, name: "Movies", state: ItemState.Incomplete, updateIndices: false)
-        list6.addItem(cat6_1, name: "Subway sandwich", state: ItemState.Incomplete, updateIndices: true)
+        list6.addItem(cat6_1, name: "Dog Shampoo", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list6.addItem(cat6_1, name: "Chips", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list6.addItem(cat6_1, name: "Movies", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list6.addItem(cat6_1, name: "Subway sandwich", state: ItemState.Incomplete, updateIndices: true, createRecord: true)
         
         
         // update cell type array in temp lists

@@ -480,7 +480,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         var newItem: Item? = nil
         
         if let category = category {
-            newItem = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true)
+            newItem = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true, createRecord: true)
         }
         
         list.updateIndices()
@@ -511,7 +511,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             newCatIndexPath = NSIndexPath(forRow: 0, inSection: 0)
         } else  {
             // we need a new category
-            newCategory = list.addCategory("", displayHeader: true, updateIndices: true)
+            newCategory = list.addCategory("", displayHeader: true, updateIndices: true, createRecord: true)
             newCatIndexPath = list.displayIndexPathForCategory(newCategory)
         }
         
@@ -584,8 +584,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 {
                     let category = obj as! Category
                     
+                    // flip expanded state
                     category.expanded = !category.expanded
-                    //print("cellSingleTapAction was hit for category '\(obj!.name)' with tag \(tag)")
                     
                     // get display index paths for this category
                     let indexPaths = list.displayIndexPathsForCategory(category, includeAddItemIndexPath: true)    // includes AddItem cell path
@@ -616,6 +616,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 } else {
                     print("no toggle - inEditMode!")
                 }
+                
+                // save expanded state change to the clould
+                appDelegate.saveListData(true)
             } else if obj is Item {
                 self.loadItemDetailView(obj as! Item)
             }
@@ -961,6 +964,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         self.prevLocation = nil
         self.displayLink?.invalidate()
         self.displayLink = nil
+        
+        appDelegate.saveListData(true)
     }
     
     func scrollUpLoop()
