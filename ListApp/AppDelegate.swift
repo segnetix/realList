@@ -26,7 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var listArray = [CKRecord]()
     var categoryArray = [CKRecord]()
     var itemArray = [CKRecord]()
-    var subscriptionSaved = false
+    var refreshEventIsPending = false
     
     // iCloud
     let container = CKContainer.defaultContainer()
@@ -52,79 +52,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         privateDatabase = container.privateCloudDatabase
         
-        // restore the subscription state
-        if let subSaved = NSUserDefaults.standardUserDefaults().objectForKey("subscriptionSaved") as? Bool {
-            self.subscriptionSaved = subSaved
-        }
-        
-        // Push notification setup
+        // push notification setup
         let notificationSettings = UIUserNotificationSettings(forTypes: UIUserNotificationType.None, categories: nil)
         application.registerUserNotificationSettings(notificationSettings)
         application.registerForRemoteNotifications()
         
-        subscribe()
-        
         return true
-    }
-    
-    // set up cloud change event subscription (if not yet done)
-    func subscribe() {
-        if !self.subscriptionSaved {
-            print("need to create a subscription...")
-            
-            // assume that we have subscribed successfully
-            self.subscriptionSaved = true
-            NSUserDefaults.standardUserDefaults().setObject(self.subscriptionSaved, forKey: "subscriptionSaved")
-            NSUserDefaults.standardUserDefaults().synchronize()
-            
-            // set up list, category and item record subscriptions
-            let predicate = NSPredicate(format: "TRUEPREDICATE")
-            
-            let listSubscription = CKSubscription(recordType: ListsRecordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
-            let categorySubscription = CKSubscription(recordType: CategoriesRecordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
-            let itemSubscription = CKSubscription(recordType: ItemsRecordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
-            
-            // list subscription
-            if let database = privateDatabase {
-                database.saveSubscription(listSubscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
-                    if error == nil {
-                        NSUserDefaults.standardUserDefaults().setObject(true, forKey: "subscriptionSaved")
-                        NSUserDefaults.standardUserDefaults().synchronize()
-                    } else {
-                        print("saveSubscription error for lists: \(error!.localizedDescription)")
-                        self.subscriptionSaved = false
-                    }
-                }
-            }
-            
-            // category subscription
-            if let database = privateDatabase {
-                database.saveSubscription(categorySubscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
-                    if error == nil {
-                        NSUserDefaults.standardUserDefaults().setObject(true, forKey: "subscriptionSaved")
-                        NSUserDefaults.standardUserDefaults().synchronize()
-                    } else {
-                        print("saveSubscription error for categories: \(error!.localizedDescription)")
-                        self.subscriptionSaved = false
-                    }
-                }
-            }
-            
-            // item subscription
-            if let database = privateDatabase {
-                database.saveSubscription(itemSubscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
-                    if error == nil {
-                        NSUserDefaults.standardUserDefaults().setObject(true, forKey: "subscriptionSaved")
-                        NSUserDefaults.standardUserDefaults().synchronize()
-                    } else {
-                        print("saveSubscription error for items: \(error!.localizedDescription)")
-                        self.subscriptionSaved = false
-                    }
-                }
-            }
-        } else {
-            print("no need to save subscription...")
-        }
     }
     
     func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
@@ -133,7 +66,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
         print("didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
-        subscribe()
+        self.deleteCurrentSubscriptions()
     }
     
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject])
@@ -241,9 +174,70 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
 ////////////////////////////////////////////////////////////////
 //
-//  MARK: - Storage methods
+//  MARK: - Subscription and storage methods
 //
 ////////////////////////////////////////////////////////////////
+    
+    // delete any old subscriptions before create new subscriptions
+    func deleteCurrentSubscriptions()
+    {
+        print("called deleteCurrentSubscriptions...")
+        
+        if let database = privateDatabase {
+            database.fetchAllSubscriptionsWithCompletionHandler() { [unowned self] (subscriptions, error) -> Void in
+                if error == nil
+                {
+                    var subscriptionsDeletedCount = 0
+                    
+                    if let subscriptions = subscriptions {
+                        for subscription in subscriptions {
+                            database.deleteSubscriptionWithID(subscription.subscriptionID, completionHandler: { (str, error) -> Void in
+                                if error != nil {
+                                    // do your error handling here!
+                                    print(error!.localizedDescription)
+                                } else {
+                                    print("\(subscription.recordType) subscription deleted.  subscriptionsDeletedCount is \(subscriptionsDeletedCount + 1) of \(subscriptions.count) \(subscription.subscriptionID)")
+                                    if ++subscriptionsDeletedCount >= subscriptions.count {
+                                        // call addNewSubscriptions after the last current subscription is deleted
+                                        self.addNewSubscriptions()
+                                    }
+                                }
+                            })
+                        }
+                     }
+                } else {
+                    // fetchAllSubscriptionsWithCompletionHandler error
+                    print("fetchAllSubscriptionsWithCompletionHandler error: \(error!.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    // add subscriptions after deleting all current subscriptions
+    func addNewSubscriptions()
+    {
+        func saveSubscription(recordType: String) {
+            // run later, making sure that all subscriptions have been deleted before re-subscribing...
+            let predicate = NSPredicate(format: "TRUEPREDICATE")
+            
+            // save new subscription
+            if let database = privateDatabase {
+                print("preparing to subscribe to \(recordType) changes")
+                let subscription = CKSubscription(recordType: recordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
+                database.saveSubscription(subscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
+                    if subscription != nil {
+                        print("saved \(recordType) subscription... \(subscription!.subscriptionID)")
+                    } else {
+                        print("ERROR: saveSubscription error for \(recordType): \(error!.localizedDescription)")
+                    }
+                }
+            }
+        }
+        
+        for subscriptionType in [ListsRecordType, CategoriesRecordType, ItemsRecordType] {
+            saveSubscription(subscriptionType)
+        }
+    }
     
     // Checks if the user has logged into their iCloud account or not
     func isIcloudAvailable() -> Bool {
@@ -300,7 +294,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // create or update a local object with the given record
     func updateFromRecord(record: CKRecord, forceUpdate: Bool)
     {
-        print("CloudKit: update notification... \(record["name"])")
+        //print("CloudKit: update notification... \(record["name"])")
         var list: List?
         var category: Category?
         var item: Item?
@@ -337,7 +331,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
             }
         default:
-            print("updateFromRecord: record not found in local data...!")
+            print("updateFromRecord: unknown record type received from cloud data...!")
             return
         }
         
@@ -355,7 +349,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     if let showCompletedItems = record["showCompletedItems"] { list!.showCompletedItems = showCompletedItems as! Bool }
                     if let showInactiveItems  = record["showInactiveItems"]  { list!.showInactiveItems = showInactiveItems as! Bool }
                     if let listColor          = record["listColor"]          { list!.listColor = getUIColorFromRGB(listColor as! Int) }
-                    if let order              = record["order"]              { list!.order = order as! Int }
+                    if let order              = record["order"]              { list!.order = order  as! Int }
                     
                     list!.listRecord = record
                     print("updated list: \(list!.name)")
@@ -371,22 +365,48 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     print("updated category: \(category!.name)")
                 }
             case ItemsRecordType:
-                if item != nil {
-                    if let name  = record["name"]  { item!.name  = name as! String }
-                    if let note  = record["note"]  { item!.note  = note as! String }
-                    if let order = record["order"] { item!.order = order as! Int }
+                if let item = item {
+                    if let name  = record["name"]  { item.name  = name  as! String }
+                    if let note  = record["note"]  { item.note  = note  as! String }
+                    if let order = record["order"] { item.order = order as! Int    }
                     
-                    item!.state = ItemState.Incomplete
-                    if let itemState = record["state"] as? Int {
-                        item!.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
+                    // check if item has changed categories
+                    if let itemRecord = item.itemRecord {
+                        let currentCategory = getCategoryFromReference(itemRecord)
+                        let updateCategory = getCategoryFromReference(record)
+                        
+                        if currentCategory != updateCategory && updateCategory != nil {
+                            // item changed categories = delete item from old category
+                            if currentCategory != nil {
+                                let index = currentCategory!.items.indexOf(item)
+                                if index != nil {
+                                    currentCategory!.items.removeAtIndex(index!)
+                                    print("Item Move: deleted \(item.name) from \(currentCategory!.name)")
+                                }
+                            }
+                            // add item to new category
+                            if item.order >= 0 {
+                                if item.order < updateCategory!.items.count {
+                                    updateCategory!.items.insert(item, atIndex: item.order)
+                                } else {
+                                    updateCategory!.items.append(item)
+                                }
+                                print("Item Move: inserted \(item.name) in \(updateCategory!.name) at pos \(item.order)")
+                            }
+                        }
                     }
-                    item!.itemRecord = record
-                    print("updated item: \(item!.name)")
+                    
+                    item.state = ItemState.Incomplete
+                    if let itemState = record["state"] as? Int {
+                        item.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
+                    }
+                    item.itemRecord = record
+                    print("updated item: \(item.name)")
                 }
             default:
                 break
             }
-        } else {
+        } else if list == nil && category == nil && item == nil {
             // local record does not exist, so add
             switch record.recordType {
             case ListsRecordType:
@@ -421,6 +441,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     print("added new category: \(newCategory.name)")
                 } else {
                     print("category \(record["name"]) can't find list \(record["owningList"])")
+                    // need to delete the category as it didn't send a valid list reference
+                    if let database = privateDatabase {
+                        database.deleteRecordWithID(record.recordID, completionHandler: { returnRecord, error in
+                            if let err = error {
+                                print("updateFromRecord: delete category error for '\(record["name"])': \(err.localizedDescription)")
+                            } else {
+                                print("updateFromRecord: category record deleted successfully '\(record["name"])'")
+                            }
+                        })
+                    }
                 }
             case ItemsRecordType:
                 print("adding a new item: \(record["name"])")
@@ -445,14 +475,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     }
                 } else {
                     print("item \(record["name"]) can't find category \(record["owningCategory"])")
+                    // need to delete the item as it didn't send a valid category reference
+                    if let database = privateDatabase {
+                        database.deleteRecordWithID(record.recordID, completionHandler: { returnRecord, error in
+                            if let err = error {
+                                print("updateFromRecord: delete item error for '\(record["name"])': \(err.localizedDescription)")
+                            } else {
+                                print("updateFromRecord: item record deleted successfully '\(record["name"])'")
+                            }
+                        })
+                    }
                 }
             default:
                 break
             }
         }
         
-        // now reorder and refresh the table view
-        self.reorderListData()
+        if !refreshEventIsPending {
+            print("preparing refreshEvent timer for update...")
+            NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: "refreshEvent", userInfo: nil, repeats: false)
+            refreshEventIsPending = true
+        }
     }
     
     // deletes local data associated with the given recordName
@@ -491,7 +534,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
         
         // now reorder and refresh the table view
-        self.reorderListData()
+        if !refreshEventIsPending {
+            print("preparing refreshEvent timer for delete...")
+            NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: "refreshEvent", userInfo: nil, repeats: false)
+            refreshEventIsPending = true
+        }
+    }
+    
+    // called from a timer to batch refreshes
+    func refreshEvent() {
+        print("refreshEvent timer did fire...")
+        refreshEventIsPending = false
+        self.refreshListData()
     }
     
     func addToUpdateRecords(record: CKRecord, obj: AnyObject) {
@@ -672,18 +726,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
            updateFromRecord(cloudItem, forceUpdate: false)
         }
         
-        self.reorderListData()
+        // updateFromRecord will set a timer to fire refreshListData after three seconds
     }
     
-    func reorderListData()
+    // sorts all lists, categories and items and updates indices
+    func refreshListData()
     {
         if let listVC = listViewController {
-            listVC.reorderListObjects()
+            listVC.reorderListObjects()         // reorders all lists, categories and items according to order number
             listVC.tableView.reloadData()
         }
         
         if let itemVC = itemViewController {
             itemVC.tableView.reloadData()
+            itemVC.resetCellViewTags()          // is this needed???
         }
     }
     

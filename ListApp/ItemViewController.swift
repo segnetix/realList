@@ -186,7 +186,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             // set item name
             let title = list.titleForObjectAtIndexPath(indexPath)
             if let cellTitle = title {
-                cell.itemName.text = cellTitle
+                cell.itemName.text = cellTitle //+ "\(tag)"
             } else {
                 cell.itemName.text = "cellTitle is nil"
             }
@@ -247,7 +247,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             let title = list.titleForObjectAtIndexPath(indexPath)
             if let cellTitle = title {
                 //cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.categoryName.tag)")      // for development/debugging
-                cell.categoryName?.text = cellTitle
+                cell.categoryName?.text = cellTitle// + "\(tag)"
             } else {
                 cell.categoryName?.text = ""
             }
@@ -1128,30 +1128,32 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     // NOTE: this only updates the tags for visible cells
     func resetCellViewTags()
     {
-        var cell: UITableViewCell? = nil
-        var index = -1
-        
-        repeat {
-            let indexPath = NSIndexPath(forRow: ++index, inSection: 0)
-            cell = tableView.cellForRowAtIndexPath(indexPath)
-                
-            if cell != nil {
-                let tag = list.tagValueForIndexPath(indexPath)
-                
-                if cell is ItemCell {
-                    let itemCell = cell as! ItemCell
-                    itemCell.itemName!.tag = tag
-                    itemCell.checkBox!.tag = tag
-                } else if cell is CategoryCell {
-                    (cell as! CategoryCell).categoryName!.tag = tag
-                } else if cell is AddItemCell {
-                    (cell as! AddItemCell).addItemButton.tag = tag
+        if list != nil {
+            var cell: UITableViewCell? = nil
+            var index = -1
+            
+            repeat {
+                let indexPath = NSIndexPath(forRow: ++index, inSection: 0)
+                cell = tableView.cellForRowAtIndexPath(indexPath)
+                    
+                if cell != nil {
+                    let tag = list.tagValueForIndexPath(indexPath)
+                    
+                    if cell is ItemCell {
+                        let itemCell = cell as! ItemCell
+                        itemCell.itemName!.tag = tag
+                        itemCell.checkBox!.tag = tag
+                    } else if cell is CategoryCell {
+                        (cell as! CategoryCell).categoryName!.tag = tag
+                    } else if cell is AddItemCell {
+                        (cell as! AddItemCell).addItemButton.tag = tag
+                    }
+                    
+                    cell!.contentView.tag = tag
                 }
                 
-                cell!.contentView.tag = tag
-            }
-            
-        } while index < list.totalDisplayCount()
+            } while index < list.totalDisplayCount()
+        }
     }
     
     func rowAtIndexPathIsVisible(indexPath: NSIndexPath) -> Bool
@@ -1462,14 +1464,14 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     }
     
     func bannerViewDidLoadAd(banner: ADBannerView!) {
-        print("bannerViewDidLoadAd")
+        //print("bannerViewDidLoadAd")
         self.adBanner.hidden = false
         
         self.layoutAnimated(true)
     }
     
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
-        print("didFailToReceiveAdWithError: \(error)")
+        //print("didFailToReceiveAdWithError: \(error)")
         self.adBanner.hidden = true
         
         self.layoutAnimated(true)
@@ -1494,7 +1496,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             adBanner.frame.origin.y = bannerXpos
         }
         
-        print("showAdBanner: xPos \(adBanner.frame.origin.y)")
+        //print("showAdBanner: xPos \(adBanner.frame.origin.y)")
         
         UIView.animateWithDuration(animated ? 0.5 : 0.0, animations: { () -> Void in
             self.view.layoutIfNeeded()

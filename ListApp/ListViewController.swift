@@ -741,7 +741,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return snapshot
     }
     
-    // reorder lists according to order number
+    // reorder lists, categories and items according to order number
     func reorderListObjects()
     {
         // sort lists
@@ -753,6 +753,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             for category in list.categories {
                 category.items.sortInPlace { $0.order < $1.order }
             }
+            
+            list.updateIndices()
         }
     }
     
