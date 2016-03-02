@@ -23,12 +23,14 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         modalPresentationStyle = UIModalPresentationStyle.Custom
         self.item = item
         self.list = list
+        
         createUI()
     }
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     
     func createUI()
     {
@@ -38,11 +40,6 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         containerView.translatesAutoresizingMaskIntoConstraints = false
         containerView.backgroundColor = UIColor(white: 1.0, alpha: 1.0)
         view.addSubview(containerView)
-        
-        // Set some constants to use when creating constraints
-        //let titleFontSize: CGFloat = view.bounds.size.width > 667.0 ? 40.0 : 22.0
-        //let bodyFontSize: CGFloat = view.bounds.size.width > 667.0 ? 40.0 : 22.0
-        //let noteFontSize: CGFloat = 15.0
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
@@ -128,7 +125,8 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         
     }
     
-    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool {
+    func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool
+    {
         if (text == "\n") {
             textView.resignFirstResponder()
             return false
@@ -136,13 +134,23 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         return true
     }
     
-    func close(sender: UIButton) {
-        item?.note = noteTextView.text
-        item?.needToSave = true
-        itemVC?.tableView.reloadData()
-        itemVC?.appDelegate.saveAll()
+    func textViewDidEndEditing(textView: UITextView) {
+        print("textViewDidEndEditing")
+    }
+    
+    func textViewShouldEndEditing(textView: UITextView) -> Bool {
+        print("textViewShouldEndEditing")
+        return true
+    }
+    
+    func close(sender: UIButton)
+    {
+        self.item?.note = noteTextView.text
+        self.item?.needToSave = true
+        self.itemVC?.tableView.reloadData()
+        self.itemVC?.appDelegate.saveAll()
         
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
-
+    
 }

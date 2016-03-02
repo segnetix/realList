@@ -120,12 +120,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
         
         print("applicationDidEnterBackground...")
+        
     }
 
     func applicationWillEnterForeground(application: UIApplication) {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
         
         print("applicationWillEnterForeground...")
+        
+        /*
+        if itemDetailVC != nil {
+            itemDetailVC!.item = itemDetailVCItem
+        }
+        */
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
@@ -209,6 +216,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     // fetchAllSubscriptionsWithCompletionHandler error
                     print("fetchAllSubscriptionsWithCompletionHandler error: \(error!.localizedDescription)")
                 }
+                print("fetchAllSubscriptionsWithCompletionHandler subscription count is \(subscriptions!.count)")
+                if subscriptions!.count < 3 {
+                    self.addNewSubscriptions()
+                }
             }
         }
     }
@@ -216,6 +227,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // add subscriptions after deleting all current subscriptions
     func addNewSubscriptions()
     {
+        print("called addNewSubscriptions...")
+        
         func saveSubscription(recordType: String) {
             // run later, making sure that all subscriptions have been deleted before re-subscribing...
             let predicate = NSPredicate(format: "TRUEPREDICATE")
@@ -352,7 +365,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     if let order              = record["order"]              { list!.order = order  as! Int }
                     
                     list!.listRecord = record
-                    print("updated list: \(list!.name)")
+                    //print("updated list: \(list!.name)")
                 }
             case CategoriesRecordType:
                 if category != nil {
@@ -362,7 +375,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     if let order         = record["order"]         { category!.order = order as! Int }
                     
                     category!.categoryRecord = record
-                    print("updated category: \(category!.name)")
+                    //print("updated category: \(category!.name)")
                 }
             case ItemsRecordType:
                 if let item = item {
@@ -401,7 +414,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                         item.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
                     }
                     item.itemRecord = record
-                    print("updated item: \(item.name)")
+                    //print("updated item: \(item.name)")
                 }
             default:
                 break
@@ -570,7 +583,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 // deal with conflicts
                 // set completionHandler of wrapper operation if it's the case
                 if error == nil && record != nil {
-                    print("batch save: \(record!["name"])")
+                    //print("batch save: \(record!["name"])")
                     let obj = self.updateRecords[record!]
                     if obj is List {
                         let list = obj as! List
@@ -637,17 +650,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             // set up the record fetched block
             listFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.listArray.append(record)
-                print("list recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
+                //print("list recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
             }
             
             categoryFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.categoryArray.append(record)
-                print("category recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
+                //print("category recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
             }
             
             itemFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.itemArray.append(record)
-                print("item recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
+                //print("item recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
             }
             
             // set up completion blocks with cursors so they can recursively gather all of the records

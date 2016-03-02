@@ -771,12 +771,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return nil
     }
     
-    func getCategoryForItem(category: Item) -> Category?
+    func getCategoryForItem(searchItem: Item) -> Category?
     {
         for list in lists {
             for category in list.categories {
                 for item in category.items {
-                    if item === item {
+                    if item === searchItem {
                         return category
                     }
                 }

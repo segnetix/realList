@@ -246,7 +246,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             // category title
             let title = list.titleForObjectAtIndexPath(indexPath)
             if let cellTitle = title {
-                //cell.categoryName?.attributedText = makeAttributedString(title: cellTitle, subtitle: "\(cell.categoryName.tag)")      // for development/debugging
                 cell.categoryName?.text = cellTitle// + "\(tag)"
             } else {
                 cell.categoryName?.text = ""
@@ -545,6 +544,28 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         appDelegate.saveAll()
     }
     
+    func collapseAllCategories() {
+        print("collapseAllCategories")
+        
+        for category in list.categories {
+            if category.expanded == true {
+                category.expanded = false
+                handleCategoryCollapseExpand(category)
+            }
+        }
+    }
+    
+    func expandAllCategories() {
+        print("expandAllCategories")
+        
+        for category in list.categories {
+            if category.expanded == false {
+                category.expanded = true
+                handleCategoryCollapseExpand(category)
+            }
+        }
+    }
+    
     func scrollToCategoryEnded(scrollView: UIScrollView)
     {
         NSObject.cancelPreviousPerformRequestsWithTarget(self)
@@ -563,6 +584,21 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         return "\(category.itemsComplete())/\(category.items.count)"
     }
 
+    func handleCategoryCollapseExpand(category: Category)
+    {
+        // get display index paths for this category
+        let indexPaths = list.displayIndexPathsForCategory(category, includeAddItemIndexPath: true)    // includes AddItem cell path
+        
+        self.tableView.beginUpdates()
+        if category.expanded {
+            // insert the expanded rows into the table view
+            self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
+        } else {
+            // remove the collapsed rows from the table view
+            self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
+        }
+        self.tableView.endUpdates()
+    }
     
 ////////////////////////////////////////////////////////////////
 //
@@ -587,18 +623,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                     // flip expanded state
                     category.expanded = !category.expanded
                     
-                    // get display index paths for this category
-                    let indexPaths = list.displayIndexPathsForCategory(category, includeAddItemIndexPath: true)    // includes AddItem cell path
-                    
-                    self.tableView.beginUpdates()
-                    if category.expanded {
-                        // insert the expanded rows into the table view
-                        self.tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
-                    } else {
-                        // remove the collapsed rows from the table view
-                        self.tableView.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: UITableViewRowAnimation.Automatic)
-                    }
-                    self.tableView.endUpdates()
+                    handleCategoryCollapseExpand(category)
                     
                     if category.expanded {
                         // scroll the newly expanded header to the top so items can be seen
@@ -1239,9 +1264,11 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     func loadItemDetailView(item: Item)
     {
         transitioningDelegate = itemDetailTransitionDelegate
-        let vc = ItemDetailViewController(item: item, list: list)
+        
+        let vc = ItemDetailViewController(item: item, list: list)      // pass item by reference to
         vc.transitioningDelegate = itemDetailTransitionDelegate
         vc.itemVC = self
+        
         presentViewController(vc, animated: true, completion: nil)
     }
     
@@ -1298,6 +1325,16 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         // need to update the cellTypeArray after show/hide event
         list.updateIndices()
+    }
+    
+    func setAllItemsIncomplete() {
+        list.setAllItemsIncomplete()
+        tableView.reloadData()
+    }
+    
+    func setAllItemsInactive() {
+        list.setAllItemsInactive()
+        tableView.reloadData()
     }
     
     // called from the checkBox button when it is tapped

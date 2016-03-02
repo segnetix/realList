@@ -20,9 +20,9 @@ class CheckBox: UIButton
     let defaultColor = UIColor(colorLiteralRed: 0.0, green: 0.478, blue: 1.0, alpha: 1.0)
     
     // external links
-    weak var item: Item?
-    weak var list: List?
-    weak var itemVC: ItemViewController?
+    var item: Item?
+    var list: List?
+    var itemVC: ItemViewController?
     
     func checkBoxInit(item: Item, list: List, itemVC: ItemViewController, tag: Int) {
         self.item = item

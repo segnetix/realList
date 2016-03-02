@@ -219,6 +219,9 @@
 						CreatedOnToolsVersion = 7.2;
 						DevelopmentTeam = R6ERNS2DRK;
 						SystemCapabilities = {
+							com.apple.Push = {
+								enabled = 1;
+							};
 							com.apple.iCloud = {
 								enabled = 1;
 							};

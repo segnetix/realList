@@ -48,9 +48,20 @@ class List: NSObject, NSCoding
             }
         }
     }
+    
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-    var showCompletedItems: Bool = true { didSet { self.updateIndices(); needToSave = true } }
-    var showInactiveItems:  Bool = true { didSet { self.updateIndices(); needToSave = true } }
+    var showCompletedItems:  Bool = true { didSet { self.updateIndices(); needToSave = true } }
+    var showInactiveItems:   Bool = true { didSet { self.updateIndices(); needToSave = true } }
+    
+    var expandAllCategories: Bool = true {
+        didSet {
+            for category in categories {
+                category.expanded = expandAllCategories
+            }
+            self.updateIndices()
+            needToSave = true
+        }
+    }
     
     // new list initializer
     init(name: String, createRecord: Bool)
@@ -233,6 +244,24 @@ class List: NSObject, NSCoding
         }
         
         return item
+    }
+    
+    // sets all items to the active state
+    func setAllItemsIncomplete() {
+        for category in categories {
+            for item in category.items {
+                item.state = ItemState.Incomplete
+            }
+        }
+    }
+    
+    // sets all items to the inactive state
+    func setAllItemsInactive() {
+        for category in categories {
+            for item in category.items {
+                item.state = ItemState.Inactive
+            }
+        }
     }
     
 ///////////////////////////////////////////////////////
