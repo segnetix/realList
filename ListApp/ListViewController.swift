@@ -293,7 +293,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // delete the newly added list if user didn't create a name
         if editingNewListName
         {
-            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
+            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()).isEmpty
             {
                 // delete from lists array
                 lists.removeLast()

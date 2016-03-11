@@ -18,6 +18,15 @@ enum ItemState: Int {
     case Inactive = 0
     case Incomplete = 1
     case Complete = 2
+    
+    // this function will bump the button to the next state
+    mutating func next() {
+        switch self {
+        case Inactive:      self = Incomplete
+        case Incomplete:    self = Complete
+        case Complete:      self = Inactive
+        }
+    }
 }
 
 ////////////////////////////////////////////////////////////////

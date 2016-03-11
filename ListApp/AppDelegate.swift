@@ -57,6 +57,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         application.registerUserNotificationSettings(notificationSettings)
         application.registerForRemoteNotifications()
         
+        // get local data timestamp
+        localTimestamp = NSUserDefaults.standardUserDefaults().objectForKey("timestamp") as? NSDate
+        if localTimestamp != nil {
+            print("localTimestamp: \(localTimestamp)")
+        }
+        
+        // restore the list data from local storage
+        if let archivedListData = NSKeyedUnarchiver.unarchiveObjectWithFile(ArchiveURL.path!) as? [List] {
+            listViewController!.lists = archivedListData
+        }
+        
+        // merge local data with cloud data
+        CKContainer.defaultContainer().accountStatusWithCompletionHandler({ status, error in
+            if (error != nil) { print("Error = \(error!.description)")}
+            print("Account status = \(status.hashValue) (0=CouldNotDetermine/1=Available/2=Restricted/3=NoAccount)")
+        })
+        
+        // restore the selected list
+        if let initialListIndex = NSUserDefaults.standardUserDefaults().objectForKey("selectionIndex") as? Int {
+            if initialListIndex >= 0 && initialListIndex < listViewController!.lists.count {
+                itemViewController!.list = listViewController!.lists[initialListIndex]
+                listViewController!.selectionIndex = initialListIndex
+            } else {
+                listViewController!.selectionIndex = -1
+            }
+        }
+        
+        fetchCloudData()
+        
         return true
     }
     
@@ -110,9 +139,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
         
         print("applicationWillResignActive...")
-        
-        // save state and data
-        saveAll()
     }
 
     func applicationDidEnterBackground(application: UIApplication) {
@@ -127,49 +153,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
         
         print("applicationWillEnterForeground...")
-        
-        /*
-        if itemDetailVC != nil {
-            itemDetailVC!.item = itemDetailVCItem
-        }
-        */
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
         
         print("applicationDidBecomeActive...")
-        
-        // get local data timestamp
-        localTimestamp = NSUserDefaults.standardUserDefaults().objectForKey("timestamp") as? NSDate
-        if localTimestamp != nil {
-            print("localTimestamp: \(localTimestamp)")
-        }
-        
-        // restore the list data from local storage
-        if let archivedListData = NSKeyedUnarchiver.unarchiveObjectWithFile(ArchiveURL.path!) as? [List] {
-            listViewController!.lists = archivedListData
-        }
-        
-        // merge local data with cloud data
-        let container = CKContainer.defaultContainer()
-        
-        container.accountStatusWithCompletionHandler({status, error in
-            if (error != nil) { print("Error = \(error!.description)")}
-            print("Account status = \(status.hashValue) (0=CouldNotDetermine/1=Available/2=Restricted/3=NoAccount)")
-        })
-        
-        // restore the selected list
-        if let initialListIndex = NSUserDefaults.standardUserDefaults().objectForKey("selectionIndex") as? Int {
-            if initialListIndex >= 0 && initialListIndex < listViewController!.lists.count {
-                itemViewController!.list = listViewController!.lists[initialListIndex]
-                listViewController!.selectionIndex = initialListIndex
-            } else {
-                listViewController!.selectionIndex = -1
-            }
-        }
-        
-        fetchCloudData()
     }
     
     func applicationWillTerminate(application: UIApplication) {
@@ -177,6 +166,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         print("applicationWillTerminate...")
         
+        // save state and data
+        saveAll()
     }
     
 ////////////////////////////////////////////////////////////////
@@ -283,7 +274,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
         }
         
-        // now send the the records for batch updating
+        // cloud save -- now send the the records for batch updating
         batchRecordUpdate()
         
         if !cloudOnly {
@@ -570,11 +561,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         if let database = privateDatabase {
             let saveRecordsOperation = CKModifyRecordsOperation()
-            var ckRecords = [CKRecord]()
+            let ckRecords = [CKRecord](updateRecords.keys)      // initializes an array of CKRecords with the keys from the updateRecords dictionary
             
-            for (ckRecord, _) in updateRecords {
-                ckRecords.append(ckRecord)
-            }
+            //for ckRecord in updateRecords.keys {
+            //    ckRecords.append(ckRecord)
+            //}
             
             saveRecordsOperation.recordsToSave = ckRecords
             saveRecordsOperation.savePolicy = .ChangedKeys

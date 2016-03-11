@@ -421,7 +421,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         // delete the newly added item if user didn't create a name
         if editingNewItemName
         {
-            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
+            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()).isEmpty
             {
                 // remove last item from category
                 list.categories[list.categories.count-1].items.removeLast()
@@ -431,7 +431,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             editingNewItemName = false
         } else if editingNewCategoryName
         {
-            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()) == ""
+            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()).isEmpty
             {
                 // remove last category from list
                 list.categories.removeLast()
@@ -1348,16 +1348,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             indexPath = list.displayIndexPathForItem(item)
             
             // cycle item state
-            switch item.state {
-            case ItemState.Incomplete:  item.state = ItemState.Complete
-            case ItemState.Complete:    item.state = ItemState.Inactive
-            case ItemState.Inactive:    item.state = ItemState.Incomplete
-            }
-            
-            /*
-            // update cloud storage with the state change
-            item.saveToCloud(nil)
-            */
+            item.state.next()
             
             // instead we will call saveListData - cloudOnly mode
             appDelegate.saveListData(true)
