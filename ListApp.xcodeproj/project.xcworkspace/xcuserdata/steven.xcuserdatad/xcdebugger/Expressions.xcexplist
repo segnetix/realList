@@ -3,19 +3,38 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "ItemDetailViewController.init(item : Item, list : List) -&gt; ItemDetailViewController:ItemDetailViewController.swift">
+         contextName = "List.saveToCloud() -&gt; ():ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "listRecord">
+            </PersistentString>
+            <PersistentString
+               value = "recordID">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "selectedCategory">
+               value = "list.categories[selectedCategory].items[i].name">
             </PersistentString>
             <PersistentString
                value = "textField.text">
             </PersistentString>
             <PersistentString
-               value = "list.categories[selectedCategory].items[i].name">
+               value = "selectedCategory">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Item.modifiedBy.didset:ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "name">
+            </PersistentString>
+            <PersistentString
+               value = "modifiedBy">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -77,13 +96,13 @@
          contextName = "Category.saveToCloud(CKReference) -&gt; ():ListData.swift">
          <PersistentStrings>
             <PersistentString
-               value = "item.note">
-            </PersistentString>
-            <PersistentString
                value = "name">
             </PersistentString>
             <PersistentString
                value = "item.name">
+            </PersistentString>
+            <PersistentString
+               value = "item.note">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -91,10 +110,10 @@
          contextName = "ItemViewController.longPressAction(UILongPressGestureRecognizer) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "indexPath!.row">
+               value = "destCat.name">
             </PersistentString>
             <PersistentString
-               value = "destCat.name">
+               value = "indexPath!.row">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -131,6 +150,9 @@
          <PersistentStrings>
             <PersistentString
                value = "category.name">
+            </PersistentString>
+            <PersistentString
+               value = "category.items[0].name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -210,13 +232,13 @@
          contextName = "ItemViewController.tableView(UITableView, commitEditingStyle : UITableViewCellEditingStyle, forRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "(item as! Item).name">
+               value = "indexPath.section">
             </PersistentString>
             <PersistentString
                value = "indexPath.row">
             </PersistentString>
             <PersistentString
-               value = "indexPath.section">
+               value = "(item as! Item).name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -324,6 +346,14 @@
          contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath, atEnd : Bool) -&gt; ():ListData.swift">
       </ContextState>
       <ContextState
+         contextName = "ListViewController.(reorderListObjects(ListViewController) -&gt; () -&gt; ()).(closure #3):ListViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "category.items[0].name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ItemViewController.listDeleted(List) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
@@ -341,23 +371,26 @@
                value = "item!.name">
             </PersistentString>
             <PersistentString
-               value = "item!.note">
+               value = "item">
             </PersistentString>
             <PersistentString
-               value = "item">
+               value = "item!.note">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "List.saveToCloud() -&gt; ():ListData.swift">
+         contextName = "Item.updateFromRecord(CKRecord) -&gt; ():ListData.swift">
          <PersistentStrings>
             <PersistentString
-               value = "listRecord">
+               value = "name">
             </PersistentString>
             <PersistentString
-               value = "recordID">
+               value = "self.modifiedBy">
             </PersistentString>
          </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemDetailViewController.init(item : Item, list : List) -&gt; ItemDetailViewController:ItemDetailViewController.swift">
       </ContextState>
    </ContextStates>
 </VariablesViewState>

@@ -14,6 +14,8 @@ let ListsRecordType = "Lists"
 let CategoriesRecordType = "Categories"
 let ItemsRecordType = "Items"
 
+let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+
 enum ItemState: Int {
     case Inactive = 0
     case Incomplete = 1
@@ -50,15 +52,7 @@ class List: NSObject, NSCoding
     var modificationDate: NSDate?
     var listRecord: CKRecord?
     var listReference: CKReference?
-    var order: Int = 0 {
-        didSet {
-            if order != oldValue {
-                needToSave = true
-            }
-        }
-    }
-    
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    var order: Int = 0 { didSet { if order != oldValue { needToSave = true } } }
     var showCompletedItems:  Bool = true { didSet { self.updateIndices(); needToSave = true } }
     var showInactiveItems:   Bool = true { didSet { self.updateIndices(); needToSave = true } }
     
@@ -128,14 +122,14 @@ class List: NSObject, NSCoding
     {
         self.modificationDate = NSDate.init()
         
-        coder.encodeObject(self.name, forKey: "name")
+        coder.encodeObject(self.name,               forKey: "name")
         coder.encodeObject(self.showCompletedItems, forKey: "showCompletedItems")
-        coder.encodeObject(self.showInactiveItems, forKey: "showInactiveItems")
-        coder.encodeObject(self.listColor, forKey: "listColor")
-        coder.encodeObject(self.categories, forKey: "categories")
-        coder.encodeObject(self.listReference, forKey: "listReference")
-        coder.encodeObject(self.listRecord, forKey: "listRecord")
-        coder.encodeObject(self.modificationDate, forKey: "modificationDate")
+        coder.encodeObject(self.showInactiveItems,  forKey: "showInactiveItems")
+        coder.encodeObject(self.listColor,          forKey: "listColor")
+        coder.encodeObject(self.categories,         forKey: "categories")
+        coder.encodeObject(self.listReference,      forKey: "listReference")
+        coder.encodeObject(self.listRecord,         forKey: "listRecord")
+        coder.encodeObject(self.modificationDate,   forKey: "modificationDate")
     }
     
     // commits this list and its categories to cloud storage
@@ -149,7 +143,7 @@ class List: NSObject, NSCoding
                 if needToDelete {
                     deleteRecord(listRecord!, database: database)
                 } else if needToSave {
-                    saveRecord(listRecord!, database: database)
+                    saveRecord(listRecord!)
                 }
             } else {
                 print("Can't save list '\(name)' - listRecord is nil...")
@@ -165,7 +159,7 @@ class List: NSObject, NSCoding
     }
     
     // saves this list record to the cloud
-    func saveRecord(listRecord: CKRecord, database: CKDatabase)
+    func saveRecord(listRecord: CKRecord)
     {
         print("saveRecord for List \(name)")
         var rgbColor = NSNumber(integer: 0)
@@ -177,14 +171,28 @@ class List: NSObject, NSCoding
             }
         }
         
-        listRecord.setObject(self.name, forKey: "name")
-        listRecord.setObject(rgbColor, forKey: "listColor")
+        listRecord.setObject(self.name,               forKey: "name")
+        listRecord.setObject(rgbColor,                forKey: "listColor")
         listRecord.setObject(self.showCompletedItems, forKey: "showCompletedItems")
-        listRecord.setObject(self.showInactiveItems, forKey: "showInactiveItems")
-        listRecord.setObject(self.order, forKey: "order")
+        listRecord.setObject(self.showInactiveItems,  forKey: "showInactiveItems")
+        listRecord.setObject(self.order,              forKey: "order")
         
         // add this record to the batch record array for updating
         appDelegate.addToUpdateRecords(listRecord, obj: self)
+    }
+    
+    // update this list from cloud storage
+    func updateFromRecord(record: CKRecord)
+    {
+        if let name               = record["name"]               { self.name               = name as! String }
+        if let showCompletedItems = record["showCompletedItems"] { self.showCompletedItems = showCompletedItems as! Bool }
+        if let showInactiveItems  = record["showInactiveItems"]  { self.showInactiveItems  = showInactiveItems as! Bool }
+        if let listColor          = record["listColor"]          { self.listColor          = UIColor.colorFromRGB(listColor as! Int) }
+        if let order              = record["order"]              { self.order              = order  as! Int }
+        
+        self.listRecord = record
+        self.listReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
+        //print("updated list: \(list!.name)")
     }
     
     func deleteFromCloud() {
@@ -968,8 +976,8 @@ class ListObj: NSObject
     var name: String { didSet { needToSave = true } }
     var categoryIndex: Int
     var itemIndex: Int
-    var needToSave: Bool = false
-    var needToDelete: Bool = false
+    var needToSave: Bool
+    var needToDelete: Bool
     var order: Int = 0 {
         didSet {
             if order != oldValue {
@@ -985,6 +993,7 @@ class ListObj: NSObject
         self.categoryIndex = 0
         self.itemIndex = 0
         self.needToSave = true
+        self.needToDelete = false
     }
     
     func updateIndicesFromTag(tag: Int)
@@ -1015,7 +1024,6 @@ class Category: ListObj, NSCoding
     var modificationDate: NSDate?
     var categoryReference: CKReference?
     var categoryRecord: CKRecord?
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     // new category initializer
     init(name: String, displayHeader: Bool, createRecord: Bool)
@@ -1064,13 +1072,13 @@ class Category: ListObj, NSCoding
     {
         self.modificationDate = NSDate.init()
         
-        coder.encodeObject(self.name, forKey: "name")
-        coder.encodeObject(self.expanded, forKey: "expanded")
-        coder.encodeObject(self.displayHeader, forKey: "displayHeader")
-        coder.encodeObject(self.modificationDate, forKey: "modificationDate")
+        coder.encodeObject(self.name,              forKey: "name")
+        coder.encodeObject(self.expanded,          forKey: "expanded")
+        coder.encodeObject(self.displayHeader,     forKey: "displayHeader")
+        coder.encodeObject(self.modificationDate,  forKey: "modificationDate")
         coder.encodeObject(self.categoryReference, forKey: "categoryReference")
-        coder.encodeObject(self.categoryRecord, forKey: "categoryRecord")
-        coder.encodeObject(self.items, forKey: "items")
+        coder.encodeObject(self.categoryRecord,    forKey: "categoryRecord")
+        coder.encodeObject(self.items,             forKey: "items")
     }
     
     // commits this category and its items to cloud storage
@@ -1084,7 +1092,7 @@ class Category: ListObj, NSCoding
                 if needToDelete {
                     deleteRecord(categoryRecord!, database: database)
                 } else if needToSave {
-                    saveRecord(categoryRecord!, listReference: listReference, database: database)
+                    saveRecord(categoryRecord!, listReference: listReference)
                 }
 
             } else {
@@ -1101,16 +1109,29 @@ class Category: ListObj, NSCoding
     }
     
     // commits just this category to cloud storage
-    func saveRecord(categoryRecord: CKRecord, listReference: CKReference, database: CKDatabase)
+    func saveRecord(categoryRecord: CKRecord, listReference: CKReference)
     {
-        categoryRecord.setObject(self.name, forKey: "name")
+        categoryRecord.setObject(self.name,          forKey: "name")
         categoryRecord.setObject(self.displayHeader, forKey: "displayHeader")
-        categoryRecord.setObject(self.expanded, forKey: "expanded")
-        categoryRecord.setObject(listReference, forKey: "owningList")
-        categoryRecord.setObject(self.order, forKey: "order")
+        categoryRecord.setObject(self.expanded,      forKey: "expanded")
+        categoryRecord.setObject(listReference,      forKey: "owningList")
+        categoryRecord.setObject(self.order,         forKey: "order")
         
         // add this record to the batch record array for updating
         appDelegate.addToUpdateRecords(categoryRecord, obj: self)
+    }
+    
+    // update this category from cloud storage
+    func updateFromRecord(record: CKRecord)
+    {
+        if let name          = record["name"]          { self.name          = name as! String }
+        if let expanded      = record["expanded"]      { self.expanded      = expanded as! Bool }
+        if let displayHeader = record["displayHeader"] { self.displayHeader = displayHeader as! Bool }
+        if let order         = record["order"]         { self.order         = order as! Int }
+        
+        self.categoryRecord = record
+        self.categoryReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
+        //print("updated category: \(category!.name)")
     }
     
     func deleteFromCloud() {
@@ -1169,35 +1190,52 @@ class Category: ListObj, NSCoding
 
 class Item: ListObj, NSCoding
 {
-    var state: ItemState { didSet { needToSave = true } }
-    var note: String { didSet { needToSave = true } }
-    var modificationDate: NSDate?
+    override var name: String { didSet { if name  != oldValue { needToSave = true; modifiedBy = UIDevice.currentDevice().name; modifiedDate = NSDate.init() } } }
+    var state: ItemState      { didSet { if state != oldValue { needToSave = true; modifiedBy = UIDevice.currentDevice().name; modifiedDate = NSDate.init() } } }
+    var note: String          { didSet { if note  != oldValue { needToSave = true; modifiedBy = UIDevice.currentDevice().name; modifiedDate = NSDate.init() } } }
+    var createdBy: String           // established locally - saved to cloud
+    var createdDate: NSDate         // established locally - saved to cloud
+    var modifiedBy: String          // established locally - saved to cloud
+    var modifiedDate: NSDate  {     // established locally - saved to cloud
+        didSet {
+            // only update if new date is newer than the current date
+            if oldValue.compare(modifiedDate) == NSComparisonResult.OrderedDescending {
+                modifiedDate = oldValue
+            }
+        }
+    }
     var itemRecord: CKRecord?
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     // new item initializer
     init(name: String, state: ItemState, createRecord: Bool)
     {
         self.state = state
         self.note = ""
-        self.modificationDate = NSDate.init()
+        self.createdBy = UIDevice.currentDevice().name
+        self.modifiedBy = UIDevice.currentDevice().name
+        self.createdDate = NSDate.init()
+        self.modifiedDate = NSDate.init()
         
         if createRecord {
-            // new item needs a new record
+            // a new item needs a new cloud record
             itemRecord = CKRecord.init(recordType: ItemsRecordType)
+            createdBy = UIDevice.currentDevice().name
         }
         
-        modificationDate = NSDate.init()
+        modifiedDate = NSDate.init()
         
         super.init(name: name)
     }
 
     // memberwise initializer
-    init(name: String?, note: String?, state: ItemState, itemRecord: CKRecord?, modificationDate: NSDate?)
+    init(name: String?, note: String?, state: ItemState, itemRecord: CKRecord?, createdBy: String?, createdDate: NSDate?, modifiedBy: String?, modifiedDate: NSDate?)
     {
-        if let note             = note             { self.note             = note             } else { self.note = "" }
-        if let itemRecord       = itemRecord       { self.itemRecord       = itemRecord       } else { self.itemRecord  = nil }
-        if let modificationDate = modificationDate { self.modificationDate = modificationDate } else { self.modificationDate = NSDate.init() }
+        if let note         = note         { self.note         = note         } else { self.note         = ""  }
+        if let itemRecord   = itemRecord   { self.itemRecord   = itemRecord   } else { self.itemRecord   = nil }
+        if let createdBy    = createdBy    { self.createdBy    = createdBy    } else { self.createdBy    = UIDevice.currentDevice().name }
+        if let createdDate  = createdDate  { self.createdDate  = createdDate  } else { self.createdDate  = NSDate.init(timeIntervalSince1970: NSTimeInterval.init()) }
+        if let modifiedBy   = modifiedBy   { self.modifiedBy   = modifiedBy   } else { self.modifiedBy   = UIDevice.currentDevice().name }
+        if let modifiedDate = modifiedDate { self.modifiedDate = modifiedDate } else { self.modifiedDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init()) }
         
         self.state = state
         
@@ -1206,25 +1244,31 @@ class Item: ListObj, NSCoding
     
     required convenience init?(coder decoder: NSCoder)
     {
-        let name           = decoder.decodeObjectForKey("name")           as? String
-        let note           = decoder.decodeObjectForKey("note")           as? String
-        let state          = decoder.decodeIntForKey("state")
-        let modificationDate = decoder.decodeObjectForKey("modificationDate") as? NSDate
-        let itemRecord     = decoder.decodeObjectForKey("itemRecord")     as? CKRecord
-        let itemState      = state == 0 ? ItemState.Inactive : state == 1 ? ItemState.Incomplete : ItemState.Complete
+        let name         = decoder.decodeObjectForKey("name")         as? String
+        let note         = decoder.decodeObjectForKey("note")         as? String
+        let createdBy    = decoder.decodeObjectForKey("createdBy")    as? String
+        let createdDate  = decoder.decodeObjectForKey("createDate")   as? NSDate
+        let modifiedBy   = decoder.decodeObjectForKey("modifiedBy")   as? String
+        let modifiedDate = decoder.decodeObjectForKey("modifiedDate") as? NSDate
+        let itemRecord   = decoder.decodeObjectForKey("itemRecord")   as? CKRecord
+        let state        = decoder.decodeIntForKey("state")
+        let itemState    = state == 0 ? ItemState.Inactive : state == 1 ? ItemState.Incomplete : ItemState.Complete
         
-        self.init(name: name, note: note, state: itemState, /*itemRecordID: itemRecordID,*/ itemRecord: itemRecord, modificationDate: modificationDate)
+        self.init(name: name, note: note, state: itemState, itemRecord: itemRecord, createdBy: createdBy, createdDate: createdDate, modifiedBy: modifiedBy, modifiedDate: modifiedDate)
     }
     
     func encodeWithCoder(coder: NSCoder)
     {
-        self.modificationDate = NSDate.init()
+        //self.modifiedDate = NSDate.init()
         
-        coder.encodeObject(self.name, forKey: "name")
-        coder.encodeObject(self.note, forKey: "note")
-        coder.encodeInteger(state.rawValue, forKey: "state")
-        coder.encodeObject(self.modificationDate, forKey: "modificationDate")
-        coder.encodeObject(self.itemRecord, forKey: "itemRecord")
+        coder.encodeObject(self.name,            forKey: "name")
+        coder.encodeObject(self.note,            forKey: "note")
+        coder.encodeInteger(self.state.rawValue, forKey: "state")
+        coder.encodeObject(self.createdBy,       forKey: "createdBy")
+        coder.encodeObject(self.createdDate,     forKey: "createdDate")
+        coder.encodeObject(self.modifiedBy,      forKey: "modifiedBy")
+        coder.encodeObject(self.modifiedDate,    forKey: "modifiedDate")
+        coder.encodeObject(self.itemRecord,      forKey: "itemRecord")
     }
     
     // commits this item change to cloud storage
@@ -1234,22 +1278,81 @@ class Item: ListObj, NSCoding
             if needToDelete {
                 deleteRecord(itemRecord!, database: database)
             } else if needToSave {
-                saveRecord(itemRecord!, categoryReference: categoryReference, database: database)
+                saveRecord(itemRecord!, categoryReference: categoryReference)
             }
         }
     }
     
     // cloud storage method for this item
-    func saveRecord(itemRecord: CKRecord, categoryReference: CKReference, database: CKDatabase)
+    func saveRecord(itemRecord: CKRecord, categoryReference: CKReference)
     {
-        itemRecord.setObject(self.name, forKey: "name")
-        itemRecord.setObject(self.note, forKey: "note")
+        itemRecord.setObject(self.name,           forKey: "name")
+        itemRecord.setObject(self.note,           forKey: "note")
         itemRecord.setObject(self.state.rawValue, forKey: "state")
-        itemRecord.setObject(categoryReference, forKey: "owningCategory")
-        itemRecord.setObject(self.order, forKey: "order")
+        itemRecord.setObject(categoryReference,   forKey: "owningCategory")
+        itemRecord.setObject(self.order,          forKey: "order")
+        itemRecord.setObject(self.createdBy,      forKey: "createdBy")
+        itemRecord.setObject(self.createdDate,    forKey: "createdDate")
+        itemRecord.setObject(self.modifiedBy,     forKey: "modifiedBy")
+        itemRecord.setObject(self.modifiedDate,   forKey: "modifiedDate")
         
         // add this record to the batch record array for updating
         appDelegate.addToUpdateRecords(itemRecord, obj: self)
+    }
+    
+    // update this item from cloud storage
+    func updateFromRecord(record: CKRecord)
+    {
+        if let itemState    = record["state"] as? Int {
+            self.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
+        } else {
+            self.state = ItemState.Incomplete
+        }
+        if let name         = record["name"]         { self.name         = name as! String         }
+        if let note         = record["note"]         { self.note         = note as! String         }
+        if let order        = record["order"]        { self.order        = order as! Int           }
+        if let createdBy    = record["createdBy"]    { self.createdBy    = createdBy as! String    }
+        if let createdDate  = record["createdDate"]  { self.createdDate  = createdDate as! NSDate  }
+        if let modifiedBy   = record["modifiedBy"]   { self.modifiedBy   = modifiedBy as! String   }
+        if let modifiedDate = record["modifiedDate"] { self.modifiedDate = modifiedDate as! NSDate }
+        
+        // check date values after update from cloud record - reset if needed
+        if self.modifiedDate.compare(NSDate.init(timeIntervalSince1970: NSTimeInterval.init())) == NSComparisonResult.OrderedSame {
+            self.modifiedDate = NSDate.init()
+        }
+        
+        if self.createdDate.compare(NSDate.init(timeIntervalSince1970: NSTimeInterval.init())) == NSComparisonResult.OrderedSame {
+            self.createdDate = self.modifiedDate
+        }
+        
+        // check if item has changed categories
+        if let itemRecord = self.itemRecord {
+            let currentCategory = getCategoryFromReference(itemRecord)
+            let updateCategory = getCategoryFromReference(record)
+            
+            if currentCategory != updateCategory && updateCategory != nil {
+                // item changed categories = delete item from old category
+                if currentCategory != nil {
+                    let index = currentCategory!.items.indexOf(self)
+                    if index != nil {
+                        currentCategory!.items.removeAtIndex(index!)
+                        print("Item Move: deleted \(self.name) from \(currentCategory!.name)")
+                    }
+                }
+                // add item to new category
+                if self.order >= 0 {
+                    if self.order < updateCategory!.items.count {
+                        updateCategory!.items.insert(self, atIndex: self.order)
+                    } else {
+                        updateCategory!.items.append(self)
+                    }
+                    print("Item Move: inserted \(self.name) in \(updateCategory!.name) at pos \(self.order)")
+                }
+            }
+        }
+        
+        self.itemRecord = record
+        //print("updated item: \(item.name)")
     }
     
     // deletes this item from the cloud
@@ -1332,10 +1435,10 @@ struct Tag
 extension UIColor
 {
     func rgb() -> Int? {
-        var fRed : CGFloat = 0
+        var fRed   : CGFloat = 0
         var fGreen : CGFloat = 0
-        var fBlue : CGFloat = 0
-        var fAlpha: CGFloat = 0
+        var fBlue  : CGFloat = 0
+        var fAlpha : CGFloat = 0
         if self.getRed(&fRed, green: &fGreen, blue: &fBlue, alpha: &fAlpha) {
             let iRed = Int(fRed * 255.0)
             let iGreen = Int(fGreen * 255.0)
@@ -1350,4 +1453,47 @@ extension UIColor
             return nil
         }
     }
+    
+    static func colorFromRGB(rgb: Int) -> UIColor?
+    {
+        if rgb == 0 {
+            return nil
+        }
+        
+        let RGB: Int64 = Int64.init(rgb)
+        
+        // let rgb = (iAlpha << 24) + (iRed << 16) + (iGreen << 8) + iBlue
+        
+        let blue  = Float(RGB & 0xFF)       / 0xFF
+        let green = Float(RGB & 0xFF00)     / 0xFF00
+        let red   = Float(RGB & 0xFF0000)   / 0xFF0000
+        let alpha = Float(RGB & 0xFF000000) / 0xFF000000
+        
+        return UIColor(colorLiteralRed: red, green: green, blue: blue, alpha: alpha)
+    }
+}
+
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Utility methods
+//
+////////////////////////////////////////////////////////////////
+
+
+func getListFromReference(categoryRecord: CKRecord) -> List?
+{
+    if let listReference = categoryRecord["owningList"] as? CKReference {
+        return appDelegate.getLocalList(listReference.recordID.recordName)
+    }
+    
+    return nil
+}
+
+func getCategoryFromReference(itemRecord: CKRecord) -> Category?
+{
+    if let categoryReference = itemRecord["owningCategory"] as? CKReference {
+        return appDelegate.getLocalCategory(categoryReference.recordID.recordName)
+    }
+    
+    return nil
 }

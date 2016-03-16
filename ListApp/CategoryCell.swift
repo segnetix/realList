@@ -21,32 +21,12 @@ class CategoryCell: UITableViewCell
 {
     @IBOutlet weak var categoryName: UITextField!
     @IBOutlet weak var catCountLabel: UILabel!
-    weak var delegate: CategoryCellDelegate?
+    //weak var delegate: CategoryCellDelegate?
     
     override func awakeFromNib() {
         super.awakeFromNib()
         
         // Initialization code
-        
-        /*
-        // set up single tap gesture recognizer in cat cell to enable expand/collapse
-        let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTappedAction:")
-        singleTapGestureRecognizer.numberOfTapsRequired = 1
-        self.addGestureRecognizer(singleTapGestureRecognizer)
-        */
-        
-        /*
-        // set up double tap gesture recognizer in item cell to enable cell moving
-        let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTappedAction:")
-        doubleTapGestureRecognizer.numberOfTapsRequired = 2
-        //singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
-        self.addGestureRecognizer(doubleTapGestureRecognizer)
-        */
-        
-        // set up long press gesture recognizer
-        // let longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
-        // doubleTapGestureRecognizer.requireGestureRecognizerToFail(longPressGestureRecognizer)
-        // self.addGestureRecognizer(longPressGestureRecognizer)
     }
     
     required init(coder aDecoder: NSCoder) {

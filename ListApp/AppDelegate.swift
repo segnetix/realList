@@ -1,4 +1,3 @@
- 
 //  AppDelegate.swift
 //  ListApp
 //
@@ -330,9 +329,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         case ItemsRecordType:
             if localObj is Item {
                 item = localObj as? Item
-                if item!.modificationDate != nil {
-                    localDataTime = item!.modificationDate!
-                }
+                localDataTime = item!.modifiedDate
             }
         default:
             print("updateFromRecord: unknown record type received from cloud data...!")
@@ -345,68 +342,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
 
         if update && (list != nil || category != nil || item != nil) {
-            // local record exists, so update
+            // local record exists, so update the object
             switch record.recordType {
-            case ListsRecordType:
-                if list != nil {
-                    if let name               = record["name"]               { list!.name = name as! String }
-                    if let showCompletedItems = record["showCompletedItems"] { list!.showCompletedItems = showCompletedItems as! Bool }
-                    if let showInactiveItems  = record["showInactiveItems"]  { list!.showInactiveItems = showInactiveItems as! Bool }
-                    if let listColor          = record["listColor"]          { list!.listColor = getUIColorFromRGB(listColor as! Int) }
-                    if let order              = record["order"]              { list!.order = order  as! Int }
-                    
-                    list!.listRecord = record
-                    //print("updated list: \(list!.name)")
-                }
-            case CategoriesRecordType:
-                if category != nil {
-                    if let name          = record["name"]          { category!.name = name as! String }
-                    if let expanded      = record["expanded"]      { category!.expanded = expanded as! Bool }
-                    if let displayHeader = record["displayHeader"] { category!.displayHeader = displayHeader as! Bool }
-                    if let order         = record["order"]         { category!.order = order as! Int }
-                    
-                    category!.categoryRecord = record
-                    //print("updated category: \(category!.name)")
-                }
-            case ItemsRecordType:
-                if let item = item {
-                    if let name  = record["name"]  { item.name  = name  as! String }
-                    if let note  = record["note"]  { item.note  = note  as! String }
-                    if let order = record["order"] { item.order = order as! Int    }
-                    
-                    // check if item has changed categories
-                    if let itemRecord = item.itemRecord {
-                        let currentCategory = getCategoryFromReference(itemRecord)
-                        let updateCategory = getCategoryFromReference(record)
-                        
-                        if currentCategory != updateCategory && updateCategory != nil {
-                            // item changed categories = delete item from old category
-                            if currentCategory != nil {
-                                let index = currentCategory!.items.indexOf(item)
-                                if index != nil {
-                                    currentCategory!.items.removeAtIndex(index!)
-                                    print("Item Move: deleted \(item.name) from \(currentCategory!.name)")
-                                }
-                            }
-                            // add item to new category
-                            if item.order >= 0 {
-                                if item.order < updateCategory!.items.count {
-                                    updateCategory!.items.insert(item, atIndex: item.order)
-                                } else {
-                                    updateCategory!.items.append(item)
-                                }
-                                print("Item Move: inserted \(item.name) in \(updateCategory!.name) at pos \(item.order)")
-                            }
-                        }
-                    }
-                    
-                    item.state = ItemState.Incomplete
-                    if let itemState = record["state"] as? Int {
-                        item.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
-                    }
-                    item.itemRecord = record
-                    //print("updated item: \(item.name)")
-                }
+            case ListsRecordType:       list!.updateFromRecord(record)
+            case CategoriesRecordType:  category!.updateFromRecord(record)
+            case ItemsRecordType:       item!.updateFromRecord(record)
             default:
                 break
             }
@@ -417,14 +357,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 print("adding a new category: \(record["name"])")
                 let newList = List(name: "", createRecord: false)
                 
-                if let name               = record["name"]               { newList.name = name as! String }
-                if let showCompletedItems = record["showCompletedItems"] { newList.showCompletedItems = showCompletedItems as! Bool }
-                if let showInactiveItems  = record["showInactiveItems"]  { newList.showInactiveItems = showInactiveItems as! Bool }
-                if let listColor          = record["listColor"]          { newList.listColor = getUIColorFromRGB(listColor as! Int) }
-                if let order              = record["order"]              { newList.order = order as! Int }
-                
-                newList.listRecord = record
-                newList.listReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
+                newList.updateFromRecord(record)
                 
                 if let listVC = listViewController {
                     listVC.lists.append(newList)
@@ -435,13 +368,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 if let list = getListFromReference(record) {
                     let newCategory = list.addCategory("", displayHeader: true, updateIndices: true, createRecord: false)
                     
-                    if let name          = record["name"]          { newCategory.name          = name as! String }
-                    if let displayHeader = record["displayHeader"] { newCategory.displayHeader = displayHeader as! Bool }
-                    if let expanded      = record["expanded"]      { newCategory.expanded      = expanded as! Bool }
-                    if let order         = record["order"]         { newCategory.order = order as! Int }
+                    newCategory.updateFromRecord(record)
                     
-                    newCategory.categoryRecord = record
-                    newCategory.categoryReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
                     print("added new category: \(newCategory.name)")
                 } else {
                     print("category \(record["name"]) can't find list \(record["owningList"])")
@@ -464,15 +392,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                             let item = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true, createRecord: false)
                             
                             if let newItem = item {
-                                if let name  = record["name"]  { newItem.name  = name as! String }
-                                if let note  = record["note"]  { newItem.note  = note as! String }
-                                if let order = record["order"] { newItem.order = order as! Int }
-                                
-                                if let itemState = record["state"] as? Int {
-                                    newItem.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
-                                }
-                                
-                                newItem.itemRecord = record
+                                newItem.updateFromRecord(record)
                                 print("added new item: \(newItem.name)")
                             }
                         }
@@ -828,41 +748,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         return nil
     }
- 
-    func getListFromReference(categoryRecord: CKRecord) -> List?
-    {
-        if let listReference = categoryRecord["owningList"] as? CKReference {
-            return getLocalList(listReference.recordID.recordName)
-        }
-        
-        return nil
-    }
     
-    func getCategoryFromReference(itemRecord: CKRecord) -> Category?
-    {
-        if let categoryReference = itemRecord["owningCategory"] as? CKReference {
-            return getLocalCategory(categoryReference.recordID.recordName)
-        }
-        
-        return nil
-    }
-    
-    func getUIColorFromRGB(rgb: Int) -> UIColor?
-    {
-        if rgb == 0 {
-            return nil
-        }
-        
-        let RGB: Int64 = Int64.init(rgb)
-        
-        // let rgb = (iAlpha << 24) + (iRed << 16) + (iGreen << 8) + iBlue
-        
-        let blue  = Float(RGB & 0xFF)       / 0xFF
-        let green = Float(RGB & 0xFF00)     / 0xFF00
-        let red   = Float(RGB & 0xFF0000)   / 0xFF0000
-        let alpha = Float(RGB & 0xFF000000) / 0xFF000000
-        
-        return UIColor(colorLiteralRed: red, green: green, blue: blue, alpha: alpha)
-    }
 }
 

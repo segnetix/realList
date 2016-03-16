@@ -12,17 +12,26 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
 {
     var containerView: UIView = UIView()
     var titleLabel: UILabel = UILabel()
+    var createdLabel: UILabel = UILabel()
+    var createdByText: UILabel = UILabel()
+    var createdDateText: UILabel = UILabel()
+    var modifiedLabel: UILabel = UILabel()
+    var modifiedByText: UILabel = UILabel()
+    var modifiedDateText: UILabel = UILabel()
     var noteTextView = UITextView()
     var closeButton: UIButton = UIButton()
-    weak var itemVC: ItemViewController?
-    weak var item: Item?
-    weak var list: List?
+    var itemVC: ItemViewController!
+    var item: Item!
+    var list: List!
     
-    init(item: Item, list: List) {
+    init(item: Item, list: List, itemVC: ItemViewController)
+    {
         super.init(nibName: nil, bundle: nil)
+        
         modalPresentationStyle = UIModalPresentationStyle.Custom
         self.item = item
         self.list = list
+        self.itemVC = itemVC
         
         createUI()
     }
@@ -34,8 +43,13 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
     
     func createUI()
     {
-        titleLabel.text = item?.name
-        noteTextView.text = item?.note
+        let formatter = NSDateFormatter()
+        formatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        formatter.timeStyle = .MediumStyle
+        var dateString = ""
+        
+        titleLabel.text = item.name
+        noteTextView.text = item.note
         
         containerView.translatesAutoresizingMaskIntoConstraints = false
         containerView.backgroundColor = UIColor(white: 1.0, alpha: 1.0)
@@ -43,7 +57,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         titleLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
-        if item?.state != ItemState.Inactive {
+        if item.state != ItemState.Inactive {
             titleLabel.textColor = UIColor.blackColor()
         } else {
             titleLabel.textColor = UIColor.lightGrayColor()
@@ -55,8 +69,8 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         noteTextView.translatesAutoresizingMaskIntoConstraints = false
         noteTextView.textColor = UIColor.blackColor()
         noteTextView.layer.borderColor = containerView.tintColor.CGColor
-        if list != nil && list!.listColor != nil {
-            noteTextView.layer.borderColor = list!.listColor!.CGColor
+        if list.listColor != nil {
+            noteTextView.layer.borderColor = list.listColor!.CGColor
         } else {
             noteTextView.layer.borderColor = containerView.tintColor.CGColor
         }
@@ -67,6 +81,38 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         noteTextView.returnKeyType = UIReturnKeyType.Done
         noteTextView.delegate = self
         containerView.addSubview(noteTextView)
+        
+        createdLabel.translatesAutoresizingMaskIntoConstraints = false
+        createdLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+        createdLabel.text = NSLocalizedString("Created", comment: "label for the 'Created:' text field.")
+        containerView.addSubview(createdLabel)
+        
+        createdByText.translatesAutoresizingMaskIntoConstraints = false
+        createdByText.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+        createdByText.text = item.createdBy
+        containerView.addSubview(createdByText)
+    
+        createdDateText.translatesAutoresizingMaskIntoConstraints = false
+        createdDateText.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+        dateString = formatter.stringFromDate(item.createdDate)
+        createdDateText.text = dateString
+        containerView.addSubview(createdDateText)
+        
+        modifiedLabel.translatesAutoresizingMaskIntoConstraints = false
+        modifiedLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+        modifiedLabel.text = NSLocalizedString("Modified", comment: "label for the 'Modified:' text field.")
+        containerView.addSubview(modifiedLabel)
+        
+        modifiedByText.translatesAutoresizingMaskIntoConstraints = false
+        modifiedByText.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+        modifiedByText.text = item.modifiedBy
+        containerView.addSubview(modifiedByText)
+        
+        modifiedDateText.translatesAutoresizingMaskIntoConstraints = false
+        modifiedDateText.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+        dateString = formatter.stringFromDate(item.modifiedDate)
+        modifiedDateText.text = dateString
+        containerView.addSubview(modifiedDateText)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setTitle(NSLocalizedString("Close", comment: "Close - title for a button to dismiss a view."), forState: UIControlState.Normal)
@@ -79,6 +125,12 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
             "containerView": containerView,
             "titleLabel": titleLabel,
             "noteTextView": noteTextView,
+            "createdLabel": createdLabel,
+            "createdByText": createdByText,
+            "createdDateText": createdDateText,
+            "modifiedLabel": modifiedLabel,
+            "modifiedByText": modifiedByText,
+            "modifiedDateText": modifiedDateText,
             "closeButton": closeButton]
         
         view.addConstraints(
@@ -108,7 +160,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
                 options: NSLayoutFormatOptions(rawValue: 0),
                 metrics: nil,
                 views: views))
-
+        
         containerView.addConstraints(
             NSLayoutConstraint.constraintsWithVisualFormat(
                 "H:|[closeButton]|",
@@ -118,11 +170,52 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
         
         containerView.addConstraints(
             NSLayoutConstraint.constraintsWithVisualFormat(
-                "V:|-24-[titleLabel]-[noteTextView(180)]-(>=20)-[closeButton]-24-|",
+                "H:|-18-[createdLabel]|",
                 options: NSLayoutFormatOptions(rawValue: 0),
                 metrics: nil,
                 views: views))
         
+        containerView.addConstraints(
+            NSLayoutConstraint.constraintsWithVisualFormat(
+                "H:|-40-[createdByText]|",
+                options: NSLayoutFormatOptions(rawValue: 0),
+                metrics: nil,
+                views: views))
+        
+        containerView.addConstraints(
+            NSLayoutConstraint.constraintsWithVisualFormat(
+                "H:|-40-[createdDateText]|",
+                options: NSLayoutFormatOptions(rawValue: 0),
+                metrics: nil,
+                views: views))
+        
+        containerView.addConstraints(
+            NSLayoutConstraint.constraintsWithVisualFormat(
+                "H:|-18-[modifiedLabel]|",
+                options: NSLayoutFormatOptions(rawValue: 0),
+                metrics: nil,
+                views: views))
+        
+        containerView.addConstraints(
+            NSLayoutConstraint.constraintsWithVisualFormat(
+                "H:|-40-[modifiedByText]|",
+                options: NSLayoutFormatOptions(rawValue: 0),
+                metrics: nil,
+                views: views))
+        
+        containerView.addConstraints(
+            NSLayoutConstraint.constraintsWithVisualFormat(
+                "H:|-40-[modifiedDateText]|",
+                options: NSLayoutFormatOptions(rawValue: 0),
+                metrics: nil,
+                views: views))
+        
+        containerView.addConstraints(
+            NSLayoutConstraint.constraintsWithVisualFormat(
+                "V:|-24-[titleLabel]-[noteTextView(180)]-24-[createdLabel]-[createdByText]-[createdDateText]-24-[modifiedLabel]-[modifiedByText]-[modifiedDateText]-(>=20)-[closeButton]-24-|",
+                options: NSLayoutFormatOptions(rawValue: 0),
+                metrics: nil,
+                views: views))
     }
     
     func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool
@@ -145,10 +238,10 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate
     
     func close(sender: UIButton)
     {
-        self.item?.note = noteTextView.text
-        self.item?.needToSave = true
-        self.itemVC?.tableView.reloadData()
-        self.itemVC?.appDelegate.saveAll()
+        self.item.note = noteTextView.text
+        self.item.needToSave = true
+        self.itemVC.tableView.reloadData()
+        self.itemVC.appDelegate.saveAll()
         
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }

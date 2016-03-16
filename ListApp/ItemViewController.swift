@@ -60,7 +60,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     var list: List! {
-        didSet (newList) {
+        didSet {
             if tableView != nil {
                 self.refreshItems()
             }
@@ -267,7 +267,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 cell.backgroundColor = UIColor.lightGrayColor()
             }
             
-            cell.delegate = self
+            //cell.delegate = self
             
             return cell
          } else {
@@ -1265,9 +1265,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     {
         transitioningDelegate = itemDetailTransitionDelegate
         
-        let vc = ItemDetailViewController(item: item, list: list)      // pass item by reference to
+        let vc = ItemDetailViewController(item: item, list: list, itemVC: self)      // pass item by reference to
         vc.transitioningDelegate = itemDetailTransitionDelegate
-        vc.itemVC = self
         
         presentViewController(vc, animated: true, completion: nil)
     }
