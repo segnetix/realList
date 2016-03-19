@@ -11,6 +11,7 @@ Delete_List_Message = "Tem a certeza que pretende eliminar permanentemente a lis
 Delete = "Excluir";
 Cancel = "Cancelar";
 Close = "Fechar";
+Print = "Print";
 Items = "Itens";
 Created = "Created:";
 Modified = "Modified:";

@@ -11,6 +11,7 @@ Delete_List_Message = "Oletko varma, että haluat poistaa pysyvästi luettelosta
 Delete = "Poistaa";
 Cancel = "Peruuttaa";
 Close = "Sulkea";
+Print = "Print";
 Created = "Created:";
 Modified = "Modified:";
 Items = "Tuotteet";

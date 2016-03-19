@@ -11,6 +11,7 @@ Delete_List_Message = "האם אתה בטוח שאתה רוצה למחוק את 
 Delete = "לִמְחוֹק";
 Cancel = "לְבַטֵל";
 Close = "לִסְגוֹר";
+Print = "Print";
 Created = "Created:";
 Modified = "Modified:";
 Items = "פריטים";

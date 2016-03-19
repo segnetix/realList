@@ -12,6 +12,7 @@ Delete = "Löschen";
 Cancel = "Stornieren";
 Close = "Schließen";
 Created = "Created:";
+Print = "Print";
 Modified = "Modified:";
 Items = "Artikel";
 Delete_Item_Title = "Löschen Sie den Artikel";

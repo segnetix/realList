@@ -11,6 +11,7 @@ Delete_List_Message = "Weet u zeker dat u permanent wilt verwijderen van de lijs
 Delete = "Verwijder";
 Cancel = "Annuleer";
 Close = "Sluiten";
+Print = "Print";
 Created = "Created:";
 Modified = "Modified:";
 Items = "Items";

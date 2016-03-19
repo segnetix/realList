@@ -11,6 +11,7 @@ Delete_List_Message = "Czy na pewno chcesz trwale usunąć listę '%@'?";
 Delete = "Kasować";
 Cancel = "Anuluj";
 Close = "Zamknąć";
+Print = "Print";
 Created = "Created:";
 Modified = "Modified:";
 Items = "Przedmiotów";

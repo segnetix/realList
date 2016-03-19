@@ -11,6 +11,7 @@ Delete_List_Message = "Er du sikker på at du vil slette listen '%@' permanent?"
 Delete = "Slett";
 Cancel = "Kansellere";
 Close = "Lukke";
+Print = "Print";
 Created = "Created:";
 Modified = "Modified:";
 Items = "Elementer";

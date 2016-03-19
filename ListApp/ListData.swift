@@ -963,6 +963,30 @@ class List: NSObject, NSCoding
         
         return -1
     }
+    
+    // list
+    func htmlForPrinting() -> String
+    {
+        //let listLabel = NSLocalizedString("List", comment: "label for 'List:'")
+        
+        // header
+        var html: String = "<!DOCTYPE html>"
+        html += "<html><head><style type='text/css'><!-- .tab { margin-left: 25px; } --> </style></head>"
+        html += "<body><font face='arial'>"
+        html += "<h1>\(self.name)</h1>"
+        
+        // categories
+        for category in categories {
+            html += "<p>"
+            html += category.htmlForPrinting(self)
+            html += "</p>"
+        }
+        
+        html += "</font></body></html>"
+        
+        return html
+    }
+
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1174,11 +1198,38 @@ class Category: ListObj, NSCoding
         addItem.itemIndex = ++i
     }
     
+    // category
+    func htmlForPrinting(list: List) -> String
+    {
+        // header
+        var html: String = ""
+        
+        // category name
+        if self.displayHeader {
+            html += "<strong><span style='background-color: #F0F0F0'>&nbsp;&nbsp;\(self.name)&nbsp;&nbsp;</span></strong>"
+        }
+        
+        // items
+        html += "<table id='itemData' cellpadding='3'>"
+        
+        if self.expanded {
+            for item in items {
+                if list.isDisplayedItem(item) {
+                    html += item.htmlForPrinting()
+                }
+            }
+        }
+        
+        html += "</table>"
+        
+        return html
+    }
+    
     // returns the number of completed items in a category
-    func itemsComplete() -> Int   {var i=0; for item in items {if item.state == ItemState.Complete   {++i}}; return i}
-    func itemsActive() -> Int     {var i=0; for item in items {if item.state != ItemState.Inactive   {++i}}; return i}
-    func itemsInactive() -> Int   {var i=0; for item in items {if item.state == ItemState.Inactive   {++i}}; return i}
-    func itemsIncomplete() -> Int {var i=0; for item in items {if item.state == ItemState.Incomplete {++i}}; return i}
+    func itemsComplete() -> Int   { var i=0; for item in items { if item.state == ItemState.Complete   { ++i } }; return i }
+    func itemsActive() -> Int     { var i=0; for item in items { if item.state != ItemState.Inactive   { ++i } }; return i }
+    func itemsInactive() -> Int   { var i=0; for item in items { if item.state == ItemState.Inactive   { ++i } }; return i }
+    func itemsIncomplete() -> Int { var i=0; for item in items { if item.state == ItemState.Incomplete { ++i } }; return i }
     
 }
 
@@ -1371,6 +1422,35 @@ class Item: ListObj, NSCoding
     func deleteFromCloud() {
         self.needToDelete = true
         appDelegate.saveListData(true)
+    }
+    
+    // item
+    func htmlForPrinting() -> String
+    {
+        var html = ""
+        
+        // state
+        var stateLabel = ""
+        
+        switch state {
+        case .Complete:    stateLabel = "&nbsp;☑︎"
+        case .Inactive:    stateLabel = "&nbsp;"
+        case .Incomplete:  stateLabel = "&nbsp;☐"
+        }
+        
+        // name
+        if self.state == .Inactive {
+            html += "<tr><td>\(stateLabel)</td><td><font size='3'; color='gray'>\(self.name)</font></td></tr>"
+        } else {
+            html += "<tr><td>\(stateLabel)</td><td><font size='3'>\(self.name)</td></tr>"
+        }
+        
+        // note
+        if self.note.characters.count > 0 {
+            html += "<tr><td></td><td><div class='tab'><font size='2'; color='gray'>\(self.note)</font></div></td></tr>"
+        }
+        
+        return html
     }
 }
 

@@ -22,51 +22,48 @@ let blue2 = UIColor(colorLiteralRed: 0.5, green: 0.75, blue: 0.75, alpha: 0.75)
 
 class SettingsViewController: UIViewController
 {
-    var containerView: UIView = UIView()
-    var newCategoryButton: UIButton = UIButton()
-    var collapseAllCategoriesButton: UIButton = UIButton()
-    var expandAllCategoriesButton: UIButton = UIButton()
-    var showHideCompletedButton: UIButton = UIButton()
-    var showHideInactiveButton: UIButton = UIButton()
-    var setAllItemsInactiveButton: UIButton = UIButton()
-    var setAllItemsIncompleteButton: UIButton = UIButton()
-    var closeButton: UIButton = UIButton()
-    var titleLabel: UILabel = UILabel()
+    let containerView: UIView = UIView()
+    let newCategoryButton: UIButton = UIButton()
+    let collapseAllCategoriesButton: UIButton = UIButton()
+    let expandAllCategoriesButton: UIButton = UIButton()
+    let showHideCompletedButton: UIButton = UIButton()
+    let showHideInactiveButton: UIButton = UIButton()
+    let setAllItemsInactiveButton: UIButton = UIButton()
+    let setAllItemsIncompleteButton: UIButton = UIButton()
+    let closeButton: UIButton = UIButton()
+    let printButton: UIButton = UIButton()
+    let emailButton: UIButton = UIButton()
     var itemVC: ItemViewController?
     
-    var red0Button: UIButton = UIButton()
-    var green0Button: UIButton = UIButton()
-    var blue0Button: UIButton = UIButton()
-    var red1Button: UIButton = UIButton()
-    var green1Button: UIButton = UIButton()
-    var blue1Button: UIButton = UIButton()
-    var red2Button: UIButton = UIButton()
-    var green2Button: UIButton = UIButton()
-    var blue2Button: UIButton = UIButton()
+    let red0Button: UIButton = UIButton()
+    let green0Button: UIButton = UIButton()
+    let blue0Button: UIButton = UIButton()
+    let red1Button: UIButton = UIButton()
+    let green1Button: UIButton = UIButton()
+    let blue1Button: UIButton = UIButton()
+    let red2Button: UIButton = UIButton()
+    let green2Button: UIButton = UIButton()
+    let blue2Button: UIButton = UIButton()
     
     // autolayout constraints
     var verticalConstraints: [NSLayoutConstraint]?
     var containerViewHorizConstraints: [NSLayoutConstraint]?
     var containerViewVertConstraints: [NSLayoutConstraint]?
-    var titleLabelHorizConstraints: [NSLayoutConstraint]?
-    var newCatButtonHorizConstraints: [NSLayoutConstraint]?
-    var collapseAllCategoriesButtonHorizConstraints: [NSLayoutConstraint]?
-    var expandAllCategoriesButtonHorizConstraints: [NSLayoutConstraint]?
-    var showHideCompletedButtonHorizConstraints: [NSLayoutConstraint]?
-    var showHideInactiveButtonHorizConstraints: [NSLayoutConstraint]?
-    var setAllItemsIncompleteButtonHorizConstraints: [NSLayoutConstraint]?
-    var setAllItemsInactiveButtonHorizConstraints: [NSLayoutConstraint]?
+    var closeButtonHorizConstraints: [NSLayoutConstraint]?
+    var categoryHorizConstraints: [NSLayoutConstraint]?
+    var showHideHorizConstraints: [NSLayoutConstraint]?
+    var setAllItemsHorizConstraints: [NSLayoutConstraint]?
     var row0ColorButtonHorizConstraints: [NSLayoutConstraint]?
     var row1ColorButtonHorizConstraints: [NSLayoutConstraint]?
     var row2ColorButtonHorizConstraints: [NSLayoutConstraint]?
-    var closeButtonHorizConstraints: [NSLayoutConstraint]?
+    var printCloseButtonHorizConstraints: [NSLayoutConstraint]?
     
     var showCompletedItems: Bool = true {
         didSet {
             if showCompletedItems {
-                showHideCompletedButton.setTitle(NSLocalizedString("Hide_Completed", comment: "Button title to hide completed items."), forState: UIControlState.Normal)
+                showHideCompletedButton.setImage(UIImage(named: "Hide Completed"), forState: .Normal)
             } else {
-                showHideCompletedButton.setTitle(NSLocalizedString("Show_Completed", comment: "Button title to show completed items."), forState: UIControlState.Normal)
+                showHideCompletedButton.setImage(UIImage(named: "Show Completed"), forState: .Normal)
             }
             
             if itemVC != nil && itemVC!.list != nil {
@@ -78,9 +75,9 @@ class SettingsViewController: UIViewController
     var showInactiveItems: Bool = true {
         didSet {
             if showInactiveItems {
-                showHideInactiveButton.setTitle(NSLocalizedString("Hide_Inactive", comment: "Button title to hide inactive items."), forState: UIControlState.Normal)
+                showHideInactiveButton.setImage(UIImage(named: "Hide Inactive"), forState: .Normal)
             } else {
-                showHideInactiveButton.setTitle(NSLocalizedString("Show_Inactive", comment: "Button title to show inactive items."), forState: UIControlState.Normal)
+                showHideInactiveButton.setImage(UIImage(named: "Show Inactive"), forState: .Normal)
             }
             
             if itemVC != nil && itemVC!.list != nil {
@@ -101,29 +98,25 @@ class SettingsViewController: UIViewController
     }
     
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
         adjustConstraints(size)
     }
     
     func adjustConstraints(size: CGSize)
     {
         // remove current constraints
-        if titleLabelHorizConstraints != nil { containerView.removeConstraints(titleLabelHorizConstraints!) }
-        if newCatButtonHorizConstraints != nil { containerView.removeConstraints(newCatButtonHorizConstraints!) }
-        if showHideCompletedButtonHorizConstraints != nil { containerView.removeConstraints(showHideCompletedButtonHorizConstraints!) }
-        if showHideInactiveButtonHorizConstraints != nil { containerView.removeConstraints(showHideInactiveButtonHorizConstraints!) }
-        if collapseAllCategoriesButtonHorizConstraints != nil { containerView.removeConstraints(collapseAllCategoriesButtonHorizConstraints!) }
-        if expandAllCategoriesButtonHorizConstraints != nil { containerView.removeConstraints(expandAllCategoriesButtonHorizConstraints!) }
-        if setAllItemsIncompleteButtonHorizConstraints != nil { containerView.removeConstraints(setAllItemsIncompleteButtonHorizConstraints!) }
-        if setAllItemsInactiveButtonHorizConstraints != nil { containerView.removeConstraints(setAllItemsInactiveButtonHorizConstraints!) }
-        if row0ColorButtonHorizConstraints != nil { containerView.removeConstraints(row0ColorButtonHorizConstraints!) }
-        if row1ColorButtonHorizConstraints != nil { containerView.removeConstraints(row1ColorButtonHorizConstraints!) }
-        if row2ColorButtonHorizConstraints != nil { containerView.removeConstraints(row2ColorButtonHorizConstraints!) }
-        if closeButtonHorizConstraints != nil { containerView.removeConstraints(closeButtonHorizConstraints!) }
-        if verticalConstraints != nil { containerView.removeConstraints(verticalConstraints!) }
+        if closeButtonHorizConstraints      != nil { containerView.removeConstraints(closeButtonHorizConstraints!)      }
+        if categoryHorizConstraints         != nil { containerView.removeConstraints(categoryHorizConstraints!)         }
+        if showHideHorizConstraints         != nil { containerView.removeConstraints(showHideHorizConstraints!)         }
+        if setAllItemsHorizConstraints      != nil { containerView.removeConstraints(setAllItemsHorizConstraints!)      }
+        if row0ColorButtonHorizConstraints  != nil { containerView.removeConstraints(row0ColorButtonHorizConstraints!)  }
+        if row1ColorButtonHorizConstraints  != nil { containerView.removeConstraints(row1ColorButtonHorizConstraints!)  }
+        if row2ColorButtonHorizConstraints  != nil { containerView.removeConstraints(row2ColorButtonHorizConstraints!)  }
+        if printCloseButtonHorizConstraints != nil { containerView.removeConstraints(printCloseButtonHorizConstraints!) }
+        if verticalConstraints              != nil { containerView.removeConstraints(verticalConstraints!)              }
         
         // constraint dictionary
         let views: [String : AnyObject] = [
-            "titleLabel": titleLabel,
             "newCatButton": newCategoryButton,
             "showHideCompletedButton": showHideCompletedButton,
             "showHideInactiveButton": showHideInactiveButton,
@@ -140,55 +133,61 @@ class SettingsViewController: UIViewController
             "red2Button": red2Button,
             "green2Button": green2Button,
             "blue2Button": blue2Button,
-            "closeButton": closeButton]
+            "closeButton": closeButton,
+            "printButton": printButton,
+            "emailButton": emailButton]
         
-        titleLabelHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[titleLabel]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        newCatButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[newCatButton]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        showHideCompletedButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[showHideCompletedButton]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        showHideInactiveButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[showHideInactiveButton]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        collapseAllCategoriesButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[collapseAllCategoriesButton]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        expandAllCategoriesButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[expandAllCategoriesButton]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        closeButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[closeButton]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        setAllItemsIncompleteButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[setAllItemsIncompleteButton]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        setAllItemsInactiveButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[setAllItemsInactiveButton]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        closeButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:[closeButton]-10-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        showHideHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[showHideCompletedButton]-[showHideInactiveButton(==showHideCompletedButton)]-|", options: [.AlignAllCenterY], metrics: nil, views: views)
+        categoryHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[collapseAllCategoriesButton(==newCatButton)]-[expandAllCategoriesButton(==newCatButton)]-[newCatButton]-|", options: [.AlignAllCenterY], metrics: nil, views: views)
+        printCloseButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-(>=4,<=8)-[printButton]-[emailButton(==printButton)]-(>=4,<=8)-|", options: [.AlignAllCenterY], metrics: nil, views: views)
+        setAllItemsHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[setAllItemsIncompleteButton]-[setAllItemsInactiveButton(==setAllItemsIncompleteButton)]-|", options: [.AlignAllCenterY], metrics: nil, views: views)
         
         // color button constraints
         row0ColorButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-[red0Button(>=44)]-4-[green0Button(==red0Button)]-4-[blue0Button(==red0Button)]-|",
+                "H:|-(<=6)-[red0Button(>=48)]-(<=6)-[green0Button(==red0Button@750)]-(<=6)-[blue0Button(==red0Button@750)]-(<=6)-|",
                 options: [.AlignAllCenterY], metrics: nil, views: views)
         
         row1ColorButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-[red1Button(>=44)]-4-[green1Button(==red1Button)]-4-[blue1Button(==red1Button)]-|",
+                "H:|-(<=6)-[red1Button(>=48)]-(<=6)-[green1Button(==red1Button@750)]-(<=6)-[blue1Button(==red1Button@750)]-(<=6)-|",
                 options: [.AlignAllCenterY], metrics: nil, views: views)
         
         row2ColorButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-[red2Button(>=44)]-4-[green2Button(==red2Button)]-4-[blue2Button(==red2Button)]-|",
+                "H:|-(<=6)-[red2Button(>=48)]-(<=6)-[green2Button(==red2Button@750)]-(<=6)-[blue2Button(==red2Button@750)]-(<=6)-|",
                 options: [.AlignAllCenterY], metrics: nil, views: views)
         
         // set overall vertical constraints based on available height
-        if size.height < 568 {
+        if size.height <= 480 {
+            // small
             verticalConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
-                "V:|-4-[titleLabel]-4-[newCatButton][collapseAllCategoriesButton][expandAllCategoriesButton]-8-[showHideCompletedButton][showHideInactiveButton]-8-[setAllItemsIncompleteButton]-8-[setAllItemsInactiveButton]-8-[red0Button]-2-[red1Button]-2-[red2Button]-(>=12)-[closeButton]-8-|",
+                "V:|-20-[closeButton]-24-[newCatButton]-20-[showHideCompletedButton]-20-[setAllItemsIncompleteButton]-(>=20)-[red0Button]-2-[red1Button]-2-[red2Button]-(>=20)-[printButton]-20-|",
+                options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        } else if size.height <= 568 {
+            // medium small
+            verticalConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
+                "V:|-20-[closeButton]-32-[newCatButton]-32-[showHideCompletedButton]-32-[setAllItemsIncompleteButton]-32-[red0Button]-4-[red1Button]-4-[red2Button]-(>=32)-[printButton]-24-|",
+                options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        } else if size.height <= 667 {
+            // medium large
+            verticalConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
+                "V:|-20-[closeButton]-48-[newCatButton]-48-[showHideCompletedButton]-48-[setAllItemsIncompleteButton]-60-[red0Button]-4-[red1Button]-4-[red2Button]-(>=32)-[printButton]-32-|",
                 options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
         } else {
+            // large
             verticalConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
-                "V:|-16-[titleLabel]-24-[newCatButton]-[collapseAllCategoriesButton]-[expandAllCategoriesButton]-24-[showHideCompletedButton]-[showHideInactiveButton]-24-[setAllItemsIncompleteButton]-[setAllItemsInactiveButton]-24-[red0Button]-4-[red1Button]-4-[red2Button]-(>=24)-[closeButton]-(>=24)-|",
+                "V:|-20-[closeButton]-48-[newCatButton]-48-[showHideCompletedButton]-48-[setAllItemsIncompleteButton]-60-[red0Button]-4-[red1Button]-4-[red2Button]-(>=48)-[printButton]-32-|",
                 options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
         }
         
         // add constraints to views
-        containerView.addConstraints(titleLabelHorizConstraints!)
-        containerView.addConstraints(newCatButtonHorizConstraints!)
-        containerView.addConstraints(showHideCompletedButtonHorizConstraints!)
-        containerView.addConstraints(showHideInactiveButtonHorizConstraints!)
-        containerView.addConstraints(collapseAllCategoriesButtonHorizConstraints!)
-        containerView.addConstraints(expandAllCategoriesButtonHorizConstraints!)
-        containerView.addConstraints(setAllItemsIncompleteButtonHorizConstraints!)
-        containerView.addConstraints(setAllItemsInactiveButtonHorizConstraints!)
+        containerView.addConstraints(closeButtonHorizConstraints!)
+        containerView.addConstraints(categoryHorizConstraints!)
+        containerView.addConstraints(showHideHorizConstraints!)
+        containerView.addConstraints(setAllItemsHorizConstraints!)
         containerView.addConstraints(row0ColorButtonHorizConstraints!)
         containerView.addConstraints(row1ColorButtonHorizConstraints!)
         containerView.addConstraints(row2ColorButtonHorizConstraints!)
-        containerView.addConstraints(closeButtonHorizConstraints!)
+        containerView.addConstraints(printCloseButtonHorizConstraints!)
         containerView.addConstraints(verticalConstraints!)
         
         // layout
@@ -201,74 +200,59 @@ class SettingsViewController: UIViewController
         containerView.backgroundColor = UIColor(white: 0.0, alpha: 1.0)
         view.addSubview(containerView)
         
-        // set font size constants
-        let titleFontSize: CGFloat = view.bounds.size.width > 400 ? 24 : 20.0
-        let buttonFontSize: CGFloat = view.bounds.size.width > 400 ? 20.0 : 16.0
-        let closeButtonFontSize: CGFloat = 20.0
-        
-        titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.text = NSLocalizedString("Settings", comment: "Title for the Settings view.")
-        titleLabel.font = UIFont.boldSystemFontOfSize(titleFontSize)
-        titleLabel.textColor = UIColor.whiteColor()
-        titleLabel.textAlignment = NSTextAlignment.Center
-        containerView.addSubview(titleLabel)
-        
         newCategoryButton.translatesAutoresizingMaskIntoConstraints = false
-        newCategoryButton.setTitle(NSLocalizedString("New_Category", comment: "Title for the New Category button."), forState: UIControlState.Normal)
-        newCategoryButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        newCategoryButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
+        newCategoryButton.setImage(UIImage(named: "New Category"), forState: .Normal)
         newCategoryButton.addTarget(self, action: "newCategory:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(newCategoryButton)
         
         collapseAllCategoriesButton.translatesAutoresizingMaskIntoConstraints = false
-        collapseAllCategoriesButton.setTitle(NSLocalizedString("Collapse_Categories", comment: "Title for the Collapse All Categories button."), forState: UIControlState.Normal)
-        collapseAllCategoriesButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        collapseAllCategoriesButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
+        collapseAllCategoriesButton.setImage(UIImage(named: "Collapsed Categories"), forState: .Normal)
         collapseAllCategoriesButton.addTarget(self, action: "collapseAllCategories:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(collapseAllCategoriesButton)
         
         expandAllCategoriesButton.translatesAutoresizingMaskIntoConstraints = false
-        expandAllCategoriesButton.setTitle(NSLocalizedString("Expand_Categories", comment: "Title for the Expand All Categories button."), forState: UIControlState.Normal)
-        expandAllCategoriesButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        expandAllCategoriesButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
+        expandAllCategoriesButton.setImage(UIImage(named: "Expanded Categories"), forState: .Normal)
         expandAllCategoriesButton.addTarget(self, action: "expandAllCategories:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(expandAllCategoriesButton)
         
         showHideCompletedButton.translatesAutoresizingMaskIntoConstraints = false
-        showHideCompletedButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        showHideCompletedButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
+        showHideCompletedButton.setImage(UIImage(named: "Show Completed"), forState: .Normal)
         showHideCompletedButton.addTarget(self, action: "showHideCompletedItems:", forControlEvents: UIControlEvents.TouchUpInside)
         showCompletedItems = itemVC != nil && itemVC!.list != nil ? itemVC!.list!.showCompletedItems : true
         containerView.addSubview(showHideCompletedButton)
         
         showHideInactiveButton.translatesAutoresizingMaskIntoConstraints = false
-        showHideInactiveButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        showHideInactiveButton.tintColor = UIColor.blackColor()
-        showHideInactiveButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
+        showHideInactiveButton.setImage(UIImage(named: "Show Inactive"), forState: .Normal)
         showHideInactiveButton.addTarget(self, action: "showHideInactiveItems:", forControlEvents: UIControlEvents.TouchUpInside)
         showInactiveItems = itemVC != nil && itemVC!.list != nil ? itemVC!.list!.showInactiveItems : true
         containerView.addSubview(showHideInactiveButton)
         
         setAllItemsIncompleteButton.translatesAutoresizingMaskIntoConstraints = false
-        setAllItemsIncompleteButton.setTitle(NSLocalizedString("Set_Items_Incomplete", comment: "Title for the Set All Items Incomplete button."), forState: UIControlState.Normal)
-        setAllItemsIncompleteButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        setAllItemsIncompleteButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
+        setAllItemsIncompleteButton.setImage(UIImage(named: "Set Incomplete"), forState: .Normal)
         setAllItemsIncompleteButton.addTarget(self, action: "setAllItemsIncomplete:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(setAllItemsIncompleteButton)
         
         setAllItemsInactiveButton.translatesAutoresizingMaskIntoConstraints = false
-        setAllItemsInactiveButton.setTitle(NSLocalizedString("Set_Items_Inactive", comment: "Title for the Set All Items Inactive button."), forState: UIControlState.Normal)
-        setAllItemsInactiveButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        setAllItemsInactiveButton.titleLabel!.font = UIFont.systemFontOfSize(buttonFontSize)
+        setAllItemsInactiveButton.setImage(UIImage(named: "Set Inactive"), forState: .Normal)
         setAllItemsInactiveButton.addTarget(self, action: "setAllItemsInactive:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(setAllItemsInactiveButton)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setTitle(NSLocalizedString("Close", comment: "Close - title for a button to dismiss a view."), forState: UIControlState.Normal)
-        closeButton.setTitleColor(UIColor.whiteColor(), forState: UIControlState.Normal)
-        closeButton.titleLabel!.font = UIFont.systemFontOfSize(closeButtonFontSize)
-        closeButton.addTarget(self, action: "close:", forControlEvents: UIControlEvents.TouchUpInside)
+        closeButton.setImage(UIImage(named: "Close Window"), forState: .Normal)
+        closeButton.addTarget(self, action: "close", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(closeButton)
+        
+        printButton.translatesAutoresizingMaskIntoConstraints = false
+        printButton.setImage(UIImage(named: "Print"), forState: .Normal)
+        printButton.addTarget(self, action: "print", forControlEvents: UIControlEvents.TouchUpInside)
+        printButton.enabled = UIPrintInteractionController.isPrintingAvailable()
+        containerView.addSubview(printButton)
+        
+        emailButton.translatesAutoresizingMaskIntoConstraints = false
+        emailButton.setImage(UIImage(named: "Email"), forState: .Normal)
+        emailButton.addTarget(self, action: "email", forControlEvents: UIControlEvents.TouchUpInside)
+        emailButton.enabled = UIPrintInteractionController.isPrintingAvailable()
+        containerView.addSubview(emailButton)
         
         red0Button.translatesAutoresizingMaskIntoConstraints = false
         red0Button.backgroundColor = red0
@@ -386,9 +370,29 @@ class SettingsViewController: UIViewController
         itemVC?.tableView.reloadData()
     }
     
-    func close(sender: UIButton) {
+    func print()
+    {
+        // present the print dialog
+        itemVC?.presentPrintDialog()
+        
+        // dismiss settings view controller
+        self.itemVC?.appDelegate.saveAll()
+        self.presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func email()
+    {
+        // present the email dialog
+        itemVC?.presentEmailDialog()
+        
+        // dismiss settings view controller
+        self.itemVC?.appDelegate.saveAll()
+        self.presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    func close()
+    {
         itemVC?.appDelegate.saveAll()
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
-    
 }

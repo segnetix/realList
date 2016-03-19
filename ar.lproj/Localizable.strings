@@ -11,6 +11,7 @@ Delete_List_Message = "هل أنت متأكد أنك تريد حذف القائ�
 Delete = "حذف";
 Cancel = "إلغاء";
 Close = "غلق";
+Print = "Print";
 Items = "العناصر";
 Created = "Created:";
 Modified = "Modified:";

@@ -11,6 +11,7 @@ Delete_List_Message = "你确定要永久删除此列表吗？";
 Delete = "删除";
 Cancel = "取消";
 Close = "关闭";
+Print = "Print";
 Created = "Created:";
 Modified = "Modified:";
 Items = "项目";

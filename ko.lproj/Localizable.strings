@@ -11,6 +11,7 @@ Delete_List_Message = "당신은 영구적으로이 목록을 삭제 하시겠�
 Delete = "지우다";
 Cancel = "취소";
 Close = "닫히다";
+Print = "Print";
 Created = "Created:";
 Modified = "Modified:";
 Items = "항목";

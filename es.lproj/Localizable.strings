@@ -11,6 +11,7 @@ Delete_List_Message = "¿Está seguro de que desea eliminar permanentemente la l
 Delete = "Borrar";
 Cancel = "Cancelar";
 Close = "Cerrar";
+Print = "Print";
 Created = "Created:";
 Modified = "Modified:";
 Items = "Elementos";

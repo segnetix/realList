@@ -35,10 +35,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         // set up controller access for application state persistence
         splitViewController = self.window!.rootViewController as? UISplitViewController
-        leftNavController = (splitViewController!.viewControllers.first as! UINavigationController)
-        listViewController = (leftNavController!.topViewController as! ListViewController)
-        rightNavController = (splitViewController!.viewControllers.last as! UINavigationController)
-        itemViewController = (rightNavController!.topViewController as! ItemViewController)
+        leftNavController   = (splitViewController!.viewControllers.first as! UINavigationController)
+        listViewController  = (leftNavController!.topViewController as! ListViewController)
+        rightNavController  = (splitViewController!.viewControllers.last as! UINavigationController)
+        itemViewController  = (rightNavController!.topViewController as! ItemViewController)
         
         listViewController!.delegate = itemViewController
         itemViewController!.navigationItem.leftItemsSupplementBackButton = true

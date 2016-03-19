@@ -11,6 +11,7 @@ Delete_List_Message = "Είστε σίγουροι ότι θέλετε να δι
 Delete = "Διαγράφω";
 Cancel = "Ματαίωση";
 Close = "κλείνω";
+Print = "Print";
 Items = "Είδη";
 Created = "Created:";
 Modified = "Modified:";

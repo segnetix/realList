@@ -36,7 +36,7 @@ let kItemCellHeight: CGFloat = 56.0
 let kCategoryCellHeight: CGFloat = 44.0
 let kAddItemCellHeight: CGFloat = 44.0
 
-class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate
+class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate, UIPrintInteractionControllerDelegate
 {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var adBanner: ADBannerView!
@@ -1269,6 +1269,33 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         vc.transitioningDelegate = itemDetailTransitionDelegate
         
         presentViewController(vc, animated: true, completion: nil)
+    }
+    
+    // called from the dismissing settings view controller
+    func presentPrintDialog()
+    {
+        let htmlString = self.getHTMLforPrinting()
+        let printController = UIPrintInteractionController.sharedPrintController()
+        let printFormatter = UIMarkupTextPrintFormatter(markupText: htmlString)
+        
+        printFormatter.contentInsets = UIEdgeInsets(top: 0, left: 72, bottom: 72, right: 60)    // page margins (72 = 1") - bottom is ignored, top only used on first page
+        printController.printFormatter = printFormatter
+        printController.delegate = self
+        printController.showsPageRange = true
+        printController.showsNumberOfCopies = true
+        
+        printController.presentAnimated(true, completionHandler: nil)
+    }
+    
+    // called from the dismissing settings view controller
+    func presentEmailDialog()
+    {
+        
+    }
+    
+    func getHTMLforPrinting() -> String
+    {
+        return list.htmlForPrinting()
     }
     
 ////////////////////////////////////////////////////////////////

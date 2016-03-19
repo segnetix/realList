@@ -11,6 +11,7 @@ Delete_List_Message = "Adakah anda pasti anda mahu memadam senarai '%@' selama-l
 Delete = "Padam";
 Cancel = "Batal";
 Close = "Menutup";
+Print = "Print";
 Created = "Created:";
 Modified = "Modified:";
 Items = "Barangan";
