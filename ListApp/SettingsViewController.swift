@@ -22,6 +22,7 @@ let blue2 = UIColor(colorLiteralRed: 0.5, green: 0.75, blue: 0.75, alpha: 0.75)
 
 class SettingsViewController: UIViewController
 {
+    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     let containerView: UIView = UIView()
     let newCategoryButton: UIButton = UIButton()
     let collapseAllCategoriesButton: UIButton = UIButton()
@@ -33,6 +34,7 @@ class SettingsViewController: UIViewController
     let closeButton: UIButton = UIButton()
     let printButton: UIButton = UIButton()
     let emailButton: UIButton = UIButton()
+    let noteSwitch: UISwitch = UISwitch()
     var itemVC: ItemViewController?
     
     let red0Button: UIButton = UIButton()
@@ -135,12 +137,13 @@ class SettingsViewController: UIViewController
             "blue2Button": blue2Button,
             "closeButton": closeButton,
             "printButton": printButton,
-            "emailButton": emailButton]
+            "emailButton": emailButton,
+            "noteSwitch": noteSwitch]
         
         closeButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:[closeButton]-10-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
         showHideHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[showHideCompletedButton]-[showHideInactiveButton(==showHideCompletedButton)]-|", options: [.AlignAllCenterY], metrics: nil, views: views)
         categoryHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[collapseAllCategoriesButton(==newCatButton)]-[expandAllCategoriesButton(==newCatButton)]-[newCatButton]-|", options: [.AlignAllCenterY], metrics: nil, views: views)
-        printCloseButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-(>=4,<=8)-[printButton]-[emailButton(==printButton)]-(>=4,<=8)-|", options: [.AlignAllCenterY], metrics: nil, views: views)
+        printCloseButtonHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-(>=4,<=8)-[printButton]-[emailButton(==printButton)]-16-[noteSwitch(==printButton)]-(>=4,<=8)-|", options: [.AlignAllCenterY], metrics: nil, views: views)
         setAllItemsHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|-[setAllItemsIncompleteButton]-[setAllItemsInactiveButton(==setAllItemsIncompleteButton)]-|", options: [.AlignAllCenterY], metrics: nil, views: views)
         
         // color button constraints
@@ -160,23 +163,75 @@ class SettingsViewController: UIViewController
         if size.height <= 480 {
             // small
             verticalConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
-                "V:|-20-[closeButton]-24-[newCatButton]-20-[showHideCompletedButton]-20-[setAllItemsIncompleteButton]-(>=20)-[red0Button]-2-[red1Button]-2-[red2Button]-(>=20)-[printButton]-20-|",
+                "V:|-20-[closeButton]-16-[newCatButton]-16-[showHideCompletedButton]-16-[setAllItemsIncompleteButton]-(>=16)-[red0Button]-4-[red1Button]-4-[red2Button]-(>=16)-[printButton]-16-|",
                 options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+            
+            // scale buttons
+            closeButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
+            newCategoryButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
+            collapseAllCategoriesButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
+            expandAllCategoriesButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
+            showHideCompletedButton.transform = CGAffineTransformMakeScale(0.9, 0.9)
+            showHideInactiveButton.transform = CGAffineTransformMakeScale(0.9, 0.9)
+            setAllItemsIncompleteButton.transform = CGAffineTransformMakeScale(0.9, 0.9)
+            setAllItemsInactiveButton.transform = CGAffineTransformMakeScale(0.9, 0.9)
+            printButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
+            emailButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
+            noteSwitch.transform = CGAffineTransformMakeScale(0.65, 0.65)
         } else if size.height <= 568 {
             // medium small
             verticalConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
-                "V:|-20-[closeButton]-32-[newCatButton]-32-[showHideCompletedButton]-32-[setAllItemsIncompleteButton]-32-[red0Button]-4-[red1Button]-4-[red2Button]-(>=32)-[printButton]-24-|",
+                "V:|-20-[closeButton]-20-[newCatButton]-20-[showHideCompletedButton]-20-[setAllItemsIncompleteButton]-24-[red0Button]-4-[red1Button]-4-[red2Button]-(>=24)-[printButton]-20-|",
                 options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+            
+            // scale buttons
+            closeButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            newCategoryButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            collapseAllCategoriesButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            expandAllCategoriesButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            showHideCompletedButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            showHideInactiveButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            setAllItemsIncompleteButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            setAllItemsInactiveButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            printButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            emailButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            noteSwitch.transform = CGAffineTransformMakeScale(0.75, 0.75)
         } else if size.height <= 667 {
             // medium large
             verticalConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
-                "V:|-20-[closeButton]-48-[newCatButton]-48-[showHideCompletedButton]-48-[setAllItemsIncompleteButton]-60-[red0Button]-4-[red1Button]-4-[red2Button]-(>=32)-[printButton]-32-|",
+                "V:|-20-[closeButton]-32-[newCatButton]-32-[showHideCompletedButton]-32-[setAllItemsIncompleteButton]-48-[red0Button]-4-[red1Button]-4-[red2Button]-(>=32)-[printButton]-32-|",
                 options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+            
+            // scale buttons
+            closeButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            newCategoryButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            collapseAllCategoriesButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            expandAllCategoriesButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
+            showHideCompletedButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            showHideInactiveButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            setAllItemsIncompleteButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            setAllItemsInactiveButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            printButton.transform = CGAffineTransformMakeScale(0.9, 0.9)
+            emailButton.transform = CGAffineTransformMakeScale(0.9, 0.9)
+            noteSwitch.transform = CGAffineTransformMakeScale(0.8, 0.8)
         } else {
             // large
             verticalConstraints = NSLayoutConstraint.constraintsWithVisualFormat(
-                "V:|-20-[closeButton]-48-[newCatButton]-48-[showHideCompletedButton]-48-[setAllItemsIncompleteButton]-60-[red0Button]-4-[red1Button]-4-[red2Button]-(>=48)-[printButton]-32-|",
+                "V:|-20-[closeButton]-60-[newCatButton]-48-[showHideCompletedButton]-48-[setAllItemsIncompleteButton]-60-[red0Button]-4-[red1Button]-4-[red2Button]-(>=48)-[printButton]-32-|",
                 options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+            
+            // scale buttons
+            closeButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            newCategoryButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            collapseAllCategoriesButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            expandAllCategoriesButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            showHideCompletedButton.transform = CGAffineTransformMakeScale(1.25, 1.25)
+            showHideInactiveButton.transform = CGAffineTransformMakeScale(1.25, 1.25)
+            setAllItemsIncompleteButton.transform = CGAffineTransformMakeScale(1.25, 1.25)
+            setAllItemsInactiveButton.transform = CGAffineTransformMakeScale(1.25, 1.25)
+            printButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            emailButton.transform = CGAffineTransformMakeScale(1.0, 1.0)
+            noteSwitch.transform = CGAffineTransformMakeScale(0.85, 0.85)
         }
         
         // add constraints to views
@@ -201,54 +256,70 @@ class SettingsViewController: UIViewController
         view.addSubview(containerView)
         
         newCategoryButton.translatesAutoresizingMaskIntoConstraints = false
+        newCategoryButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         newCategoryButton.setImage(UIImage(named: "New Category"), forState: .Normal)
         newCategoryButton.addTarget(self, action: "newCategory:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(newCategoryButton)
         
         collapseAllCategoriesButton.translatesAutoresizingMaskIntoConstraints = false
+        collapseAllCategoriesButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         collapseAllCategoriesButton.setImage(UIImage(named: "Collapsed Categories"), forState: .Normal)
         collapseAllCategoriesButton.addTarget(self, action: "collapseAllCategories:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(collapseAllCategoriesButton)
         
         expandAllCategoriesButton.translatesAutoresizingMaskIntoConstraints = false
+        expandAllCategoriesButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         expandAllCategoriesButton.setImage(UIImage(named: "Expanded Categories"), forState: .Normal)
         expandAllCategoriesButton.addTarget(self, action: "expandAllCategories:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(expandAllCategoriesButton)
         
         showHideCompletedButton.translatesAutoresizingMaskIntoConstraints = false
+        showHideCompletedButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         showHideCompletedButton.setImage(UIImage(named: "Show Completed"), forState: .Normal)
         showHideCompletedButton.addTarget(self, action: "showHideCompletedItems:", forControlEvents: UIControlEvents.TouchUpInside)
         showCompletedItems = itemVC != nil && itemVC!.list != nil ? itemVC!.list!.showCompletedItems : true
         containerView.addSubview(showHideCompletedButton)
         
         showHideInactiveButton.translatesAutoresizingMaskIntoConstraints = false
+        showHideInactiveButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         showHideInactiveButton.setImage(UIImage(named: "Show Inactive"), forState: .Normal)
         showHideInactiveButton.addTarget(self, action: "showHideInactiveItems:", forControlEvents: UIControlEvents.TouchUpInside)
         showInactiveItems = itemVC != nil && itemVC!.list != nil ? itemVC!.list!.showInactiveItems : true
         containerView.addSubview(showHideInactiveButton)
         
         setAllItemsIncompleteButton.translatesAutoresizingMaskIntoConstraints = false
+        setAllItemsIncompleteButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         setAllItemsIncompleteButton.setImage(UIImage(named: "Set Incomplete"), forState: .Normal)
         setAllItemsIncompleteButton.addTarget(self, action: "setAllItemsIncomplete:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(setAllItemsIncompleteButton)
         
         setAllItemsInactiveButton.translatesAutoresizingMaskIntoConstraints = false
+        setAllItemsInactiveButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         setAllItemsInactiveButton.setImage(UIImage(named: "Set Inactive"), forState: .Normal)
         setAllItemsInactiveButton.addTarget(self, action: "setAllItemsInactive:", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(setAllItemsInactiveButton)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
+        closeButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         closeButton.setImage(UIImage(named: "Close Window"), forState: .Normal)
         closeButton.addTarget(self, action: "close", forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(closeButton)
         
+        noteSwitch.translatesAutoresizingMaskIntoConstraints = false
+        noteSwitch.transform = CGAffineTransformMakeScale(0.75, 0.75)
+        noteSwitch.addTarget(self, action: "noteSwitchChanged", forControlEvents: .TouchUpInside)
+        noteSwitch.setOn(appDelegate.printNotes, animated: true)
+        containerView.addSubview(noteSwitch)
+        
         printButton.translatesAutoresizingMaskIntoConstraints = false
+        printButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
         printButton.setImage(UIImage(named: "Print"), forState: .Normal)
         printButton.addTarget(self, action: "print", forControlEvents: UIControlEvents.TouchUpInside)
         printButton.enabled = UIPrintInteractionController.isPrintingAvailable()
         containerView.addSubview(printButton)
         
         emailButton.translatesAutoresizingMaskIntoConstraints = false
+        emailButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
         emailButton.setImage(UIImage(named: "Email"), forState: .Normal)
         emailButton.addTarget(self, action: "email", forControlEvents: UIControlEvents.TouchUpInside)
         emailButton.enabled = UIPrintInteractionController.isPrintingAvailable()
@@ -311,7 +382,7 @@ class SettingsViewController: UIViewController
         // set up container view constraints
         let views: [String : AnyObject] = ["containerView": containerView]
         containerViewHorizConstraints = NSLayoutConstraint.constraintsWithVisualFormat("H:|[containerView]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        containerViewVertConstraints = NSLayoutConstraint.constraintsWithVisualFormat("V:|[containerView]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        containerViewVertConstraints  = NSLayoutConstraint.constraintsWithVisualFormat("V:|[containerView]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
         
         view.addConstraints(containerViewHorizConstraints!)
         view.addConstraints(containerViewVertConstraints!)
@@ -370,6 +441,10 @@ class SettingsViewController: UIViewController
         itemVC?.tableView.reloadData()
     }
     
+    func noteSwitchChanged() {
+        appDelegate.printNotes = noteSwitch.on
+    }
+    
     func print()
     {
         // present the print dialog
@@ -382,8 +457,8 @@ class SettingsViewController: UIViewController
     
     func email()
     {
-        // present the email dialog
-        itemVC?.presentEmailDialog()
+        // schedule the email dialog
+        itemVC?.scheduleEmailDialog()
         
         // dismiss settings view controller
         self.itemVC?.appDelegate.saveAll()

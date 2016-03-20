@@ -9,6 +9,7 @@
 import UIKit
 import QuartzCore
 import iAd
+import MessageUI
 
 let itemCellID     = "ItemCell"
 let categoryCellID = "CategoryCell"
@@ -36,7 +37,7 @@ let kItemCellHeight: CGFloat = 56.0
 let kCategoryCellHeight: CGFloat = 44.0
 let kAddItemCellHeight: CGFloat = 44.0
 
-class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate, UIPrintInteractionControllerDelegate
+class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate, UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate
 {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var adBanner: ADBannerView!
@@ -1287,10 +1288,74 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         printController.presentAnimated(true, completionHandler: nil)
     }
     
+    func scheduleEmailDialog() {
+        dispatch_async(dispatch_get_main_queue()) {
+            self.presentEmailDialog()
+        }
+            
+        //NSTimer.scheduledTimerWithTimeInterval(0.5, target: self, selector: "presentEmailDialog", userInfo: nil, repeats: false)
+    }
+    
     // called from the dismissing settings view controller
     func presentEmailDialog()
     {
+        if MFMailComposeViewController.canSendMail()
+        {
+            // init the mail view controller
+            let mailViewController = MFMailComposeViewController.init()
+            mailViewController.mailComposeDelegate = self
+            mailViewController.navigationBar.barStyle = UIBarStyle.Default
+
+            // subject and title
+            mailViewController.setSubject(list.name)
+            
+            mailViewController.setMessageBody(self.getHTMLforPrinting(), isHTML: true)
+            
+            self.presentViewController(mailViewController, animated: true, completion: nil)
+        }
+        else
+        {
+            let alertController = UIAlertController(title: "Can't Send Email", message: "Your device could not send e-mail.  Please check e-mail configuration and try again.", preferredStyle: .Alert)
+            let OKAction = UIAlertAction(title: "OK", style: .Default) { (action) in
+                print("email not configued... alert controller OKAction...")
+            }
+            alertController.addAction(OKAction)
+            
+            self.presentViewController(alertController, animated: true, completion: nil)
+        }
+    }
+    
+    // Dismisses the email composition interface when users tap Cancel or Send. Proceeds to update the message field with the result of the operation.
+    func mailComposeController(controller: MFMailComposeViewController, didFinishWithResult result: MFMailComposeResult, error: NSError?)
+    {
+        var message = ""
         
+        switch result {
+        case MFMailComposeResultCancelled:
+            message = "Email Cancelled"
+        case MFMailComposeResultSaved:
+            message = "Email Saved"
+        case MFMailComposeResultSent:
+            message = "Email Sent"
+        case MFMailComposeResultFailed:
+            if let err = error {
+                message = "Email Failure: \(err.localizedDescription)"
+            }
+        default:
+            message = "Email Not Sent"
+        }
+        
+        if (result != MFMailComposeResultCancelled) {
+            let alertController = UIAlertController(title: message, message: nil, preferredStyle: .Alert)
+            let okAction = UIAlertAction(title: "OK", style: .Default) { [unowned self] (action) in
+                self.dismissViewControllerAnimated(false, completion: nil)
+            }
+            alertController.addAction(okAction)
+            
+            controller.presentViewController(alertController, animated: true, completion: nil)
+        } else {
+            self.dismissViewControllerAnimated(false, completion: nil)
+        }
     }
     
     func getHTMLforPrinting() -> String

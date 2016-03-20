@@ -1446,7 +1446,7 @@ class Item: ListObj, NSCoding
         }
         
         // note
-        if self.note.characters.count > 0 {
+        if appDelegate.printNotes && self.note.characters.count > 0 {
             html += "<tr><td></td><td><div class='tab'><font size='2'; color='gray'>\(self.note)</font></div></td></tr>"
         }
         

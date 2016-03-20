@@ -26,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var categoryArray = [CKRecord]()
     var itemArray = [CKRecord]()
     var refreshEventIsPending = false
+    var printNotes = true
     
     // iCloud
     let container = CKContainer.defaultContainer()
@@ -81,6 +82,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             } else {
                 listViewController!.selectionIndex = -1
             }
+        }
+        
+        if let printNotes = NSUserDefaults.standardUserDefaults().objectForKey("printNotes") as? Bool {
+            self.printNotes = printNotes
         }
         
         fetchCloudData()
@@ -255,6 +260,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         // save current selection
         NSUserDefaults.standardUserDefaults().setObject(listViewController!.selectionIndex, forKey: "selectionIndex")
+        NSUserDefaults.standardUserDefaults().setObject(printNotes, forKey: "printNotes")
         
         NSUserDefaults.standardUserDefaults().synchronize()
     }
