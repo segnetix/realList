@@ -1,6 +1,6 @@
 //
 //  SettingsPresentationController.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 2/5/16.
 //  Copyright © 2016 Steven Gentry. All rights reserved.
@@ -17,7 +17,7 @@ class SettingsPresentationController: UIPresentationController, UIAdaptivePresen
         chromeView.backgroundColor = UIColor(white: 0.0, alpha: 0.4)
         chromeView.alpha = 0.0
         
-        let tap = UITapGestureRecognizer(target: self, action: "chromeViewTapped:")
+        let tap = UITapGestureRecognizer(target: self, action: #selector(SettingsPresentationController.chromeViewTapped(_:)))
         chromeView.addGestureRecognizer(tap)
     }
     

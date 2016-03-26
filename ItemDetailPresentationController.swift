@@ -1,6 +1,6 @@
 //
 //  ItemDetailPresentationController.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 2/5/16.
 //  Copyright © 2016 Steven Gentry. All rights reserved.
@@ -17,7 +17,7 @@ class ItemDetailPresentationController: UIPresentationController, UIAdaptivePres
         chromeView.backgroundColor = UIColor.whiteColor()
         chromeView.alpha = 1.0
         
-        let tap = UITapGestureRecognizer(target: self, action: "chromeViewTapped:")
+        let tap = UITapGestureRecognizer(target: self, action: #selector(ItemDetailPresentationController.chromeViewTapped(_:)))
         chromeView.addGestureRecognizer(tap)
     }
     

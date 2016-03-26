@@ -1,6 +1,6 @@
 //
 //  ItemViewController.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 12/30/15.
 //  Copyright © 2015 Steven Gentry. All rights reserved.
@@ -87,14 +87,14 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         //self.navigationItem.rightBarButtonItem = self.editButtonItem()
         
         // set up long press gesture recognizer for the cell move functionality
-        longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
+        longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(ItemViewController.longPressAction(_:)))
         self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
 
         // settings button
         let settingsButton: UIButton = UIButton(type: UIButtonType.Custom)
-        settingsButton.setImage(UIImage(named: "settings"), forState: .Normal)
+        settingsButton.setImage(UIImage(named: "Settings"), forState: .Normal)
         settingsButton.frame = CGRectMake(0, 0, 30, 30)
-        settingsButton.addTarget(self, action: Selector("settingsButtonTapped"), forControlEvents: .TouchUpInside)
+        settingsButton.addTarget(self, action: #selector(ItemViewController.settingsButtonTapped), forControlEvents: .TouchUpInside)
         let rightBarButton = UIBarButtonItem()
         rightBarButton.customView = settingsButton
         self.navigationItem.rightBarButtonItem = rightBarButton
@@ -103,8 +103,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         modalPresentationStyle = UIModalPresentationStyle.Custom
         
         // set up keyboard show/hide notifications
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillShow:", name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardWillHide:", name: UIKeyboardWillHideNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
         
         refreshItems()
     }
@@ -166,18 +166,18 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             // Configure the cell...
             cell.itemName.userInteractionEnabled = false
             cell.itemName.delegate = self
-            cell.itemName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+            cell.itemName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
             cell.itemName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
             cell.itemName!.tag = tag
             cell.contentView.tag = tag
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
-            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
+            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ItemViewController.cellSingleTapAction(_:)))
             singleTapGestureRecognizer.numberOfTapsRequired = 1
             cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
             
             // set up double tap gesture recognizer in item cell to enable cell moving
-            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
+            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ItemViewController.cellDoubleTapAction(_:)))
             doubleTapGestureRecognizer.numberOfTapsRequired = 2
             singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
             cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
@@ -228,18 +228,18 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             // Configure the cell...
             cell.categoryName.userInteractionEnabled = false
             cell.categoryName.delegate = self
-            cell.categoryName.addTarget(self, action: "itemNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+            cell.categoryName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
             cell.categoryName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
             cell.categoryName!.tag = tag
             cell.contentView.tag = tag
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
-            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
+            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ItemViewController.cellSingleTapAction(_:)))
             singleTapGestureRecognizer.numberOfTapsRequired = 1
             cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
             
             // set up double tap gesture recognizer in cat cell to enable cell moving
-            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
+            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ItemViewController.cellDoubleTapAction(_:)))
             doubleTapGestureRecognizer.numberOfTapsRequired = 2
             singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
             cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
@@ -528,7 +528,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 
                 // set up a selector event to fire when the new cell has scrolled into place
                 NSObject.cancelPreviousPerformRequestsWithTarget(self)
-                self.performSelector("scrollToCategoryEnded:", withObject: nil, afterDelay: 0.5)
+                self.performSelector(#selector(ItemViewController.scrollToCategoryEnded(_:)), withObject: nil, afterDelay: 0.5)
             } else {
                 // new cell is already visible
                 print("new cell is already visible")
@@ -721,14 +721,14 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         if touchLocation.y > (tableView.bounds.height - kScrollZoneHeight) {
             // need to scroll down
             if displayLink == nil {
-                displayLink = CADisplayLink(target: self, selector: Selector("scrollDownLoop"))
+                displayLink = CADisplayLink(target: self, selector: #selector(ItemViewController.scrollDownLoop))
                 displayLink!.frameInterval = 1
                 displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
-                displayLink = CADisplayLink(target: self, selector: Selector("scrollUpLoop"))
+                displayLink = CADisplayLink(target: self, selector: #selector(ItemViewController.scrollUpLoop))
                 displayLink!.frameInterval = 1
                 displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
             }
@@ -806,8 +806,10 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         }
     }
     
-    func longPressMoved(var indexPath: NSIndexPath?, location: CGPoint)
+    func longPressMoved(idxPath: NSIndexPath?, location: CGPoint)
     {
+        var indexPath = idxPath
+        
         if prevLocation == nil {
             return  
         }
@@ -942,7 +944,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                     let moveDirection = sourceIndexPath!.row >  indexPath!.row ? MoveDirection.Up : MoveDirection.Down
                     
                     if moveDirection == .Up && destDataObj is Item && dstCategoryIndex >= 0 {
-                        ++dstCategoryIndex
+                        dstCategoryIndex += 1
                     }
                     
                     //print("srcCategoryIndex: \(srcCategoryIndex)  dstCategoryIndex: \(dstCategoryIndex)")
@@ -1159,7 +1161,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             var index = -1
             
             repeat {
-                let indexPath = NSIndexPath(forRow: ++index, inSection: 0)
+                index += 1
+                let indexPath = NSIndexPath(forRow: index, inSection: 0)
                 cell = tableView.cellForRowAtIndexPath(indexPath)
                     
                 if cell != nil {
@@ -1193,8 +1196,10 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         return false
     }
     
-    func adjustIndexPathIfItemMovingAboveTopRow(var indexPath: NSIndexPath) -> NSIndexPath
+    func adjustIndexPathIfItemMovingAboveTopRow(idxPath: NSIndexPath) -> NSIndexPath
     {
+        var indexPath = idxPath
+        
         if sourceIndexPath != nil
         {
             let srcObj = tableView.cellForRowAtIndexPath(sourceIndexPath!)
@@ -1549,7 +1554,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         var i = -1
         
         for obj in itemArray {
-            ++i
+            i += 1
             if obj === item {
                 return i
             }

@@ -1,6 +1,6 @@
 //
 //  SettingsAnimatedTransitioning.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 2/5/16.
 //  Copyright © 2016 Steven Gentry. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  ViewController.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 12/30/15.
 //  Copyright © 2015 Steven Gentry. All rights reserved.

@@ -1,6 +1,6 @@
 //
 //  ListCell.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 12/31/15.
 //  Copyright © 2015 Steven Gentry. All rights reserved.

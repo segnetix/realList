@@ -1,6 +1,6 @@
 //
 //  CheckBox.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 2/10/16.
 //  Copyright © 2016 Steven Gentry. All rights reserved.
@@ -30,7 +30,7 @@ class CheckBox: UIButton
         self.itemVC = itemVC
         self.tag = tag
         
-        self.addTarget(self, action: "buttonTapped:", forControlEvents: UIControlEvents.TouchUpInside)
+        self.addTarget(self, action: #selector(CheckBox.buttonTapped(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         
         // set the initial check box image
         setImage()

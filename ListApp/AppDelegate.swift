@@ -1,5 +1,5 @@
 //  AppDelegate.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 12/30/15.
 //  Copyright © 2015 Steven Gentry. All rights reserved.
@@ -20,7 +20,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var DocumentsDirectory: NSURL?
     var ArchiveURL = NSURL()
     var cloudUploadStatusRecord: CKRecord?
-    var localTimestamp: NSDate?
     var updateRecords = [CKRecord: AnyObject]()
     var listArray = [CKRecord]()
     var categoryArray = [CKRecord]()
@@ -51,28 +50,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         splitViewController!.preferredDisplayMode = UISplitViewControllerDisplayMode.AllVisible
         
         privateDatabase = container.privateCloudDatabase
-        
+
         // push notification setup
         let notificationSettings = UIUserNotificationSettings(forTypes: UIUserNotificationType.None, categories: nil)
         application.registerUserNotificationSettings(notificationSettings)
         application.registerForRemoteNotifications()
-        
-        // get local data timestamp
-        localTimestamp = NSUserDefaults.standardUserDefaults().objectForKey("timestamp") as? NSDate
-        if localTimestamp != nil {
-            print("localTimestamp: \(localTimestamp)")
-        }
         
         // restore the list data from local storage
         if let archivedListData = NSKeyedUnarchiver.unarchiveObjectWithFile(ArchiveURL.path!) as? [List] {
             listViewController!.lists = archivedListData
         }
         
-        // merge local data with cloud data
-        CKContainer.defaultContainer().accountStatusWithCompletionHandler({ status, error in
-            if (error != nil) { print("Error = \(error!.description)")}
-            print("Account status = \(status.hashValue) (0=CouldNotDetermine/1=Available/2=Restricted/3=NoAccount)")
-        })
+        print("iCloudIsAvailable: \(self.iCloudIsAvailable())")
         
         // restore the selected list
         if let initialListIndex = NSUserDefaults.standardUserDefaults().objectForKey("selectionIndex") as? Int {
@@ -88,20 +77,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             self.printNotes = printNotes
         }
         
-        fetchCloudData()
+        //fetchCloudData()
         
         return true
     }
     
-    func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError) {
-        print("didFailToRegisterForRemoteNotificationsWithError: \(error)")
+    func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError)
+    {
+        print("*** didFailToRegisterForRemoteNotificationsWithError: \(error)")
     }
     
-    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
-        print("didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
-        self.deleteCurrentSubscriptions()
+    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData)
+    {
+        print("*** didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
+        
+        // will create subscriptions if necessary
+        self.createSubscriptions()
     }
     
+    // iCloud sent notification of a change
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject])
     {
         let cloudKitNotification = CKNotification(fromRemoteNotificationDictionary: userInfo as! [String : NSObject])
@@ -161,13 +155,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        
         print("applicationDidBecomeActive...")
+        fetchCloudData()
     }
     
-    func applicationWillTerminate(application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-        
+    // called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground
+    func applicationWillTerminate(application: UIApplication)
+    {
         print("applicationWillTerminate...")
         
         // save state and data
@@ -180,51 +174,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 //
 ////////////////////////////////////////////////////////////////
     
-    // delete any old subscriptions before create new subscriptions
-    func deleteCurrentSubscriptions()
+    // create subscriptions if necessary
+    func createSubscriptions()
     {
-        print("called deleteCurrentSubscriptions...")
+        print("called createSubscriptions...")
         
-        if let database = privateDatabase {
-            database.fetchAllSubscriptionsWithCompletionHandler() { [unowned self] (subscriptions, error) -> Void in
-                if error == nil
-                {
-                    var subscriptionsDeletedCount = 0
-                    
-                    if let subscriptions = subscriptions {
-                        for subscription in subscriptions {
-                            database.deleteSubscriptionWithID(subscription.subscriptionID, completionHandler: { (str, error) -> Void in
-                                if error != nil {
-                                    // do your error handling here!
-                                    print(error!.localizedDescription)
-                                } else {
-                                    print("\(subscription.recordType) subscription deleted.  subscriptionsDeletedCount is \(subscriptionsDeletedCount + 1) of \(subscriptions.count) \(subscription.subscriptionID)")
-                                    if ++subscriptionsDeletedCount >= subscriptions.count {
-                                        // call addNewSubscriptions after the last current subscription is deleted
-                                        self.addNewSubscriptions()
-                                    }
-                                }
-                            })
-                        }
-                     }
-                } else {
-                    // fetchAllSubscriptionsWithCompletionHandler error
-                    print("fetchAllSubscriptionsWithCompletionHandler error: \(error!.localizedDescription)")
-                }
-                print("fetchAllSubscriptionsWithCompletionHandler subscription count is \(subscriptions!.count)")
-                if subscriptions!.count < 3 {
-                    self.addNewSubscriptions()
-                }
-            }
-        }
-    }
-    
-    // add subscriptions after deleting all current subscriptions
-    func addNewSubscriptions()
-    {
-        print("called addNewSubscriptions...")
-        
-        func saveSubscription(recordType: String) {
+        // create a single subscription of the given type
+        func createSubscription(recordType: String) {
             // run later, making sure that all subscriptions have been deleted before re-subscribing...
             let predicate = NSPredicate(format: "TRUEPREDICATE")
             
@@ -242,13 +198,48 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
         }
         
-        for subscriptionType in [ListsRecordType, CategoriesRecordType, ItemsRecordType] {
-            saveSubscription(subscriptionType)
+        // subscription check
+        if let database = privateDatabase {
+            database.fetchAllSubscriptionsWithCompletionHandler() { (subscriptions, error) -> Void in
+                if error == nil
+                {
+                    var haveListsSub = false
+                    var haveCategoriesSub = false
+                    var haveItemsSub = false
+                    
+                    // check for existing subscriptions
+                    if let subscriptions = subscriptions {
+                        for subscription in subscriptions {
+                            if subscription.recordType == ListsRecordType {
+                                print("*** subscription check: Lists")
+                                haveListsSub = true
+                            }
+                            if subscription.recordType == CategoriesRecordType {
+                                print("*** subscription check: Categories")
+                                haveCategoriesSub = true
+                            }
+                            if subscription.recordType == ItemsRecordType {
+                                print("*** subscription check: Items")
+                                haveItemsSub = true
+                            }
+                        }
+                    }
+                    
+                    // create any missing subscriptions
+                    if !haveListsSub      { createSubscription(ListsRecordType)      }
+                    if !haveCategoriesSub { createSubscription(CategoriesRecordType) }
+                    if !haveItemsSub      { createSubscription(ItemsRecordType)      }
+                    
+                } else {
+                    print("fetchAllSubscriptionsWithCompletionHandler error: \(error!.localizedDescription)")
+                }
+            }
         }
     }
     
-    // Checks if the user has logged into their iCloud account or not
-    func isIcloudAvailable() -> Bool {
+    // checks if the user has logged into their iCloud account or not
+    func iCloudIsAvailable() -> Bool
+    {
         if let _ = NSFileManager.defaultManager().ubiquityIdentityToken {
             return true
         } else {
@@ -273,14 +264,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         updateRecords.removeAll()       // empty the updateRecords array
         
         // saveToCloud will add all records needing updating to the updateRecords array
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                list.saveToCloud()
+        if iCloudIsAvailable() {
+            if let listVC = listViewController {
+                for list in listVC.lists {
+                    list.saveToCloud()
+                }
             }
+            
+            // cloud batch save ready -- now send the records for batch updating
+            batchRecordUpdate()
         }
-        
-        // cloud save -- now send the the records for batch updating
-        batchRecordUpdate()
         
         if !cloudOnly {
             // save the list data - local
@@ -288,12 +281,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: ArchiveURL.path!)
                 
                 if !successfulSave {
-                    print("Failed to save list data locally...")
+                    print("ERROR: Failed to save list data locally...")
                 }
             }
         }
     }
-
+    
     func saveAll() {
         saveState()
         saveListData(false)
@@ -303,7 +296,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // create or update a local object with the given record
     func updateFromRecord(record: CKRecord, forceUpdate: Bool)
     {
-        //print("CloudKit: update notification... \(record["name"])")
         var list: List?
         var category: Category?
         var item: Item?
@@ -423,7 +415,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         if !refreshEventIsPending {
             print("preparing refreshEvent timer for update...")
-            NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: "refreshEvent", userInfo: nil, repeats: false)
+            NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
             refreshEventIsPending = true
         }
     }
@@ -466,7 +458,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // now reorder and refresh the table view
         if !refreshEventIsPending {
             print("preparing refreshEvent timer for delete...")
-            NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: "refreshEvent", userInfo: nil, repeats: false)
+            NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
             refreshEventIsPending = true
         }
     }

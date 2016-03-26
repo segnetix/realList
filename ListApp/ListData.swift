@@ -1,6 +1,6 @@
 //
 //  ListData.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 12/31/15.
 //  Copyright © 2015 Steven Gentry. All rights reserved.
@@ -13,6 +13,31 @@ let kItemIndexMax = 100000
 let ListsRecordType = "Lists"
 let CategoriesRecordType = "Categories"
 let ItemsRecordType = "Items"
+
+// key strings for record access
+let key_name                = "name"
+let key_showCompletedItems  = "showCompletedItems"
+let key_showInactiveItems   = "showInactiveItems"
+let key_listColor           = "listColor"
+let key_categories          = "categories"
+let key_modificationDate    = "modificationDate"
+let key_listReference       = "listReference"
+let key_listRecord          = "listRecord"
+let key_order               = "order"
+let key_expanded            = "expanded"
+let key_displayHeader       = "displayHeader"
+let key_owningList          = "owningList"
+let key_categoryReference   = "categoryReference"
+let key_categoryRecord      = "categoryRecord"
+let key_items               = "items"
+let key_note                = "note"
+let key_createdBy           = "createdBy"
+let key_createdDate         = "createdDate"
+let key_modifiedBy          = "modifiedBy"
+let key_modifiedDate        = "modifiedDate"
+let key_owningCategory      = "owningCategory"
+let key_itemRecord          = "itemRecord"
+let key_state               = "state"
 
 let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
 
@@ -105,14 +130,14 @@ class List: NSObject, NSCoding
     
     required convenience init?(coder decoder: NSCoder)
     {
-        let name               = decoder.decodeObjectForKey("name")               as? String
-        let showCompletedItems = decoder.decodeObjectForKey("showCompletedItems") as? Bool
-        let showInactiveItems  = decoder.decodeObjectForKey("showInactiveItems")  as? Bool
-        let listColor          = decoder.decodeObjectForKey("listColor")          as? UIColor
-        let categories         = decoder.decodeObjectForKey("categories")         as? [Category]
-        let listReference      = decoder.decodeObjectForKey("listReference")      as? CKReference
-        let listRecord         = decoder.decodeObjectForKey("listRecord")         as? CKRecord
-        let modificationDate   = decoder.decodeObjectForKey("modificationDate")   as? NSDate
+        let name               = decoder.decodeObjectForKey(key_name)               as? String
+        let showCompletedItems = decoder.decodeObjectForKey(key_showCompletedItems) as? Bool
+        let showInactiveItems  = decoder.decodeObjectForKey(key_showInactiveItems)  as? Bool
+        let listColor          = decoder.decodeObjectForKey(key_listColor)          as? UIColor
+        let categories         = decoder.decodeObjectForKey(key_categories)         as? [Category]
+        let listReference      = decoder.decodeObjectForKey(key_listReference)      as? CKReference
+        let listRecord         = decoder.decodeObjectForKey(key_listRecord)         as? CKRecord
+        let modificationDate   = decoder.decodeObjectForKey(key_modificationDate)   as? NSDate
         
         self.init(name: name, showCompletedItems: showCompletedItems, showInactiveItems: showInactiveItems, listColor: listColor, modificationDate: modificationDate, listReference: listReference, listRecord: listRecord, categories: categories)
     }
@@ -122,14 +147,14 @@ class List: NSObject, NSCoding
     {
         self.modificationDate = NSDate.init()
         
-        coder.encodeObject(self.name,               forKey: "name")
-        coder.encodeObject(self.showCompletedItems, forKey: "showCompletedItems")
-        coder.encodeObject(self.showInactiveItems,  forKey: "showInactiveItems")
-        coder.encodeObject(self.listColor,          forKey: "listColor")
-        coder.encodeObject(self.categories,         forKey: "categories")
-        coder.encodeObject(self.listReference,      forKey: "listReference")
-        coder.encodeObject(self.listRecord,         forKey: "listRecord")
-        coder.encodeObject(self.modificationDate,   forKey: "modificationDate")
+        coder.encodeObject(self.name,               forKey: key_name)
+        coder.encodeObject(self.showCompletedItems, forKey: key_showCompletedItems)
+        coder.encodeObject(self.showInactiveItems,  forKey: key_showInactiveItems)
+        coder.encodeObject(self.listColor,          forKey: key_listColor)
+        coder.encodeObject(self.categories,         forKey: key_categories)
+        coder.encodeObject(self.listReference,      forKey: key_listReference)
+        coder.encodeObject(self.listRecord,         forKey: key_listRecord)
+        coder.encodeObject(self.modificationDate,   forKey: key_modificationDate)
     }
     
     // commits this list and its categories to cloud storage
@@ -171,11 +196,11 @@ class List: NSObject, NSCoding
             }
         }
         
-        listRecord.setObject(self.name,               forKey: "name")
-        listRecord.setObject(rgbColor,                forKey: "listColor")
-        listRecord.setObject(self.showCompletedItems, forKey: "showCompletedItems")
-        listRecord.setObject(self.showInactiveItems,  forKey: "showInactiveItems")
-        listRecord.setObject(self.order,              forKey: "order")
+        listRecord.setObject(self.name,               forKey: key_name)
+        listRecord.setObject(rgbColor,                forKey: key_listColor)
+        listRecord.setObject(self.showCompletedItems, forKey: key_showCompletedItems)
+        listRecord.setObject(self.showInactiveItems,  forKey: key_showInactiveItems)
+        listRecord.setObject(self.order,              forKey: key_order)
         
         // add this record to the batch record array for updating
         appDelegate.addToUpdateRecords(listRecord, obj: self)
@@ -184,11 +209,11 @@ class List: NSObject, NSCoding
     // update this list from cloud storage
     func updateFromRecord(record: CKRecord)
     {
-        if let name               = record["name"]               { self.name               = name as! String }
-        if let showCompletedItems = record["showCompletedItems"] { self.showCompletedItems = showCompletedItems as! Bool }
-        if let showInactiveItems  = record["showInactiveItems"]  { self.showInactiveItems  = showInactiveItems as! Bool }
-        if let listColor          = record["listColor"]          { self.listColor          = UIColor.colorFromRGB(listColor as! Int) }
-        if let order              = record["order"]              { self.order              = order  as! Int }
+        if let name               = record[key_name]               { self.name               = name as! String }
+        if let showCompletedItems = record[key_showCompletedItems] { self.showCompletedItems = showCompletedItems as! Bool }
+        if let showInactiveItems  = record[key_showInactiveItems]  { self.showInactiveItems  = showInactiveItems as! Bool }
+        if let listColor          = record[key_listColor]          { self.listColor          = UIColor.colorFromRGB(listColor as! Int) }
+        if let order              = record[key_order]              { self.order              = order  as! Int }
         
         self.listRecord = record
         self.listReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
@@ -224,7 +249,7 @@ class List: NSObject, NSCoding
         
         for cat in categories {
             if cat === category {
-                ++index
+                index += 1
                 return index
             }
         }
@@ -340,7 +365,7 @@ class List: NSObject, NSCoding
         
         // check for insert before category, in that case switch to the end of the previous category
         if catIdx > 0 && itmIdx < 0 {
-            --catIdx                                    // move to the previous category
+            catIdx -= 1                                 // move to the previous category
             itmIdx = categories[catIdx].items.count     // end of the category
         } else if itmIdx < 0 {
             // moved above top row, set to top position in top category
@@ -504,7 +529,8 @@ class List: NSObject, NSCoding
     {
         var i = -1
         for cat in categories {
-            cat.updateIndices(++i)
+            i += 1
+            cat.updateIndices(i)
             cat.order = i
         }
     }
@@ -516,16 +542,16 @@ class List: NSObject, NSCoding
         
         for category in categories {
             if category.displayHeader {
-                ++count
+                count += 1
             }
             
             if category.expanded {
                 for item in category.items {
                     if isDisplayedItem(item) {
-                        ++count
+                        count += 1
                     }
                 }
-                ++count     // for AddItem cell
+                count += 1      // for AddItem cell
             }
         }
         
@@ -625,7 +651,7 @@ class List: NSObject, NSCoding
         
         for category in categories {
             if category.displayHeader {
-                ++index
+                index += 1
             }
             
             if index == row {
@@ -635,13 +661,13 @@ class List: NSObject, NSCoding
             if category.expanded {
                 for item in category.items {
                     if isDisplayedItem(item) {
-                        ++index
+                        index += 1
                         if index == row {
                             return item
                         }
                     }
                 }
-                ++index
+                index += 1
                 if index == row {
                     return category.addItem
                 }
@@ -674,7 +700,7 @@ class List: NSObject, NSCoding
         
         for category in categories {
             if category.displayHeader {
-                ++index
+                index += 1
             }
             
             if category === obj {
@@ -684,14 +710,14 @@ class List: NSObject, NSCoding
             if category.expanded {
                 for item in category.items {
                     if isDisplayedItem(item) {
-                        ++index
+                        index += 1
                         if item === obj {
                             return (NSIndexPath(forRow: index, inSection: 0), true)
                         }
                     }
                 }
                 // for AddItem cell
-                ++index
+                index += 1
                 if category.addItem === obj {
                     return (NSIndexPath(forRow: index, inSection: 0), true)
                 }
@@ -784,13 +810,15 @@ class List: NSObject, NSCoding
             
             for item in category.items {
                 if isDisplayedItem(item) {
-                    indexPaths.append(NSIndexPath(forRow: ++pos, inSection: 0))
+                    pos += 1
+                    indexPaths.append(NSIndexPath(forRow: pos, inSection: 0))
                 }
             }
             
             if includeAddItemIndexPath {
                 // one more for the addItem cell
-                indexPaths.append(NSIndexPath(forRow: ++pos, inSection: 0))
+                pos += 1
+                indexPaths.append(NSIndexPath(forRow: pos, inSection: 0))
             }
         } else {
             print("ERROR: displayIndexPathsForCategory was given an invalid index path!")
@@ -808,7 +836,7 @@ class List: NSObject, NSCoding
         for category in categories
         {
             if category.displayHeader {
-                ++pos
+                pos += 1
             }
             
             if category.expanded
@@ -816,12 +844,13 @@ class List: NSObject, NSCoding
                 for item in category.items
                 {
                     if item.state == ItemState.Complete {
-                        indexPaths.append(NSIndexPath(forRow: ++pos, inSection: 0))
+                        pos += 1
+                        indexPaths.append(NSIndexPath(forRow: pos, inSection: 0))
                     } else if item.state != ItemState.Inactive || showInactiveItems {
-                        ++pos
+                        pos += 1
                     }
                 }
-                ++pos     // for the AddItem cell
+                pos += 1        // for the AddItem cell
             }
         }
         
@@ -837,7 +866,7 @@ class List: NSObject, NSCoding
         for category in categories
         {
             if category.displayHeader {
-                ++pos
+                pos += 1
             }
             
             if category.expanded
@@ -845,12 +874,13 @@ class List: NSObject, NSCoding
                 for item in category.items
                 {
                     if item.state == ItemState.Inactive {
-                        indexPaths.append(NSIndexPath(forRow: ++pos, inSection: 0))
+                        pos += 1
+                        indexPaths.append(NSIndexPath(forRow: pos, inSection: 0))
                     } else if item.state != ItemState.Complete || showCompletedItems {
-                        ++pos
+                        pos += 1
                     }
                 }
-                ++pos     // for the AddItem cell
+                pos += 1     // for the AddItem cell
             }
         }
         
@@ -919,10 +949,10 @@ class List: NSObject, NSCoding
         for category in categories
         {
             var itemIndex = 0
-            ++catIndex
+            catIndex += 1
             
             if category.displayHeader {
-                ++rowIndex
+                rowIndex += 1
                 if rowIndex == row {
                     return Tag(catIdx: catIndex, itmIdx: itemIndex)     // categories are always itemIndex 0
                 }
@@ -933,16 +963,16 @@ class List: NSObject, NSCoding
                 for item in category.items
                 {
                     if isDisplayedItem(item) {
-                        ++itemIndex
-                        ++rowIndex
+                        itemIndex += 1
+                        rowIndex += 1
                         if rowIndex == row {
                             return Tag(catIdx: catIndex, itmIdx: itemIndex)
                         }
                     }
                 }
                 // AddItem row
-                ++itemIndex
-                ++rowIndex
+                itemIndex += 1
+                rowIndex += 1
                 if rowIndex == row {
                     return Tag(catIdx: catIndex, itmIdx: itemIndex)
                 }
@@ -1081,13 +1111,13 @@ class Category: ListObj, NSCoding
     
     required convenience init?(coder decoder: NSCoder)
     {
-        let name = decoder.decodeObjectForKey("name")                           as? String
-        let expanded          = decoder.decodeObjectForKey("expanded")          as? Bool
-        let displayHeader     = decoder.decodeObjectForKey("displayHeader")     as? Bool
-        let modificationDate  = decoder.decodeObjectForKey("modificationDate")  as? NSDate
-        let categoryReference = decoder.decodeObjectForKey("categoryReference") as? CKReference
-        let categoryRecord    = decoder.decodeObjectForKey("categoryRecord")    as? CKRecord
-        let items             = decoder.decodeObjectForKey("items")             as? [Item]
+        let name = decoder.decodeObjectForKey(key_name)                           as? String
+        let expanded          = decoder.decodeObjectForKey(key_expanded)          as? Bool
+        let displayHeader     = decoder.decodeObjectForKey(key_displayHeader)     as? Bool
+        let modificationDate  = decoder.decodeObjectForKey(key_modificationDate)  as? NSDate
+        let categoryReference = decoder.decodeObjectForKey(key_categoryReference) as? CKReference
+        let categoryRecord    = decoder.decodeObjectForKey(key_categoryRecord)    as? CKRecord
+        let items             = decoder.decodeObjectForKey(key_items)             as? [Item]
         
         self.init(name: name, expanded: expanded, displayHeader: displayHeader, modificationDate: modificationDate, categoryReference: categoryReference, categoryRecord: categoryRecord, items: items)
     }
@@ -1096,13 +1126,13 @@ class Category: ListObj, NSCoding
     {
         self.modificationDate = NSDate.init()
         
-        coder.encodeObject(self.name,              forKey: "name")
-        coder.encodeObject(self.expanded,          forKey: "expanded")
-        coder.encodeObject(self.displayHeader,     forKey: "displayHeader")
-        coder.encodeObject(self.modificationDate,  forKey: "modificationDate")
-        coder.encodeObject(self.categoryReference, forKey: "categoryReference")
-        coder.encodeObject(self.categoryRecord,    forKey: "categoryRecord")
-        coder.encodeObject(self.items,             forKey: "items")
+        coder.encodeObject(self.name,              forKey: key_name)
+        coder.encodeObject(self.expanded,          forKey: key_expanded)
+        coder.encodeObject(self.displayHeader,     forKey: key_displayHeader)
+        coder.encodeObject(self.modificationDate,  forKey: key_modificationDate)
+        coder.encodeObject(self.categoryReference, forKey: key_categoryReference)
+        coder.encodeObject(self.categoryRecord,    forKey: key_categoryRecord)
+        coder.encodeObject(self.items,             forKey: key_items)
     }
     
     // commits this category and its items to cloud storage
@@ -1135,11 +1165,11 @@ class Category: ListObj, NSCoding
     // commits just this category to cloud storage
     func saveRecord(categoryRecord: CKRecord, listReference: CKReference)
     {
-        categoryRecord.setObject(self.name,          forKey: "name")
-        categoryRecord.setObject(self.displayHeader, forKey: "displayHeader")
-        categoryRecord.setObject(self.expanded,      forKey: "expanded")
-        categoryRecord.setObject(listReference,      forKey: "owningList")
-        categoryRecord.setObject(self.order,         forKey: "order")
+        categoryRecord.setObject(self.name,          forKey: key_name)
+        categoryRecord.setObject(self.displayHeader, forKey: key_displayHeader)
+        categoryRecord.setObject(self.expanded,      forKey: key_expanded)
+        categoryRecord.setObject(listReference,      forKey: key_owningList)
+        categoryRecord.setObject(self.order,         forKey: key_order)
         
         // add this record to the batch record array for updating
         appDelegate.addToUpdateRecords(categoryRecord, obj: self)
@@ -1148,10 +1178,10 @@ class Category: ListObj, NSCoding
     // update this category from cloud storage
     func updateFromRecord(record: CKRecord)
     {
-        if let name          = record["name"]          { self.name          = name as! String }
-        if let expanded      = record["expanded"]      { self.expanded      = expanded as! Bool }
-        if let displayHeader = record["displayHeader"] { self.displayHeader = displayHeader as! Bool }
-        if let order         = record["order"]         { self.order         = order as! Int }
+        if let name          = record[key_name]          { self.name          = name as! String }
+        if let expanded      = record[key_expanded]      { self.expanded      = expanded as! Bool }
+        if let displayHeader = record[key_displayHeader] { self.displayHeader = displayHeader as! Bool }
+        if let order         = record[key_order]         { self.order         = order as! Int }
         
         self.categoryRecord = record
         self.categoryReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
@@ -1190,12 +1220,14 @@ class Category: ListObj, NSCoding
         var i = 0
         for item in items {
             item.order = i
-            item.itemIndex = ++i
+            i += 1
+            item.itemIndex = i
             item.categoryIndex = catIndex
         }
         
         addItem.categoryIndex = catIndex
-        addItem.itemIndex = ++i
+        i += 1
+        addItem.itemIndex = i
     }
     
     // category
@@ -1226,10 +1258,10 @@ class Category: ListObj, NSCoding
     }
     
     // returns the number of completed items in a category
-    func itemsComplete() -> Int   { var i=0; for item in items { if item.state == ItemState.Complete   { ++i } }; return i }
-    func itemsActive() -> Int     { var i=0; for item in items { if item.state != ItemState.Inactive   { ++i } }; return i }
-    func itemsInactive() -> Int   { var i=0; for item in items { if item.state == ItemState.Inactive   { ++i } }; return i }
-    func itemsIncomplete() -> Int { var i=0; for item in items { if item.state == ItemState.Incomplete { ++i } }; return i }
+    func itemsComplete() -> Int   { var i=0; for item in items { if item.state == ItemState.Complete   { i += 1 } }; return i }
+    func itemsActive() -> Int     { var i=0; for item in items { if item.state != ItemState.Inactive   { i += 1 } }; return i }
+    func itemsInactive() -> Int   { var i=0; for item in items { if item.state == ItemState.Inactive   { i += 1 } }; return i }
+    func itemsIncomplete() -> Int { var i=0; for item in items { if item.state == ItemState.Incomplete { i += 1 } }; return i }
     
 }
 
@@ -1295,14 +1327,14 @@ class Item: ListObj, NSCoding
     
     required convenience init?(coder decoder: NSCoder)
     {
-        let name         = decoder.decodeObjectForKey("name")         as? String
-        let note         = decoder.decodeObjectForKey("note")         as? String
-        let createdBy    = decoder.decodeObjectForKey("createdBy")    as? String
-        let createdDate  = decoder.decodeObjectForKey("createDate")   as? NSDate
-        let modifiedBy   = decoder.decodeObjectForKey("modifiedBy")   as? String
-        let modifiedDate = decoder.decodeObjectForKey("modifiedDate") as? NSDate
-        let itemRecord   = decoder.decodeObjectForKey("itemRecord")   as? CKRecord
-        let state        = decoder.decodeIntForKey("state")
+        let name         = decoder.decodeObjectForKey(key_name)         as? String
+        let note         = decoder.decodeObjectForKey(key_note)         as? String
+        let createdBy    = decoder.decodeObjectForKey(key_createdBy)    as? String
+        let createdDate  = decoder.decodeObjectForKey(key_createdDate)  as? NSDate
+        let modifiedBy   = decoder.decodeObjectForKey(key_modifiedBy)   as? String
+        let modifiedDate = decoder.decodeObjectForKey(key_modifiedDate) as? NSDate
+        let itemRecord   = decoder.decodeObjectForKey(key_itemRecord)   as? CKRecord
+        let state        = decoder.decodeIntForKey(key_state)
         let itemState    = state == 0 ? ItemState.Inactive : state == 1 ? ItemState.Incomplete : ItemState.Complete
         
         self.init(name: name, note: note, state: itemState, itemRecord: itemRecord, createdBy: createdBy, createdDate: createdDate, modifiedBy: modifiedBy, modifiedDate: modifiedDate)
@@ -1312,14 +1344,14 @@ class Item: ListObj, NSCoding
     {
         //self.modifiedDate = NSDate.init()
         
-        coder.encodeObject(self.name,            forKey: "name")
-        coder.encodeObject(self.note,            forKey: "note")
-        coder.encodeInteger(self.state.rawValue, forKey: "state")
-        coder.encodeObject(self.createdBy,       forKey: "createdBy")
-        coder.encodeObject(self.createdDate,     forKey: "createdDate")
-        coder.encodeObject(self.modifiedBy,      forKey: "modifiedBy")
-        coder.encodeObject(self.modifiedDate,    forKey: "modifiedDate")
-        coder.encodeObject(self.itemRecord,      forKey: "itemRecord")
+        coder.encodeObject(self.name,            forKey: key_name)
+        coder.encodeObject(self.note,            forKey: key_note)
+        coder.encodeInteger(self.state.rawValue, forKey: key_state)
+        coder.encodeObject(self.createdBy,       forKey: key_createdBy)
+        coder.encodeObject(self.createdDate,     forKey: key_createdDate)
+        coder.encodeObject(self.modifiedBy,      forKey: key_modifiedBy)
+        coder.encodeObject(self.modifiedDate,    forKey: key_modifiedDate)
+        coder.encodeObject(self.itemRecord,      forKey: key_itemRecord)
     }
     
     // commits this item change to cloud storage
@@ -1337,15 +1369,15 @@ class Item: ListObj, NSCoding
     // cloud storage method for this item
     func saveRecord(itemRecord: CKRecord, categoryReference: CKReference)
     {
-        itemRecord.setObject(self.name,           forKey: "name")
-        itemRecord.setObject(self.note,           forKey: "note")
-        itemRecord.setObject(self.state.rawValue, forKey: "state")
-        itemRecord.setObject(categoryReference,   forKey: "owningCategory")
-        itemRecord.setObject(self.order,          forKey: "order")
-        itemRecord.setObject(self.createdBy,      forKey: "createdBy")
-        itemRecord.setObject(self.createdDate,    forKey: "createdDate")
-        itemRecord.setObject(self.modifiedBy,     forKey: "modifiedBy")
-        itemRecord.setObject(self.modifiedDate,   forKey: "modifiedDate")
+        itemRecord.setObject(self.name,           forKey: key_name)
+        itemRecord.setObject(self.note,           forKey: key_note)
+        itemRecord.setObject(self.state.rawValue, forKey: key_state)
+        itemRecord.setObject(categoryReference,   forKey: key_owningCategory)
+        itemRecord.setObject(self.order,          forKey: key_order)
+        itemRecord.setObject(self.createdBy,      forKey: key_createdBy)
+        itemRecord.setObject(self.createdDate,    forKey: key_createdDate)
+        itemRecord.setObject(self.modifiedBy,     forKey: key_modifiedBy)
+        itemRecord.setObject(self.modifiedDate,   forKey: key_modifiedDate)
         
         // add this record to the batch record array for updating
         appDelegate.addToUpdateRecords(itemRecord, obj: self)
@@ -1359,13 +1391,13 @@ class Item: ListObj, NSCoding
         } else {
             self.state = ItemState.Incomplete
         }
-        if let name         = record["name"]         { self.name         = name as! String         }
-        if let note         = record["note"]         { self.note         = note as! String         }
-        if let order        = record["order"]        { self.order        = order as! Int           }
-        if let createdBy    = record["createdBy"]    { self.createdBy    = createdBy as! String    }
-        if let createdDate  = record["createdDate"]  { self.createdDate  = createdDate as! NSDate  }
-        if let modifiedBy   = record["modifiedBy"]   { self.modifiedBy   = modifiedBy as! String   }
-        if let modifiedDate = record["modifiedDate"] { self.modifiedDate = modifiedDate as! NSDate }
+        if let name         = record[key_name]         { self.name         = name as! String         }
+        if let note         = record[key_note]         { self.note         = note as! String         }
+        if let order        = record[key_order]        { self.order        = order as! Int           }
+        if let createdBy    = record[key_createdBy]    { self.createdBy    = createdBy as! String    }
+        if let createdDate  = record[key_createdDate]  { self.createdDate  = createdDate as! NSDate  }
+        if let modifiedBy   = record[key_modifiedBy]   { self.modifiedBy   = modifiedBy as! String   }
+        if let modifiedDate = record[key_modifiedDate] { self.modifiedDate = modifiedDate as! NSDate }
         
         // check date values after update from cloud record - reset if needed
         if self.modifiedDate.compare(NSDate.init(timeIntervalSince1970: NSTimeInterval.init())) == NSComparisonResult.OrderedSame {
@@ -1414,7 +1446,6 @@ class Item: ListObj, NSCoding
                 print("Delete Item Error for '\(self.name)': \(err.localizedDescription)")
             } else {
                 print("Success: Item record deleted successfully '\(self.name)'")
-                //self.appDelegate.updateTimestamps(true)
             }
         })
     }
@@ -1562,7 +1593,7 @@ extension UIColor
 
 func getListFromReference(categoryRecord: CKRecord) -> List?
 {
-    if let listReference = categoryRecord["owningList"] as? CKReference {
+    if let listReference = categoryRecord[key_owningList] as? CKReference {
         return appDelegate.getLocalList(listReference.recordID.recordName)
     }
     
@@ -1571,7 +1602,7 @@ func getListFromReference(categoryRecord: CKRecord) -> List?
 
 func getCategoryFromReference(itemRecord: CKRecord) -> Category?
 {
-    if let categoryReference = itemRecord["owningCategory"] as? CKReference {
+    if let categoryReference = itemRecord[key_owningCategory] as? CKReference {
         return appDelegate.getLocalCategory(categoryReference.recordID.recordName)
     }
     

@@ -1,6 +1,6 @@
 //
 //  ItemDetailTransitioningDelegate.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 2/6/16.
 //  Copyright © 2016 Steven Gentry. All rights reserved.

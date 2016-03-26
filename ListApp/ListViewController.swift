@@ -1,6 +1,6 @@
 //
 //  ListViewController.swift
-//  ListApp
+//  EnList
 //
 //  Created by Steven Gentry on 12/30/15.
 //  Copyright © 2015 Steven Gentry. All rights reserved.
@@ -56,8 +56,16 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         //self.navigationItem.rightBarButtonItem = self.editButtonItem()
         
         // set up long press gesture recognizer for the cell move functionality
-        longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: "longPressAction:")
+        longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(ListViewController.longPressAction(_:)))
         self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
+        
+        // info button
+        let infoButton: UIButton = UIButton(type: UIButtonType.InfoLight)
+        infoButton.addTarget(self, action: #selector(ListViewController.infoButtonTapped), forControlEvents: .TouchUpInside)
+        let rightBarButton = UIBarButtonItem()
+        rightBarButton.customView = infoButton
+        self.navigationItem.rightBarButtonItem = rightBarButton
+
         
         // this is to suppress the extra cell separators in the table view
         self.tableView.tableFooterView = UIView()
@@ -130,7 +138,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             
             cell.listName.userInteractionEnabled = false
             cell.listName.delegate = self
-            cell.listName.addTarget(self, action: "listNameDidChange:", forControlEvents: UIControlEvents.EditingChanged)
+            cell.listName.addTarget(self, action: #selector(ListViewController.listNameDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
             cell.listName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
             cell.listName.text = list.name
             cell.listName.tag = indexPath.row
@@ -144,12 +152,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             }
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
-            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellSingleTapAction:")
+            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ListViewController.cellSingleTapAction(_:)))
             singleTapGestureRecognizer.numberOfTapsRequired = 1
             cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
             
             // set up double tap gesture recognizer in item cell to enable cell moving
-            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: "cellDoubleTapAction:")
+            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ListViewController.cellDoubleTapAction(_:)))
             doubleTapGestureRecognizer.numberOfTapsRequired = 2
             singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
             cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
@@ -412,14 +420,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         if touchLocation.y > (tableView.bounds.height - kScrollZoneHeight) {
             // need to scroll down
             if displayLink == nil {
-                displayLink = CADisplayLink(target: self, selector: Selector("scrollDownLoop"))
+                displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
                 displayLink!.frameInterval = 1
                 displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
-                displayLink = CADisplayLink(target: self, selector: Selector("scrollUpLoop"))
+                displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
                 displayLink!.frameInterval = 1
                 displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
             }
@@ -509,8 +517,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // clean up after a long press gesture
-    func longPressEnded(var indexPath: NSIndexPath?, location: CGPoint)
+    func longPressEnded(idxPath: NSIndexPath?, location: CGPoint)
     {
+        var indexPath = idxPath
         longPressActive = false
         
         // cancel any scroll loop
@@ -579,7 +588,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // need to reset the list order values
         var i = -1
         for list in lists {
-            list.order = ++i
+            i += 1
+            list.order = i
         }
         
         // and save data changes locally and to the cloud
@@ -629,6 +639,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 //  MARK: - Delete methods
 //
 ////////////////////////////////////////////////////////////////
+    
+    // presents the about window
+    func infoButtonTapped() {
+        let aboutVC = AboutViewController()
+        presentViewController(aboutVC, animated: true, completion: nil)
+    }
     
     func confirmDelete(listName: String)
     {
@@ -701,7 +717,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 list.order = i
                 let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
                 cell?.backgroundColor = UIColor.whiteColor()
-                ++i
+                i += 1
             }
             
             // then select the current cell
