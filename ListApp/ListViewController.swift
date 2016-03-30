@@ -815,6 +815,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     func generateTutorial()
     {
+        // do we already have a tutorial loaded?
+        for list in lists {
+            if list.isTutorialList {
+                return
+            }
+        }
+        
         // list1
         let tutorial = List(name: "Tutorial", createRecord: true)
         tutorial.isTutorialList = true
@@ -897,7 +904,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.note = "...use the Notification Settings button"
         
         // All done...
-        let cat7 = tutorial.addCategory("All done...!!!", displayHeader: true, updateIndices: false, createRecord: true)
+        let cat7 = tutorial.addCategory("All done!!", displayHeader: true, updateIndices: false, createRecord: true)
         item = tutorial.addItem(cat7, name: "You can delete this turorial...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         item!.note = "...from the Lists view at any time"
         item = tutorial.addItem(cat7, name: "You can add it again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)

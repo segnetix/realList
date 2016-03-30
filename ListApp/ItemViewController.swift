@@ -1137,7 +1137,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             self.title = list!.name
             tableView.reloadData()
         } else {
-            self.title = NSLocalizedString("Items", comment: "Items - the view controller title for and empty list of items.")
+            self.title = NSLocalizedString("Items", comment: "Items - the view controller title for an empty list of items.")
             tableView.reloadData()
         }
     }

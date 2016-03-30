@@ -547,7 +547,7 @@
                         <constraint firstAttribute="height" constant="30" id="PNO-D5-iyS"/>
                     </constraints>
                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                    <state key="normal" title="Add Tutorial"/>
+                    <state key="normal" title="Tutorial"/>
                     <variation key="default">
                         <mask key="constraints">
                             <exclude reference="2lT-aD-bcm"/>

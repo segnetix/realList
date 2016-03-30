@@ -71,7 +71,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
         } else {
             listViewController!.generateTutorial()
-            listViewController!.selectionIndex = 0
+            listViewController!.selectList(0)
         }
         
         print("iCloudIsAvailable: \(self.iCloudIsAvailable())")
