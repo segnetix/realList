@@ -2,17 +2,17 @@
   "images" : [
     {
       "idiom" : "universal",
-      "filename" : "Show Completed_44.png",
+      "filename" : "ShowCompleted_eye_44.png",
       "scale" : "1x"
     },
     {
       "idiom" : "universal",
-      "filename" : "Show Completed_88.png",
+      "filename" : "ShowCompleted_eye_88.png",
       "scale" : "2x"
     },
     {
       "idiom" : "universal",
-      "filename" : "Show Completed_132.png",
+      "filename" : "ShowCompleted_eye_132.png",
       "scale" : "3x"
     }
   ],

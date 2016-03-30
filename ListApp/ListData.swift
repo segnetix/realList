@@ -80,6 +80,7 @@ class List: NSObject, NSCoding
     var order: Int = 0 { didSet { if order != oldValue { needToSave = true } } }
     var showCompletedItems:  Bool = true { didSet { self.updateIndices(); needToSave = true } }
     var showInactiveItems:   Bool = true { didSet { self.updateIndices(); needToSave = true } }
+    var isTutorialList = false
     
     var expandAllCategories: Bool = true {
         didSet {
@@ -160,6 +161,11 @@ class List: NSObject, NSCoding
     // commits this list and its categories to cloud storage
     func saveToCloud()
     {
+        // don't save the tutorial to the cloud
+        if self.isTutorialList {
+            return
+        }
+        
         if let database = appDelegate.privateDatabase
         {
             if listRecord != nil
@@ -434,17 +440,26 @@ class List: NSObject, NSCoding
                         // delete the category and its items from cloud storage
                         category.deleteFromCloud()
                         
-                        // remove the category and its items from the list
+                        // add paths of category, add item row, and items
                         removedPaths = displayIndexPathsForCategoryFromIndexPath(indexPath, includeCategoryAndAddItemIndexPaths: true)
+                        
+                        // remove the category and its items from the list
                         self.categories.removeAtIndex(catIndex)
                     } else {
                         // we are deleting the only category which has become visible
-                        // so instead delete just the items and set the category.displayHeader to false
-                        category.displayHeader = false
-                        category.deleteCategoryItems()
+                        // so instead only delete the items and set the category.displayHeader to false
+                        // leaving the 'new item' row in place with a hidden category header
+                        category.deleteCategoryItemsFromCloudStorage()
                         
+                        // add paths of items
                         removedPaths = displayIndexPathsForCategoryFromIndexPath(indexPath, includeCategoryAndAddItemIndexPaths: false)
-                        self.categories.removeAtIndex(catIndex)
+                        
+                        // add path of category itself because we are going to hide it
+                        removedPaths.append(indexPath)
+                        category.displayHeader = false
+                        
+                        // remove the items from the category
+                        category.deleteItems()
                     }
                 }
             }
@@ -1205,11 +1220,17 @@ class Category: ListObj, NSCoding
         })
     }
 
-    func deleteCategoryItems() {
+    func deleteCategoryItemsFromCloudStorage()
+    {
         for item in items {
             item.needToDelete = true
         }
         appDelegate.saveListData(true)
+    }
+    
+    func deleteItems()
+    {
+        items.removeAll(keepCapacity: true)
     }
     
     // updates the indices for all items in this category

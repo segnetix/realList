@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="U9r-Jc-lyd">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="U9r-Jc-lyd">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -137,29 +137,24 @@
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="59"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9Rm-EG-YMt">
-                                                    <rect key="frame" x="8" y="8" width="584" height="43"/>
-                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                    <color key="tintColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                                    <state key="normal" title="new item">
-                                                        <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                                    </state>
-                                                    <connections>
-                                                        <action selector="addItemButtonTapped:" destination="qcG-gI-ddh" eventType="touchUpInside" id="ZDp-G3-DQq"/>
-                                                    </connections>
-                                                </button>
+                                                <view contentMode="scaleAspectFit" translatesAutoresizingMaskIntoConstraints="NO" id="nDH-Jk-d7y" userLabel="AddItemButton" customClass="AddButton" customModule="EnList" customModuleProvider="target">
+                                                    <rect key="frame" x="-1" y="0.0" width="64" height="40"/>
+                                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="width" constant="64" id="Aai-L7-rYA"/>
+                                                        <constraint firstAttribute="height" constant="40" id="aI3-69-oiJ"/>
+                                                    </constraints>
+                                                </view>
                                             </subviews>
                                             <constraints>
-                                                <constraint firstItem="9Rm-EG-YMt" firstAttribute="trailing" secondItem="gu9-8t-wra" secondAttribute="trailingMargin" id="34r-d0-POi"/>
-                                                <constraint firstItem="9Rm-EG-YMt" firstAttribute="top" secondItem="gu9-8t-wra" secondAttribute="topMargin" id="4oF-l7-D6P"/>
-                                                <constraint firstItem="9Rm-EG-YMt" firstAttribute="leading" secondItem="gu9-8t-wra" secondAttribute="leadingMargin" id="m88-Yx-uE8"/>
-                                                <constraint firstAttribute="bottomMargin" secondItem="9Rm-EG-YMt" secondAttribute="bottom" id="u87-Nm-BBK"/>
+                                                <constraint firstItem="nDH-Jk-d7y" firstAttribute="leading" secondItem="gu9-8t-wra" secondAttribute="leading" constant="-1" id="9di-s4-IVb"/>
+                                                <constraint firstItem="nDH-Jk-d7y" firstAttribute="top" secondItem="gu9-8t-wra" secondAttribute="top" id="G0c-sy-u2L"/>
                                             </constraints>
                                         </tableViewCellContentView>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <inset key="separatorInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                         <connections>
-                                            <outlet property="addItemButton" destination="9Rm-EG-YMt" id="JT4-qz-qQQ"/>
+                                            <outlet property="addItemButton" destination="nDH-Jk-d7y" id="O6a-j0-MaL"/>
                                         </connections>
                                     </tableViewCell>
                                 </prototypes>
@@ -181,6 +176,15 @@
                                         <exclude reference="hgg-v9-KU9"/>
                                         <exclude reference="min-iT-npo"/>
                                     </mask>
+                                </variation>
+                                <variation key="widthClass=compact" misplaced="YES">
+                                    <rect key="frame" x="0.0" y="534" width="400" height="66"/>
+                                </variation>
+                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
+                                    <rect key="frame" x="0.0" y="734" width="400" height="66"/>
+                                </variation>
+                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="0.0" y="734" width="800" height="66"/>
                                 </variation>
                             </adBannerView>
                         </subviews>
@@ -270,31 +274,29 @@
                                     <rect key="frame" x="0.0" y="0.0" width="600" height="59"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kcl-ny-7ll">
-                                            <rect key="frame" x="8" y="8" width="584" height="43"/>
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Add" translatesAutoresizingMaskIntoConstraints="NO" id="ef6-Iu-1ed">
+                                            <rect key="frame" x="20" y="14" width="32" height="32"/>
                                             <constraints>
-                                                <constraint firstAttribute="width" constant="46" id="wNh-dT-f0i"/>
+                                                <constraint firstAttribute="height" constant="32" id="F3w-ak-2p3"/>
+                                                <constraint firstAttribute="width" constant="32" id="Oxq-hw-dvI"/>
                                             </constraints>
-                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            <color key="tintColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            <state key="normal" title="new list">
-                                                <color key="titleColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                            </state>
-                                            <variation key="default">
-                                                <mask key="constraints">
-                                                    <exclude reference="wNh-dT-f0i"/>
-                                                </mask>
-                                            </variation>
+                                        </imageView>
+                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Dfd-kT-iJO" userLabel="AddListButton">
+                                            <rect key="frame" x="0.0" y="10" width="64" height="40"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="64" id="Pot-gk-X2Y"/>
+                                                <constraint firstAttribute="height" constant="40" id="S4Y-x5-tza"/>
+                                            </constraints>
                                             <connections>
-                                                <action selector="addListButtonTapped:" destination="YAY-IK-bg0" eventType="touchUpInside" id="hGQ-gG-c9B"/>
+                                                <action selector="addListButtonTapped:" destination="YAY-IK-bg0" eventType="touchUpInside" id="ScB-sp-Ssu"/>
                                             </connections>
                                         </button>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="Kcl-ny-7ll" firstAttribute="top" secondItem="LRg-Ey-VjT" secondAttribute="topMargin" id="D3a-t1-GzQ"/>
-                                        <constraint firstAttribute="bottomMargin" secondItem="Kcl-ny-7ll" secondAttribute="bottom" id="FZA-uJ-agP"/>
-                                        <constraint firstAttribute="trailingMargin" secondItem="Kcl-ny-7ll" secondAttribute="trailing" id="Ii1-aI-Ieg"/>
-                                        <constraint firstItem="Kcl-ny-7ll" firstAttribute="leading" secondItem="LRg-Ey-VjT" secondAttribute="leadingMargin" id="ZE1-m6-jpl"/>
+                                        <constraint firstItem="Dfd-kT-iJO" firstAttribute="leading" secondItem="LRg-Ey-VjT" secondAttribute="leading" id="8LX-n0-34d"/>
+                                        <constraint firstItem="Dfd-kT-iJO" firstAttribute="centerY" secondItem="LRg-Ey-VjT" secondAttribute="centerY" id="8X9-KA-7MB"/>
+                                        <constraint firstItem="ef6-Iu-1ed" firstAttribute="centerY" secondItem="LRg-Ey-VjT" secondAttribute="centerY" id="NIE-BB-FEy"/>
+                                        <constraint firstItem="ef6-Iu-1ed" firstAttribute="leading" secondItem="LRg-Ey-VjT" secondAttribute="leading" constant="20" id="cKe-cm-lnv"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -360,4 +362,7 @@
             <point key="canvasLocation" x="274" y="615"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="Add" width="32" height="32"/>
+    </resources>
 </document>

@@ -13,6 +13,9 @@ class AboutViewController: UIViewController
     @IBOutlet weak var versionLabel: UILabel!
     @IBOutlet weak var iCloudLabel: UILabel!
     
+    var listVC: ListViewController?
+    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    
     override func viewDidLoad()
     {
         super.viewDidLoad()
@@ -22,13 +25,11 @@ class AboutViewController: UIViewController
             versionLabel.text = "v" + text
         }
         
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         if appDelegate.iCloudIsAvailable() {
             iCloudLabel.text = "YES"
         } else {
             iCloudLabel.text = "NO"
         }
-        
     }
 
     override func didReceiveMemoryWarning()
@@ -53,6 +54,15 @@ class AboutViewController: UIViewController
         if let appSettings = NSURL(string: UIApplicationOpenSettingsURLString) {
             UIApplication.sharedApplication().openURL(appSettings)
         }
+    }
+    
+    @IBAction func addTutorial(sender: AnyObject)
+    {
+        if let listVC = listVC {
+            listVC.generateTutorial()
+        }
+        
+        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
     @IBAction func close(sender: UIButton)

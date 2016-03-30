@@ -56,6 +56,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     var editingNewItemName = false
     var editingNewCategoryName = false
     var showAdBanner = true
+    var tempCollapsedCategoryIsMoving = false
     let settingsTransitionDelegate = SettingsTransitioningDelegate()
     let itemDetailTransitionDelegate = ItemDetailTransitioningDelegate()
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -101,6 +102,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         // settingsVC
         modalPresentationStyle = UIModalPresentationStyle.Custom
+        
+        // this is to suppress the extra cell separators in the table view
+        self.tableView.tableFooterView = UIView()
         
         // set up keyboard show/hide notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
@@ -280,8 +284,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             cell.separatorInset = UIEdgeInsetsZero
             cell.layoutMargins = UIEdgeInsetsZero
             
-            // set up cell tag for later id
-            cell.addItemButton.tag = tag
+            // set up add item button
+            cell.addItemButton.addButtonInit(list, itemVC: self, tag: tag)
             
             return cell
         }
@@ -788,6 +792,17 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         let obj = list.objectForIndexPath(indexPath)
         
+        // can we collapse the category here?
+        if obj is Category {
+            let cat = obj as! Category
+            
+            if cat.expanded {
+                tempCollapsedCategoryIsMoving = true
+                cat.expanded = false
+                handleCategoryCollapseExpand(cat)
+            }
+        }
+        
         if obj is Item || obj is Category {
             var center = cell.center
             snapshot?.center = center
@@ -958,6 +973,13 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                         list.insertCategory(srcCategory, atIndex: dstCategoryIndex)
                         
                         tableView.endUpdates()
+                    }
+                    
+                    // restore a temp collapsed category
+                    if tempCollapsedCategoryIsMoving {
+                        srcCategory.expanded = true
+                        handleCategoryCollapseExpand(srcCategory)
+                        tempCollapsedCategoryIsMoving = false
                     }
                 }
             }

@@ -39,7 +39,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     var displayLink: CADisplayLink? = nil
     var scrollLoopCount = 0     // debugging var
     var longPressActive = false    
-    var selectionIndex = -1
+    var selectionIndex = 0
     var editingNewListName = false
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
@@ -59,20 +59,26 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(ListViewController.longPressAction(_:)))
         self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
         
+        /*
         // info button
-        let infoButton: UIButton = UIButton(type: UIButtonType.InfoLight)
+        let infoButton: UIButton = UIButton(type: UIButtonType.Custom)
+        infoButton.setImage(UIImage(named: "EnListIcon"), forState: .Normal)
         infoButton.addTarget(self, action: #selector(ListViewController.infoButtonTapped), forControlEvents: .TouchUpInside)
         let rightBarButton = UIBarButtonItem()
         rightBarButton.customView = infoButton
         self.navigationItem.rightBarButtonItem = rightBarButton
-
+        */
+        
+        // about button
+        let button: UIButton = UIButton(type: UIButtonType.Custom)
+        button.setImage(UIImage(named: "EnListIcon"), forState: UIControlState.Normal)
+        button.addTarget(self, action: #selector(ListViewController.infoButtonTapped), forControlEvents: UIControlEvents.TouchUpInside)
+        button.frame = CGRectMake(0, 0, 32, 32)
+        let barButton = UIBarButtonItem(customView: button)
+        self.navigationItem.leftBarButtonItem = barButton
         
         // this is to suppress the extra cell separators in the table view
         self.tableView.tableFooterView = UIView()
-        
-        // selectionIndex can be set by the AppDelegate with an initial list selection on app start (from saved state)
-        self.selectList(selectionIndex)
-        
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -85,7 +91,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         //navigationController?.hidesBarsOnTap = true
         //navigationController?.hidesBarsWhenKeyboardAppears = true
         
-
+        //print("*** List view did appear...")
+        //self.tableView.reloadData()
+        
+        // selectionIndex can be set by the AppDelegate with an initial list selection on app start (from saved state)
+        self.selectList(selectionIndex)
     }
     
     override func didReceiveMemoryWarning() {
@@ -96,9 +106,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     required init(coder aDecoder: NSCoder)
     {
         super.init(coder: aDecoder)!
-        
-        // adds temp test items
-        //addTestItems()
     }
     
 ////////////////////////////////////////////////////////////////
@@ -641,8 +648,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 ////////////////////////////////////////////////////////////////
     
     // presents the about window
-    func infoButtonTapped() {
+    func infoButtonTapped()
+    {
         let aboutVC = AboutViewController()
+        aboutVC.listVC = self
         presentViewController(aboutVC, animated: true, completion: nil)
     }
     
@@ -803,6 +812,100 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
 ////////////////////////////////////////////////////////////////
+    
+    func generateTutorial()
+    {
+        // list1
+        let tutorial = List(name: "Tutorial", createRecord: true)
+        tutorial.isTutorialList = true
+        lists.append(tutorial)
+        var item: Item?
+        
+        // Getting started...
+        let cat1 = tutorial.addCategory("Getting started...", displayHeader: true, updateIndices: false, createRecord: true)
+        item = tutorial.addItem(cat1, name: "Things to know about EnList...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...check them off as you learn them!"
+        item = tutorial.addItem(cat1, name: "Make a new list item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...tap the item add button below"
+        
+        // Item actions...
+        let cat2 = tutorial.addCategory("Item actions...", displayHeader: true, updateIndices: false, createRecord: true)
+        item = tutorial.addItem(cat2, name: "Single tap an item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to add a note like this"
+        item = tutorial.addItem(cat2, name: "Double tap an item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to edit the item name"
+        item = tutorial.addItem(cat2, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to delete an item"
+        item = tutorial.addItem(cat2, name: "Tap the check box...", state: ItemState.Complete, updateIndices: false, createRecord: true)
+        item!.note = "...to mark the tiem as completed"
+        item = tutorial.addItem(cat2, name: "Tap again...", state: ItemState.Inactive, updateIndices: false, createRecord: true)
+        item!.note = "...to mark it as inactive"
+        item = tutorial.addItem(cat2, name: "Tap again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to mark it as active"
+        item!.state = ItemState.Incomplete
+        item = tutorial.addItem(cat2, name: "Press, hold and drag...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to move an item"
+        
+        // Category actions...
+        let cat3 = tutorial.addCategory("Category actions...", displayHeader: true, updateIndices: false, createRecord: true)
+        item = tutorial.addItem(cat3, name: "Create a new category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...tap the settings icon (upper right) and then tap the icon with the green plus to make a new category."
+        item = tutorial.addItem(cat3, name: "Single tap a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to collapse all the items in that category"
+        item = tutorial.addItem(cat3, name: "Single tap it again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to expand it"
+        item = tutorial.addItem(cat3, name: "Double tap a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to edit its name"
+        item = tutorial.addItem(cat3, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to delete a category"
+        item = tutorial.addItem(cat3, name: "Press, hold and drag a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to move it"
+        
+        // List actions...
+        let cat4 = tutorial.addCategory("List actions...", displayHeader: true, updateIndices: false, createRecord: true)
+        item = tutorial.addItem(cat4, name: "Tap the 'Lists' button above...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...to go back to the lists view"
+        item = tutorial.addItem(cat4, name: "Create a new list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...with the list add button"
+        
+        // Settings actions...
+        let cat5 = tutorial.addCategory("Settings actions...", displayHeader: true, updateIndices: false, createRecord: true)
+        item = tutorial.addItem(cat5, name: "The settings buttons let you...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...collapse and expand all categories..."
+        item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...create new categories..."
+        item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...control what items are shown..."
+        item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...set all items to active or inactive..."
+        item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...change the color of your list..."
+        item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...print or email your list (with or without notes)"
+        
+        // Synchronize devices...
+        let cat6 = tutorial.addCategory("Synchronize devices...", displayHeader: true, updateIndices: false, createRecord: true)
+        item = tutorial.addItem(cat6, name: "EnList can synchronize lists...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...between all your iOS devices"
+        item = tutorial.addItem(cat6, name: "1. Go to the About view", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "Access from the EnList icon at the top of the List view"
+        item = tutorial.addItem(cat6, name: "2. Check if iCloud is enabled...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...if it says No, then go to the next step..."
+        item = tutorial.addItem(cat6, name: "3. Turn on iCloud drive...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "... use the iCloud Settings button..."
+        item = tutorial.addItem(cat6, name: "4. Enable notifications...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...use the Notification Settings button"
+        
+        // All done...
+        let cat7 = tutorial.addCategory("All done...!!!", displayHeader: true, updateIndices: false, createRecord: true)
+        item = tutorial.addItem(cat7, name: "You can delete this turorial...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...from the Lists view at any time"
+        item = tutorial.addItem(cat7, name: "You can add it again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        item!.note = "...from the About view if you wish"
+        
+        tutorial.updateIndices()
+        self.tableView.reloadData()
+    }
     
     func addTestItems()
     {

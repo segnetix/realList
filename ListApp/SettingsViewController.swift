@@ -277,51 +277,43 @@ class SettingsViewController: UIViewController
         view.addSubview(containerView)
         
         newCategoryButton.translatesAutoresizingMaskIntoConstraints = false
-        //newCategoryButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         newCategoryButton.setImage(UIImage(named: "New Category"), forState: .Normal)
         newCategoryButton.addTarget(self, action: #selector(SettingsViewController.newCategory(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(newCategoryButton)
         
         collapseAllCategoriesButton.translatesAutoresizingMaskIntoConstraints = false
-        //collapseAllCategoriesButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         collapseAllCategoriesButton.setImage(UIImage(named: "Collapsed Categories"), forState: .Normal)
         collapseAllCategoriesButton.addTarget(self, action: #selector(SettingsViewController.collapseAllCategories(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(collapseAllCategoriesButton)
         
         expandAllCategoriesButton.translatesAutoresizingMaskIntoConstraints = false
-        //expandAllCategoriesButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         expandAllCategoriesButton.setImage(UIImage(named: "Expanded Categories"), forState: .Normal)
         expandAllCategoriesButton.addTarget(self, action: #selector(SettingsViewController.expandAllCategories(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(expandAllCategoriesButton)
         
         showHideCompletedButton.translatesAutoresizingMaskIntoConstraints = false
-        //showHideCompletedButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         showHideCompletedButton.setImage(UIImage(named: "Show Completed"), forState: .Normal)
         showHideCompletedButton.addTarget(self, action: #selector(SettingsViewController.showHideCompletedItems(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         showCompletedItems = itemVC != nil && itemVC!.list != nil ? itemVC!.list!.showCompletedItems : true
         containerView.addSubview(showHideCompletedButton)
         
         showHideInactiveButton.translatesAutoresizingMaskIntoConstraints = false
-        //showHideInactiveButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         showHideInactiveButton.setImage(UIImage(named: "Show Inactive"), forState: .Normal)
         showHideInactiveButton.addTarget(self, action: #selector(SettingsViewController.showHideInactiveItems(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         showInactiveItems = itemVC != nil && itemVC!.list != nil ? itemVC!.list!.showInactiveItems : true
         containerView.addSubview(showHideInactiveButton)
         
         setAllItemsIncompleteButton.translatesAutoresizingMaskIntoConstraints = false
-        //setAllItemsIncompleteButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         setAllItemsIncompleteButton.setImage(UIImage(named: "Set Incomplete"), forState: .Normal)
         setAllItemsIncompleteButton.addTarget(self, action: #selector(SettingsViewController.setAllItemsIncomplete(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(setAllItemsIncompleteButton)
         
         setAllItemsInactiveButton.translatesAutoresizingMaskIntoConstraints = false
-        //setAllItemsInactiveButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         setAllItemsInactiveButton.setImage(UIImage(named: "Set Inactive"), forState: .Normal)
         setAllItemsInactiveButton.addTarget(self, action: #selector(SettingsViewController.setAllItemsInactive(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(setAllItemsInactiveButton)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        //closeButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         closeButton.setImage(UIImage(named: "Close Window"), forState: .Normal)
         closeButton.addTarget(self, action: #selector(SettingsViewController.close), forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(closeButton)
@@ -333,23 +325,19 @@ class SettingsViewController: UIViewController
             noteButton.setImage(UIImage(named: "Notes Off"), forState: .Normal)
         }
         noteButton.addTarget(self, action: #selector(SettingsViewController.noteButtonChanged), forControlEvents: .TouchUpInside)
-        //noteButton.transform = CGAffineTransformMakeScale(0.85, 0.85)
         containerView.addSubview(noteButton)
         
         vertLineImage.translatesAutoresizingMaskIntoConstraints = false
-        //vertLineImage.transform = CGAffineTransformMakeScale(0.75, 0.75)
         vertLineImage.image = UIImage(named: "Vert Dash Line")
         containerView.addSubview(vertLineImage)
         
         printButton.translatesAutoresizingMaskIntoConstraints = false
-        //printButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
         printButton.setImage(UIImage(named: "Print"), forState: .Normal)
         printButton.addTarget(self, action: #selector(SettingsViewController.print), forControlEvents: UIControlEvents.TouchUpInside)
         printButton.enabled = UIPrintInteractionController.isPrintingAvailable()
         containerView.addSubview(printButton)
         
         emailButton.translatesAutoresizingMaskIntoConstraints = false
-        //emailButton.transform = CGAffineTransformMakeScale(0.75, 0.75)
         emailButton.setImage(UIImage(named: "Email"), forState: .Normal)
         emailButton.addTarget(self, action: #selector(SettingsViewController.email), forControlEvents: UIControlEvents.TouchUpInside)
         emailButton.enabled = UIPrintInteractionController.isPrintingAvailable()

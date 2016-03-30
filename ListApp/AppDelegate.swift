@@ -59,19 +59,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // restore the list data from local storage
         if let archivedListData = NSKeyedUnarchiver.unarchiveObjectWithFile(ArchiveURL.path!) as? [List] {
             listViewController!.lists = archivedListData
+            
+            // restore the selected list
+            if let initialListIndex = NSUserDefaults.standardUserDefaults().objectForKey("selectionIndex") as? Int {
+                if initialListIndex >= 0 && initialListIndex < listViewController!.lists.count {
+                    itemViewController!.list = listViewController!.lists[initialListIndex]
+                    listViewController!.selectionIndex = initialListIndex
+                } else {
+                    listViewController!.selectionIndex = -1
+                }
+            }
+        } else {
+            listViewController!.generateTutorial()
+            listViewController!.selectionIndex = 0
         }
         
         print("iCloudIsAvailable: \(self.iCloudIsAvailable())")
-        
-        // restore the selected list
-        if let initialListIndex = NSUserDefaults.standardUserDefaults().objectForKey("selectionIndex") as? Int {
-            if initialListIndex >= 0 && initialListIndex < listViewController!.lists.count {
-                itemViewController!.list = listViewController!.lists[initialListIndex]
-                listViewController!.selectionIndex = initialListIndex
-            } else {
-                listViewController!.selectionIndex = -1
-            }
-        }
         
         if let printNotes = NSUserDefaults.standardUserDefaults().objectForKey("printNotes") as? Bool {
             self.printNotes = printNotes

@@ -13,6 +13,7 @@
 		B03C467D1C66F34D00B66CBD /* ItemDetailPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */; };
 		B03C467F1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */; };
 		B03C46811C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */; };
+		B06836A21CAB1A7200422742 /* AddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06836A11CAB1A7200422742 /* AddButton.swift */; };
 		B07828981C36000B009D356F /* ListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07828971C36000B009D356F /* ListCell.swift */; };
 		B078289A1C360020009D356F /* ItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07828991C360020009D356F /* ItemCell.swift */; };
 		B07AB8A21C6BCF99001F8F81 /* CheckBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */; };
@@ -102,6 +103,7 @@
 		B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailPresentationController.swift; path = ../ItemDetailPresentationController.swift; sourceTree = "<group>"; };
 		B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailTransitioningDelegate.swift; path = ../ItemDetailTransitioningDelegate.swift; sourceTree = "<group>"; };
 		B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemDetailAnimatedTransitioning.swift; sourceTree = "<group>"; };
+		B06836A11CAB1A7200422742 /* AddButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AddButton.swift; path = ../AddButton.swift; sourceTree = "<group>"; };
 		B07828971C36000B009D356F /* ListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListCell.swift; sourceTree = "<group>"; };
 		B07828991C360020009D356F /* ItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemCell.swift; sourceTree = "<group>"; };
 		B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckBox.swift; sourceTree = "<group>"; };
@@ -174,6 +176,7 @@
 				B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */,
 				B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */,
 				B0FF8C361C4AE58900C0A33C /* AddListCell.swift */,
+				B06836A11CAB1A7200422742 /* AddButton.swift */,
 				B07828991C360020009D356F /* ItemCell.swift */,
 				B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */,
 				B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */,
@@ -320,6 +323,7 @@
 				B07828981C36000B009D356F /* ListCell.swift in Sources */,
 				B078289A1C360020009D356F /* ItemCell.swift in Sources */,
 				B0FF8C351C4AE2B000C0A33C /* AddItemCell.swift in Sources */,
+				B06836A21CAB1A7200422742 /* AddButton.swift in Sources */,
 				B0A3027E1C34A1C800F6FB44 /* ListViewController.swift in Sources */,
 				B0930D6C1C652DE9007EBAA0 /* SettingsPresentationController.swift in Sources */,
 				B0A302801C34A31C00F6FB44 /* ItemViewController.swift in Sources */,
