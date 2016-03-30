@@ -399,12 +399,24 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         // scroll the editing cell into view if necessary
         if obj != nil {
-            let indexPath = list.displayIndexPathForObj(obj!).indexPath
+            let category = list.categoryForObj(obj!)
             
-            if indexPath != nil {
-                if self.tableView.indexPathsForVisibleRows?.contains(indexPath!) == false
-                {
-                    tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Bottom, animated: false)
+            if let category = category {
+                let indexPath = list.displayIndexPathForAddItemInCategory(category)
+                
+                if indexPath != nil {
+                    print("*** addItem indexPath row is \(indexPath!.row)")
+                    let delay = 0.1 * Double(NSEC_PER_SEC)
+                    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
+                    
+                    dispatch_after(time, dispatch_get_main_queue(), {
+                        if self.tableView.indexPathsForVisibleRows?.contains(indexPath!) == false {
+                            print("*** addItem is not visible...")
+                            self.tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Bottom, animated: false)
+                        } else {
+                            print("*** addItem is visible...")
+                        }
+                    })
                 }
             }
         }
@@ -477,7 +489,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         list.updateObjNameAtTag(textField.tag, name: newName)
     }
     
-    @IBAction func addItemButtonTapped(sender: UIButton)
+    func addItemButtonTapped(sender: UIButton)
     {
         // create a new item and append to the category of the add button
         let category = list.categoryForTag(sender.tag)
@@ -553,7 +565,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         print("collapseAllCategories")
         
         for category in list.categories {
-            if category.expanded == true {
+            if category.expanded == true && category.displayHeader == true {
                 category.expanded = false
                 handleCategoryCollapseExpand(category)
             }
@@ -1082,6 +1094,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         self.presentViewController(alert, animated: true, completion: nil)
     }
     
+    // deletes an item or a category and all of the items in it
     func handleDeleteItem(alertAction: UIAlertAction!) -> Void
     {
         if let indexPath = deleteItemIndexPath, currentList = list
@@ -1094,6 +1107,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             
             let deleteObj = currentList.objectForIndexPath(indexPath)
             
+            // cloud delete
             if deleteObj is Category {
                 preserveCat = false
                 let cat = deleteObj as! Category

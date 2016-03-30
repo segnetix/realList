@@ -823,7 +823,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
         
         // list1
-        let tutorial = List(name: "Tutorial", createRecord: true)
+        let tutorial = List(name: "EnList Tutorial", createRecord: true)
         tutorial.isTutorialList = true
         lists.append(tutorial)
         var item: Item?
