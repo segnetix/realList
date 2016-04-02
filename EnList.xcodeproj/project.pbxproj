@@ -513,7 +513,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = ListApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.segnetix.EnList;
+				PRODUCT_BUNDLE_IDENTIFIER = com.segnetix.realList;
 				PRODUCT_NAME = EnList;
 				PROVISIONING_PROFILE = "";
 			};
@@ -528,7 +528,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = ListApp/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.segnetix.EnList;
+				PRODUCT_BUNDLE_IDENTIFIER = com.segnetix.realList;
 				PRODUCT_NAME = EnList;
 				PROVISIONING_PROFILE = "";
 			};

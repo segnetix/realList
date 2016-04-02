@@ -471,6 +471,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         print("refreshEvent timer did fire...")
         refreshEventIsPending = false
         self.refreshListData()
+        print("refreshEvent did finish...")
     }
     
     func addToUpdateRecords(record: CKRecord, obj: AnyObject) {
@@ -484,13 +485,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             let saveRecordsOperation = CKModifyRecordsOperation()
             let ckRecords = [CKRecord](updateRecords.keys)      // initializes an array of CKRecords with the keys from the updateRecords dictionary
             
-            //for ckRecord in updateRecords.keys {
-            //    ckRecords.append(ckRecord)
-            //}
-            
             saveRecordsOperation.recordsToSave = ckRecords
             saveRecordsOperation.savePolicy = .ChangedKeys
-            
             saveRecordsOperation.perRecordCompletionBlock = { record, error in
                 // deal with conflicts
                 // set completionHandler of wrapper operation if it's the case
@@ -521,7 +517,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     }
                 }
             }
-            
             saveRecordsOperation.modifyRecordsCompletionBlock = { savedRecords, deletedRecordIDs, error in
                 if error == nil {
                     print("batch save operation complete!")
@@ -663,6 +658,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
         
         if let itemVC = itemViewController {
+            itemVC.listNameChanged(itemVC.list.name)
             itemVC.tableView.reloadData()
             itemVC.resetCellViewTags()          // is this needed???
         }

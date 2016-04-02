@@ -31,6 +31,10 @@
                                             <rect key="frame" x="0.0" y="0.0" width="567" height="31"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
+                                                <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3mz-5D-bK6" userLabel="Tap View">
+                                                    <rect key="frame" x="52" y="0.0" width="515" height="31"/>
+                                                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                                </view>
                                                 <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="ek5-bB-UcJ" userLabel="Item Name">
                                                     <rect key="frame" x="60" y="0.0" width="507" height="21"/>
                                                     <attributedString key="attributedText"/>
@@ -55,16 +59,20 @@
                                             </subviews>
                                             <constraints>
                                                 <constraint firstItem="ek5-bB-UcJ" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="top" id="0AG-hw-4t3"/>
+                                                <constraint firstItem="3mz-5D-bK6" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="top" id="0zW-xF-fAa"/>
                                                 <constraint firstAttribute="trailing" secondItem="ek5-bB-UcJ" secondAttribute="trailing" id="GAn-7A-Ikl"/>
                                                 <constraint firstItem="ug1-Vs-VEu" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" id="Ut2-4b-DnH"/>
                                                 <constraint firstItem="b3w-fy-jQC" firstAttribute="centerY" secondItem="AZO-88-8cc" secondAttribute="centerY" id="cIZ-xb-PTX"/>
                                                 <constraint firstAttribute="bottom" secondItem="ug1-Vs-VEu" secondAttribute="bottom" constant="4" id="i46-pq-z9n"/>
                                                 <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" symbolic="YES" id="jsU-Dy-dVn"/>
                                                 <constraint firstItem="ug1-Vs-VEu" firstAttribute="top" secondItem="ek5-bB-UcJ" secondAttribute="bottom" id="kLn-3h-ii4"/>
+                                                <constraint firstItem="3mz-5D-bK6" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" id="n34-5R-QfH"/>
                                                 <constraint firstAttribute="trailing" secondItem="ug1-Vs-VEu" secondAttribute="trailing" id="oCD-Ys-ADr"/>
                                                 <constraint firstItem="b3w-fy-jQC" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leading" constant="8" id="pdu-Nh-Lux"/>
+                                                <constraint firstAttribute="bottom" secondItem="3mz-5D-bK6" secondAttribute="bottom" id="qzG-Pq-jF8"/>
                                                 <constraint firstItem="b3w-fy-jQC" firstAttribute="leading" secondItem="AZO-88-8cc" secondAttribute="leading" constant="20" symbolic="YES" id="tAB-1R-QC4"/>
                                                 <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" id="uaJ-dA-h4J"/>
+                                                <constraint firstAttribute="trailing" secondItem="3mz-5D-bK6" secondAttribute="trailing" id="xVE-qD-00C"/>
                                             </constraints>
                                             <variation key="default">
                                                 <mask key="constraints">
@@ -79,6 +87,7 @@
                                             <outlet property="checkBox" destination="b3w-fy-jQC" id="ncn-QF-v5v"/>
                                             <outlet property="itemName" destination="ek5-bB-UcJ" id="Pnn-R8-IcF"/>
                                             <outlet property="itemNote" destination="ug1-Vs-VEu" id="psY-L5-kha"/>
+                                            <outlet property="tapView" destination="3mz-5D-bK6" id="FtF-wh-P2B"/>
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="CategoryCell" id="STC-IF-0Ob" userLabel="CategoryCell" customClass="CategoryCell" customModule="EnList" customModuleProvider="target">
@@ -275,7 +284,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Add" translatesAutoresizingMaskIntoConstraints="NO" id="ef6-Iu-1ed">
-                                            <rect key="frame" x="20" y="14" width="32" height="32"/>
+                                            <rect key="frame" x="15" y="14" width="32" height="32"/>
                                             <constraints>
                                                 <constraint firstAttribute="height" constant="32" id="F3w-ak-2p3"/>
                                                 <constraint firstAttribute="width" constant="32" id="Oxq-hw-dvI"/>
@@ -296,7 +305,7 @@
                                         <constraint firstItem="Dfd-kT-iJO" firstAttribute="leading" secondItem="LRg-Ey-VjT" secondAttribute="leading" id="8LX-n0-34d"/>
                                         <constraint firstItem="Dfd-kT-iJO" firstAttribute="centerY" secondItem="LRg-Ey-VjT" secondAttribute="centerY" id="8X9-KA-7MB"/>
                                         <constraint firstItem="ef6-Iu-1ed" firstAttribute="centerY" secondItem="LRg-Ey-VjT" secondAttribute="centerY" id="NIE-BB-FEy"/>
-                                        <constraint firstItem="ef6-Iu-1ed" firstAttribute="leading" secondItem="LRg-Ey-VjT" secondAttribute="leading" constant="20" id="cKe-cm-lnv"/>
+                                        <constraint firstItem="ef6-Iu-1ed" firstAttribute="leading" secondItem="LRg-Ey-VjT" secondAttribute="leading" constant="15" id="cKe-cm-lnv"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -360,6 +369,23 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Jkw-yO-bPx" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="274" y="615"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="tsr-V4-iAZ">
+            <objects>
+                <viewController id="r1d-Pe-0ed" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="mua-ZB-5ym"/>
+                        <viewControllerLayoutGuide type="bottom" id="qd9-0f-vTC"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="jjV-T3-ICg">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="2Sl-6a-lxg" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
         </scene>
     </scenes>
     <resources>

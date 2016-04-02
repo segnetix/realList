@@ -22,6 +22,7 @@ class ItemCell: UITableViewCell
     @IBOutlet weak var checkBox: CheckBox!
     @IBOutlet weak var itemName: UITextField!
     @IBOutlet weak var itemNote: UILabel!
+    @IBOutlet weak var tapView: UIView!
     
     weak var delegate: ItemCellDelegate?
     let gradientLayer = CAGradientLayer()
