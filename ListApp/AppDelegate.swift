@@ -21,9 +21,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var ArchiveURL = NSURL()
     var cloudUploadStatusRecord: CKRecord?
     var updateRecords = [CKRecord: AnyObject]()
+    var itemReferences = [CKReference]()
     var listArray = [CKRecord]()
     var categoryArray = [CKRecord]()
     var itemArray = [CKRecord]()
+    var imageArray = [CKRecord]()
     var refreshEventIsPending = false
     var printNotes = true
     
@@ -70,7 +72,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
             }
         } else {
-            listViewController!.generateTutorial()
+            // temp for development
+            //listViewController!.generateTutorial()
             listViewController!.selectList(0)
         }
         
@@ -159,6 +162,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
         print("applicationDidBecomeActive...")
+        
         fetchCloudData()
     }
     
@@ -209,6 +213,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     var haveListsSub = false
                     var haveCategoriesSub = false
                     var haveItemsSub = false
+                    var haveImagesSub = false
                     
                     // check for existing subscriptions
                     if let subscriptions = subscriptions {
@@ -225,6 +230,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                                 print("*** subscription check: Items")
                                 haveItemsSub = true
                             }
+                            if subscription.recordType == ImagesRecordType {
+                                print("*** subscription check: Images")
+                                haveImagesSub = true
+                            }
                         }
                     }
                     
@@ -232,6 +241,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     if !haveListsSub      { createSubscription(ListsRecordType)      }
                     if !haveCategoriesSub { createSubscription(CategoriesRecordType) }
                     if !haveItemsSub      { createSubscription(ItemsRecordType)      }
+                    if !haveImagesSub     { createSubscription(ImagesRecordType)     }
                     
                 } else {
                     print("fetchAllSubscriptionsWithCompletionHandler error: \(error!.localizedDescription)")
@@ -302,6 +312,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         var list: List?
         var category: Category?
         var item: Item?
+        var imageAsset: ImageAsset?
         var update: Bool = forceUpdate
         let localObj = getLocalObject(record.recordID.recordName)
         
@@ -332,8 +343,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 item = localObj as? Item
                 localDataTime = item!.modifiedDate
             }
+        case ImagesRecordType:
+            if localObj is ImageAsset {
+                imageAsset = localObj as? ImageAsset
+                localDataTime = imageAsset!.modifiedDate
+            }
         default:
-            print("updateFromRecord: unknown record type received from cloud data...!")
+            print("*** ERROR: updateFromRecord - unknown record type received from cloud data...!")
             return
         }
         
@@ -342,20 +358,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             update = cloudDataTime.compare(localDataTime) == NSComparisonResult.OrderedDescending
         }
 
-        if update && (list != nil || category != nil || item != nil) {
+        if update && (list != nil || category != nil || item != nil || imageAsset != nil) {
             // local record exists, so update the object
             switch record.recordType {
             case ListsRecordType:       list!.updateFromRecord(record)
             case CategoriesRecordType:  category!.updateFromRecord(record)
             case ItemsRecordType:       item!.updateFromRecord(record)
+            case ImagesRecordType:      imageAsset!.updateFromRecord(record)
             default:
                 break
             }
-        } else if list == nil && category == nil && item == nil {
+        } else if list == nil && category == nil && item == nil && imageAsset == nil {
             // local record does not exist, so add
             switch record.recordType {
             case ListsRecordType:
-                print("adding a new category: \(record["name"])")
                 let newList = List(name: "", createRecord: false)
                 
                 newList.updateFromRecord(record)
@@ -365,7 +381,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     print("added new list: \(newList.name)")
                 }
             case CategoriesRecordType:
-                print("adding a new category: \(record["name"])")
                 if let list = getListFromReference(record) {
                     let newCategory = list.addCategory("", displayHeader: true, updateIndices: true, createRecord: false)
                     
@@ -373,20 +388,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     
                     print("added new category: \(newCategory.name)")
                 } else {
-                    print("category \(record["name"]) can't find list \(record["owningList"])")
-                    // need to delete the category as it didn't send a valid list reference
-                    if let database = privateDatabase {
-                        database.deleteRecordWithID(record.recordID, completionHandler: { returnRecord, error in
-                            if let err = error {
-                                print("updateFromRecord: delete category error for '\(record["name"])': \(err.localizedDescription)")
-                            } else {
-                                print("updateFromRecord: category record deleted successfully '\(record["name"])'")
-                            }
-                        })
-                    }
+                    print("*** ERROR: category \(record["name"]) can't find list \(record["owningList"])")
                 }
             case ItemsRecordType:
-                print("adding a new item: \(record["name"])")
                 if let category = getCategoryFromReference(record) {
                     if category.categoryRecord != nil {
                         if let list = getListFromReference(category.categoryRecord!) {
@@ -399,17 +403,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                         }
                     }
                 } else {
-                    print("item \(record["name"]) can't find category \(record["owningCategory"])")
-                    // need to delete the item as it didn't send a valid category reference
-                    if let database = privateDatabase {
-                        database.deleteRecordWithID(record.recordID, completionHandler: { returnRecord, error in
-                            if let err = error {
-                                print("updateFromRecord: delete item error for '\(record["name"])': \(err.localizedDescription)")
-                            } else {
-                                print("updateFromRecord: item record deleted successfully '\(record["name"])'")
-                            }
-                        })
+                    print("*** ERROR: item \(record["name"]) can't find category \(record["owningCategory"])")
+                }
+            case ImagesRecordType:
+                if let item = getItemFromReference(record) {
+                    if let image = item.addImage(false) {
+                        image.updateFromRecord(record)
+                        print("added new image to item: '\(item.name)' imageGUID: \(image.imageGUID)")
                     }
+                } else {
+                    print("*** ERROR: image \(record[key_imageGUID]) can't find item \(record[key_owningItem])")
                 }
             default:
                 break
@@ -478,6 +481,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         updateRecords[record] = obj
     }
     
+    // these are references to items that need an updated image from the cloud
+    func addToItemReferences(reference: CKReference) {
+        itemReferences.append(reference)
+    }
+    
     // sends all records needing updating to cloud storage
     func batchRecordUpdate()
     {
@@ -502,8 +510,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     } else if obj is Item {
                         let item = obj as! Item
                         item.needToSave = false
+                    } else if obj is ImageAsset {
+                        let image = obj as! ImageAsset
+                        image.needToDelete = false
+                        image.deleteImageFile()
                     }
                 } else if error != nil {
+                    // NOTE: This should be able to handle a CKErrorLimitExceeded error.
                     let obj = self.updateRecords[record!]
                     if obj is List {
                         let list = obj as! List
@@ -514,6 +527,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     } else if obj is Item {
                         let item = obj as! Item
                         print("batch update error: \(item.name) \(error!.localizedDescription)")
+                    } else if obj is ImageAsset {
+                        let image = obj as! ImageAsset
+                        print("batch update error: \(image.imageGUID) \(error!.localizedDescription)")
                     }
                 }
             }
@@ -521,6 +537,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 if error == nil {
                     print("batch save operation complete!")
                 } else {
+                    // NOTE: This should be able to handle a CKErrorLimitExceeded error.
                     print("batch save error: \(error!.localizedDescription)")
                 }
             }
@@ -538,17 +555,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             listArray.removeAll()
             categoryArray.removeAll()
             itemArray.removeAll()
+            itemReferences.removeAll()   // this array will be populated after the items have been merged with any item references that need image updates
             
             // set up query operations
             let truePredicate = NSPredicate(value: true)
-
+            
             let listQuery = CKQuery(recordType: ListsRecordType, predicate: truePredicate)
             let categoryQuery = CKQuery(recordType: CategoriesRecordType, predicate: truePredicate)
             let itemQuery = CKQuery(recordType: ItemsRecordType, predicate: truePredicate)
             
-            listQuery.sortDescriptors = [NSSortDescriptor(key: "order", ascending: true)]
-            categoryQuery.sortDescriptors = [NSSortDescriptor(key: "order", ascending: true)]
-            itemQuery.sortDescriptors = [NSSortDescriptor(key: "order", ascending: true)]
+            listQuery.sortDescriptors = [NSSortDescriptor(key: key_order, ascending: true)]
+            categoryQuery.sortDescriptors = [NSSortDescriptor(key: key_order, ascending: true)]
+            itemQuery.sortDescriptors = [NSSortDescriptor(key: key_order, ascending: true)]
             
             let listFetch = CKQueryOperation(query: listQuery)
             let categoryFetch = CKQueryOperation(query: categoryQuery)
@@ -557,17 +575,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             // set up the record fetched block
             listFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.listArray.append(record)
-                //print("list recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
+                print("list recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
             }
             
             categoryFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.categoryArray.append(record)
-                //print("category recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
+                print("category recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
             }
             
             itemFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.itemArray.append(record)
-                //print("item recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
+                print("item recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
             }
             
             // set up completion blocks with cursors so they can recursively gather all of the records
@@ -626,27 +644,85 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
+    // pulls image data for items needing updating
+    func fetchImageData()
+    {
+        print("*** fetchImageData - \(itemReferences.count) items need new images...")
+        
+        if let database = privateDatabase {
+            // clear the record array
+            imageArray.removeAll()
+            
+            let predicate = NSPredicate (format: "owningItem IN %@", argumentArray: [itemReferences])
+            let imageQuery = CKQuery(recordType: ImagesRecordType, predicate: predicate)
+            let imageFetch = CKQueryOperation(query: imageQuery)
+            
+            imageFetch.recordFetchedBlock = { (record : CKRecord!) in
+                self.imageArray.append(record)
+                print("image recordFetchedBlock - GUID: \(record[key_imageGUID]) recordId: \(record.recordID.recordName)")
+            }
+            
+            // set up completion block with cursors so they can recursively gather all of the image records
+            imageFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+                if cursor != nil {
+                    print("there is more data to fetch")
+                    let newOperation = CKQueryOperation(cursor: cursor!)
+                    newOperation.recordFetchedBlock = imageFetch.recordFetchedBlock
+                    newOperation.queryCompletionBlock = imageFetch.queryCompletionBlock
+                    database.addOperation(newOperation)
+                }
+                
+                if error != nil {
+                    print("imageFetch error: \(error?.localizedDescription)")
+                }
+                
+                if cursor == nil {
+                    print("The image record fetch operation is complete...")
+                    print("array count - image: \(self.imageArray.count)")
+                    
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.mergeImageCloudData()
+                    }
+                }
+            }
+            
+            // execute the query operation
+            database.addOperation(imageFetch)
+        }
+    
+    }
+    
     // after fetching cloud data, merge with local data
     func mergeCloudData()
     {
-        print("mergeCloudData")
+        print("mergeCloudData...")
         
-        for cloudList in listArray
-        {
+        for cloudList in listArray {
             updateFromRecord(cloudList, forceUpdate: false)
         }
         
-        for cloudCategory in categoryArray
-        {
+        for cloudCategory in categoryArray {
             updateFromRecord(cloudCategory, forceUpdate: false)
         }
         
-        for cloudItem in itemArray
-        {
+        for cloudItem in itemArray {
            updateFromRecord(cloudItem, forceUpdate: false)
         }
         
+        // now that items are merged we can call fetchImageData to
+        // retreive any images that need updating
+        self.fetchImageData()
+        
         // updateFromRecord will set a timer to fire refreshListData after three seconds
+    }
+    
+    func mergeImageCloudData()
+    {
+        print("mergeImageCloudData...")
+        
+        for cloudImage in imageArray {
+            updateFromRecord(cloudImage, forceUpdate: false)
+        }
     }
     
     // sorts all lists, categories and items and updates indices
@@ -658,9 +734,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
         
         if let itemVC = itemViewController {
-            itemVC.listNameChanged(itemVC.list.name)
+            if let list = itemVC.list {
+                itemVC.listNameChanged(list.name)
+            }
             itemVC.tableView.reloadData()
-            itemVC.resetCellViewTags()          // is this needed???
+            itemVC.resetCellViewTags()
         }
     }
     

@@ -115,7 +115,12 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         }
         imageView.layer.borderWidth = 2.0
         imageView.layer.cornerRadius = 5.0
-        imageView.image = item.image
+        if item.imageAsset?.image != nil {
+            imageView.image = item.getImage()
+        } else {
+            imageView.image = nil
+        }
+        imageView.image = item.imageAsset?.image
         imageView.contentMode = .ScaleAspectFit
         containerView.addSubview(imageView)
         
@@ -175,7 +180,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         // photo button
         addPhotoButton.translatesAutoresizingMaskIntoConstraints = false
         addPhotoButton.addTarget(self, action: #selector(ItemDetailViewController.addPhoto(_:)), forControlEvents: UIControlEvents.TouchUpInside)
-        if item.image == nil {
+        if item.imageAsset?.image == nil {
             setPhotoButton(true)
         } else {
             setPhotoButton(false)
@@ -474,7 +479,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
     func close(sender: UIButton)
     {
         self.item.note = noteTextView.text
-        self.item.image = imageView.image
+        self.item.setImage(imageView.image)
         self.item.needToSave = true
         self.itemVC.tableView.reloadData()
         self.itemVC.appDelegate.saveAll()

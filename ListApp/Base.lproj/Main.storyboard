@@ -370,23 +370,6 @@
             </objects>
             <point key="canvasLocation" x="274" y="615"/>
         </scene>
-        <!--View Controller-->
-        <scene sceneID="tsr-V4-iAZ">
-            <objects>
-                <viewController id="r1d-Pe-0ed" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="mua-ZB-5ym"/>
-                        <viewControllerLayoutGuide type="bottom" id="qd9-0f-vTC"/>
-                    </layoutGuides>
-                    <view key="view" contentMode="scaleToFill" id="jjV-T3-ICg">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                    </view>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="2Sl-6a-lxg" userLabel="First Responder" sceneMemberID="firstResponder"/>
-            </objects>
-        </scene>
     </scenes>
     <resources>
         <image name="Add" width="32" height="32"/>

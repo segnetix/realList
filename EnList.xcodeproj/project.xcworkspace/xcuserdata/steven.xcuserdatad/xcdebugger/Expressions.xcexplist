@@ -17,10 +17,10 @@
          contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "list.categories[selectedCategory].items[i].name">
+               value = "textField.text">
             </PersistentString>
             <PersistentString
-               value = "textField.text">
+               value = "list.categories[selectedCategory].items[i].name">
             </PersistentString>
             <PersistentString
                value = "selectedCategory">
@@ -346,10 +346,29 @@
          contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath, atEnd : Bool) -&gt; ():ListData.swift">
       </ContextState>
       <ContextState
+         contextName = "ImageAsset.setItemImage(UIImage?) -&gt; ():ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "imageGUID">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ListViewController.(reorderListObjects(ListViewController) -&gt; () -&gt; ()).(closure #3):ListViewController.swift">
          <PersistentStrings>
             <PersistentString
                value = "category.items[0].name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ImageAsset.setItemImage(UIImage?) -&gt; Bool:ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "image">
+            </PersistentString>
+            <PersistentString
+               value = "self.image">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
