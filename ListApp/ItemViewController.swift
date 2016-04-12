@@ -407,7 +407,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 
                 if indexPath != nil {
                     print("*** addItem indexPath row is \(indexPath!.row)")
-                    let delay = 0.1 * Double(NSEC_PER_SEC)
+                    let delay = 0.20 * Double(NSEC_PER_SEC)
                     let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
                     
                     dispatch_after(time, dispatch_get_main_queue(), {
@@ -447,7 +447,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 list.updateIndices()
             }
             editingNewItemName = false
-        } else if editingNewCategoryName
+        }
+        else if editingNewCategoryName
         {
             if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()).isEmpty
             {
@@ -460,25 +461,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         }
         
         appDelegate.saveListData(true)
-        
-        // the following code should be handled by the call above to saveListData
-        /*
-        // update object change in cloud
-        let obj = list.objectForTag(textField.tag)
-        
-        if obj is Category {
-            let category = obj as! Category
-            if list.listRecord != nil {
-                category.saveToCloud(list.listRecord!)
-            }
-        } else if obj is Item {
-            let item = obj as! Item
-            let category = list.categoryForObj(item)
-            if category != nil && category?.categoryRecord != nil {
-                item.saveToCloud(category!.categoryRecord!)
-            }
-        }
-        */
         
         return true
     }

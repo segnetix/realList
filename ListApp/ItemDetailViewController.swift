@@ -229,14 +229,6 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
                 options: NSLayoutFormatOptions(rawValue: 0),
                 metrics: nil,
                 views: views))
-        /*
-        containerView.addConstraints(
-            NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-20-[midHorizStackView]-20-|",
-                options: NSLayoutFormatOptions(rawValue: 0),
-                metrics: nil,
-                views: views))
-        */
         
         if wideDisplay {
             containerView.addConstraints(
@@ -274,50 +266,6 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
                     metrics: nil,
                     views: views))
         }
-        
-        /*
-        containerView.addConstraints(
-            NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-18-[createdLabel]|",
-                options: NSLayoutFormatOptions(rawValue: 0),
-                metrics: nil,
-                views: views))
-        
-        infoVertStackView.addConstraints(
-            NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-40-[createdByText]|",
-                options: NSLayoutFormatOptions(rawValue: 0),
-                metrics: nil,
-                views: views))
-        
-        infoVertStackView.addConstraints(
-            NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-40-[createdDateText]|",
-                options: NSLayoutFormatOptions(rawValue: 0),
-                metrics: nil,
-                views: views))
-        
-        containerView.addConstraints(
-            NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-18-[modifiedLabel]|",
-                options: NSLayoutFormatOptions(rawValue: 0),
-                metrics: nil,
-                views: views))
-        
-        containerView.addConstraints(
-            NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-40-[modifiedByText]|",
-                options: NSLayoutFormatOptions(rawValue: 0),
-                metrics: nil,
-                views: views))
-        
-        containerView.addConstraints(
-            NSLayoutConstraint.constraintsWithVisualFormat(
-                "H:|-40-[modifiedDateText]|",
-                options: NSLayoutFormatOptions(rawValue: 0),
-                metrics: nil,
-                views: views))
-        */
         
         containerView.addConstraints(
             NSLayoutConstraint.constraintsWithVisualFormat(
@@ -420,15 +368,16 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject])
     {
         if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            imageView.image = resizeImage(pickedImage, newWidth: 360)       // set to iPad width
+            imageView.image = resizeAndCompressImage(pickedImage, newWidth: 360)       // set to iPad image view dimensions
             setPhotoButton(false)
         }
         
         dismissViewControllerAnimated(true, completion: nil)
     }
     
-    func resizeImage(image: UIImage, newWidth: CGFloat) -> UIImage
+    func resizeAndCompressImage(image: UIImage, newWidth: CGFloat) -> UIImage
     {
+        // scale the image
         let scale = newWidth / image.size.width
         let newHeight = image.size.height * scale
         UIGraphicsBeginImageContext(CGSizeMake(newWidth, newHeight))

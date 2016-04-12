@@ -7,7 +7,7 @@
 
 import UIKit
 import CloudKit
- 
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate
 {
@@ -21,13 +21,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var ArchiveURL = NSURL()
     var cloudUploadStatusRecord: CKRecord?
     var updateRecords = [CKRecord: AnyObject]()
-    var itemReferences = [CKReference]()
-    var listArray = [CKRecord]()
-    var categoryArray = [CKRecord]()
-    var itemArray = [CKRecord]()
-    var imageArray = [CKRecord]()
+    var itemReferences = [CKReference]()                // holds references to items that have outdated image assets
+    var listArray = [CKRecord]()                        // holds fetched list records for app launch data merge
+    var categoryArray = [CKRecord]()                    // "
+    var itemArray = [CKRecord]()                        // "
+    var imageArray = [CKRecord]()                       // "
+    var deleteArray = [CKRecord]()                      // "
     var refreshEventIsPending = false
     var printNotes = true
+    
+    // delete purge delay
+    let deletePurgeDays = 30                            // delete records will be purged from cloud storage after this many days
     
     // iCloud
     let container = CKContainer.defaultContainer()
@@ -355,7 +359,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // if not forcing the update then check if cloud data is newer than local data
         if !forceUpdate {
-            update = cloudDataTime.compare(localDataTime) == NSComparisonResult.OrderedDescending
+            update = cloudDataTime > localDataTime
         }
 
         if update && (list != nil || category != nil || item != nil || imageAsset != nil) {
@@ -388,7 +392,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     
                     print("added new category: \(newCategory.name)")
                 } else {
-                    print("*** ERROR: category \(record["name"]) can't find list \(record["owningList"])")
+                    print("*** ERROR: category \(record[key_name]) can't find list \(record[key_owningList])")
                 }
             case ItemsRecordType:
                 if let category = getCategoryFromReference(record) {
@@ -403,7 +407,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                         }
                     }
                 } else {
-                    print("*** ERROR: item \(record["name"]) can't find category \(record["owningCategory"])")
+                    print("*** ERROR: item \(record[key_name]) can't find category \(record[key_owningCategory])")
                 }
             case ImagesRecordType:
                 if let item = getItemFromReference(record) {
@@ -499,7 +503,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 // deal with conflicts
                 // set completionHandler of wrapper operation if it's the case
                 if error == nil && record != nil {
-                    //print("batch save: \(record!["name"])")
+                    //print("batch save: \(record![key_name])")
                     let obj = self.updateRecords[record!]
                     if obj is List {
                         let list = obj as! List
@@ -537,13 +541,49 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 if error == nil {
                     print("batch save operation complete!")
                 } else {
-                    // NOTE: This should be able to handle a CKErrorLimitExceeded error.
-                    print("batch save error: \(error!.localizedDescription)")
+                    // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
+                    print("*** ERROR: batchRecordUpdate - \(error!.localizedDescription)")
+                    print("The following records had problems: \(error!.userInfo[CKPartialErrorsByItemIDKey])")
                 }
             }
             
             // execute the batch save operation
             database.addOperation(saveRecordsOperation)
+        }
+    }
+    
+    // deletes an array of records
+    func batchRecordDelete(deleteRecords: [CKRecord])
+    {
+        if let database = privateDatabase
+        {
+            // generate the array of recordIDs to be deleted
+            var deleteRecordIDs = [CKRecordID]()
+            for record in deleteRecords {
+                deleteRecordIDs.append(record.recordID)
+            }
+            
+            let deleteRecordsOperation = CKModifyRecordsOperation(recordsToSave: nil, recordIDsToDelete: deleteRecordIDs)
+            deleteRecordsOperation.recordsToSave = nil
+            deleteRecordsOperation.recordIDsToDelete = deleteRecordIDs
+            deleteRecordsOperation.perRecordCompletionBlock = { record, error in
+                if error == nil && record != nil {
+                    print("batchRecordDelete: deleted \(record![key_objectName])")
+                } else if error != nil {
+                    print("*** ERROR: batchRecordDelete: \(error!.localizedDescription)")
+                }
+            }
+            deleteRecordsOperation.modifyRecordsCompletionBlock = { savedRecords, deletedRecordIDs, error in
+                if error == nil {
+                    print("batch delete operation complete - \(savedRecords?.count) deleted.")
+                } else {
+                    // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
+                    print("*** ERROR: batchRecordDelete. The following records had problems: \(error!.userInfo[CKPartialErrorsByItemIDKey])")
+                }
+            }
+            
+            // execute the batch delete operation
+            database.addOperation(deleteRecordsOperation)
         }
     }
     
@@ -555,6 +595,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             listArray.removeAll()
             categoryArray.removeAll()
             itemArray.removeAll()
+            deleteArray.removeAll()
             itemReferences.removeAll()   // this array will be populated after the items have been merged with any item references that need image updates
             
             // set up query operations
@@ -563,6 +604,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             let listQuery = CKQuery(recordType: ListsRecordType, predicate: truePredicate)
             let categoryQuery = CKQuery(recordType: CategoriesRecordType, predicate: truePredicate)
             let itemQuery = CKQuery(recordType: ItemsRecordType, predicate: truePredicate)
+            let deleteQuery = CKQuery(recordType: DeletesRecordType, predicate: truePredicate)
             
             listQuery.sortDescriptors = [NSSortDescriptor(key: key_order, ascending: true)]
             categoryQuery.sortDescriptors = [NSSortDescriptor(key: key_order, ascending: true)]
@@ -571,21 +613,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             let listFetch = CKQueryOperation(query: listQuery)
             let categoryFetch = CKQueryOperation(query: categoryQuery)
             let itemFetch = CKQueryOperation(query: itemQuery)
+            let deleteFetch = CKQueryOperation(query: deleteQuery)
             
             // set up the record fetched block
             listFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.listArray.append(record)
-                print("list recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
+                print("list recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
             }
             
             categoryFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.categoryArray.append(record)
-                print("category recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
+                print("category recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
             }
             
             itemFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.itemArray.append(record)
-                print("item recordFetchedBlock: \(record["name"]) \(record["order"]) \(record.recordID.recordName)")
+                print("item recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
+            }
+            
+            deleteFetch.recordFetchedBlock = { (record : CKRecord!) in
+                self.deleteArray.append(record)
+                print("delete recordFetchedBlock: \(record[key_itemName]) \(record[key_deletedDate]) \(record.recordID.recordName)")
             }
             
             // set up completion blocks with cursors so they can recursively gather all of the records
@@ -615,6 +663,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
             }
             
+            deleteFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+                if cursor != nil {
+                    print("there is more data to fetch")
+                    let newOperation = CKQueryOperation(cursor: cursor!)
+                    newOperation.recordFetchedBlock = deleteFetch.recordFetchedBlock
+                    newOperation.queryCompletionBlock = deleteFetch.queryCompletionBlock
+                    database.addOperation(newOperation)
+                }
+                if error != nil {
+                    print("deleteFetch error: \(error?.localizedDescription)")
+                }
+            }
+            
             itemFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
                 if cursor != nil {
                     print("there is more data to fetch")
@@ -629,7 +690,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 
                 if cursor == nil {
                     print("The record fetch operation is complete...")
-                    print("array counts - list: \(self.listArray.count) category: \(self.categoryArray.count) item: \(self.itemArray.count)")
+                    print("array counts - list: \(self.listArray.count) category: \(self.categoryArray.count) item: \(self.itemArray.count) delete: \(self.deleteArray.count)")
                     
                     dispatch_async(dispatch_get_main_queue()) {
                         self.mergeCloudData()
@@ -641,6 +702,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             database.addOperation(listFetch)
             database.addOperation(categoryFetch)
             database.addOperation(itemFetch)
+            database.addOperation(deleteFetch)
         }
     }
     
@@ -709,11 +771,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate
            updateFromRecord(cloudItem, forceUpdate: false)
         }
         
+        // check if any of the local objects are in the deleted list and if so delete
+        processDeletedObjects()
+        
+        // purge old delete records from cloud storage
+        purgeOldDeleteRecords()
+        
         // now that items are merged we can call fetchImageData to
         // retreive any images that need updating
         self.fetchImageData()
         
-        // updateFromRecord will set a timer to fire refreshListData after three seconds
+        // updateFromRecord will set a timer to fire refreshListData after three seconds,
+        // giving more time for cloud records to arrive before refreshing the UI
     }
     
     func mergeImageCloudData()
@@ -723,6 +792,108 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         for cloudImage in imageArray {
             updateFromRecord(cloudImage, forceUpdate: false)
         }
+    }
+    
+    // check if any of the local objects are in the deleted list (deletedArray) and if so delete
+    func processDeletedObjects()
+    {
+        print("processing deleted objects...")
+        
+        // create an array of recordID.recordName from the cloud delete records
+        var listDeleteRecordIDs = [String]()
+        var categoryDeleteRecordIDs = [String]()
+        var itemDeleteRecordIDs = [String]()
+        
+        // populate the delete record arrays by record type
+        for deleteRecord in deleteArray {
+            let recordType = deleteRecord[key_objectType] as? String
+            let recordID = deleteRecord[key_objectRecordID] as? String
+            
+            if recordType == ListsRecordType {
+                if let recordID = recordID {
+                    listDeleteRecordIDs.append(recordID)
+                }
+            } else if recordType == CategoriesRecordType {
+                if let recordID = recordID {
+                    categoryDeleteRecordIDs.append(recordID)
+                }
+            } else if recordType == ItemsRecordType {
+                if let recordID = recordID {
+                    itemDeleteRecordIDs.append(recordID)
+                }
+            }
+        }
+        
+        // populate delete object arrays where local objects are in the cloud delete arrays
+        if let listVC = listViewController
+        {
+            var listsToDelete = [List]()
+            for list in listVC.lists {
+                let listRecordName = list.listRecord?.recordID.recordName
+                if let listRecordName = listRecordName {
+                    if listDeleteRecordIDs.contains(listRecordName) {
+                        listsToDelete.append(list)
+                    }
+                }
+                
+                var categoriesToDelete = [Category]()
+                for category in list.categories {
+                    let categoryRecordName = category.categoryRecord?.recordID.recordName
+                    if let categoryRecordName = categoryRecordName {
+                        if categoryDeleteRecordIDs.contains(categoryRecordName) {
+                            categoriesToDelete.append(category)
+                        }
+                    }
+                    
+                    var itemsToDelete = [Item]()
+                    for item in category.items {
+                        let itemRecordName = item.itemRecord?.recordID.recordName
+                        if let itemRecordName = itemRecordName {
+                            if itemDeleteRecordIDs.contains(itemRecordName) {
+                                itemsToDelete.append(item)
+                            }
+                        }
+                    }
+                    
+                    // remove the deleted items in this category
+                    category.items.removeObjectsInArray(itemsToDelete)
+                    print("*** processDeleteObjects - deleted \(itemsToDelete.count) items in \(list.name): \(category.name)")
+                }
+                
+                // remove the deleted categories in this list
+                list.categories.removeObjectsInArray(categoriesToDelete)
+                print("*** processDeleteObjects - deleted \(categoriesToDelete.count) categories in \(list.name)")
+            }
+            
+            // remove the deleted lists
+            listVC.lists.removeObjectsInArray(listsToDelete)
+            print("*** processDeleteObjects - deleted \(listsToDelete.count) lists")
+        }
+    }
+    
+    // purge any delete records older than one month
+    func purgeOldDeleteRecords()
+    {
+        let now = NSDate.init()
+        let userCalendar = NSCalendar.currentCalendar()
+        let timeInterval = NSDateComponents()
+        timeInterval.day = deletePurgeDays
+        
+        var purgeRecords = [CKRecord]()
+        
+        // collect records to be purged
+        for record in deleteArray {
+            if let deleteDate = record[key_deletedDate] as? NSDate {
+                let expirationDate = userCalendar.dateByAddingComponents(timeInterval, toDate: deleteDate, options: [])!
+                
+                if now > expirationDate {
+                    purgeRecords.append(record)
+                }
+            }
+        }
+        
+        // submit delete operation
+        batchRecordDelete(purgeRecords)
     }
     
     // sorts all lists, categories and items and updates indices
@@ -826,3 +997,42 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
 }
 
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Global Extensions
+//
+////////////////////////////////////////////////////////////////
+
+// Array extension for removing objects
+extension Array where Element: Equatable
+{
+    mutating func removeObject(object: Element) {
+        if let index = self.indexOf(object) {
+            self.removeAtIndex(index)
+        }
+    }
+    
+    mutating func removeObjectsInArray(array: [Element]) {
+        for object in array {
+            self.removeObject(object)
+        }
+    }
+}
+
+// Date extension and methods for comparisons
+public func ==(lhs: NSDate, rhs: NSDate) -> Bool
+{
+    return lhs === rhs || lhs.compare(rhs) == .OrderedSame
+}
+
+public func <(lhs: NSDate, rhs: NSDate) -> Bool
+{
+    return lhs.compare(rhs) == .OrderedAscending
+}
+
+public func >(lhs: NSDate, rhs: NSDate) -> Bool
+{
+    return lhs.compare(rhs) == .OrderedDescending
+}
+
+extension NSDate: Comparable { }

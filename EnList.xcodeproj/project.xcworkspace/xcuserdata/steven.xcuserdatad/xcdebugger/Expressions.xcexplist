@@ -9,6 +9,9 @@
                value = "listRecord">
             </PersistentString>
             <PersistentString
+               value = "categories">
+            </PersistentString>
+            <PersistentString
                value = "recordID">
             </PersistentString>
          </PersistentStrings>
@@ -144,6 +147,20 @@
       </ContextState>
       <ContextState
          contextName = "List.insertItemAtIndexPath(Item, indexPath : NSIndexPath, atPosition : InsertPosition) -&gt; ():ListData.swift">
+      </ContextState>
+      <ContextState
+         contextName = "AppDelegate.processDeletedObjects() -&gt; ():AppDelegate.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "category.name">
+            </PersistentString>
+            <PersistentString
+               value = "item.name">
+            </PersistentString>
+            <PersistentString
+               value = "list.name">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "ListViewController.reorderListObjects() -&gt; ():ListViewController.swift">

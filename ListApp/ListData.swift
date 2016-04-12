@@ -14,6 +14,7 @@ let ListsRecordType = "Lists"
 let CategoriesRecordType = "Categories"
 let ItemsRecordType = "Items"
 let ImagesRecordType = "Images"
+let DeletesRecordType = "Deletes"
 
 // key strings for record access
 let key_name                = "name"
@@ -36,6 +37,7 @@ let key_createdBy           = "createdBy"
 let key_createdDate         = "createdDate"
 let key_modifiedBy          = "modifiedBy"
 let key_modifiedDate        = "modifiedDate"
+let key_deletedDate         = "deletedDate"
 let key_imageModifiedDate   = "imageModifiedDate"
 let key_owningCategory      = "owningCategory"
 let key_itemRecord          = "itemRecord"
@@ -48,8 +50,12 @@ let key_imageGUID           = "imageGUID"
 let key_imageFilePath       = "imageFilePath"
 let key_imageAsset          = "imageAsset"
 let key_imageRecord         = "imageRecord"
+let key_objectRecordID      = "objectRecordID"
+let key_objectName          = "objectName"
+let key_objectType          = "objectType"
+let key_itemName            = "itemName"
 
-let jpegCompressionQuality  = CGFloat(0.5)      // JPEG quality range is 0.0 (low) to 1.0 (high)
+let jpegCompressionQuality  = CGFloat(0.6)      // JPEG quality range is 0.0 (low) to 1.0 (high)
 
 let alpha: Float = 1.0
 
@@ -289,9 +295,12 @@ class List: NSObject, NSCoding
             if let err = error {
                 print("Delete List Error: \(err.localizedDescription)")
             } else {
-                print("Success: List record deleted successfully")
+                print("Success: List record deleted successfully '\(self.name)' recordID: \(listRecord.recordID.recordName)")
             }
         })
+        
+        // create a Delete record for this list delete and save to cloud
+        createDeleteRecord(database, recordName: listRecord.recordID.recordName, objectType: ListsRecordType, objectName: self.name)
     }
     
     func setListColor()
@@ -492,8 +501,8 @@ class List: NSObject, NSCoding
             
             if itemIndex >= 0 {
                 // delete item from cloud storage
-                let item = obj as! Item
-                item.deleteFromCloud()
+                //let item = obj as! Item
+                //item.deleteFromCloud()
                 
                 // remove the item from the category
                 self.categories[catIndex].items.removeAtIndex(itemIndex)
@@ -508,7 +517,7 @@ class List: NSObject, NSCoding
                     
                     if categories.count > 1 {
                         // delete the category and its items from cloud storage
-                        category.deleteFromCloud()
+                        //category.deleteFromCloud()
                         
                         // add paths of category, add item row, and items
                         removedPaths = displayIndexPathsForCategoryFromIndexPath(indexPath, includeCategoryAndAddItemIndexPaths: true)
@@ -1312,9 +1321,12 @@ class Category: ListObj, NSCoding
             if let err = error {
                 print("Delete Category Error: \(err.localizedDescription)")
             } else {
-                print("Success: Category record deleted from cloud \(self.name)")
+                print("Success: Category record deleted from cloud '\(self.name)' recordID: \(categoryRecord.recordID.recordName)")
             }
         })
+        
+        // create a Delete record for this category delete and save to cloud
+        createDeleteRecord(database, recordName: categoryRecord.recordID.recordName, objectType: CategoriesRecordType, objectName: self.name)
     }
 
     func deleteCategoryItemsFromCloudStorage()
@@ -1391,7 +1403,16 @@ class Category: ListObj, NSCoding
 
 class Item: ListObj, NSCoding
 {
-    override var name: String   { didSet { if name  != oldValue { needToSave = true; modifiedBy = UIDevice.currentDevice().name; modifiedDate = NSDate.init() } } }
+    override var name: String {
+        didSet {
+            if name  != oldValue {
+                needToSave = true
+                modifiedBy = UIDevice.currentDevice().name
+                modifiedDate = NSDate.init()
+                imageAsset?.itemName = self.name
+            }
+        }
+    }
     var state: ItemState        { didSet { if state != oldValue { needToSave = true; modifiedBy = UIDevice.currentDevice().name; modifiedDate = NSDate.init() } } }
     var note: String            { didSet { if note  != oldValue { needToSave = true; modifiedBy = UIDevice.currentDevice().name; modifiedDate = NSDate.init() } } }
     var itemReference: CKReference?
@@ -1404,7 +1425,7 @@ class Item: ListObj, NSCoding
     var modifiedDate: NSDate   {    // established locally - saved to cloud
         didSet {
             // only update if new date is newer than the current date
-            if oldValue.compare(modifiedDate) == NSComparisonResult.OrderedDescending {
+            if oldValue > modifiedDate {
                 modifiedDate = oldValue
             }
         }
@@ -1412,7 +1433,7 @@ class Item: ListObj, NSCoding
     var imageModifiedDate: NSDate {
         didSet {
             // only update if new date is newer than the current date
-            if oldValue.compare(modifiedDate) == NSComparisonResult.OrderedDescending {
+            if oldValue > modifiedDate {
                 imageModifiedDate = oldValue
             }
         }
@@ -1435,8 +1456,12 @@ class Item: ListObj, NSCoding
             // a new item needs a new cloud record
             itemRecord = CKRecord.init(recordType: ItemsRecordType)
             itemReference = CKReference.init(record: itemRecord!, action: CKReferenceAction.DeleteSelf)
-            imageAsset = ImageAsset(itemReference: itemReference!)
+            imageAsset = ImageAsset(itemName: name, itemReference: itemReference!)
             createdBy = UIDevice.currentDevice().name
+        }
+        
+        if imageAsset != nil {
+            imageAsset!.itemName = name
         }
         
         super.init(name: name)
@@ -1454,7 +1479,14 @@ class Item: ListObj, NSCoding
         if let modifiedDate       = modifiedDate      { self.modifiedDate      = modifiedDate      } else { self.modifiedDate      = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())                   }
         if let imageModifiedDate  = imageModifiedDate { self.imageModifiedDate = imageModifiedDate } else { self.imageModifiedDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())                   }
         if let itemReference      = itemReference     { self.itemReference     = itemReference     } else { self.itemReference     = CKReference.init(record: itemRecord!, action: CKReferenceAction.DeleteSelf) }
-        if let imageAsset         = imageAsset        { self.imageAsset        = imageAsset        } else { self.imageAsset        = ImageAsset(itemReference: self.itemReference!); print("*** Item memberwise initializer is initializing the ImageAsset...") }
+        if let imageAsset         = imageAsset {
+            self.imageAsset = imageAsset
+            self.imageAsset!.itemName = name
+            print("*** Item memberwise initializer set imageAsset.itemName to \(name)")
+        } else {
+            self.imageAsset = ImageAsset(itemName: name, itemReference: self.itemReference!)
+            print("*** Item memberwise initializer is initializing the ImageAsset...")
+        }
         
         self.state = state
         
@@ -1524,6 +1556,7 @@ class Item: ListObj, NSCoding
         
         // pass save on to the imageAsset
         if imageAsset != nil && itemReference != nil {
+            imageAsset!.itemName = self.name
             imageAsset!.saveToCloud(itemReference!)
         } else {
             print("******* ERROR in item - saveToCloud: imageAsset or itemReference is nil...")
@@ -1556,7 +1589,7 @@ class Item: ListObj, NSCoding
     // update this item from cloud storage
     func updateFromRecord(record: CKRecord)
     {
-        if let itemState = record["state"] as? Int {
+        if let itemState = record[key_state] as? Int {
             self.state = itemState == 0 ? ItemState.Inactive : itemState == 1 ? ItemState.Incomplete : ItemState.Complete
         } else {
             self.state = ItemState.Incomplete
@@ -1575,13 +1608,14 @@ class Item: ListObj, NSCoding
         self.itemReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
         
         if self.imageAsset == nil {
-            self.imageAsset = ImageAsset(itemReference: itemReference!)
+            self.imageAsset = ImageAsset(itemName: self.name, itemReference: itemReference!)
         }
         
         // if the cloud imageModifiedDate is newer than local then we need to schedule the imageAsset for this item to be pulled
         if let imageModifiedDate = record[key_imageModifiedDate] as? NSDate
         {
-            if imageModifiedDate.compare(self.imageModifiedDate) == NSComparisonResult.OrderedDescending {
+            if imageModifiedDate > self.imageModifiedDate {
+                // a newer image for this item exists
                 // add this imageAsset to the array needing fetching
                 if imageAsset != nil {
                     print("ImageAsset.updateFromRecord - itemRecordID for \(self.name) was added to the itemReferences for image update...")
@@ -1599,11 +1633,11 @@ class Item: ListObj, NSCoding
         }
         
         // check date values after update from cloud record - reset if needed
-        if self.modifiedDate.compare(NSDate.init(timeIntervalSince1970: NSTimeInterval.init())) == NSComparisonResult.OrderedSame {
+        if self.modifiedDate == NSDate.init(timeIntervalSince1970: NSTimeInterval.init()) {
             self.modifiedDate = NSDate.init()
         }
         
-        if self.createdDate.compare(NSDate.init(timeIntervalSince1970: NSTimeInterval.init())) == NSComparisonResult.OrderedSame {
+        if self.createdDate == NSDate.init(timeIntervalSince1970: NSTimeInterval.init()) {
             self.createdDate = self.modifiedDate
         }
         
@@ -1648,9 +1682,12 @@ class Item: ListObj, NSCoding
             if let err = error {
                 print("Delete Item Error for '\(self.name)': \(err.localizedDescription)")
             } else {
-                print("Success: Item record deleted successfully '\(self.name)'")
+                print("Success: Item record deleted successfully '\(self.name)' recordID: \(self.itemRecord?.recordID.recordName)")
             }
         })
+        
+        // create a Delete record for this item delete and save to cloud
+        createDeleteRecord(database, recordName: itemRecord.recordID.recordName, objectType: ItemsRecordType, objectName: self.name)
     }
     
     func deleteFromCloud()
@@ -1697,6 +1734,7 @@ class Item: ListObj, NSCoding
         
         if self.imageAsset!.setItemImage(image) {
             // image was updated
+            self.imageAsset!.itemName = self.name
             self.imageModifiedDate = NSDate.init()
         }
     }
@@ -1708,10 +1746,10 @@ class Item: ListObj, NSCoding
     
     func addImage(createRecord: Bool) -> ImageAsset?
     {
-        var imageAsset: ImageAsset? = nil
+        var imageAsset: ImageAsset?
         
         if self.itemReference != nil {
-            imageAsset = ImageAsset(itemReference: self.itemReference!)
+            imageAsset = ImageAsset(itemName: self.name, itemReference: self.itemReference!)
             self.imageAsset = imageAsset
         }
         
@@ -1727,6 +1765,11 @@ class Item: ListObj, NSCoding
 
 class ImageAsset: NSObject, NSCoding
 {
+    var itemName: String! {
+        didSet {
+            _ = 0
+        }
+    }
     var image: UIImage?
     var imageGUID: String
     var imageFileURL: NSURL?
@@ -1736,7 +1779,7 @@ class ImageAsset: NSObject, NSCoding
     var modifiedDate: NSDate   {    // established locally - saved to cloud
         didSet {
             // only update if new date is newer than the currently held date
-            if oldValue.compare(modifiedDate) == NSComparisonResult.OrderedDescending {
+            if oldValue > modifiedDate {
                 modifiedDate = oldValue
             }
         }
@@ -1745,8 +1788,13 @@ class ImageAsset: NSObject, NSCoding
     var needToDelete: Bool
     
     // new item initializer
-    init(itemReference: CKReference)
+    init(itemName: String?, itemReference: CKReference)
     {
+        var name = ""
+        if itemName != nil {
+            name = itemName!
+        }
+        self.itemName = name
         self.image = nil
         self.imageGUID = NSUUID().UUIDString
         self.imageFileURL = nil
@@ -1758,12 +1806,13 @@ class ImageAsset: NSObject, NSCoding
     }
     
     // memberwise initializer
-    init(image: UIImage?, imageGUID: String?, imageAsset: CKAsset?, itemReference: CKReference?, imageRecord: CKRecord?, modifiedDate: NSDate?)
+    init(itemName: String?, image: UIImage?, imageGUID: String?, imageAsset: CKAsset?, itemReference: CKReference?, imageRecord: CKRecord?, modifiedDate: NSDate?)
     {
-        if let image         = image         { self.image         = image         } else { self.image         = nil                                                        }
-        if let imageGUID     = imageGUID     { self.imageGUID     = imageGUID     } else { self.imageGUID     = NSUUID().UUIDString                                        }
-        if let imageRecord   = imageRecord   { self.imageRecord   = imageRecord   } else { self.imageRecord   = CKRecord.init(recordType: ImagesRecordType)                }
-        if let modifiedDate  = modifiedDate  { self.modifiedDate  = modifiedDate  } else { self.modifiedDate   = NSDate.init(timeIntervalSince1970: NSTimeInterval.init()) }
+        if let itemName      = itemName      { self.itemName      = itemName      } else { self.itemName      = ""                                                        }
+        if let image         = image         { self.image         = image         } else { self.image         = nil                                                       }
+        if let imageGUID     = imageGUID     { self.imageGUID     = imageGUID     } else { self.imageGUID     = NSUUID().UUIDString                                       }
+        if let imageRecord   = imageRecord   { self.imageRecord   = imageRecord   } else { self.imageRecord   = CKRecord.init(recordType: ImagesRecordType)               }
+        if let modifiedDate  = modifiedDate  { self.modifiedDate  = modifiedDate  } else { self.modifiedDate  = NSDate.init(timeIntervalSince1970: NSTimeInterval.init()) }
         
         if itemReference != nil {
             self.itemReference = itemReference
@@ -1775,31 +1824,49 @@ class ImageAsset: NSObject, NSCoding
         self.imageFileURL = nil
     }
     
-    required convenience init?(coder decoder: NSCoder)
-    {
-        let image         = decoder.decodeObjectForKey(key_image)         as? UIImage
-        let imageGUID     = decoder.decodeObjectForKey(key_imageGUID)     as? String
-        let itemReference = decoder.decodeObjectForKey(key_itemReference) as? CKReference
-        let imageAsset    = decoder.decodeObjectForKey(key_imageAsset)    as? CKAsset
-        let imageRecord   = decoder.decodeObjectForKey(key_imageRecord)   as? CKRecord
-        let modifiedDate  = decoder.decodeObjectForKey(key_modifiedDate)  as? NSDate
-        
-        self.init(image: image,
-                  imageGUID: imageGUID,
-                  imageAsset: imageAsset,
-                  itemReference: itemReference,
-                  imageRecord: imageRecord,
-                  modifiedDate: modifiedDate)
-    }
-    
+    // encoder
     func encodeWithCoder(coder: NSCoder)
     {
-        coder.encodeObject(self.image,         forKey: key_image)
+        coder.encodeObject(self.itemName,      forKey: key_itemName)
         coder.encodeObject(self.imageGUID,     forKey: key_imageGUID)
         coder.encodeObject(self.itemReference, forKey: key_itemReference)
         coder.encodeObject(self.imageAsset,    forKey: key_imageAsset)
         coder.encodeObject(self.imageRecord,   forKey: key_imageRecord)
         coder.encodeObject(self.modifiedDate,  forKey: key_modifiedDate)
+        
+        // compress image with JPG and save as NSData
+        if let image = self.image {
+            if let jpgImageData = UIImageJPEGRepresentation(image, jpegCompressionQuality) {
+                //let jpgImage = UIImage(data: jpgImageData, scale: 1.0)        // this converts the data to jpg image
+                coder.encodeObject(jpgImageData,   forKey: key_image)
+            }
+        }
+    }
+    
+    // decoder
+    required convenience init?(coder decoder: NSCoder)
+    {
+        let itemName      = decoder.decodeObjectForKey(key_name)          as? String
+        let imageGUID     = decoder.decodeObjectForKey(key_imageGUID)     as? String
+        let itemReference = decoder.decodeObjectForKey(key_itemReference) as? CKReference
+        let imageAsset    = decoder.decodeObjectForKey(key_imageAsset)    as? CKAsset
+        let imageRecord   = decoder.decodeObjectForKey(key_imageRecord)   as? CKRecord
+        let modifiedDate  = decoder.decodeObjectForKey(key_modifiedDate)  as? NSDate
+        let imageData     = decoder.decodeObjectForKey(key_image)         as? NSData
+        var image: UIImage?
+        
+        // restore image from jpg data
+        if let imageData = imageData {
+            image = UIImage(data: imageData)
+        }
+        
+        self.init(itemName:      itemName,
+                  image:         image,
+                  imageGUID:     imageGUID,
+                  imageAsset:    imageAsset,
+                  itemReference: itemReference,
+                  imageRecord:   imageRecord,
+                  modifiedDate:  modifiedDate)
     }
     
     // commits the image to cloud storage (if needed)
@@ -1817,6 +1884,7 @@ class ImageAsset: NSObject, NSCoding
     // cloud storage method for this image
     func saveRecord(imageRecord: CKRecord, itemReference: CKReference)
     {
+        imageRecord[key_itemName]      = self.itemName
         imageRecord[key_imageGUID]     = self.imageGUID
         imageRecord[key_owningItem]    = itemReference
         imageRecord[key_modifiedDate]  = self.modifiedDate
@@ -1830,8 +1898,6 @@ class ImageAsset: NSObject, NSCoding
     // image asset to nil in the imageRecord and updating
     func deleteRecord(imageRecord: CKRecord, database: CKDatabase)
     {
-        //imageRecord[key_imageGUID]   = self.imageGUID
-        //imageRecord[key_owningItem]  = itemReference
         imageRecord[key_modifiedDate]  = self.modifiedDate
         imageRecord[key_imageAsset]    = nil
         
@@ -1850,6 +1916,7 @@ class ImageAsset: NSObject, NSCoding
         }
         */
         
+        if let itemName      = record[key_itemName]     { self.itemName      = itemName      as! String      }
         if let imageGUID     = record[key_imageGUID]    { self.imageGUID     = imageGUID     as! String      }
         if let itemReference = record[key_owningItem]   { self.itemReference = itemReference as? CKReference }
         if let imageAsset    = record[key_imageAsset]   { self.imageAsset    = imageAsset    as? CKAsset     }
@@ -1864,7 +1931,6 @@ class ImageAsset: NSObject, NSCoding
         if let path = imageAsset?.fileURL.path {
             let image = UIImage(contentsOfFile: path)
             self.image = image
-            
             print("ImageAsset.updateFromRecord: got image update for \(imageGUID)...")
         }
         
@@ -1895,7 +1961,8 @@ class ImageAsset: NSObject, NSCoding
                     let docsDir: AnyObject = dirPaths[0]
                     self.imageFileURL = NSURL.fileURLWithPath(docsDir.stringByAppendingPathComponent(self.imageGUID + ".png"))
                     
-                    try UIImageJPEGRepresentation(image!, jpegCompressionQuality)!.writeToURL(imageFileURL!, options: .AtomicWrite)
+                    //try UIImagePNGRepresentation(image!)!.writeToURL(imageFileURL!, options: .AtomicWrite)                            // without compression
+                    try UIImageJPEGRepresentation(image!, jpegCompressionQuality)!.writeToURL(imageFileURL!, options: .AtomicWrite)     // with compression
                     
                     self.imageAsset = CKAsset(fileURL: imageFileURL!)
                     self.needToSave = true
@@ -2070,4 +2137,21 @@ func getItemFromReference(imageRecord: CKRecord) -> Item? {
     }
     
     return nil
+}
+
+// create a Delete record for this list delete and save to cloud
+func createDeleteRecord(database: CKDatabase, recordName: String, objectType: String, objectName: String)
+{
+    let deleteRecord = CKRecord(recordType: DeletesRecordType)
+    deleteRecord[key_objectRecordID] = recordName
+    deleteRecord[key_objectType] = objectType
+    deleteRecord[key_objectName] = objectName
+    deleteRecord[key_deletedDate] = NSDate.init()
+    database.saveRecord(deleteRecord, completionHandler: { returnRecord, error in
+        if let err = error {
+            print("Save deleteRecord Error for '\(objectName)': \(err.localizedDescription)")
+        } else {
+            print("Success: delete record saved successfully for '\(objectName)' recordID: \(recordName)")
+        }
+    })
 }
