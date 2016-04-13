@@ -339,11 +339,13 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
             }
         })
         let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil )
-        alertVC.addAction(libraryAction)
-        alertVC.addAction(cancelAction)
+
         if photoAction != nil {
             alertVC.addAction(photoAction!)
         }
+        alertVC.addAction(libraryAction)
+        alertVC.addAction(cancelAction)
+        
         presentViewController(alertVC, animated: true, completion: nil)
     }
     

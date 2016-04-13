@@ -76,8 +76,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
             }
         } else {
-            // temp for development
-            //listViewController!.generateTutorial()
+            // temp - comment out the tutorial generation line below for development
+            listViewController!.generateTutorial()
             listViewController!.selectList(0)
         }
         

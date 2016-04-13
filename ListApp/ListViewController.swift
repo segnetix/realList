@@ -823,48 +823,66 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
         
         // list1
-        let tutorial = List(name: "theList Tutorial", createRecord: true, tutorial: true)
+        let tutorial = List(name: "realList Tutorial", createRecord: true, tutorial: true)
         tutorial.isTutorialList = true
         lists.append(tutorial)
         var item: Item?
         
         // Getting started...
         let cat1 = tutorial.addCategory("Getting started...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
-        item = tutorial.addItem(cat1, name: "Things to know about theList...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        
+        item = tutorial.addItem(cat1, name: "Things to know about realList...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...check them off as you learn them!"
+        
         item = tutorial.addItem(cat1, name: "Make a new list item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...tap the item add button below"
+        item!.imageAsset!.image = UIImage(named: "Add")
         
         // Item actions...
         let cat2 = tutorial.addCategory("Item actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         item = tutorial.addItem(cat2, name: "Single tap an item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to add a note like this"
+        
         item = tutorial.addItem(cat2, name: "Double tap an item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to edit the item name"
+        
         item = tutorial.addItem(cat2, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to delete an item"
+        
         item = tutorial.addItem(cat2, name: "Tap the check box...", state: ItemState.Complete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...to mark the tiem as completed"
+        item!.note = "...to mark the item as completed"
+        item!.imageAsset!.image = UIImage(named: "checkBox_complete")
+        
         item = tutorial.addItem(cat2, name: "Tap again...", state: ItemState.Inactive, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to mark it as inactive"
+        item!.imageAsset!.image = UIImage(named: "checkBox_inactive")
+        
         item = tutorial.addItem(cat2, name: "Tap again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to mark it as active"
-        item!.state = ItemState.Incomplete
+        item!.imageAsset!.image = UIImage(named: "checkBox_incomplete")
+        
         item = tutorial.addItem(cat2, name: "Press, hold and drag...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to move an item"
         
         // Category actions...
         let cat3 = tutorial.addCategory("Category actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
+        
         item = tutorial.addItem(cat3, name: "Create a new category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...tap the settings icon (upper right) and then tap the icon with the green plus to make a new category."
+        item!.imageAsset!.image = UIImage(named: "New Category")
+        
         item = tutorial.addItem(cat3, name: "Single tap a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to collapse all the items in that category"
+        
         item = tutorial.addItem(cat3, name: "Single tap it again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to expand it"
+        
         item = tutorial.addItem(cat3, name: "Double tap a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to edit its name"
+        
         item = tutorial.addItem(cat3, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to delete a category"
+        
         item = tutorial.addItem(cat3, name: "Press, hold and drag a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to move it"
         
@@ -872,34 +890,57 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cat4 = tutorial.addCategory("List actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         item = tutorial.addItem(cat4, name: "Tap the 'Lists' button above...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to go back to the lists view"
+        
         item = tutorial.addItem(cat4, name: "Create a new list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...with the list add button"
+        item!.imageAsset!.image = UIImage(named: "Add")
         
         // Settings actions...
         let cat5 = tutorial.addCategory("Settings actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
+        
         item = tutorial.addItem(cat5, name: "The settings buttons let you...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...collapse and expand all categories..."
+        item!.note = "...collapse all categories..."
+        item!.imageAsset!.image = UIImage(named: "Collapsed Categories")
+        
+        item = tutorial.addItem(cat5, name: "...and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item!.note = "...expand all categories..."
+        item!.imageAsset!.image = UIImage(named: "Expanded Categories")
+        
         item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...create new categories..."
+        item!.imageAsset!.image = UIImage(named: "New Category")
+        
         item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...control what items are shown..."
+        item!.imageAsset!.image = UIImage(named: "Show Completed")
+        
         item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...set all items to active or inactive..."
+        item!.imageAsset!.image = UIImage(named: "Set Incomplete")
+        
         item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...change the color of your list..."
+        
         item = tutorial.addItem(cat5, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...print or email your list (with or without notes)"
+        item!.imageAsset!.image = UIImage(named: "Print")
         
         // Synchronize devices...
         let cat6 = tutorial.addCategory("Synchronize devices...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
-        item = tutorial.addItem(cat6, name: "theList can synchronize lists...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        
+        item = tutorial.addItem(cat6, name: "realList can synchronize lists...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...between all your iOS devices"
+        
         item = tutorial.addItem(cat6, name: "1. Go to the About view", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "Access from the theList icon at the top of the List view"
+        item!.note = "Access from the realList icon at the top of the List view"
+        item!.imageAsset!.image = UIImage(named: "EnListIcon_180")
+        
         item = tutorial.addItem(cat6, name: "2. Check if iCloud is enabled...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...if it says No, then go to the next step..."
+        
         item = tutorial.addItem(cat6, name: "3. Turn on iCloud drive...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "... use the iCloud Settings button..."
+        
         item = tutorial.addItem(cat6, name: "4. Enable notifications...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...use the Notification Settings button"
         
@@ -907,6 +948,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cat7 = tutorial.addCategory("All done!!", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         item = tutorial.addItem(cat7, name: "You can delete this turorial...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...from the Lists view at any time"
+        
         item = tutorial.addItem(cat7, name: "You can add it again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...from the About view if you wish"
         
