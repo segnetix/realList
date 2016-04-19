@@ -26,20 +26,25 @@
 		B0930D6C1C652DE9007EBAA0 /* SettingsPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0930D6B1C652DE9007EBAA0 /* SettingsPresentationController.swift */; };
 		B0930D6E1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0930D6D1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift */; };
 		B0930D701C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0930D6F1C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift */; };
+		B0A1BCDB1CC2C6C700F4F0B1 /* AppSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */; };
+		B0A1BCDC1CC2C6C700F4F0B1 /* AppSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */; };
+		B0A1BCDF1CC4142700F4F0B1 /* UpgradeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */; };
+		B0A1BCE01CC4142700F4F0B1 /* UpgradeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */; };
 		B0A3026C1C349F7A00F6FB44 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */; };
-		B0A3026E1C349F7A00F6FB44 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A3026D1C349F7A00F6FB44 /* ViewController.swift */; };
 		B0A302711C349F7A00F6FB44 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0A3026F1C349F7A00F6FB44 /* Main.storyboard */; };
 		B0A302731C349F7A00F6FB44 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0A302721C349F7A00F6FB44 /* Assets.xcassets */; };
 		B0A302761C349F7A00F6FB44 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0A302741C349F7A00F6FB44 /* LaunchScreen.storyboard */; };
 		B0A3027E1C34A1C800F6FB44 /* ListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */; };
 		B0A302801C34A31C00F6FB44 /* ItemViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */; };
 		B0A302881C35915B00F6FB44 /* ListData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A302871C35915B00F6FB44 /* ListData.swift */; };
+		B0EC54D61CBFF5BD0017553B /* RealListProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */; };
+		B0EC54D81CBFF7100017553B /* IAPHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EC54D71CBFF7100017553B /* IAPHelper.swift */; };
 		B0FF8C351C4AE2B000C0A33C /* AddItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */; };
 		B0FF8C371C4AE58900C0A33C /* AddListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FF8C361C4AE58900C0A33C /* AddListCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		B0026FDB1CA5AE2800DA1785 /* EnList_Development_Profile.mobileprovision */ = {isa = PBXFileReference; lastKnownFileType = file; name = EnList_Development_Profile.mobileprovision; path = ../../../../../Downloads/EnList_Development_Profile.mobileprovision; sourceTree = "<group>"; };
+		B0026FDB1CA5AE2800DA1785 /* EnList_Development_Profile.mobileprovision */ = {isa = PBXFileReference; lastKnownFileType = file; name = EnList_Development_Profile.mobileprovision; path = ../../../../../../Downloads/EnList_Development_Profile.mobileprovision; sourceTree = "<group>"; };
 		B02174CC1C6D52B20087D5A3 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/Main.strings; sourceTree = "<group>"; };
 		B02174CD1C6D52B20087D5A3 /* fr */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = fr; path = fr.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
 		B02174CE1C6D52B80087D5A3 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Main.strings; sourceTree = "<group>"; };
@@ -117,9 +122,12 @@
 		B0930D6B1C652DE9007EBAA0 /* SettingsPresentationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsPresentationController.swift; sourceTree = "<group>"; };
 		B0930D6D1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsAnimatedTransitioning.swift; sourceTree = "<group>"; };
 		B0930D6F1C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTransitioningDelegate.swift; sourceTree = "<group>"; };
+		B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppSettingsViewController.swift; path = ../AppSettingsViewController.swift; sourceTree = "<group>"; };
+		B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AppSettingsViewController.xib; path = ../AppSettingsViewController.xib; sourceTree = "<group>"; };
+		B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpgradeViewController.swift; sourceTree = "<group>"; };
+		B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UpgradeViewController.xib; sourceTree = "<group>"; };
 		B0A302681C349F7A00F6FB44 /* EnList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EnList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		B0A3026D1C349F7A00F6FB44 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		B0A302701C349F7A00F6FB44 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B0A302721C349F7A00F6FB44 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B0A302751C349F7A00F6FB44 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -127,6 +135,8 @@
 		B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListViewController.swift; sourceTree = "<group>"; };
 		B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemViewController.swift; sourceTree = "<group>"; };
 		B0A302871C35915B00F6FB44 /* ListData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListData.swift; sourceTree = "<group>"; };
+		B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealListProducts.swift; sourceTree = "<group>"; };
+		B0EC54D71CBFF7100017553B /* IAPHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IAPHelper.swift; path = ../IAPHelper.swift; sourceTree = "<group>"; };
 		B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddItemCell.swift; sourceTree = "<group>"; };
 		B0FF8C361C4AE58900C0A33C /* AddListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddListCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -149,7 +159,6 @@
 			isa = PBXGroup;
 			children = (
 				B02BBCED1CA7069F00030822 /* StoreKit.framework */,
-				B0026FDB1CA5AE2800DA1785 /* EnList_Development_Profile.mobileprovision */,
 				B07CCC7A1CA1985A00CBCFC1 /* CloudKit.framework */,
 				B0930D5D1C63C951007EBAA0 /* iAd.framework */,
 				B0A3026A1C349F7A00F6FB44 /* EnList */,
@@ -170,7 +179,6 @@
 			children = (
 				B07CCC791CA197E700CBCFC1 /* EnList.entitlements */,
 				B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */,
-				B0A3026D1C349F7A00F6FB44 /* ViewController.swift */,
 				B0A302871C35915B00F6FB44 /* ListData.swift */,
 				B07828971C36000B009D356F /* ListCell.swift */,
 				B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */,
@@ -182,20 +190,27 @@
 				B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */,
 				B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */,
 				B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */,
-				B0930D691C652DA5007EBAA0 /* SettingsViewController.swift */,
 				B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */,
-				B0930D6F1C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift */,
 				B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */,
-				B0930D6B1C652DE9007EBAA0 /* SettingsPresentationController.swift */,
 				B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */,
+				B0930D691C652DA5007EBAA0 /* SettingsViewController.swift */,
+				B0930D6F1C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift */,
+				B0930D6B1C652DE9007EBAA0 /* SettingsPresentationController.swift */,
 				B0930D6D1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift */,
 				B07CCC7C1CA1A76500CBCFC1 /* AboutViewController.swift */,
 				B07CCC7D1CA1A76500CBCFC1 /* AboutViewController.xib */,
+				B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */,
+				B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */,
+				B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */,
+				B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */,
+				B0EC54D71CBFF7100017553B /* IAPHelper.swift */,
+				B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */,
 				B0A3026F1C349F7A00F6FB44 /* Main.storyboard */,
 				B0A302721C349F7A00F6FB44 /* Assets.xcassets */,
 				B02174D41C6D57110087D5A3 /* Localizable.strings */,
 				B0A302741C349F7A00F6FB44 /* LaunchScreen.storyboard */,
 				B0A302771C349F7A00F6FB44 /* Info.plist */,
+				B0026FDB1CA5AE2800DA1785 /* EnList_Development_Profile.mobileprovision */,
 			);
 			name = EnList;
 			path = ListApp;
@@ -293,9 +308,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B0A1BCE01CC4142700F4F0B1 /* UpgradeViewController.xib in Resources */,
 				B0A302761C349F7A00F6FB44 /* LaunchScreen.storyboard in Resources */,
 				B02174D21C6D57110087D5A3 /* Localizable.strings in Resources */,
 				B0A302731C349F7A00F6FB44 /* Assets.xcassets in Resources */,
+				B0A1BCDC1CC2C6C700F4F0B1 /* AppSettingsViewController.xib in Resources */,
 				B0A302711C349F7A00F6FB44 /* Main.storyboard in Resources */,
 				B07CCC7F1CA1A76500CBCFC1 /* AboutViewController.xib in Resources */,
 			);
@@ -309,7 +326,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				B0930D6A1C652DA5007EBAA0 /* SettingsViewController.swift in Sources */,
-				B0A3026E1C349F7A00F6FB44 /* ViewController.swift in Sources */,
 				B0FF8C371C4AE58900C0A33C /* AddListCell.swift in Sources */,
 				B03C467D1C66F34D00B66CBD /* ItemDetailPresentationController.swift in Sources */,
 				B0930D701C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift in Sources */,
@@ -317,11 +333,15 @@
 				B03C467B1C66F21400B66CBD /* ItemDetailViewController.swift in Sources */,
 				B07AB8A21C6BCF99001F8F81 /* CheckBox.swift in Sources */,
 				B0A302881C35915B00F6FB44 /* ListData.swift in Sources */,
+				B0EC54D61CBFF5BD0017553B /* RealListProducts.swift in Sources */,
 				B03C46811C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift in Sources */,
 				B0A3026C1C349F7A00F6FB44 /* AppDelegate.swift in Sources */,
 				B0854A891C3895DA00B9D2F7 /* CategoryCell.swift in Sources */,
 				B07828981C36000B009D356F /* ListCell.swift in Sources */,
+				B0A1BCDF1CC4142700F4F0B1 /* UpgradeViewController.swift in Sources */,
+				B0A1BCDB1CC2C6C700F4F0B1 /* AppSettingsViewController.swift in Sources */,
 				B078289A1C360020009D356F /* ItemCell.swift in Sources */,
+				B0EC54D81CBFF7100017553B /* IAPHelper.swift in Sources */,
 				B0FF8C351C4AE2B000C0A33C /* AddItemCell.swift in Sources */,
 				B06836A21CAB1A7200422742 /* AddButton.swift in Sources */,
 				B0A3027E1C34A1C800F6FB44 /* ListViewController.swift in Sources */,

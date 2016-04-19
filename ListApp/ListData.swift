@@ -47,7 +47,7 @@ let key_tutorial            = "tutorial"
 let key_owningItem          = "owningItem"
 let key_image               = "image"
 let key_imageGUID           = "imageGUID"
-let key_imageFilePath       = "imageFilePath"
+//let key_imageFilePath       = "imageFilePath"
 let key_imageAsset          = "imageAsset"
 let key_imageRecord         = "imageRecord"
 let key_objectRecordID      = "objectRecordID"
@@ -1111,6 +1111,17 @@ class List: NSObject, NSCoding
         return html
     }
 
+    // item count for this list
+    func itemCount() -> Int
+    {
+        var count = 0
+        
+        for category in categories {
+            count += category.items.count
+        }
+        
+        return count
+    }
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1720,6 +1731,18 @@ class Item: ListObj, NSCoding
         // note
         if appDelegate.printNotes && self.note.characters.count > 0 {
             html += "<tr><td></td><td><div class='tab'><font size='2'; color='gray'>\(self.note)</font></div></td></tr>"
+        }
+        
+        // image
+        if appDelegate.printNotes && appDelegate.picsInPrintAndEmail {
+            if let image = imageAsset?.image {
+                let resizedImage = resizeImage(image, newWidth: 120)
+                let imageData = UIImageJPEGRepresentation(resizedImage, jpegCompressionQuality)
+                if let imageData = imageData {
+                    let base64String = imageData.base64EncodedStringWithOptions(.Encoding64CharacterLineLength)
+                    html += "<tr><td></td><td><b><img src='data:image/jpeg;base64,\(base64String)' width='120' height='90' align='left' border='0' alt='Item Image' ></b></td></tr>"
+                }
+            }
         }
         
         return html

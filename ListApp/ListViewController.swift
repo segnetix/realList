@@ -148,6 +148,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             cell.listName.addTarget(self, action: #selector(ListViewController.listNameDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
             cell.listName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
             cell.listName.text = list.name
+            cell.listName.autocapitalizationType = appDelegate.namesCapitalize ? .Words : .None
+            cell.listName.spellCheckingType = appDelegate.namesSpellCheck ? .Yes : .No
+            cell.listName.autocorrectionType = appDelegate.namesAutocorrection ? .Yes : .No
             cell.listName.tag = indexPath.row
             cell.contentView.tag = indexPath.row
             
@@ -332,6 +335,29 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     @IBAction func addListButtonTapped(sender: UIButton)
     {
+        var listCount = 0
+        
+        for list in lists {
+            if list.isTutorialList == false {
+                listCount += 1
+            }
+        }
+        
+        if appDelegate.appIsUpgraded == false && listCount >= kMaxListCount
+        {
+            // max list count (not including the tutorial) will be exceeded
+            let alertVC = UIAlertController(
+                title: "List Limit",
+                message: "The free version of realList is limited to \(kMaxListCount) lists.  Please upgrade or restore your purchase for unlimited lists.",
+                preferredStyle: .Alert)
+            let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil )
+            alertVC.addAction(okAction)
+            
+            presentViewController(alertVC, animated: true, completion: nil)
+            
+            return
+        }
+        
         // create a new list and append
         let newList = List(name: "", createRecord: true)
         lists.append(newList)
@@ -533,6 +559,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         displayLink?.invalidate()
         displayLink = nil
         scrollLoopCount = 0
+        
+        guard indexPath != nil else { return }
         
         let destCell = self.tableView.cellForRowAtIndexPath(indexPath!)
         
@@ -824,7 +852,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // list1
         let tutorial = List(name: "realList Tutorial", createRecord: true, tutorial: true)
-        tutorial.isTutorialList = true
         lists.append(tutorial)
         var item: Item?
         

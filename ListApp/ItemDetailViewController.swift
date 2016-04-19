@@ -102,6 +102,9 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         noteTextView.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
         noteTextView.textAlignment = NSTextAlignment.Left
         noteTextView.returnKeyType = UIReturnKeyType.Done
+        noteTextView.autocapitalizationType = appDelegate.namesCapitalize ? .Sentences : .None
+        noteTextView.spellCheckingType = appDelegate.namesSpellCheck ? .Yes : .No
+        noteTextView.autocorrectionType = appDelegate.namesAutocorrection ? .Yes : .No
         noteTextView.delegate = self
         containerView.addSubview(noteTextView)
         
@@ -370,24 +373,11 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
     func imagePickerController(picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : AnyObject])
     {
         if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
-            imageView.image = resizeAndCompressImage(pickedImage, newWidth: 360)       // set to iPad image view dimensions
+            imageView.image = resizeImage(pickedImage, newWidth: 360)       // set to iPad image view dimensions
             setPhotoButton(false)
         }
         
         dismissViewControllerAnimated(true, completion: nil)
-    }
-    
-    func resizeAndCompressImage(image: UIImage, newWidth: CGFloat) -> UIImage
-    {
-        // scale the image
-        let scale = newWidth / image.size.width
-        let newHeight = image.size.height * scale
-        UIGraphicsBeginImageContext(CGSizeMake(newWidth, newHeight))
-        image.drawInRect(CGRectMake(0, 0, newWidth, newHeight))
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return newImage
     }
     
     func imagePickerControllerDidCancel(picker: UIImagePickerController)
@@ -438,4 +428,24 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
+}
+
+
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - Utility methods
+//
+////////////////////////////////////////////////////////////////
+
+func resizeImage(image: UIImage, newWidth: CGFloat) -> UIImage
+{
+    // scale the image
+    let scale = newWidth / image.size.width
+    let newHeight = image.size.height * scale
+    UIGraphicsBeginImageContext(CGSizeMake(newWidth, newHeight))
+    image.drawInRect(CGRectMake(0, 0, newWidth, newHeight))
+    let newImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+    
+    return newImage
 }

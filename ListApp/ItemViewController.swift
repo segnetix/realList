@@ -32,10 +32,10 @@ enum ItemViewCellType {
     case AddItem
 }
 
-let kItemViewScrollRate: CGFloat = 6.0
-let kItemCellHeight: CGFloat = 56.0
+let kItemViewScrollRate: CGFloat =  6.0
+let kItemCellHeight:     CGFloat = 56.0
 let kCategoryCellHeight: CGFloat = 44.0
-let kAddItemCellHeight: CGFloat = 44.0
+let kAddItemCellHeight:  CGFloat = 44.0
 
 class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate, UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate
 {
@@ -55,7 +55,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     var longPressActive = false
     var editingNewItemName = false
     var editingNewCategoryName = false
-    var showAdBanner = true
     var tempCollapsedCategoryIsMoving = false
     let settingsTransitionDelegate = SettingsTransitioningDelegate()
     let itemDetailTransitionDelegate = ItemDetailTransitioningDelegate()
@@ -79,7 +78,12 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     {
         super.viewDidLoad()
         
-        adBanner.delegate = self
+        if appDelegate.appIsUpgraded {
+            adBanner.delegate = nil
+            adBanner.removeFromSuperview()
+        } else {
+            adBanner.delegate = self
+        }
         
         // Uncomment the following line to preserve selection between presentations
         //self.clearsSelectionOnViewWillAppear = false
@@ -115,14 +119,14 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        
+        layoutAnimated(false)
     }
     
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
         //print("viewWillTransitionToSize... \(size)")
-
     }
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -172,6 +176,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             cell.itemName.delegate = self
             cell.itemName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
             cell.itemName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+            cell.itemName.autocapitalizationType = appDelegate.namesCapitalize ? .Words : .None
+            cell.itemName.spellCheckingType = appDelegate.namesSpellCheck ? .Yes : .No
+            cell.itemName.autocorrectionType = appDelegate.namesAutocorrection ? .Yes : .No
             cell.itemName!.tag = tag
             cell.contentView.tag = tag
             cell.tapView.tag = tag
@@ -235,6 +242,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             cell.categoryName.delegate = self
             cell.categoryName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
             cell.categoryName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
+            cell.categoryName.autocapitalizationType = appDelegate.namesCapitalize ? .Words : .None
+            cell.categoryName.spellCheckingType = appDelegate.namesSpellCheck ? .Yes : .No
+            cell.categoryName.autocorrectionType = appDelegate.namesAutocorrection ? .Yes : .No
             cell.categoryName!.tag = tag
             cell.contentView.tag = tag
             
@@ -379,8 +389,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         // need to restore the tableView frame based on presence of the ad banner
         let bannerHeight = adBanner.frame.size.height
         let bannerXpos = self.view.frame.size.height
+        let showAdBanner = !appDelegate.appIsUpgraded
         
-        if showAdBanner || adBanner.bannerLoaded {
+        if showAdBanner && adBanner.bannerLoaded {
             self.tableView.frame.size.height = self.view.frame.height - bannerHeight
             adBanner.frame.origin.y = bannerXpos - bannerHeight
         } else {
@@ -389,7 +400,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         }
         
         
-        UIView.animateWithDuration(0.3, animations: { () -> Void in
+        UIView.animateWithDuration(0.5, animations: { () -> Void in
             self.view.layoutIfNeeded()
         })
     }
@@ -474,6 +485,21 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     
     func addItemButtonTapped(sender: UIButton)
     {
+        if appDelegate.appIsUpgraded == false && list.itemCount() >= kMaxItemCount
+        {
+            // max item count will be exceeded
+            let alertVC = UIAlertController(
+                title: "Item Limit",
+                message: "The free version of realList is limited to \(kMaxItemCount) items per list.  Please upgrade or restore your purchase for unlimited items.",
+                preferredStyle: .Alert)
+            let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil )
+            alertVC.addAction(okAction)
+            
+            presentViewController(alertVC, animated: true, completion: nil)
+            
+            return
+        }
+        
         // create a new item and append to the category of the add button
         let category = list.categoryForTag(sender.tag)
         var newItem: Item? = nil
@@ -1326,7 +1352,16 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             let mailViewController = MFMailComposeViewController.init()
             mailViewController.mailComposeDelegate = self
             mailViewController.navigationBar.barStyle = UIBarStyle.Default
-
+            
+            // test code for embedded images from attachments
+            /*
+            let image = list.categories[0].items[0].imageAsset?.image
+            if image != nil {
+                let imageData = UIImageJPEGRepresentation(image!, jpegCompressionQuality)
+                mailViewController.addAttachmentData(imageData!, mimeType: "image/jpeg", fileName: "image01.jpg")
+            }
+            */
+            
             // subject and title
             mailViewController.setSubject(list.name)
             
@@ -1592,60 +1627,73 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     func bannerViewActionShouldBegin(banner: ADBannerView!, willLeaveApplication willLeave: Bool) -> Bool
     {
         print("Banner view is beginning an ad action")
-        let shouldExecuteAction = self.allowActionToRun()     // your app implements this method
+        let shouldExecuteAction = self.allowActionToRun()
         
         if !willLeave && shouldExecuteAction
         {
             // insert code here to suspend any services that might conflict with the advertisement
         }
         
-        return shouldExecuteAction;
+        return shouldExecuteAction
     }
     
-    func bannerViewActionDidFinish(banner: ADBannerView!) {
+    func bannerViewActionDidFinish(banner: ADBannerView!)
+    {
         // insert code here to resume any services paused by the ad banner action
         // must execute quickly
         print("bannerViewActionDidFinish")
     }
     
-    func bannerViewDidLoadAd(banner: ADBannerView!) {
-        //print("bannerViewDidLoadAd")
-        self.adBanner.hidden = false
-        
-        self.layoutAnimated(true)
+    func bannerViewDidLoadAd(banner: ADBannerView!)
+    {
+        if self.allowActionToRun() {
+            self.adBanner.hidden = true
+            self.layoutAnimated(false)
+        } else {
+            self.adBanner.hidden = false
+            self.layoutAnimated(true)
+        }
     }
     
-    func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!) {
-        //print("didFailToReceiveAdWithError: \(error)")
+    func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!)
+    {
         self.adBanner.hidden = true
-        
         self.layoutAnimated(true)
     }
     
     func allowActionToRun() -> Bool {
         // determine if we will allow an add action to take over the screen
-
-        return true
+        if appDelegate.appIsUpgraded {
+            return false
+        } else {
+            return true
+        }
     }
     
     // move the adBanner on and off the screen
-    func layoutAnimated(animated: Bool) {
-        let bannerHeight = adBanner.frame.size.height
-        let bannerXpos = self.view.frame.size.height
-        
-        if showAdBanner && adBanner.bannerLoaded {
-            self.tableView.frame.size.height = self.view.frame.height - bannerHeight
-            adBanner.frame.origin.y = bannerXpos - bannerHeight
-        } else {
-            self.tableView.frame.size.height = self.view.frame.height
-            adBanner.frame.origin.y = bannerXpos
+    func layoutAnimated(animated: Bool)
+    {
+        if self.adBanner != nil {
+            let bannerHeight = self.adBanner.frame.size.height
+            let bannerXpos   = self.view.frame.size.height
+            let showAdBanner = !appDelegate.appIsUpgraded
+            
+            if showAdBanner && adBanner.bannerLoaded {
+                // show the ad banner
+                self.adBanner.hidden = false
+                self.tableView.frame.size.height = self.view.frame.height - bannerHeight
+                self.adBanner.frame.origin.y = bannerXpos - bannerHeight
+            } else {
+                // hide the ad banner
+                self.adBanner.hidden = true
+                self.tableView.frame.size.height = self.view.frame.height
+                self.adBanner.frame.origin.y = bannerXpos
+            }
+            
+            UIView.animateWithDuration(animated ? 0.5 : 0.0, animations: { () -> Void in
+                self.view.layoutIfNeeded()
+            })
         }
-        
-        //print("showAdBanner: xPos \(adBanner.frame.origin.y)")
-        
-        UIView.animateWithDuration(animated ? 0.5 : 0.0, animations: { () -> Void in
-            self.view.layoutIfNeeded()
-        })
     }
     
 }

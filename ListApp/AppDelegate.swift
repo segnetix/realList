@@ -7,6 +7,30 @@
 
 import UIKit
 import CloudKit
+import StoreKit
+
+let key_listData             = "listData"
+let key_selectionIndex       = "selectionIndex"
+let key_printNotes           = "printNotes"
+let key_namesCapitalize      = "namesCapitalize"
+let key_namesSpellCheck      = "namesSpellCheck"
+let key_namesAutocorrection  = "namesAutocorrection"
+let key_notesCapitalize      = "notesCapitalize"
+let key_notesSpellCheck      = "notesSpellCheck"
+let key_notesAutocorrection  = "notesAutocorrection"
+let key_picsInPrintAndEmail  = "picsInPrintAndEmail"
+
+// list and item limits
+let kMaxListCount            =  3
+let kMaxItemCount            = 20
+
+// price formatter function
+let priceFormatter: NSNumberFormatter = {
+    let formatter = NSNumberFormatter()
+    formatter.formatterBehavior = .Behavior10_4
+    formatter.numberStyle = .CurrencyStyle
+    return formatter
+}()
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate
@@ -17,6 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var listViewController: ListViewController?
     var rightNavController: UINavigationController?
     var itemViewController: ItemViewController?
+    var aboutViewController: AboutViewController?
     var DocumentsDirectory: NSURL?
     var ArchiveURL = NSURL()
     var cloudUploadStatusRecord: CKRecord?
@@ -29,6 +54,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var deleteArray = [CKRecord]()                      // "
     var refreshEventIsPending = false
     var printNotes = true
+    var upgradePriceString = ""
+    var upgradeProduct: SKProduct?
+    var appIsUpgraded: Bool = false {
+        didSet {
+            if let itemVC = itemViewController {
+                print("appIsUpgraded was set to \(appIsUpgraded)")
+                if itemVC.adBanner != nil && appIsUpgraded {
+                    itemVC.adBanner.delegate = nil
+                    itemVC.adBanner.removeFromSuperview()
+                }
+                itemVC.layoutAnimated(false)
+            }
+        }
+    }
+    
+    // app settings
+    var namesCapitalize = false
+    var namesSpellCheck = false
+    var namesAutocorrection = false
+    var notesCapitalize = false
+    var notesSpellCheck = false
+    var notesAutocorrection = false
+    var picsInPrintAndEmail = false
     
     // delete purge delay
     let deletePurgeDays = 30                            // delete records will be purged from cloud storage after this many days
@@ -51,7 +99,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         itemViewController!.navigationItem.leftBarButtonItem = splitViewController!.displayModeButtonItem()
         
         DocumentsDirectory = NSFileManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-        ArchiveURL = DocumentsDirectory!.URLByAppendingPathComponent("listData")
+        ArchiveURL = DocumentsDirectory!.URLByAppendingPathComponent(key_listData)
         
         splitViewController!.preferredDisplayMode = UISplitViewControllerDisplayMode.AllVisible
         
@@ -67,7 +115,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             listViewController!.lists = archivedListData
             
             // restore the selected list
-            if let initialListIndex = NSUserDefaults.standardUserDefaults().objectForKey("selectionIndex") as? Int {
+            if let initialListIndex = NSUserDefaults.standardUserDefaults().objectForKey(key_selectionIndex) as? Int {
                 if initialListIndex >= 0 && initialListIndex < listViewController!.lists.count {
                     itemViewController!.list = listViewController!.lists[initialListIndex]
                     listViewController!.selectionIndex = initialListIndex
@@ -83,11 +131,46 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         print("iCloudIsAvailable: \(self.iCloudIsAvailable())")
         
-        if let printNotes = NSUserDefaults.standardUserDefaults().objectForKey("printNotes") as? Bool {
-            self.printNotes = printNotes
-        }
+        // restore app settings
+        if let printNotes          = NSUserDefaults.standardUserDefaults().objectForKey(key_printNotes)          as? Bool { self.printNotes          = printNotes          }
+        if let namesCapitalize     = NSUserDefaults.standardUserDefaults().objectForKey(key_namesCapitalize)     as? Bool { self.namesCapitalize     = namesCapitalize     }
+        if let namesSpellCheck     = NSUserDefaults.standardUserDefaults().objectForKey(key_namesSpellCheck)     as? Bool { self.namesSpellCheck     = namesSpellCheck     }
+        if let namesAutocorrection = NSUserDefaults.standardUserDefaults().objectForKey(key_namesAutocorrection) as? Bool { self.namesAutocorrection = namesAutocorrection }
+        if let notesCapitalize     = NSUserDefaults.standardUserDefaults().objectForKey(key_notesCapitalize)     as? Bool { self.notesCapitalize     = notesCapitalize     }
+        if let notesSpellCheck     = NSUserDefaults.standardUserDefaults().objectForKey(key_notesSpellCheck)     as? Bool { self.notesSpellCheck     = notesSpellCheck     }
+        if let notesAutocorrection = NSUserDefaults.standardUserDefaults().objectForKey(key_notesAutocorrection) as? Bool { self.notesAutocorrection = notesAutocorrection }
+        if let picsInPrintAndEmail = NSUserDefaults.standardUserDefaults().objectForKey(key_picsInPrintAndEmail) as? Bool { self.picsInPrintAndEmail = picsInPrintAndEmail }
         
-        //fetchCloudData()
+        // restore upgrade status from user defaults
+        if RealListProducts.store.isProductPurchased(RealListProducts.AdRemovalRealList) {
+            self.appIsUpgraded = true
+        } else {
+            // check the product on the app store to get pricing
+            self.appIsUpgraded = false
+            RealListProducts.store.requestProducts { success, products in
+                if success {
+                    if let products = products {
+                        if products.count > 0 {
+                            // we have only one product
+                            let product = products[0]
+                            self.upgradeProduct = product
+                            
+                            print("localizedTitle: \(product.localizedTitle)")
+                            print("localizedDescription: \(product.localizedDescription)")
+                            print("productIdentifier: \(product.productIdentifier)")
+                            
+                            if RealListProducts.store.isProductPurchased(product.productIdentifier) {
+                                self.appIsUpgraded = true
+                            } else {
+                                self.appIsUpgraded = false
+                                priceFormatter.locale = product.priceLocale
+                                self.upgradePriceString = priceFormatter.stringFromNumber(product.price)!
+                            }
+                        }
+                    }
+                }
+            }
+        }
         
         return true
     }
@@ -161,6 +244,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
         
         print("applicationWillEnterForeground...")
+        aboutViewController?.updateCloudStatus()
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
@@ -267,8 +351,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func saveState()
     {
         // save current selection
-        NSUserDefaults.standardUserDefaults().setObject(listViewController!.selectionIndex, forKey: "selectionIndex")
-        NSUserDefaults.standardUserDefaults().setObject(printNotes, forKey: "printNotes")
+        NSUserDefaults.standardUserDefaults().setObject(listViewController!.selectionIndex, forKey: key_selectionIndex)
+        NSUserDefaults.standardUserDefaults().setObject(printNotes,                         forKey: key_printNotes)
+        
+        // save app settings
+        NSUserDefaults.standardUserDefaults().setObject(namesCapitalize,                    forKey: key_namesCapitalize)
+        NSUserDefaults.standardUserDefaults().setObject(namesSpellCheck,                    forKey: key_namesSpellCheck)
+        NSUserDefaults.standardUserDefaults().setObject(namesAutocorrection,                forKey: key_namesAutocorrection)
+        NSUserDefaults.standardUserDefaults().setObject(notesCapitalize,                    forKey: key_notesCapitalize)
+        NSUserDefaults.standardUserDefaults().setObject(notesSpellCheck,                    forKey: key_notesSpellCheck)
+        NSUserDefaults.standardUserDefaults().setObject(notesAutocorrection,                forKey: key_notesAutocorrection)
+        NSUserDefaults.standardUserDefaults().setObject(picsInPrintAndEmail,                forKey: key_picsInPrintAndEmail)
         
         NSUserDefaults.standardUserDefaults().synchronize()
     }

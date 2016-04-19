@@ -8,10 +8,24 @@
 
 import UIKit
 
+enum PermissionStatus: Int, CustomStringConvertible {
+    case Authorized, Unauthorized, Unknown, Disabled
+    
+    var description: String {
+        switch self {
+        case .Authorized:   return "Authorized"
+        case .Unauthorized: return "Unauthorized"
+        case .Unknown:      return "Unknown"
+        case .Disabled:     return "Disabled" // System-level
+        }
+    }
+}
+
 class AboutViewController: UIViewController
 {
     @IBOutlet weak var versionLabel: UILabel!
-    @IBOutlet weak var iCloudLabel: UILabel!
+    @IBOutlet weak var cloudButton: UIButton!
+    @IBOutlet weak var upgradeButton: UIButton!
     
     var listVC: ListViewController?
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -20,18 +34,24 @@ class AboutViewController: UIViewController
     {
         super.viewDidLoad()
 
+        appDelegate.aboutViewController = self
+        
         // get the bundle version string
         if let text = NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? String {
             versionLabel.text = "v" + text
         }
         
+        updateCloudStatus()
+    }
+    
+    func updateCloudStatus() {
         if appDelegate.iCloudIsAvailable() {
-            iCloudLabel.text = "YES"
+            cloudButton.setImage(UIImage(named: "Cloud_check"), forState: .Normal)
         } else {
-            iCloudLabel.text = "NO"
+            cloudButton.setImage(UIImage(named: "Cloud"), forState: .Normal)
         }
     }
-
+    
     override func didReceiveMemoryWarning()
     {
         super.didReceiveMemoryWarning()
@@ -56,6 +76,13 @@ class AboutViewController: UIViewController
         }
     }
     
+    @IBAction func appSettings(sender: UIButton)
+    {
+        print("app settings")
+        let appSettingsVC = AppSettingsViewController()
+        presentViewController(appSettingsVC, animated: true, completion: nil)
+    }
+    
     @IBAction func addTutorial(sender: AnyObject)
     {
         if let listVC = listVC {
@@ -65,8 +92,16 @@ class AboutViewController: UIViewController
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
+    @IBAction func upgrade(sender: UIButton)
+    {
+        print("upgrade...")
+        let upgradeVC = UpgradeViewController()
+        presentViewController(upgradeVC, animated: true, completion: nil)
+    }
+    
     @IBAction func close(sender: UIButton)
     {
-       presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+        appDelegate.aboutViewController = nil
+        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
 }
