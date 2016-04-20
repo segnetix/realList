@@ -65,7 +65,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         let formatter = NSDateFormatter()
         formatter.dateStyle = NSDateFormatterStyle.MediumStyle
         formatter.timeStyle = .MediumStyle
-        let padding = "    "
+        let padding = "   "
         var dateString = ""
         
         titleLabel.text = item.name
@@ -128,11 +128,11 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         containerView.addSubview(imageView)
         
         // info text
-        var infoTextFont: UIFont = UIFont.preferredFontForTextStyle(UIFontTextStyleFootnote)
+        let infoTextFont: UIFont = UIFont.preferredFontForTextStyle(UIFontTextStyleFootnote)
         
-        if wideDisplay {
-            infoTextFont = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
-        }
+        //if wideDisplay {
+        //    infoTextFont = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
+        //}
         
         createdLabel.translatesAutoresizingMaskIntoConstraints = false
         createdLabel.font = infoTextFont
@@ -236,7 +236,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         if wideDisplay {
             containerView.addConstraints(
                 NSLayoutConstraint.constraintsWithVisualFormat(
-                    "H:|-20-[infoVertStackView]-(>=24)-[photoButton]-24-[imageView(360)]-20-|",
+                    "H:|-20-[infoVertStackView]-(>=24)-[photoButton(40)]-24-[imageView(360)]-20-|",
                     options: [.AlignAllTop],
                     metrics: nil,
                     views: views))

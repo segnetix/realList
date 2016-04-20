@@ -12,9 +12,9 @@ public struct RealListProducts
 {
     private static let Prefix = "com.segnetix.realList."
     
-    public static let AdRemovalRealList = Prefix + "AdRemoval"
+    public static let FullVersion = Prefix + "FullVersion"
     
-    private static let productIdentifiers: Set<ProductIdentifier> = [RealListProducts.AdRemovalRealList]
+    private static let productIdentifiers: Set<ProductIdentifier> = [RealListProducts.FullVersion]
     
     public static let store = IAPHelper(productIds: RealListProducts.productIdentifiers)
 }

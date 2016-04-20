@@ -142,7 +142,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         if let picsInPrintAndEmail = NSUserDefaults.standardUserDefaults().objectForKey(key_picsInPrintAndEmail) as? Bool { self.picsInPrintAndEmail = picsInPrintAndEmail }
         
         // restore upgrade status from user defaults
-        if RealListProducts.store.isProductPurchased(RealListProducts.AdRemovalRealList) {
+        if RealListProducts.store.isProductPurchased(RealListProducts.FullVersion) {
             self.appIsUpgraded = true
         } else {
             // check the product on the app store to get pricing
@@ -711,22 +711,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             // set up the record fetched block
             listFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.listArray.append(record)
-                print("list recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
+                //print("list recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
             }
             
             categoryFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.categoryArray.append(record)
-                print("category recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
+                //print("category recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
             }
             
             itemFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.itemArray.append(record)
-                print("item recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
+                //print("item recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
             }
             
             deleteFetch.recordFetchedBlock = { (record : CKRecord!) in
                 self.deleteArray.append(record)
-                print("delete recordFetchedBlock: \(record[key_itemName]) \(record[key_deletedDate]) \(record.recordID.recordName)")
+                //print("delete recordFetchedBlock: \(record[key_itemName]) \(record[key_deletedDate]) \(record.recordID.recordName)")
             }
             
             // set up completion blocks with cursors so they can recursively gather all of the records
@@ -802,7 +802,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // pulls image data for items needing updating
     func fetchImageData()
     {
-        print("*** fetchImageData - \(itemReferences.count) items need new images...")
+        //print("*** fetchImageData - \(itemReferences.count) items need new images...")
         
         if let database = privateDatabase {
             // clear the record array
@@ -950,17 +950,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     
                     // remove the deleted items in this category
                     category.items.removeObjectsInArray(itemsToDelete)
-                    print("*** processDeleteObjects - deleted \(itemsToDelete.count) items in \(list.name): \(category.name)")
+                    //print("*** processDeleteObjects - deleted \(itemsToDelete.count) items in \(list.name): \(category.name)")
                 }
                 
                 // remove the deleted categories in this list
                 list.categories.removeObjectsInArray(categoriesToDelete)
-                print("*** processDeleteObjects - deleted \(categoriesToDelete.count) categories in \(list.name)")
+                //print("*** processDeleteObjects - deleted \(categoriesToDelete.count) categories in \(list.name)")
             }
             
             // remove the deleted lists
             listVC.lists.removeObjectsInArray(listsToDelete)
-            print("*** processDeleteObjects - deleted \(listsToDelete.count) lists")
+            //print("*** processDeleteObjects - deleted \(listsToDelete.count) lists")
         }
     }
     
@@ -1092,7 +1092,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 
 ////////////////////////////////////////////////////////////////
 //
-//  MARK: - Global Extensions
+//  MARK: - Global Methods and Extensions
 //
 ////////////////////////////////////////////////////////////////
 
@@ -1129,3 +1129,19 @@ public func >(lhs: NSDate, rhs: NSDate) -> Bool
 }
 
 extension NSDate: Comparable { }
+
+
+// print wrapper - will remove print statements from the release version
+func print(items: Any..., separator: String = " ", terminator: String = "\n")
+{
+    #if DEBUG
+    var idx = items.startIndex
+    let endIdx = items.endIndex
+    
+    repeat {
+        Swift.print(items[idx], separator: separator, terminator: idx == (endIdx - 1) ? terminator : separator)
+        idx += 1
+    } while idx < endIdx
+    
+    #endif
+}

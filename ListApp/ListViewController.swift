@@ -668,7 +668,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
 
-    
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - Delete methods
@@ -844,10 +843,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     func generateTutorial()
     {
         // do we already have a tutorial loaded?
+        var i = 0
         for list in lists {
             if list.isTutorialList {
+                self.selectionIndex = i
                 return
             }
+            i += 1
         }
         
         // list1
@@ -979,6 +981,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item = tutorial.addItem(cat7, name: "You can add it again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...from the About view if you wish"
         
+        // select the newly added tutorial
+        self.selectionIndex = self.lists.count-1
+        
+        // housekeeping
         tutorial.updateIndices()
         self.tableView.reloadData()
     }

@@ -86,7 +86,18 @@ class AboutViewController: UIViewController
     @IBAction func addTutorial(sender: AnyObject)
     {
         if let listVC = listVC {
+            // generates the tutorial and selects it
             listVC.generateTutorial()
+            
+            // delay presentation of the itemVC until after dismissal of the About view
+            let delay = 0.20 * Double(NSEC_PER_SEC)
+            let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
+            
+            dispatch_after(time, dispatch_get_main_queue(), {
+                if let itemVC = listVC.delegate as? ItemViewController {
+                    listVC.splitViewController?.showDetailViewController(itemVC.navigationController!, sender: nil)
+                }
+            })
         }
         
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)

@@ -20,6 +20,7 @@ let DeletesRecordType = "Deletes"
 let key_name                = "name"
 let key_showCompletedItems  = "showCompletedItems"
 let key_showInactiveItems   = "showInactiveItems"
+let key_isTutorialList      = "isTutorialList"
 let key_listColorName       = "listColorName"
 let key_categories          = "categories"
 let key_modificationDate    = "modificationDate"
@@ -160,11 +161,12 @@ class List: NSObject, NSCoding
 ///////////////////////////////////////////////////////
     
     // Memberwise initializer - called when restoring from local storage on launch
-    init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, listColorName: String?, modificationDate: NSDate?, listReference: CKReference?, listRecord: CKRecord?, categories: [Category]?)
+    init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, tutorial: Bool?, listColorName: String?, modificationDate: NSDate?, listReference: CKReference?, listRecord: CKRecord?, categories: [Category]?)
     {
-        if let name               = name                 { self.name                = name               } else { self.name = "" }
-        if let showCompletedItems = showCompletedItems   { self.showCompletedItems  = showCompletedItems } else { self.showCompletedItems = true }
-        if let showInactiveItems  = showInactiveItems    { self.showInactiveItems   = showInactiveItems  } else { self.showInactiveItems  = true }
+        if let name               = name                 { self.name                = name               } else { self.name = ""                        }
+        if let showCompletedItems = showCompletedItems   { self.showCompletedItems  = showCompletedItems } else { self.showCompletedItems = true        }
+        if let showInactiveItems  = showInactiveItems    { self.showInactiveItems   = showInactiveItems  } else { self.showInactiveItems  = true        }
+        if let tutorial           = tutorial             { self.isTutorialList      = tutorial           } else { self.isTutorialList = false           }
         if let modificationDate   = modificationDate     { self.modificationDate    = modificationDate   } else { self.modificationDate = NSDate.init() }
         if let listColorName      = listColorName        { self.listColorName       = listColorName      }
         if let listReference      = listReference        { self.listReference       = listReference      }
@@ -182,6 +184,7 @@ class List: NSObject, NSCoding
         let name               = decoder.decodeObjectForKey(key_name)               as? String
         let showCompletedItems = decoder.decodeObjectForKey(key_showCompletedItems) as? Bool
         let showInactiveItems  = decoder.decodeObjectForKey(key_showInactiveItems)  as? Bool
+        let tutorial           = decoder.decodeObjectForKey(key_isTutorialList)     as? Bool
         let listColorName      = decoder.decodeObjectForKey(key_listColorName)      as? String
         let categories         = decoder.decodeObjectForKey(key_categories)         as? [Category]
         let listReference      = decoder.decodeObjectForKey(key_listReference)      as? CKReference
@@ -191,6 +194,7 @@ class List: NSObject, NSCoding
         self.init(name: name,
                   showCompletedItems: showCompletedItems,
                   showInactiveItems: showInactiveItems,
+                  tutorial: tutorial,
                   listColorName: listColorName,
                   modificationDate: modificationDate,
                   listReference: listReference,
@@ -206,6 +210,7 @@ class List: NSObject, NSCoding
         coder.encodeObject(self.name,               forKey: key_name)
         coder.encodeObject(self.showCompletedItems, forKey: key_showCompletedItems)
         coder.encodeObject(self.showInactiveItems,  forKey: key_showInactiveItems)
+        coder.encodeObject(self.isTutorialList,     forKey: key_isTutorialList)
         coder.encodeObject(self.listColorName,      forKey: key_listColorName)
         coder.encodeObject(self.categories,         forKey: key_categories)
         coder.encodeObject(self.listReference,      forKey: key_listReference)
@@ -232,7 +237,7 @@ class List: NSObject, NSCoding
                     saveRecord(listRecord!)
                 }
             } else {
-                print("Can't save list '\(name)' - listRecord is nil...")
+                print("ERROR: list saveToCloud - Can't save list '\(name)' to cloud - listRecord is nil...")
             }
         }
         
@@ -247,8 +252,6 @@ class List: NSObject, NSCoding
     // saves this list record to the cloud
     func saveRecord(listRecord: CKRecord)
     {
-        print("saveRecord for List \(name)")
-        
         // don't save tutorial records to the cloud
         if self.isTutorialList {
             return
@@ -1493,10 +1496,10 @@ class Item: ListObj, NSCoding
         if let imageAsset         = imageAsset {
             self.imageAsset = imageAsset
             self.imageAsset!.itemName = name
-            print("*** Item memberwise initializer set imageAsset.itemName to \(name)")
+            //print("*** Item memberwise initializer set imageAsset.itemName to \(name)")
         } else {
             self.imageAsset = ImageAsset(itemName: name, itemReference: self.itemReference!)
-            print("*** Item memberwise initializer is initializing the ImageAsset...")
+            //print("*** Item memberwise initializer is initializing the ImageAsset...")
         }
         
         self.state = state
@@ -1636,7 +1639,7 @@ class Item: ListObj, NSCoding
                     print("******* ERROR in item updateFromRecord - the imageAsset for this item is nil...!!!")
                 }
             } else {
-                print("ImageAsset.updateFromRecord - image is up to date...")
+                //print("ImageAsset.updateFromRecord - image is up to date...")
             }
             
             // then set the local imageModifiedDate to cloud value
