@@ -80,7 +80,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         if appDelegate.appIsUpgraded {
             adBanner.delegate = nil
-            //adBanner.removeFromSuperview()
+            adBanner.removeFromSuperview()
+            adBanner.hidden = true
         } else {
             adBanner.delegate = self
         }
@@ -133,9 +134,19 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
     }
     
+    /*
     override func viewWillLayoutSubviews() {
-        //print("viewWillLayoutSubviews with width: \(self.view.frame.width)")
+        print("viewWillLayoutSubviews with width: \(self.view.frame.width)")
+        //super.viewWillLayoutSubviews()
+        layoutAnimated(true)
+    }
+    */
+    
+    override func viewDidLayoutSubviews() {
+        print("viewDidLayoutSubviews with width: \(self.view.frame.width)")
+        super.viewDidLayoutSubviews()
         
+        layoutAnimated(true)
     }
     
     required init(coder aDecoder: NSCoder) {
@@ -1675,29 +1686,34 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     // move the adBanner on and off the screen
     func layoutAnimated(animated: Bool)
     {
-        if self.adBanner != nil {
-            let bannerHeight = self.adBanner.frame.size.height
-            let bannerXpos   = self.view.frame.size.height
-            let showAdBanner = !appDelegate.appIsUpgraded
-            
-            if showAdBanner && adBanner.bannerLoaded {
-                // show the ad banner
-                self.adBanner.hidden = false
-                self.tableView.frame.size.height = self.view.frame.height - bannerHeight
-                self.adBanner.frame.origin.y = bannerXpos - bannerHeight
-            } else {
-                // hide the ad banner
-                self.adBanner.hidden = true
-                self.tableView.frame.size.height = self.view.frame.height
-                self.adBanner.frame.origin.y = bannerXpos
-            }
-            
-            UIView.animateWithDuration(animated ? 0.5 : 0.0, animations: { () -> Void in
-                self.view.layoutIfNeeded()
-            })
+        var bannerHeight: CGFloat = 0.0
+        var bannerLoaded = false
+        let bannerXpos   = self.view.frame.size.height
+        let showAdBanner = !appDelegate.appIsUpgraded
+        
+        if adBanner != nil {
+            bannerHeight = adBanner!.frame.size.height
+            bannerLoaded = adBanner!.bannerLoaded
         }
+        
+        if showAdBanner && bannerLoaded {
+            // show the ad banner
+            adBanner.hidden = false
+            tableView.frame.size.height = self.view.frame.height - bannerHeight
+            adBanner.frame.origin.y = bannerXpos - bannerHeight
+        } else {
+            // hide the ad banner
+            if adBanner != nil {
+                adBanner.hidden = true
+                adBanner.frame.origin.y = bannerXpos
+            }
+            tableView.frame.size.height = self.view.frame.height
+        }
+        
+        UIView.animateWithDuration(animated ? 0.5 : 0.0, animations: { () -> Void in
+            self.view.layoutIfNeeded()
+        })
     }
-    
 }
 
 
