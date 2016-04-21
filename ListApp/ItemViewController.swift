@@ -80,7 +80,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         if appDelegate.appIsUpgraded {
             adBanner.delegate = nil
-            adBanner.removeFromSuperview()
+            //adBanner.removeFromSuperview()
         } else {
             adBanner.delegate = self
         }
@@ -176,9 +176,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             cell.itemName.delegate = self
             cell.itemName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
             cell.itemName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
-            cell.itemName.autocapitalizationType = appDelegate.namesCapitalize ? .Words : .None
-            cell.itemName.spellCheckingType = appDelegate.namesSpellCheck ? .Yes : .No
-            cell.itemName.autocorrectionType = appDelegate.namesAutocorrection ? .Yes : .No
+            cell.itemName.autocapitalizationType = appDelegate.namesCapitalize     ? .Words : .None
+            cell.itemName.spellCheckingType      = appDelegate.namesSpellCheck     ? .Yes   : .No
+            cell.itemName.autocorrectionType     = appDelegate.namesAutocorrection ? .Yes   : .No
             cell.itemName!.tag = tag
             cell.contentView.tag = tag
             cell.tapView.tag = tag
@@ -596,13 +596,15 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     {
         NSObject.cancelPreviousPerformRequestsWithTarget(self)
         
-        let cell = tableView.cellForRowAtIndexPath(newCatIndexPath!) as! CategoryCell
-        
-        cell.categoryName.userInteractionEnabled = true
-        cell.categoryName.becomeFirstResponder()
-        editingNewCategoryName = true
-        editingNewItemName = false
-        newCatIndexPath = nil
+        if let cell = tableView.cellForRowAtIndexPath(newCatIndexPath!) as? CategoryCell {
+            cell.categoryName.userInteractionEnabled = true
+            cell.categoryName.becomeFirstResponder()
+            editingNewCategoryName = true
+            editingNewItemName = false
+            newCatIndexPath = nil
+        } else {
+            print("ERROR: scrollToCategoryEnded - no row at newCatIndexPath: \(newCatIndexPath)")
+        }
     }
     
     func categoryCountString(category: Category) -> String

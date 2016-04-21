@@ -102,9 +102,9 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         noteTextView.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
         noteTextView.textAlignment = NSTextAlignment.Left
         noteTextView.returnKeyType = UIReturnKeyType.Done
-        noteTextView.autocapitalizationType = appDelegate.namesCapitalize ? .Sentences : .None
-        noteTextView.spellCheckingType = appDelegate.namesSpellCheck ? .Yes : .No
-        noteTextView.autocorrectionType = appDelegate.namesAutocorrection ? .Yes : .No
+        noteTextView.autocapitalizationType = appDelegate.namesCapitalize     ? .Sentences : .None
+        noteTextView.spellCheckingType      = appDelegate.namesSpellCheck     ? .Yes       : .No
+        noteTextView.autocorrectionType     = appDelegate.namesAutocorrection ? .Yes       : .No
         noteTextView.delegate = self
         containerView.addSubview(noteTextView)
         

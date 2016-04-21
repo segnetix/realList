@@ -43,11 +43,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1359"
-            endingLineNumber = "1359"
+            startingLineNumber = "1361"
+            endingLineNumber = "1361"
             landmarkName = "presentEmailDialog()"
             landmarkType = "5">
          </BreakpointContent>
@@ -123,11 +123,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1684"
-            endingLineNumber = "1684"
+            startingLineNumber = "1686"
+            endingLineNumber = "1686"
             landmarkName = "layoutAnimated(_:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -139,11 +139,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1689"
-            endingLineNumber = "1689"
+            startingLineNumber = "1691"
+            endingLineNumber = "1691"
             landmarkName = "layoutAnimated(_:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -155,11 +155,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1693"
-            endingLineNumber = "1693"
+            startingLineNumber = "1695"
+            endingLineNumber = "1695"
             landmarkName = "layoutAnimated(_:)"
             landmarkType = "5">
             <Locations>
@@ -203,11 +203,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1682"
-            endingLineNumber = "1682"
+            startingLineNumber = "1684"
+            endingLineNumber = "1684"
             landmarkName = "layoutAnimated(_:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -219,11 +219,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1660"
-            endingLineNumber = "1660"
+            startingLineNumber = "1662"
+            endingLineNumber = "1662"
             landmarkName = "bannerView(_:didFailToReceiveAdWithError:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -235,11 +235,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1653"
-            endingLineNumber = "1653"
+            startingLineNumber = "1655"
+            endingLineNumber = "1655"
             landmarkName = "bannerViewDidLoadAd(_:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -251,11 +251,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1644"
-            endingLineNumber = "1644"
+            startingLineNumber = "1646"
+            endingLineNumber = "1646"
             landmarkName = "bannerViewActionDidFinish(_:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -267,11 +267,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1637"
-            endingLineNumber = "1637"
+            startingLineNumber = "1639"
+            endingLineNumber = "1639"
             landmarkName = "bannerViewActionShouldBegin(_:willLeaveApplication:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -283,11 +283,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ItemViewController.swift"
-            timestampString = "482799465.394787"
+            timestampString = "482947965.850517"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1496"
-            endingLineNumber = "1496"
+            startingLineNumber = "1498"
+            endingLineNumber = "1498"
             landmarkName = "checkButtonTapped(_:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -491,12 +491,44 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/ListViewController.swift"
-            timestampString = "482883192.577072"
+            timestampString = "482947406.667364"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "846"
             endingLineNumber = "846"
             landmarkName = "generateTutorial()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/ItemViewController.swift"
+            timestampString = "482946953.240405"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "66"
+            endingLineNumber = "66"
+            landmarkName = "ItemViewController"
+            landmarkType = "3">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/ItemViewController.swift"
+            timestampString = "482948277.94228"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "154"
+            endingLineNumber = "154"
+            landmarkName = "tableView(_:numberOfRowsInSection:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
