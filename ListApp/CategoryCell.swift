@@ -22,6 +22,7 @@ class CategoryCell: UITableViewCell
     @IBOutlet weak var categoryName: UITextField!
     @IBOutlet weak var catCountLabel: UILabel!
     //weak var delegate: CategoryCellDelegate?
+    @IBOutlet weak var expandArrows: UIImageView!
     
     override func awakeFromNib() {
         super.awakeFromNib()

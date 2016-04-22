@@ -183,6 +183,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             let tag = item.tag()
             
             // Configure the cell...
+            //cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             cell.itemName.userInteractionEnabled = false
             cell.itemName.delegate = self
             cell.itemName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
@@ -193,6 +194,24 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             cell.itemName!.tag = tag
             cell.contentView.tag = tag
             cell.tapView.tag = tag
+            
+            // set up picture indicator
+            if item.imageAsset?.image != nil {
+                cell.pictureIndicator.hidden = false
+                let origImage = cell.pictureIndicator.image
+                
+                if let origImage = origImage {
+                    // set check box color from list color
+                    let tintedImage = origImage.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
+                    cell.pictureIndicator.image = tintedImage
+                    
+                    if list!.listColor != nil {
+                        cell.pictureIndicator.tintColor = list!.listColor
+                    }
+                }
+            } else {
+                cell.pictureIndicator.hidden = true
+            }
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
             let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ItemViewController.cellSingleTapAction(_:)))
@@ -258,6 +277,13 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             cell.categoryName.autocorrectionType = appDelegate.namesAutocorrection ? .Yes : .No
             cell.categoryName!.tag = tag
             cell.contentView.tag = tag
+            
+            // set up expand arrows
+            if category.expanded {
+                cell.expandArrows.image = UIImage(named: "Expand Arrows")
+            } else {
+                cell.expandArrows.image = UIImage(named: "Collapse Arrows")
+            }
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
             let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ItemViewController.cellSingleTapAction(_:)))
@@ -366,7 +392,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         }
     }
     
-
+    
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - TextField methods
@@ -590,6 +616,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 handleCategoryCollapseExpand(category)
             }
         }
+        tableView.reloadData()
     }
     
     func expandAllCategories() {
@@ -601,6 +628,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 handleCategoryCollapseExpand(category)
             }
         }
+        tableView.reloadData()
     }
     
     func scrollToCategoryEnded(scrollView: UIScrollView)
@@ -658,16 +686,19 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 if !inEditMode
                 {
                     let category = obj as! Category
+                    let indexPath = list.displayIndexPathForCategory(category)
                     
                     // flip expanded state
                     category.expanded = !category.expanded
                     
                     handleCategoryCollapseExpand(category)
                     
-                    if category.expanded {
-                        // scroll the newly expanded header to the top so items can be seen
-                        let indexPath = list.displayIndexPathForCategory(category)
-                        if indexPath != nil {
+                    // handle expand arrows
+                    if indexPath != nil {
+                        self.tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: .None)
+                        
+                        if category.expanded {
+                            // scroll the newly expanded header to the top so items can be seen
                             self.tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Top, animated: true)
                         }
                     }
@@ -690,7 +721,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             print("ERROR: cellSingleTapAction received a nil sender.view!")
         }
     }
-    
+
     /// Respond to a double tap (cell name edit).
     func cellDoubleTapAction(sender: UITapGestureRecognizer)
     {
@@ -1150,6 +1181,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             tableView.endUpdates()
             
             resetCellViewTags()
+            
+            // reload to update the category count
+            self.tableView.reloadData()
         } else {
             print("ERROR: handleDeleteItem received a null indexPath or list!")
         }

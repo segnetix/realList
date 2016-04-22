@@ -854,7 +854,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // list1
         let tutorial = List(name: "realList Tutorial", createRecord: true, tutorial: true)
+        tutorial.listColorName = "r1_2"
         lists.append(tutorial)
+        
         var item: Item?
         
         // Getting started...

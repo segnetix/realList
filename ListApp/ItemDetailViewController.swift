@@ -28,6 +28,9 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
     var item: Item!
     var list: List!
     let imagePicker = UIImagePickerController()
+    let formatter = NSDateFormatter()
+    let padding = "   "
+    var dateString = ""
     
 ////////////////////////////////////////////////////////////////
 //
@@ -43,6 +46,9 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         self.item = item
         self.list = list
         self.itemVC = itemVC
+        
+        formatter.dateStyle = NSDateFormatterStyle.MediumStyle
+        formatter.timeStyle = .MediumStyle
         
         createUI()
     }
@@ -62,11 +68,6 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
     {
         let wideDisplay = view.frame.width >= 768
         let shortDisplay = view.frame.height < 568
-        let formatter = NSDateFormatter()
-        formatter.dateStyle = NSDateFormatterStyle.MediumStyle
-        formatter.timeStyle = .MediumStyle
-        let padding = "   "
-        var dateString = ""
         
         titleLabel.text = item.name
         noteTextView.text = item.note
@@ -304,9 +305,15 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
     func textView(textView: UITextView, shouldChangeTextInRange range: NSRange, replacementText text: String) -> Bool
     {
         if (text == "\n") {
+            if noteTextView.text != item.note {
+                item.note = noteTextView.text
+                dateString = formatter.stringFromDate(item.modifiedDate)
+                modifiedDateText.text = padding + dateString
+            }
             textView.resignFirstResponder()
             return false
         }
+        
         return true
     }
     
@@ -409,6 +416,11 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         } else {
             addPhotoButton.setImage(cameraImage, forState: .Normal)
         }
+        
+        // update the modified date
+        self.item.setImage(imageView.image)
+        dateString = formatter.stringFromDate(item.modifiedDate)
+        modifiedDateText.text = padding + dateString
     }
     
 ////////////////////////////////////////////////////////////////
@@ -419,8 +431,8 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
     
     func close(sender: UIButton)
     {
-        self.item.note = noteTextView.text
-        self.item.setImage(imageView.image)
+        //self.item.note = noteTextView.text
+        //self.item.setImage(imageView.image)
         self.item.needToSave = true
         self.itemVC.tableView.reloadData()
         self.itemVC.appDelegate.saveAll()

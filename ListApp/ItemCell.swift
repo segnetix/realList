@@ -23,9 +23,10 @@ class ItemCell: UITableViewCell
     @IBOutlet weak var itemName: UITextField!
     @IBOutlet weak var itemNote: UILabel!
     @IBOutlet weak var tapView: UIView!
+    @IBOutlet weak var pictureIndicator: UIImageView!
     
     weak var delegate: ItemCellDelegate?
-    let gradientLayer = CAGradientLayer()
+    //let gradientLayer = CAGradientLayer()
     
     override func awakeFromNib()
     {
@@ -58,7 +59,7 @@ class ItemCell: UITableViewCell
     override func layoutSubviews()
     {
         super.layoutSubviews()
-        gradientLayer.frame = bounds
+        //gradientLayer.frame = bounds
     }
     
     required init(coder aDecoder: NSCoder) {
@@ -69,6 +70,7 @@ class ItemCell: UITableViewCell
     {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
+        /*
         // gradient layer for cell
         gradientLayer.frame = bounds
         let color1 = UIColor(white: 1.0, alpha: 0.2).CGColor as CGColorRef
@@ -78,6 +80,7 @@ class ItemCell: UITableViewCell
         gradientLayer.colors = [color1, color2, color3, color4]
         gradientLayer.locations = [0.0, 0.01, 0.95, 1.0]
         layer.insertSublayer(gradientLayer, atIndex: 0)
+         */
     }
     
     override func setSelected(selected: Bool, animated: Bool)

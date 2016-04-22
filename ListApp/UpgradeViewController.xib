@@ -81,14 +81,14 @@
                         <action selector="buyButtonTapped:" destination="-1" eventType="touchUpInside" id="xPI-6N-pBD"/>
                     </connections>
                 </button>
-                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vcp-af-Nsx">
-                    <rect key="frame" x="220" y="320" width="160" height="30"/>
+                <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vcp-af-Nsx">
+                    <rect key="frame" x="220" y="317" width="160" height="36"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="160" id="Xvj-By-39y"/>
                         <constraint firstAttribute="height" constant="30" id="kbf-A9-LZu"/>
                     </constraints>
                     <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="17"/>
-                    <state key="normal" title="Restore Purchases"/>
+                    <state key="normal" title="Restore Purchase"/>
                     <connections>
                         <action selector="restorePurchases:" destination="-1" eventType="touchUpInside" id="8HK-7Q-0Fp"/>
                     </connections>

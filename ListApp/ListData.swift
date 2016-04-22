@@ -1438,17 +1438,15 @@ class Item: ListObj, NSCoding
     var modifiedBy: String          // established locally - saved to cloud
     var modifiedDate: NSDate   {    // established locally - saved to cloud
         didSet {
-            // only update if new date is newer than the current date
-            if oldValue > modifiedDate {
-                modifiedDate = oldValue
-            }
+            // also set modified by
+            modifiedBy = UIDevice.currentDevice().name
         }
     }
     var imageModifiedDate: NSDate {
         didSet {
-            // only update if new date is newer than the current date
-            if oldValue > modifiedDate {
-                imageModifiedDate = oldValue
+            // also set modified date
+            if imageModifiedDate > modifiedDate {
+                modifiedDate = imageModifiedDate
             }
         }
     }
@@ -1460,11 +1458,11 @@ class Item: ListObj, NSCoding
         self.note = ""
         self.imageAsset = nil
         self.isTutorialItem = tutorial
-        self.createdBy = UIDevice.currentDevice().name
-        self.modifiedBy = UIDevice.currentDevice().name
-        self.createdDate = NSDate.init()
-        self.modifiedDate = NSDate.init()
-        self.imageModifiedDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
+        createdBy = UIDevice.currentDevice().name
+        modifiedBy = UIDevice.currentDevice().name
+        createdDate = NSDate.init(timeIntervalSince1970: 0)
+        modifiedDate = NSDate.init(timeIntervalSince1970: 0)
+        self.imageModifiedDate = NSDate.init(timeIntervalSince1970: 0)
         
         if createRecord {
             // a new item needs a new cloud record
@@ -1472,6 +1470,9 @@ class Item: ListObj, NSCoding
             itemReference = CKReference.init(record: itemRecord!, action: CKReferenceAction.DeleteSelf)
             imageAsset = ImageAsset(itemName: name, itemReference: itemReference!)
             createdBy = UIDevice.currentDevice().name
+            modifiedBy = UIDevice.currentDevice().name
+            createdDate = NSDate.init()
+            modifiedDate = NSDate.init()
         }
         
         if imageAsset != nil {
@@ -1488,10 +1489,10 @@ class Item: ListObj, NSCoding
         if let tutorial           = tutorial          { self.isTutorialItem    = tutorial          } else { self.isTutorialItem    = false                                                                       }
         if let itemRecord         = itemRecord        { self.itemRecord        = itemRecord        } else { self.itemRecord        = nil                                                                         }
         if let createdBy          = createdBy         { self.createdBy         = createdBy         } else { self.createdBy         = UIDevice.currentDevice().name                                               }
-        if let createdDate        = createdDate       { self.createdDate       = createdDate       } else { self.createdDate       = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())                   }
+        if let createdDate        = createdDate       { self.createdDate       = createdDate       } else { self.createdDate       = NSDate.init(timeIntervalSince1970: 0)                                       }
         if let modifiedBy         = modifiedBy        { self.modifiedBy        = modifiedBy        } else { self.modifiedBy        = UIDevice.currentDevice().name                                               }
-        if let modifiedDate       = modifiedDate      { self.modifiedDate      = modifiedDate      } else { self.modifiedDate      = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())                   }
-        if let imageModifiedDate  = imageModifiedDate { self.imageModifiedDate = imageModifiedDate } else { self.imageModifiedDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())                   }
+        if let modifiedDate       = modifiedDate      { self.modifiedDate      = modifiedDate      } else { self.modifiedDate      = NSDate.init(timeIntervalSince1970: 0)                                       }
+        if let imageModifiedDate  = imageModifiedDate { self.imageModifiedDate = imageModifiedDate } else { self.imageModifiedDate = NSDate.init(timeIntervalSince1970: 0)                                       }
         if let itemReference      = itemReference     { self.itemReference     = itemReference     } else { self.itemReference     = CKReference.init(record: itemRecord!, action: CKReferenceAction.DeleteSelf) }
         if let imageAsset         = imageAsset {
             self.imageAsset = imageAsset
@@ -1609,13 +1610,13 @@ class Item: ListObj, NSCoding
             self.state = ItemState.Incomplete
         }
         
-        if let name         = record[key_name]         { self.name         = name as! String         }
-        if let note         = record[key_note]         { self.note         = note as! String         }
-        if let order        = record[key_order]        { self.order        = order as! Int           }
-        if let createdBy    = record[key_createdBy]    { self.createdBy    = createdBy as! String    }
-        if let createdDate  = record[key_createdDate]  { self.createdDate  = createdDate as! NSDate  }
-        if let modifiedBy   = record[key_modifiedBy]   { self.modifiedBy   = modifiedBy as! String   }
-        if let modifiedDate = record[key_modifiedDate] { self.modifiedDate = modifiedDate as! NSDate }
+        if let name              = record[key_name]              { self.name              = name as! String              }
+        if let note              = record[key_note]              { self.note              = note as! String              }
+        if let order             = record[key_order]             { self.order             = order as! Int                }
+        if let createdBy         = record[key_createdBy]         { self.createdBy         = createdBy as! String         }
+        if let createdDate       = record[key_createdDate]       { self.createdDate       = createdDate as! NSDate       }
+        if let modifiedBy        = record[key_modifiedBy]        { self.modifiedBy        = modifiedBy as! String        }
+        if let modifiedDate      = record[key_modifiedDate]      { self.modifiedDate      = modifiedDate as! NSDate      }
         
         // update item record, reference, and image asset (if needed)
         self.itemRecord = record
@@ -1638,8 +1639,6 @@ class Item: ListObj, NSCoding
                 } else {
                     print("******* ERROR in item updateFromRecord - the imageAsset for this item is nil...!!!")
                 }
-            } else {
-                //print("ImageAsset.updateFromRecord - image is up to date...")
             }
             
             // then set the local imageModifiedDate to cloud value
@@ -1647,11 +1646,11 @@ class Item: ListObj, NSCoding
         }
         
         // check date values after update from cloud record - reset if needed
-        if self.modifiedDate == NSDate.init(timeIntervalSince1970: NSTimeInterval.init()) {
+        if self.modifiedDate == NSDate.init(timeIntervalSince1970: 0) {
             self.modifiedDate = NSDate.init()
         }
         
-        if self.createdDate == NSDate.init(timeIntervalSince1970: NSTimeInterval.init()) {
+        if self.createdDate == NSDate.init(timeIntervalSince1970: 0) {
             self.createdDate = self.modifiedDate
         }
         
@@ -1834,11 +1833,11 @@ class ImageAsset: NSObject, NSCoding
     // memberwise initializer
     init(itemName: String?, image: UIImage?, imageGUID: String?, imageAsset: CKAsset?, itemReference: CKReference?, imageRecord: CKRecord?, modifiedDate: NSDate?)
     {
-        if let itemName      = itemName      { self.itemName      = itemName      } else { self.itemName      = ""                                                        }
-        if let image         = image         { self.image         = image         } else { self.image         = nil                                                       }
-        if let imageGUID     = imageGUID     { self.imageGUID     = imageGUID     } else { self.imageGUID     = NSUUID().UUIDString                                       }
-        if let imageRecord   = imageRecord   { self.imageRecord   = imageRecord   } else { self.imageRecord   = CKRecord.init(recordType: ImagesRecordType)               }
-        if let modifiedDate  = modifiedDate  { self.modifiedDate  = modifiedDate  } else { self.modifiedDate  = NSDate.init(timeIntervalSince1970: NSTimeInterval.init()) }
+        if let itemName      = itemName      { self.itemName      = itemName      } else { self.itemName      = ""                                          }
+        if let image         = image         { self.image         = image         } else { self.image         = nil                                         }
+        if let imageGUID     = imageGUID     { self.imageGUID     = imageGUID     } else { self.imageGUID     = NSUUID().UUIDString                         }
+        if let imageRecord   = imageRecord   { self.imageRecord   = imageRecord   } else { self.imageRecord   = CKRecord.init(recordType: ImagesRecordType) }
+        if let modifiedDate  = modifiedDate  { self.modifiedDate  = modifiedDate  } else { self.modifiedDate  = NSDate.init(timeIntervalSince1970: 0)       }
         
         if itemReference != nil {
             self.itemReference = itemReference
@@ -1949,7 +1948,7 @@ class ImageAsset: NSObject, NSCoding
         if let modifiedDate  = record[key_modifiedDate] { self.modifiedDate  = modifiedDate  as! NSDate      }
         
         // check date values after update from cloud record - reset if needed
-        if self.modifiedDate.compare(NSDate.init(timeIntervalSince1970: NSTimeInterval.init())) == NSComparisonResult.OrderedSame {
+        if self.modifiedDate.compare(NSDate.init(timeIntervalSince1970: 0)) == NSComparisonResult.OrderedSame {
             self.modifiedDate = NSDate.init()
         }
         

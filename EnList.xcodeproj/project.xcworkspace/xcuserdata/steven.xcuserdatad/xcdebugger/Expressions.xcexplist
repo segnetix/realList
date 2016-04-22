@@ -3,36 +3,19 @@
    version = "1.0">
    <ContextStates>
       <ContextState
-         contextName = "List.saveToCloud() -&gt; ():ListData.swift">
-         <PersistentStrings>
-            <PersistentString
-               value = "listRecord">
-            </PersistentString>
-            <PersistentString
-               value = "categories">
-            </PersistentString>
-            <PersistentString
-               value = "name">
-            </PersistentString>
-            <PersistentString
-               value = "isTutorialList">
-            </PersistentString>
-            <PersistentString
-               value = "recordID">
-            </PersistentString>
-         </PersistentStrings>
+         contextName = "ItemDetailViewController.init(item : Item, list : List) -&gt; ItemDetailViewController:ItemDetailViewController.swift">
       </ContextState>
       <ContextState
          contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
+               value = "selectedCategory">
+            </PersistentString>
+            <PersistentString
                value = "list.categories[selectedCategory].items[i].name">
             </PersistentString>
             <PersistentString
                value = "textField.text">
-            </PersistentString>
-            <PersistentString
-               value = "selectedCategory">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -108,10 +91,10 @@
                value = "name">
             </PersistentString>
             <PersistentString
-               value = "item.name">
+               value = "item.note">
             </PersistentString>
             <PersistentString
-               value = "item.note">
+               value = "item.name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -119,10 +102,10 @@
          contextName = "ItemViewController.longPressAction(UILongPressGestureRecognizer) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "destCat.name">
+               value = "indexPath!.row">
             </PersistentString>
             <PersistentString
-               value = "indexPath!.row">
+               value = "destCat.name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -161,10 +144,10 @@
                value = "category.name">
             </PersistentString>
             <PersistentString
-               value = "item.name">
+               value = "list.name">
             </PersistentString>
             <PersistentString
-               value = "list.name">
+               value = "item.name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -176,6 +159,14 @@
             </PersistentString>
             <PersistentString
                value = "category.items[0].name">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "List.addItem(Category, name : String, state : ItemState, updateIndices : Bool, createRecord : Bool, tutorial : Bool) -&gt; Item?:ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -201,6 +192,14 @@
          <PersistentStrings>
             <PersistentString
                value = "inEditMode">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "Item.modifiedDate.didset:ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -241,6 +240,9 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "ItemViewController.bannerView(ADBannerView!, didFailToReceiveAdWithError : NSError!) -&gt; ():ItemViewController.swift">
+      </ContextState>
+      <ContextState
          contextName = "CategoryCell.gestureRecognizerShouldBegin(UIGestureRecognizer) -&gt; Bool:CategoryCell.swift">
          <PersistentStrings>
             <PersistentString
@@ -266,13 +268,13 @@
          contextName = "ItemViewController.tableView(UITableView, commitEditingStyle : UITableViewCellEditingStyle, forRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "indexPath.section">
+               value = "(item as! Item).name">
             </PersistentString>
             <PersistentString
                value = "indexPath.row">
             </PersistentString>
             <PersistentString
-               value = "(item as! Item).name">
+               value = "indexPath.section">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -313,13 +315,13 @@
          contextName = "ItemViewController.layoutAnimated(Bool) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "self.view.frame.height">
+               value = "self.tableView.frame.size.height">
             </PersistentString>
             <PersistentString
                value = "adBanner.frame.origin.y">
             </PersistentString>
             <PersistentString
-               value = "self.tableView.frame.size.height">
+               value = "self.view.frame.height">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -397,10 +399,10 @@
                value = "appDelegate.namesSpellCheck">
             </PersistentString>
             <PersistentString
-               value = "appDelegate.namesAutocorrection">
+               value = "appDelegate.namesCapitalize">
             </PersistentString>
             <PersistentString
-               value = "appDelegate.namesCapitalize">
+               value = "appDelegate.namesAutocorrection">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -452,10 +454,10 @@
                value = "item!.name">
             </PersistentString>
             <PersistentString
-               value = "item">
+               value = "item!.note">
             </PersistentString>
             <PersistentString
-               value = "item!.note">
+               value = "item">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -463,15 +465,38 @@
          contextName = "Item.updateFromRecord(CKRecord) -&gt; ():ListData.swift">
          <PersistentStrings>
             <PersistentString
+               value = "self.modifiedBy">
+            </PersistentString>
+            <PersistentString
+               value = "self.modifiedDate">
+            </PersistentString>
+            <PersistentString
                value = "name">
             </PersistentString>
             <PersistentString
-               value = "self.modifiedBy">
+               value = "modifiedDate">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ItemDetailViewController.init(item : Item, list : List) -&gt; ItemDetailViewController:ItemDetailViewController.swift">
+         contextName = "List.saveToCloud() -&gt; ():ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "listRecord">
+            </PersistentString>
+            <PersistentString
+               value = "categories">
+            </PersistentString>
+            <PersistentString
+               value = "name">
+            </PersistentString>
+            <PersistentString
+               value = "isTutorialList">
+            </PersistentString>
+            <PersistentString
+               value = "recordID">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
    </ContextStates>
 </VariablesViewState>
