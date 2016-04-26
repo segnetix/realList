@@ -20,20 +20,11 @@
                         <subviews>
                             <adBannerView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cIg-QC-tHH">
                                 <rect key="frame" x="0.0" y="534" width="600" height="66"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="50" id="exE-Od-VvJ"/>
-                                    <constraint firstAttribute="height" constant="32" id="hgg-v9-KU9"/>
-                                    <constraint firstAttribute="height" constant="50" id="min-iT-npo"/>
-                                </constraints>
-                                <variation key="default">
-                                    <mask key="constraints">
-                                        <exclude reference="exE-Od-VvJ"/>
-                                        <exclude reference="hgg-v9-KU9"/>
-                                        <exclude reference="min-iT-npo"/>
-                                    </mask>
-                                </variation>
                                 <variation key="widthClass=compact" misplaced="YES">
                                     <rect key="frame" x="0.0" y="534" width="400" height="66"/>
+                                </variation>
+                                <variation key="widthClass=regular" misplaced="YES">
+                                    <rect key="frame" x="0.0" y="534" width="800" height="66"/>
                                 </variation>
                                 <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
                                     <rect key="frame" x="0.0" y="734" width="400" height="66"/>
@@ -43,7 +34,7 @@
                                 </variation>
                             </adBannerView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" allowsSelection="NO" rowHeight="32" sectionHeaderHeight="32" sectionFooterHeight="32" translatesAutoresizingMaskIntoConstraints="NO" id="ATl-Ia-AoT">
-                                <rect key="frame" x="0.0" y="65" width="600" height="469"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="534"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <inset key="scrollIndicatorInsets" minX="-1" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <color key="separatorColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -153,7 +144,7 @@
                                                     <nil key="highlightedColor"/>
                                                 </label>
                                                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Expand Arrows" translatesAutoresizingMaskIntoConstraints="NO" id="UwT-T6-8hx">
-                                                    <rect key="frame" x="4" y="5" width="8" height="30"/>
+                                                    <rect key="frame" x="2" y="6" width="8" height="30"/>
                                                     <constraints>
                                                         <constraint firstAttribute="height" constant="30" id="ckw-Am-zYP"/>
                                                         <constraint firstAttribute="width" constant="8" id="g2z-mj-zzI"/>
@@ -167,9 +158,9 @@
                                                 <constraint firstItem="nPQ-Yu-QYm" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="topMargin" id="hDD-3Q-A0C"/>
                                                 <constraint firstItem="nPQ-Yu-QYm" firstAttribute="centerY" secondItem="F5V-gG-q6K" secondAttribute="centerY" id="lYH-kz-FIR"/>
                                                 <constraint firstAttribute="bottomMargin" secondItem="37Y-n0-dxM" secondAttribute="bottom" id="lle-i8-791"/>
-                                                <constraint firstItem="nPQ-Yu-QYm" firstAttribute="leading" secondItem="UwT-T6-8hx" secondAttribute="trailing" constant="4" id="qmS-mG-Yf7"/>
-                                                <constraint firstItem="UwT-T6-8hx" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="top" constant="5" id="rUQ-xC-qE8"/>
-                                                <constraint firstItem="UwT-T6-8hx" firstAttribute="leading" secondItem="F5V-gG-q6K" secondAttribute="leading" constant="4" id="sPD-ph-e5c"/>
+                                                <constraint firstItem="nPQ-Yu-QYm" firstAttribute="leading" secondItem="UwT-T6-8hx" secondAttribute="trailing" constant="6" id="qmS-mG-Yf7"/>
+                                                <constraint firstItem="UwT-T6-8hx" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="top" constant="6" id="rUQ-xC-qE8"/>
+                                                <constraint firstItem="UwT-T6-8hx" firstAttribute="leading" secondItem="F5V-gG-q6K" secondAttribute="leading" constant="2" id="sPD-ph-e5c"/>
                                                 <constraint firstItem="37Y-n0-dxM" firstAttribute="leading" secondItem="nPQ-Yu-QYm" secondAttribute="trailing" constant="8" symbolic="YES" id="sVq-vx-3x2"/>
                                                 <constraint firstAttribute="bottom" secondItem="nPQ-Yu-QYm" secondAttribute="bottom" id="t4b-Uk-mNP"/>
                                                 <constraint firstItem="nPQ-Yu-QYm" firstAttribute="top" secondItem="F5V-gG-q6K" secondAttribute="top" id="wY8-Tf-3VY"/>
@@ -233,8 +224,10 @@
                             <constraint firstItem="cIg-QC-tHH" firstAttribute="top" secondItem="ATl-Ia-AoT" secondAttribute="bottom" id="3oZ-MK-hEb"/>
                             <constraint firstAttribute="trailing" secondItem="ATl-Ia-AoT" secondAttribute="trailing" id="7MF-bk-JaJ"/>
                             <constraint firstItem="ATl-Ia-AoT" firstAttribute="leading" secondItem="Gbn-SU-SIi" secondAttribute="leading" id="Imd-Tv-SYi"/>
-                            <constraint firstItem="ATl-Ia-AoT" firstAttribute="top" secondItem="Gbn-SU-SIi" secondAttribute="top" constant="65" id="c8r-ak-smE"/>
                             <constraint firstItem="cIg-QC-tHH" firstAttribute="leading" secondItem="Gbn-SU-SIi" secondAttribute="leading" id="hNn-pd-HcJ"/>
+                            <constraint firstItem="ATl-Ia-AoT" firstAttribute="top" secondItem="Gbn-SU-SIi" secondAttribute="top" id="k5A-tL-yYV">
+                                <variation key="widthClass=compact" constant="64"/>
+                            </constraint>
                             <constraint firstAttribute="trailing" secondItem="cIg-QC-tHH" secondAttribute="trailing" id="m2f-dF-jiO"/>
                         </constraints>
                     </view>

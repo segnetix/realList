@@ -21,7 +21,8 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
     var noteTextView = UITextView()
     var addPhotoButton = UIButton()
     var imageView = UIImageView()
-    var spacerLabel = UILabel()
+    //var spacerLabel = UILabel()
+    var spacerView = UIView()
     var infoVertStackView = UIStackView()
     var closeButton: UIButton = UIButton()
     var itemVC: ItemViewController!
@@ -148,9 +149,12 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         dateString = formatter.stringFromDate(item.createdDate)
         createdDateText.text = padding + dateString
         
-        spacerLabel.translatesAutoresizingMaskIntoConstraints = false
-        spacerLabel.font = infoTextFont
-        spacerLabel.text = padding
+        //spacerLabel.translatesAutoresizingMaskIntoConstraints = false
+        //spacerLabel.font = UIFont.preferredFontForTextStyle(UIFontTextStyleFootnote)
+        //spacerLabel.text = padding
+        
+        spacerView.translatesAutoresizingMaskIntoConstraints = false  
+        spacerView.sizeThatFits(CGSize(width: 60, height: 8))
         
         modifiedLabel.translatesAutoresizingMaskIntoConstraints = false
         modifiedLabel.font = infoTextFont
@@ -175,7 +179,8 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         infoVertStackView.addArrangedSubview(createdLabel)
         infoVertStackView.addArrangedSubview(createdByText)
         infoVertStackView.addArrangedSubview(createdDateText)
-        infoVertStackView.addArrangedSubview(spacerLabel)
+        //infoVertStackView.addArrangedSubview(spacerLabel)
+        infoVertStackView.addArrangedSubview(spacerView)
         infoVertStackView.addArrangedSubview(modifiedLabel)
         infoVertStackView.addArrangedSubview(modifiedByText)
         infoVertStackView.addArrangedSubview(modifiedDateText)
@@ -193,7 +198,18 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         
         // close button
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setImage(UIImage(named: "Close Window_blue"), forState: .Normal)
+        let origImage = UIImage(named: "Close Window_blue")
+        if let origImage = origImage {
+            // set close button color from list color
+            let tintedImage = origImage.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
+            closeButton.setImage(tintedImage, forState: .Normal)
+            
+            if list!.listColor != nil {
+                closeButton.tintColor = list!.listColor
+            }
+        } else {
+            closeButton.setImage(UIImage(named: "Close Window_blue"), forState: .Normal)
+        }
         closeButton.addTarget(self, action: #selector(ItemDetailViewController.close(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         containerView.addSubview(closeButton)
         
@@ -288,14 +304,14 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         } else if !shortDisplay {
             containerView.addConstraints(
                 NSLayoutConstraint.constraintsWithVisualFormat(
-                    "V:|-20-[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView]-(>=12)-[closeButton]-16-|",
+                    "V:|-20-[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView(135)]-(>=12)-[closeButton]-16-|",
                     options: NSLayoutFormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else {
             containerView.addConstraints(
                 NSLayoutConstraint.constraintsWithVisualFormat(
-                    "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView]-(>=8)-[closeButton]-8-|",
+                    "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(135)]-(>=8)-[closeButton]-8-|",
                     options: NSLayoutFormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))

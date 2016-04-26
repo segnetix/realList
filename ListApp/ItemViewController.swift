@@ -201,7 +201,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 let origImage = cell.pictureIndicator.image
                 
                 if let origImage = origImage {
-                    // set check box color from list color
+                    // set picture indicator color from list color
                     let tintedImage = origImage.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
                     cell.pictureIndicator.image = tintedImage
                     
@@ -407,9 +407,10 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         var info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
         let keyboardHeight = keyboardFrame.height
+        let topBarHeight = getTopBarHeight()
         
         // need to shrink the tableView height so it shows above the keyboard
-        self.tableView.frame.size.height = self.view.frame.height - keyboardHeight
+        self.tableView.frame.size.height = self.view.frame.height - topBarHeight - keyboardHeight
         
         // while the keyboard is visible
         UIView.animateWithDuration(0.3, animations: { () -> Void in
@@ -423,23 +424,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         editingNewCategoryName = false
         editingNewItemName = false
         
-        // need to restore the tableView frame based on presence of the ad banner
-        let bannerHeight = adBanner.frame.size.height
-        let bannerXpos = self.view.frame.size.height
-        let showAdBanner = !appDelegate.appIsUpgraded
-        
-        if showAdBanner && adBanner.bannerLoaded {
-            self.tableView.frame.size.height = self.view.frame.height - bannerHeight
-            adBanner.frame.origin.y = bannerXpos - bannerHeight
-        } else {
-            self.tableView.frame.size.height = self.view.frame.height
-            adBanner.frame.origin.y = bannerXpos
-        }
-        
-        
-        UIView.animateWithDuration(0.5, animations: { () -> Void in
-            self.view.layoutIfNeeded()
-        })
+        layoutAnimated(true)
     }
     
     func textFieldShouldBeginEditing(textField: UITextField) -> Bool
@@ -553,11 +538,11 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             let newItemIndexPath = list.displayIndexPathForItem(item)
             
             if let indexPath = newItemIndexPath {
-                let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
-                
-                cell.itemName.userInteractionEnabled = true
-                cell.itemName.becomeFirstResponder()
-                editingNewItemName = true
+                if let cell = tableView.cellForRowAtIndexPath(indexPath) as? ItemCell {
+                    cell.itemName.userInteractionEnabled = true
+                    cell.itemName.becomeFirstResponder()
+                    editingNewItemName = true
+                }
             }
         }
     }
@@ -1720,10 +1705,19 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     // move the adBanner on and off the screen
     func layoutAnimated(animated: Bool)
     {
+        if inEditMode {
+            return
+        }
+        
+        var topBarHeight = getTopBarHeight()
         var bannerHeight: CGFloat = 0.0
         var bannerLoaded = false
         let bannerXpos   = self.view.frame.size.height
         let showAdBanner = !appDelegate.appIsUpgraded
+        
+        if appDelegate.appIsUpgraded {
+            topBarHeight = 0.0
+        }
         
         if adBanner != nil {
             bannerHeight = adBanner!.frame.size.height
@@ -1733,15 +1727,17 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         if showAdBanner && bannerLoaded {
             // show the ad banner
             adBanner.hidden = false
-            tableView.frame.size.height = self.view.frame.height - bannerHeight
             adBanner.frame.origin.y = bannerXpos - bannerHeight
+            tableView.frame.size.height = self.view.frame.height - bannerHeight - topBarHeight
+            tableView.frame.origin.y = topBarHeight
         } else {
             // hide the ad banner
             if adBanner != nil {
                 adBanner.hidden = true
                 adBanner.frame.origin.y = bannerXpos
             }
-            tableView.frame.size.height = self.view.frame.height
+            tableView.frame.origin.y = topBarHeight
+            tableView.frame.size.height = self.view.frame.height - topBarHeight
         }
         
         UIView.animateWithDuration(animated ? 0.5 : 0.0, animations: { () -> Void in
