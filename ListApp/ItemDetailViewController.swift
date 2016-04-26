@@ -325,6 +325,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
                 item.note = noteTextView.text
                 dateString = formatter.stringFromDate(item.modifiedDate)
                 modifiedDateText.text = padding + dateString
+                modifiedByText.text = UIDevice.currentDevice().name
             }
             textView.resignFirstResponder()
             return false

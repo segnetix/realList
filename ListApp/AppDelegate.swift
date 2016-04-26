@@ -1001,8 +1001,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             if let list = itemVC.list {
                 itemVC.listNameChanged(list.name)
             }
-            itemVC.tableView.reloadData()
-            itemVC.resetCellViewTags()
+            if itemVC.inEditMode == false {
+                itemVC.tableView.reloadData()
+                itemVC.resetCellViewTags()
+            }
         }
     }
     

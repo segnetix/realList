@@ -425,6 +425,9 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         editingNewItemName = false
         
         layoutAnimated(true)
+        
+        tableView.reloadData()
+        resetCellViewTags()
     }
     
     func textFieldShouldBeginEditing(textField: UITextField) -> Bool
@@ -514,7 +517,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
                 title: "Item Limit",
                 message: "The free version of realList is limited to \(kMaxItemCount) items per list.  Please upgrade or restore your purchase for unlimited items.",
                 preferredStyle: .Alert)
-            let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil )
+            let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil)
             alertVC.addAction(okAction)
             
             presentViewController(alertVC, animated: true, completion: nil)
@@ -531,8 +534,8 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         }
         
         list.updateIndices()
-        self.tableView.reloadData()
-        self.resetCellViewTags()
+        tableView.reloadData()
+        resetCellViewTags()
         
         if let item = newItem {
             let newItemIndexPath = list.displayIndexPathForItem(item)
@@ -633,7 +636,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     
     func categoryCountString(category: Category) -> String
     {
-        return "\(category.itemsComplete())/\(category.items.count)"
+        return "\(category.itemsComplete())/\(category.itemsActive())"
     }
 
     func handleCategoryCollapseExpand(category: Category)
@@ -842,9 +845,10 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         let obj = list.objectForIndexPath(indexPath)
         
-        // can we collapse the category here?
+        // collapse the category before starting the long press
         if obj is Category {
             let cat = obj as! Category
+            //let catCell = cell as! CategoryCell
             
             if cat.expanded {
                 tempCollapsedCategoryIsMoving = true

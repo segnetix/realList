@@ -86,6 +86,17 @@
          contextName = "List.removeItemAtIndexPath(NSIndexPath, preserveCategories : Bool) -&gt; [NSIndexPath]?:ListData.swift">
       </ContextState>
       <ContextState
+         contextName = "ListViewController.keyboardWillHide(NSNotification) -&gt; ():ListViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "tableView.frame.size.height">
+            </PersistentString>
+            <PersistentString
+               value = "self.view.frame.height">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ItemViewController.tableView(UITableView, moveRowAtIndexPath : NSIndexPath, toIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString

@@ -42,6 +42,7 @@ class AboutViewController: UIViewController
         }
         
         updateCloudStatus()
+        updateUpgradeStatus()
     }
     
     func updateCloudStatus() {
@@ -49,6 +50,14 @@ class AboutViewController: UIViewController
             cloudButton.setImage(UIImage(named: "Cloud_check"), forState: .Normal)
         } else {
             cloudButton.setImage(UIImage(named: "Cloud"), forState: .Normal)
+        }
+    }
+    
+    func updateUpgradeStatus() {
+        if appDelegate.appIsUpgraded {
+            upgradeButton.setImage(UIImage(named: "Upgraded"), forState: .Normal)
+        } else {
+            upgradeButton.setImage(UIImage(named: "Upgrade"), forState: .Normal)
         }
     }
     
@@ -107,6 +116,7 @@ class AboutViewController: UIViewController
     {
         print("upgrade...")
         let upgradeVC = UpgradeViewController()
+        upgradeVC.aboutViewController = self
         presentViewController(upgradeVC, animated: true, completion: nil)
     }
     

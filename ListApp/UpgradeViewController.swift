@@ -15,6 +15,7 @@ class UpgradeViewController: UIViewController
     @IBOutlet weak var buyButton: UIButton!
     @IBOutlet weak var purchasedCheck: UIImageView!
     @IBOutlet weak var restoreButton: UIButton!
+    weak var aboutViewController: AboutViewController?
     
     override func viewDidLoad()
     {
@@ -151,6 +152,9 @@ class UpgradeViewController: UIViewController
     
     @IBAction func close(sender: AnyObject)
     {
+        if let aboutVC = aboutViewController {
+            aboutVC.updateUpgradeStatus()
+        }
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
 }

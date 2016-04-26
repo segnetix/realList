@@ -77,6 +77,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.leftBarButtonItem = barButton
         
+        // set up keyboard show/hide notifications
+        /*
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ListViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ListViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
+        */
+        
         // this is to suppress the extra cell separators in the table view
         self.tableView.tableFooterView = UIView()
     }
@@ -270,6 +276,36 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
     
+    /*
+    func keyboardWillShow(notification: NSNotification)
+    {
+        var info = notification.userInfo!
+        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
+        let keyboardHeight = keyboardFrame.height
+        //let topBarHeight = getTopBarHeight()
+        
+        // need to shrink the tableView height so it shows above the keyboard
+        tableView.frame.size.height = self.view.frame.height - keyboardHeight// + topBarHeight
+        
+        // while the keyboard is visible
+        UIView.animateWithDuration(0.3, animations: { () -> Void in
+            self.view.layoutIfNeeded()
+        })
+    }
+    
+    func keyboardWillHide(notification: NSNotification)
+    {
+        //let topBarHeight = getTopBarHeight()
+        
+        // need to expand the tableView height so it fills the screen
+        tableView.frame.size.height = self.view.frame.height
+        
+        // while the keyboard is visible
+        UIView.animateWithDuration(0.3, animations: { () -> Void in
+            self.view.layoutIfNeeded()
+        })
+    }
+    */
     
     func textFieldShouldBeginEditing(textField: UITextField) -> Bool
     {

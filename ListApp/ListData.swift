@@ -1615,7 +1615,7 @@ class Item: ListObj, NSCoding
         if let order             = record[key_order]             { self.order             = order as! Int                }
         if let createdBy         = record[key_createdBy]         { self.createdBy         = createdBy as! String         }
         if let createdDate       = record[key_createdDate]       { self.createdDate       = createdDate as! NSDate       }
-        if let modifiedBy        = record[key_modifiedBy]        { self.modifiedBy        = modifiedBy as! String        }
+        //if let modifiedBy        = record[key_modifiedBy]        { self.modifiedBy        = modifiedBy as! String        }
         if let modifiedDate      = record[key_modifiedDate]      { self.modifiedDate      = modifiedDate as! NSDate      }
         
         // update item record, reference, and image asset (if needed)
@@ -1653,6 +1653,9 @@ class Item: ListObj, NSCoding
         if self.createdDate == NSDate.init(timeIntervalSince1970: 0) {
             self.createdDate = self.modifiedDate
         }
+        
+        // reset modifiedBy after changes
+        if let modifiedBy = record[key_modifiedBy] { self.modifiedBy = modifiedBy as! String }
         
         // handle if item has changed categories
         if let itemRecord = self.itemRecord {
