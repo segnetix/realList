@@ -396,6 +396,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // create a new list and append
         let newList = List(name: "", createRecord: true)
+        newList.listColorName = "r1_2"
         lists.append(newList)
         
         newList.addCategory("", displayHeader: false, updateIndices: true, createRecord: true)

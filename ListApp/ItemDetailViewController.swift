@@ -99,8 +99,8 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         } else {
             noteTextView.layer.borderColor = containerView.tintColor.CGColor
         }
-        noteTextView.layer.borderWidth = 2.0
-        noteTextView.layer.cornerRadius = 5.0
+        noteTextView.layer.borderWidth = 3.0
+        noteTextView.layer.cornerRadius = 8.0
         noteTextView.font = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
         noteTextView.textAlignment = NSTextAlignment.Left
         noteTextView.returnKeyType = UIReturnKeyType.Done
@@ -118,8 +118,9 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         } else {
             imageView.layer.borderColor = containerView.tintColor.CGColor
         }
-        imageView.layer.borderWidth = 2.0
-        imageView.layer.cornerRadius = 5.0
+        imageView.layer.borderWidth = 3.0
+        imageView.layer.cornerRadius = 8.0
+        imageView.clipsToBounds = true
         if item.imageAsset?.image != nil {
             imageView.image = item.getImage()
         } else {
@@ -171,7 +172,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         
         // info text stack
         infoVertStackView.axis = .Vertical
-        infoVertStackView.distribution = .EqualSpacing
+        infoVertStackView.distribution = .EqualCentering
         infoVertStackView.alignment = .Leading
         infoVertStackView.spacing = 0
         infoVertStackView.translatesAutoresizingMaskIntoConstraints = false
@@ -257,6 +258,14 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
                     options: [.AlignAllTop],
                     metrics: nil,
                     views: views))
+            
+            containerView.addConstraints(
+                NSLayoutConstraint.constraintsWithVisualFormat(
+                    "V:[infoVertStackView(180)]",
+                    options: NSLayoutFormatOptions(rawValue: 0),
+                    metrics: nil,
+                    views: views))
+            
         } else if !shortDisplay {
             containerView.addConstraints(
                 NSLayoutConstraint.constraintsWithVisualFormat(
@@ -304,14 +313,14 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         } else if !shortDisplay {
             containerView.addConstraints(
                 NSLayoutConstraint.constraintsWithVisualFormat(
-                    "V:|-20-[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView(135)]-(>=12)-[closeButton]-16-|",
+                    "V:|-20-[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView(125)]-(>=12)-[closeButton]-16-|",
                     options: NSLayoutFormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else {
             containerView.addConstraints(
                 NSLayoutConstraint.constraintsWithVisualFormat(
-                    "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(135)]-(>=8)-[closeButton]-8-|",
+                    "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(125)]-(>=8)-[closeButton]-8-|",
                     options: NSLayoutFormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))

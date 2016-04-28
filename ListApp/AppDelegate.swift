@@ -20,7 +20,7 @@ let key_notesSpellCheck      = "notesSpellCheck"
 let key_notesAutocorrection  = "notesAutocorrection"
 let key_picsInPrintAndEmail  = "picsInPrintAndEmail"
 
-// list and item limits
+// list and item limits for free version
 let kMaxListCount            =  3
 let kMaxItemCount            = 20
 
@@ -70,10 +70,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // app settings
-    var namesCapitalize = false
+    var namesCapitalize = true
     var namesSpellCheck = false
     var namesAutocorrection = false
-    var notesCapitalize = false
+    var notesCapitalize = true
     var notesSpellCheck = false
     var notesAutocorrection = false
     var picsInPrintAndEmail = false
@@ -583,65 +583,101 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         itemReferences.append(reference)
     }
     
-    // sends all records needing updating to cloud storage
+    // sends all records needing updating in batches to cloud storage
     func batchRecordUpdate()
     {
+        let batchSize = 100        // this number must be no greater than 400
+        
         if let database = privateDatabase {
-            let saveRecordsOperation = CKModifyRecordsOperation()
-            let ckRecords = [CKRecord](updateRecords.keys)      // initializes an array of CKRecords with the keys from the updateRecords dictionary
+            var ckRecords = [CKRecord](updateRecords.keys)      // initializes an array of CKRecords with the keys from the updateRecords dictionary
             
-            saveRecordsOperation.recordsToSave = ckRecords
-            saveRecordsOperation.savePolicy = .ChangedKeys
-            saveRecordsOperation.perRecordCompletionBlock = { record, error in
-                // deal with conflicts
-                // set completionHandler of wrapper operation if it's the case
-                if error == nil && record != nil {
-                    //print("batch save: \(record![key_name])")
-                    let obj = self.updateRecords[record!]
-                    if obj is List {
-                        let list = obj as! List
-                        list.needToSave = false
-                    } else if obj is Category {
-                        let category = obj as! Category
-                        category.needToSave = false
-                    } else if obj is Item {
-                        let item = obj as! Item
-                        item.needToSave = false
-                    } else if obj is ImageAsset {
-                        let image = obj as! ImageAsset
-                        image.needToDelete = false
-                        image.deleteImageFile()
-                    }
-                } else if error != nil {
-                    // NOTE: This should be able to handle a CKErrorLimitExceeded error.
-                    let obj = self.updateRecords[record!]
-                    if obj is List {
-                        let list = obj as! List
-                        print("batch update error: \(list.name) \(error!.localizedDescription)")
-                    } else if obj is Category {
-                        let category = obj as! Category
-                        print("batch update error: \(category.name) \(error!.localizedDescription)")
-                    } else if obj is Item {
-                        let item = obj as! Item
-                        print("batch update error: \(item.name) \(error!.localizedDescription)")
-                    } else if obj is ImageAsset {
-                        let image = obj as! ImageAsset
-                        print("batch update error: \(image.imageGUID) \(error!.localizedDescription)")
-                    }
-                }
-            }
-            saveRecordsOperation.modifyRecordsCompletionBlock = { savedRecords, deletedRecordIDs, error in
-                if error == nil {
-                    print("batch save operation complete!")
-                } else {
-                    // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
-                    print("*** ERROR: batchRecordUpdate - \(error!.localizedDescription)")
-                    print("The following records had problems: \(error!.userInfo[CKPartialErrorsByItemIDKey])")
-                }
+            if ckRecords.count == 0 {
+                print("batchRecordUpdate - ckRecords.count == 0")
+                return
             }
             
-            // execute the batch save operation
-            database.addOperation(saveRecordsOperation)
+            // submit a limited number of records in each operation
+            var startIndex = 0
+            var stopIndex = 0
+            
+            repeat {
+                startIndex = stopIndex
+                stopIndex += batchSize
+                
+                if stopIndex > ckRecords.count - 1 {
+                    stopIndex = ckRecords.count - 1
+                }
+                
+                if stopIndex < startIndex {
+                    print("ERROR: batchRecordUpdate - stopIndex < startIndex")
+                    return
+                }
+                
+                // set up a temp arrary of records for this batch
+                var batchRecords = [CKRecord]()
+                for i in startIndex...stopIndex {
+                    batchRecords.append(ckRecords[i])
+                }
+                
+                print("batchRecordUpdate - \(startIndex+1) to \(stopIndex+1) of \(ckRecords.count)")
+                
+                let saveRecordsOperation = CKModifyRecordsOperation()
+                saveRecordsOperation.recordsToSave = batchRecords
+                saveRecordsOperation.savePolicy = .ChangedKeys
+                saveRecordsOperation.perRecordCompletionBlock = { record, error in
+                    // deal with conflicts
+                    // set completionHandler of wrapper operation if it's the case
+                    if error == nil && record != nil {
+                        //print("batch save: \(record![key_name])")
+                        let obj = self.updateRecords[record!]
+                        if obj is List {
+                            let list = obj as! List
+                            list.needToSave = false
+                        } else if obj is Category {
+                            let category = obj as! Category
+                            category.needToSave = false
+                        } else if obj is Item {
+                            let item = obj as! Item
+                            item.needToSave = false
+                        } else if obj is ImageAsset {
+                            let image = obj as! ImageAsset
+                            image.needToDelete = false
+                            image.deleteImageFile()
+                        }
+                    } else if error != nil {
+                        // NOTE: This should be able to handle a CKErrorLimitExceeded error.
+                        let obj = self.updateRecords[record!]
+                        if obj is List {
+                            let list = obj as! List
+                            print("batch update error: \(list.name) \(error!.localizedDescription)")
+                        } else if obj is Category {
+                            let category = obj as! Category
+                            print("batch update error: \(category.name) \(error!.localizedDescription)")
+                        } else if obj is Item {
+                            let item = obj as! Item
+                            print("batch update error: \(item.name) \(error!.localizedDescription)")
+                        } else if obj is ImageAsset {
+                            let image = obj as! ImageAsset
+                            print("batch update error: \(image.imageGUID) \(error!.localizedDescription)")
+                        }
+                    }
+                }
+                
+                saveRecordsOperation.modifyRecordsCompletionBlock = { savedRecords, deletedRecordIDs, error in
+                    if error == nil {
+                        print("batch save operation complete!")
+                    } else {
+                        // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
+                        print("*** ERROR: batchRecordUpdate - \(error!.localizedDescription)")
+                        print("The following records had problems: \(error!.userInfo[CKPartialErrorsByItemIDKey])")
+                    }
+                }
+                
+                // execute the batch save operation
+                database.addOperation(saveRecordsOperation)
+                
+            } while stopIndex < ckRecords.count - 1
+            
         }
     }
     
@@ -683,6 +719,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // pulls all list, category and item data from cloud storage
     func fetchCloudData()
     {
+        let resultCount = 0
+        
         if let database = privateDatabase {
             // clear the record arrays
             listArray.removeAll()
@@ -703,10 +741,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             categoryQuery.sortDescriptors = [NSSortDescriptor(key: key_order, ascending: true)]
             itemQuery.sortDescriptors = [NSSortDescriptor(key: key_order, ascending: true)]
             
-            let listFetch = CKQueryOperation(query: listQuery)
-            let categoryFetch = CKQueryOperation(query: categoryQuery)
-            let itemFetch = CKQueryOperation(query: itemQuery)
-            let deleteFetch = CKQueryOperation(query: deleteQuery)
+            var listFetch = CKQueryOperation(query: listQuery)
+            var categoryFetch = CKQueryOperation(query: categoryQuery)
+            var itemFetch = CKQueryOperation(query: itemQuery)
+            var deleteFetch = CKQueryOperation(query: deleteQuery)
+            
+            listFetch.resultsLimit = resultCount
+            categoryFetch.resultsLimit = resultCount
+            itemFetch.resultsLimit = resultCount
+            deleteFetch.resultsLimit = resultCount
             
             // set up the record fetched block
             listFetch.recordFetchedBlock = { (record : CKRecord!) in
@@ -731,58 +774,75 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             // set up completion blocks with cursors so they can recursively gather all of the records
             listFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+                if error != nil {
+                    print("listFetch error: \(error?.localizedDescription)")
+                }
+                
                 if cursor != nil {
-                    print("there is more data to fetch")
+                    print("\(self.listArray.count) lists - there is more data to fetch...")
                     let newOperation = CKQueryOperation(cursor: cursor!)
                     newOperation.recordFetchedBlock = listFetch.recordFetchedBlock
                     newOperation.queryCompletionBlock = listFetch.queryCompletionBlock
+                    newOperation.resultsLimit = resultCount
+                    listFetch = newOperation
                     database.addOperation(newOperation)
-                }
-                if error != nil {
-                    print("listFetch error: \(error?.localizedDescription)")
+                } else {
+                    print("list fetch complete")
                 }
             }
             
             categoryFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+                if error != nil {
+                    print("categoryFetch error: \(error?.localizedDescription)")
+                }
+                
                 if cursor != nil {
-                    print("there is more data to fetch")
+                    print("\(self.categoryArray.count) categories - there is more data to fetch...")
                     let newOperation = CKQueryOperation(cursor: cursor!)
                     newOperation.recordFetchedBlock = categoryFetch.recordFetchedBlock
                     newOperation.queryCompletionBlock = categoryFetch.queryCompletionBlock
+                    newOperation.resultsLimit = resultCount
+                    categoryFetch = newOperation
                     database.addOperation(newOperation)
-                }
-                if error != nil {
-                    print("categoryFetch error: \(error?.localizedDescription)")
+                } else {
+                    print("category fetch complete")
                 }
             }
             
             deleteFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+                if error != nil {
+                    print("deleteFetch error: \(error?.localizedDescription)")
+                }
+                
                 if cursor != nil {
-                    print("there is more data to fetch")
+                    print("\(self.deleteArray.count) delete items - there is more data to fetch...")
                     let newOperation = CKQueryOperation(cursor: cursor!)
                     newOperation.recordFetchedBlock = deleteFetch.recordFetchedBlock
                     newOperation.queryCompletionBlock = deleteFetch.queryCompletionBlock
+                    newOperation.resultsLimit = resultCount
+                    deleteFetch = newOperation
                     database.addOperation(newOperation)
-                }
-                if error != nil {
-                    print("deleteFetch error: \(error?.localizedDescription)")
+                } else {
+                    print("delete fetch complete")
                 }
             }
             
             itemFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
-                if cursor != nil {
-                    print("there is more data to fetch")
-                    let newOperation = CKQueryOperation(cursor: cursor!)
-                    newOperation.recordFetchedBlock = itemFetch.recordFetchedBlock
-                    newOperation.queryCompletionBlock = itemFetch.queryCompletionBlock
-                    database.addOperation(newOperation)
-                }
                 if error != nil {
                     print("itemFetch error: \(error?.localizedDescription)")
                 }
                 
-                if cursor == nil {
-                    print("The record fetch operation is complete...")
+                if cursor != nil {
+                    print("item cursor: \(cursor)")
+                    print("\(self.itemArray.count) items - there is more data to fetch...")
+                    let newOperation = CKQueryOperation(cursor: cursor!)
+                    newOperation.recordFetchedBlock = itemFetch.recordFetchedBlock
+                    newOperation.queryCompletionBlock = itemFetch.queryCompletionBlock
+                    newOperation.resultsLimit = resultCount
+                    itemFetch = newOperation
+                    database.addOperation(newOperation)
+                } else {
+                    print("The item record fetch operation is complete...")
                     print("array counts - list: \(self.listArray.count) category: \(self.categoryArray.count) item: \(self.itemArray.count) delete: \(self.deleteArray.count)")
                     
                     dispatch_async(dispatch_get_main_queue()) {

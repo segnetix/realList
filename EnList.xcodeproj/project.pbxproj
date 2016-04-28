@@ -13,6 +13,7 @@
 		B03C467D1C66F34D00B66CBD /* ItemDetailPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */; };
 		B03C467F1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */; };
 		B03C46811C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */; };
+		B05B23571CD12D2E00595569 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B05B23561CD12D2E00595569 /* Default-568h@2x.png */; };
 		B06836A21CAB1A7200422742 /* AddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06836A11CAB1A7200422742 /* AddButton.swift */; };
 		B07828981C36000B009D356F /* ListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07828971C36000B009D356F /* ListCell.swift */; };
 		B078289A1C360020009D356F /* ItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B07828991C360020009D356F /* ItemCell.swift */; };
@@ -108,6 +109,7 @@
 		B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailPresentationController.swift; path = ../ItemDetailPresentationController.swift; sourceTree = "<group>"; };
 		B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailTransitioningDelegate.swift; path = ../ItemDetailTransitioningDelegate.swift; sourceTree = "<group>"; };
 		B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemDetailAnimatedTransitioning.swift; sourceTree = "<group>"; };
+		B05B23561CD12D2E00595569 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		B06836A11CAB1A7200422742 /* AddButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AddButton.swift; path = ../AddButton.swift; sourceTree = "<group>"; };
 		B07828971C36000B009D356F /* ListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListCell.swift; sourceTree = "<group>"; };
 		B07828991C360020009D356F /* ItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemCell.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 		B0A3025F1C349F7A00F6FB44 = {
 			isa = PBXGroup;
 			children = (
+				B05B23561CD12D2E00595569 /* Default-568h@2x.png */,
 				B02BBCED1CA7069F00030822 /* StoreKit.framework */,
 				B07CCC7A1CA1985A00CBCFC1 /* CloudKit.framework */,
 				B0930D5D1C63C951007EBAA0 /* iAd.framework */,
@@ -313,6 +316,7 @@
 				B02174D21C6D57110087D5A3 /* Localizable.strings in Resources */,
 				B0A302731C349F7A00F6FB44 /* Assets.xcassets in Resources */,
 				B0A1BCDC1CC2C6C700F4F0B1 /* AppSettingsViewController.xib in Resources */,
+				B05B23571CD12D2E00595569 /* Default-568h@2x.png in Resources */,
 				B0A302711C349F7A00F6FB44 /* Main.storyboard in Resources */,
 				B07CCC7F1CA1A76500CBCFC1 /* AboutViewController.xib in Resources */,
 			);

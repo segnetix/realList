@@ -113,7 +113,7 @@ class List: NSObject, NSCoding
     var name: String { didSet { needToSave = true } }
     var categories = [Category]()
     var listColor: UIColor?
-    var listColorName: String = "r1_1" {
+    var listColorName: String = "r1_2" {
         didSet {
             needToSave = true
             setListColor()
@@ -321,7 +321,7 @@ class List: NSObject, NSCoding
         case "r4_1": listColor = color4_1
         case "r4_2": listColor = color4_2
         case "r4_3": listColor = color4_3
-        default: listColor = color1_1
+        default: listColor = color1_2
         }
     }
     
@@ -1615,8 +1615,8 @@ class Item: ListObj, NSCoding
         if let order             = record[key_order]             { self.order             = order as! Int                }
         if let createdBy         = record[key_createdBy]         { self.createdBy         = createdBy as! String         }
         if let createdDate       = record[key_createdDate]       { self.createdDate       = createdDate as! NSDate       }
-        //if let modifiedBy        = record[key_modifiedBy]        { self.modifiedBy        = modifiedBy as! String        }
         if let modifiedDate      = record[key_modifiedDate]      { self.modifiedDate      = modifiedDate as! NSDate      }
+        // modifiedBy is handled later
         
         // update item record, reference, and image asset (if needed)
         self.itemRecord = record

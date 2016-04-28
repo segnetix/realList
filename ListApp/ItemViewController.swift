@@ -407,10 +407,10 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         var info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
         let keyboardHeight = keyboardFrame.height
-        let topBarHeight = getTopBarHeight()
+        //let topBarHeight = getTopBarHeight()
         
         // need to shrink the tableView height so it shows above the keyboard
-        self.tableView.frame.size.height = self.view.frame.height - topBarHeight - keyboardHeight
+        self.tableView.frame.size.height = self.view.frame.height - keyboardHeight
         
         // while the keyboard is visible
         UIView.animateWithDuration(0.3, animations: { () -> Void in

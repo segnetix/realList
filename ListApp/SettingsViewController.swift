@@ -440,7 +440,7 @@ class SettingsViewController: UIViewController
     }
     
     func colorButton(sender: UIButton) {
-        var color = "r1_1"
+        var color = "r1_2"
         var selectedButton: UIButton?
         
         switch sender.tag {
@@ -456,7 +456,7 @@ class SettingsViewController: UIViewController
             case 10: color = "r4_1"; selectedButton = r4_1
             case 11: color = "r4_2"; selectedButton = r4_2
             case 12: color = "r4_3"; selectedButton = r4_3
-            default: color = "r1_1"; selectedButton = r1_1
+            default: color = "r1_2"; selectedButton = r1_2
         }
         
         // put a white box around the selected color button
