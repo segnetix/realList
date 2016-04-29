@@ -396,7 +396,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // create a new list and append
         let newList = List(name: "", createRecord: true)
-        newList.listColorName = "r1_2"
+        newList.listColorName = r1_2
         lists.append(newList)
         
         newList.addCategory("", displayHeader: false, updateIndices: true, createRecord: true)
@@ -891,7 +891,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // list1
         let tutorial = List(name: "realList Tutorial", createRecord: true, tutorial: true)
-        tutorial.listColorName = "r1_2"
+        tutorial.listColorName = r1_2
         lists.append(tutorial)
         
         var item: Item?

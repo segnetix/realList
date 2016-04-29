@@ -1334,7 +1334,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
 
     func settingsButtonTapped()
     {
-        //print("settings button tapped...")
+        print("settings button tapped...")
         
         if let list = list {
             transitioningDelegate = settingsTransitionDelegate
@@ -1342,7 +1342,6 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             vc.transitioningDelegate = settingsTransitionDelegate
             presentViewController(vc, animated: true, completion: nil)
         }
-
     }
     
     func loadItemDetailView(item: Item)

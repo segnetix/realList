@@ -10,12 +10,46 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/AppDelegate.swift"
-            timestampString = "483571743.44085"
+            timestampString = "483657876.468211"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "835"
-            endingLineNumber = "835"
-            landmarkName = "fetchCloudData()"
+            startingLineNumber = "594"
+            endingLineNumber = "594"
+            landmarkName = "batchRecordUpdate()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            condition = "record[&quot;name&quot;] == &quot;crash&quot;"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/AppDelegate.swift"
+            timestampString = "483657876.468211"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "486"
+            endingLineNumber = "486"
+            landmarkName = "updateFromRecord(_:forceUpdate:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            condition = "cloudCategory[&quot;name&quot;] == &quot;crash&quot;"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/AppDelegate.swift"
+            timestampString = "483663317.13127"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "957"
+            endingLineNumber = "957"
+            landmarkName = "mergeCloudData()"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -26,12 +60,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/AppDelegate.swift"
-            timestampString = "483571743.44085"
+            timestampString = "483663317.13127"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "852"
-            endingLineNumber = "852"
-            landmarkName = "fetchCloudData()"
+            startingLineNumber = "1147"
+            endingLineNumber = "1147"
+            landmarkName = "getLocalList(_:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -41,13 +75,109 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ListApp/AppDelegate.swift"
-            timestampString = "483571743.44085"
+            filePath = "ListApp/ItemViewController.swift"
+            timestampString = "483660219.667657"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "849"
-            endingLineNumber = "849"
-            landmarkName = "fetchCloudData()"
+            startingLineNumber = "1339"
+            endingLineNumber = "1339"
+            landmarkName = "settingsButtonTapped()"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "EnList.ItemViewController.settingsButtonTapped () -&gt; ()"
+                  moduleName = "EnList"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/steven/Library/Mobile%20Documents/com~apple~CloudDocs/Xcode/ListApp/ListApp/ItemViewController.swift"
+                  timestampString = "483658850.378894"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1339"
+                  endingLineNumber = "1339"
+                  offsetFromSymbolStart = "28">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "EnList.ItemViewController.settingsButtonTapped () -&gt; ()"
+                  moduleName = "EnList"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/steven/Library/Mobile%20Documents/com~apple~CloudDocs/Xcode/ListApp/ListApp/ItemViewController.swift"
+                  timestampString = "483658850.379132"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1339"
+                  endingLineNumber = "1339"
+                  offsetFromSymbolStart = "72">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/ItemViewController.swift"
+            timestampString = "483660219.667657"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1341"
+            endingLineNumber = "1341"
+            landmarkName = "settingsButtonTapped()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/SettingsViewController.swift"
+            timestampString = "483660206.706755"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "142"
+            endingLineNumber = "142"
+            landmarkName = "viewWillTransitionToSize(_:withTransitionCoordinator:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/SettingsViewController.swift"
+            timestampString = "483660790.929469"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "218"
+            endingLineNumber = "218"
+            landmarkName = "adjustConstraints(_:)"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/ListData.swift"
+            timestampString = "483662821.513522"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1645"
+            endingLineNumber = "1645"
+            landmarkName = "updateFromRecord(_:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

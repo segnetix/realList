@@ -48,13 +48,26 @@ let key_tutorial            = "tutorial"
 let key_owningItem          = "owningItem"
 let key_image               = "image"
 let key_imageGUID           = "imageGUID"
-//let key_imageFilePath       = "imageFilePath"
 let key_imageAsset          = "imageAsset"
 let key_imageRecord         = "imageRecord"
 let key_objectRecordID      = "objectRecordID"
 let key_objectName          = "objectName"
 let key_objectType          = "objectType"
 let key_itemName            = "itemName"
+
+// color row and column constants
+let r1_1                    = "r1_1"
+let r1_2                    = "r1_2"
+let r1_3                    = "r1_3"
+let r2_1                    = "r2_1"
+let r2_2                    = "r2_2"
+let r2_3                    = "r2_3"
+let r3_1                    = "r3_1"
+let r3_2                    = "r3_2"
+let r3_3                    = "r3_3"
+let r4_1                    = "r4_1"
+let r4_2                    = "r4_2"
+let r4_3                    = "r4_3"
 
 let jpegCompressionQuality  = CGFloat(0.6)      // JPEG quality range is 0.0 (low) to 1.0 (high)
 
@@ -113,7 +126,7 @@ class List: NSObject, NSCoding
     var name: String { didSet { needToSave = true } }
     var categories = [Category]()
     var listColor: UIColor?
-    var listColorName: String = "r1_2" {
+    var listColorName: String = r1_2 {
         didSet {
             needToSave = true
             setListColor()
@@ -309,18 +322,18 @@ class List: NSObject, NSCoding
     func setListColor()
     {
         switch listColorName {
-        case "r1_1": listColor = color1_1
-        case "r1_2": listColor = color1_2
-        case "r1_3": listColor = color1_3
-        case "r2_1": listColor = color2_1
-        case "r2_2": listColor = color2_2
-        case "r2_3": listColor = color2_3
-        case "r3_1": listColor = color3_1
-        case "r3_2": listColor = color3_2
-        case "r3_3": listColor = color3_3
-        case "r4_1": listColor = color4_1
-        case "r4_2": listColor = color4_2
-        case "r4_3": listColor = color4_3
+        case r1_1: listColor = color1_1
+        case r1_2: listColor = color1_2
+        case r1_3: listColor = color1_3
+        case r2_1: listColor = color2_1
+        case r2_2: listColor = color2_2
+        case r2_3: listColor = color2_3
+        case r3_1: listColor = color3_1
+        case r3_2: listColor = color3_2
+        case r3_3: listColor = color3_3
+        case r4_1: listColor = color4_1
+        case r4_2: listColor = color4_2
+        case r4_3: listColor = color4_3
         default: listColor = color1_2
         }
     }
@@ -1629,20 +1642,22 @@ class Item: ListObj, NSCoding
         // if the cloud imageModifiedDate is newer than local then we need to schedule the imageAsset for this item to be pulled
         if let imageModifiedDate = record[key_imageModifiedDate] as? NSDate
         {
-            if imageModifiedDate > self.imageModifiedDate {
+            if imageModifiedDate > self.imageModifiedDate || (imageModifiedDate == self.imageModifiedDate &&
+                                                              imageModifiedDate != NSDate.init(timeIntervalSince1970: 0) &&
+                                                              self.imageAsset?.image == nil) {
                 // a newer image for this item exists
                 // add this imageAsset to the array needing fetching
                 if imageAsset != nil {
-                    print("ImageAsset.updateFromRecord - itemRecordID for \(self.name) was added to the itemReferences for image update...")
+                    //print("ImageAsset.updateFromRecord - itemRecordID for \(self.name) was added to the itemReferences for image update...")
                     appDelegate.addToItemReferences(self.itemReference!)
                     //appDelegate.itemRecordIDs.append(record.recordID.name)
                 } else {
                     print("******* ERROR in item updateFromRecord - the imageAsset for this item is nil...!!!")
                 }
+                
+                // then set the local item imageModifiedDate to cloud value
+                self.imageModifiedDate = imageModifiedDate
             }
-            
-            // then set the local imageModifiedDate to cloud value
-            self.imageModifiedDate = imageModifiedDate
         }
         
         // check date values after update from cloud record - reset if needed
@@ -1938,9 +1953,8 @@ class ImageAsset: NSObject, NSCoding
     {
         // does the item need to be notified when the imageAsset is updated???
         /*
-        if let imageRecord = self.imageRecord {
-            let item = getItemFromReference(imageRecord)
-
+        if let item = getItemFromReference(record) {
+            //
         }
         */
         
@@ -1959,7 +1973,7 @@ class ImageAsset: NSObject, NSCoding
         if let path = imageAsset?.fileURL.path {
             let image = UIImage(contentsOfFile: path)
             self.image = image
-            print("ImageAsset.updateFromRecord: got image update for \(imageGUID)...")
+            //print("ImageAsset.updateFromRecord: got image update for \(imageGUID)...")
         }
         
         self.imageRecord = record

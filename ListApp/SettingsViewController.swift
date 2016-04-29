@@ -27,18 +27,18 @@ class SettingsViewController: UIViewController
     var itemVC: ItemViewController?
     
     // color buttons
-    let r1_1: UIButton = UIButton()
-    let r1_2: UIButton = UIButton()
-    let r1_3: UIButton = UIButton()
-    let r2_1: UIButton = UIButton()
-    let r2_2: UIButton = UIButton()
-    let r2_3: UIButton = UIButton()
-    let r3_1: UIButton = UIButton()
-    let r3_2: UIButton = UIButton()
-    let r3_3: UIButton = UIButton()
-    let r4_1: UIButton = UIButton()
-    let r4_2: UIButton = UIButton()
-    let r4_3: UIButton = UIButton()
+    let cb1_1: UIButton = UIButton()
+    let cb1_2: UIButton = UIButton()
+    let cb1_3: UIButton = UIButton()
+    let cb2_1: UIButton = UIButton()
+    let cb2_2: UIButton = UIButton()
+    let cb2_3: UIButton = UIButton()
+    let cb3_1: UIButton = UIButton()
+    let cb3_2: UIButton = UIButton()
+    let cb3_3: UIButton = UIButton()
+    let cb4_1: UIButton = UIButton()
+    let cb4_2: UIButton = UIButton()
+    let cb4_3: UIButton = UIButton()
     var colorButtons = [UIButton: UIColor]()
     var colorButtonIndex = [UIButton: Int]()
     
@@ -115,23 +115,23 @@ class SettingsViewController: UIViewController
     func selectInitialColorButton(colorName: String?)
     {
         // initial color button selection
-        var colorButton = r1_1
+        var colorButton = cb1_2
         
         if let colorName = colorName {
             switch colorName {
-            case "r1_1": colorButton = r1_1
-            case "r1_2": colorButton = r1_2
-            case "r1_3": colorButton = r1_3
-            case "r2_1": colorButton = r2_1
-            case "r2_2": colorButton = r2_2
-            case "r2_3": colorButton = r2_3
-            case "r3_1": colorButton = r3_1
-            case "r3_2": colorButton = r3_2
-            case "r3_3": colorButton = r3_3
-            case "r4_1": colorButton = r4_1
-            case "r4_2": colorButton = r4_2
-            case "r4_3": colorButton = r4_3
-            default: colorButton = r1_1
+            case r1_1: colorButton = cb1_1
+            case r1_2: colorButton = cb1_2
+            case r1_3: colorButton = cb1_3
+            case r2_1: colorButton = cb2_1
+            case r2_2: colorButton = cb2_2
+            case r2_3: colorButton = cb2_3
+            case r3_1: colorButton = cb3_1
+            case r3_2: colorButton = cb3_2
+            case r3_3: colorButton = cb3_3
+            case r4_1: colorButton = cb4_1
+            case r4_2: colorButton = cb4_2
+            case r4_3: colorButton = cb4_3
+            default:   colorButton = cb1_2
             }
         }
         
@@ -166,18 +166,18 @@ class SettingsViewController: UIViewController
             "expandAllCategoriesButton": expandAllCategoriesButton,
             "setAllItemsIncompleteButton": setAllItemsIncompleteButton,
             "setAllItemsInactiveButton": setAllItemsInactiveButton,
-            "r1_1": r1_1,
-            "r1_2": r1_2,
-            "r1_3": r1_3,
-            "r2_1": r2_1,
-            "r2_2": r2_2,
-            "r2_3": r2_3,
-            "r3_1": r3_1,
-            "r3_2": r3_2,
-            "r3_3": r3_3,
-            "r4_1": r4_1,
-            "r4_2": r4_2,
-            "r4_3": r4_3,
+            "r1_1": cb1_1,
+            "r1_2": cb1_2,
+            "r1_3": cb1_3,
+            "r2_1": cb2_1,
+            "r2_2": cb2_2,
+            "r2_3": cb2_3,
+            "r3_1": cb3_1,
+            "r3_2": cb3_2,
+            "r3_3": cb3_3,
+            "r4_1": cb4_1,
+            "r4_2": cb4_2,
+            "r4_3": cb4_3,
             "closeButton": closeButton,
             "printButton": printButton,
             "emailButton": emailButton,
@@ -307,8 +307,8 @@ class SettingsViewController: UIViewController
         // set the showNotes state
         self.showNotes = appDelegate.printNotes
         
-        colorButtons = [r1_1: color1_1, r1_2: color1_2, r1_3: color1_3, r2_1: color2_1, r2_2: color2_2, r2_3: color2_3, r3_1: color3_1, r3_2: color3_2, r3_3: color3_3, r4_1: color4_1, r4_2: color4_2, r4_3: color4_3]
-        colorButtonIndex = [r1_1: 1, r1_2: 2, r1_3: 3, r2_1: 4, r2_2: 5, r2_3: 6, r3_1: 7, r3_2: 8, r3_3: 9, r4_1: 10, r4_2: 11, r4_3: 12]
+        colorButtons = [cb1_1: color1_1, cb1_2: color1_2, cb1_3: color1_3, cb2_1: color2_1, cb2_2: color2_2, cb2_3: color2_3, cb3_1: color3_1, cb3_2: color3_2, cb3_3: color3_3, cb4_1: color4_1, cb4_2: color4_2, cb4_3: color4_3]
+        colorButtonIndex = [cb1_1: 1, cb1_2: 2, cb1_3: 3, cb2_1: 4, cb2_2: 5, cb2_3: 6, cb3_1: 7, cb3_2: 8, cb3_3: 9, cb4_1: 10, cb4_2: 11, cb4_3: 12]
         
         containerView.translatesAutoresizingMaskIntoConstraints = false
         containerView.backgroundColor = UIColor(white: 0.0, alpha: 1.0)
@@ -444,19 +444,19 @@ class SettingsViewController: UIViewController
         var selectedButton: UIButton?
         
         switch sender.tag {
-            case  1: color = "r1_1"; selectedButton = r1_1
-            case  2: color = "r1_2"; selectedButton = r1_2
-            case  3: color = "r1_3"; selectedButton = r1_3
-            case  4: color = "r2_1"; selectedButton = r2_1
-            case  5: color = "r2_2"; selectedButton = r2_2
-            case  6: color = "r2_3"; selectedButton = r2_3
-            case  7: color = "r3_1"; selectedButton = r3_1
-            case  8: color = "r3_2"; selectedButton = r3_2
-            case  9: color = "r3_3"; selectedButton = r3_3
-            case 10: color = "r4_1"; selectedButton = r4_1
-            case 11: color = "r4_2"; selectedButton = r4_2
-            case 12: color = "r4_3"; selectedButton = r4_3
-            default: color = "r1_2"; selectedButton = r1_2
+            case  1: color = r1_1; selectedButton = cb1_1
+            case  2: color = r1_2; selectedButton = cb1_2
+            case  3: color = r1_3; selectedButton = cb1_3
+            case  4: color = r2_1; selectedButton = cb2_1
+            case  5: color = r2_2; selectedButton = cb2_2
+            case  6: color = r2_3; selectedButton = cb2_3
+            case  7: color = r3_1; selectedButton = cb3_1
+            case  8: color = r3_2; selectedButton = cb3_2
+            case  9: color = r3_3; selectedButton = cb3_3
+            case 10: color = r4_1; selectedButton = cb4_1
+            case 11: color = r4_2; selectedButton = cb4_2
+            case 12: color = r4_3; selectedButton = cb4_3
+            default: color = r1_2; selectedButton = cb1_2
         }
         
         // put a white box around the selected color button

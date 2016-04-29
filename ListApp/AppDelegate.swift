@@ -50,7 +50,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var listArray = [CKRecord]()                        // holds fetched list records for app launch data merge
     var categoryArray = [CKRecord]()                    // "
     var itemArray = [CKRecord]()                        // "
-    var imageArray = [CKRecord]()                       // "
     var deleteArray = [CKRecord]()                      // "
     var refreshEventIsPending = false
     var printNotes = true
@@ -375,23 +374,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // saveToCloud will add all records needing updating to the updateRecords array
         if iCloudIsAvailable() {
-            if let listVC = listViewController {
-                for list in listVC.lists {
-                    list.saveToCloud()
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
+            {
+                if let listVC = self.listViewController {
+                    for list in listVC.lists {
+                        list.saveToCloud()
+                    }
                 }
+                
+                // cloud batch save ready -- now send the records for batch updating
+                self.batchRecordUpdate()
             }
-            
-            // cloud batch save ready -- now send the records for batch updating
-            batchRecordUpdate()
         }
         
         if !cloudOnly {
-            // save the list data - local
-            if let listVC = listViewController {
-                let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: ArchiveURL.path!)
-                
-                if !successfulSave {
-                    print("ERROR: Failed to save list data locally...")
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
+            {
+                // save the list data - local
+                if let listVC = self.listViewController {
+                    let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: self.ArchiveURL.path!)
+                    
+                    if !successfulSave {
+                        print("ERROR: Failed to save list data locally...")
+                    }
                 }
             }
         }
@@ -586,7 +591,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // sends all records needing updating in batches to cloud storage
     func batchRecordUpdate()
     {
-        let batchSize = 100        // this number must be no greater than 400
+        let batchSize = 250        // this number must be no greater than 400
         
         if let database = privateDatabase {
             var ckRecords = [CKRecord](updateRecords.keys)      // initializes an array of CKRecords with the keys from the updateRecords dictionary
@@ -598,10 +603,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             // submit a limited number of records in each operation
             var startIndex = 0
-            var stopIndex = 0
+            var stopIndex = -1
             
             repeat {
-                startIndex = stopIndex
+                startIndex = stopIndex + 1
                 stopIndex += batchSize
                 
                 if stopIndex > ckRecords.count - 1 {
@@ -664,9 +669,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
                 
                 saveRecordsOperation.modifyRecordsCompletionBlock = { savedRecords, deletedRecordIDs, error in
-                    if error == nil {
-                        print("batch save operation complete!")
-                    } else {
+                    if error == nil && savedRecords != nil {
+                        print("batch save operation complete for \(savedRecords!.count) records")
+                    } else if error != nil {
                         // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
                         print("*** ERROR: batchRecordUpdate - \(error!.localizedDescription)")
                         print("The following records had problems: \(error!.userInfo[CKPartialErrorsByItemIDKey])")
@@ -719,7 +724,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // pulls all list, category and item data from cloud storage
     func fetchCloudData()
     {
-        let resultCount = 0
+        let resultCount = 0         // default value will let iCloud server decide how much to send in each block
         
         if let database = privateDatabase {
             // clear the record arrays
@@ -833,7 +838,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
                 
                 if cursor != nil {
-                    print("item cursor: \(cursor)")
+                    //print("item cursor: \(cursor)")
                     print("\(self.itemArray.count) items - there is more data to fetch...")
                     let newOperation = CKQueryOperation(cursor: cursor!)
                     newOperation.recordFetchedBlock = itemFetch.recordFetchedBlock
@@ -859,52 +864,84 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
-    // pulls image data for items needing updating
+    // pulls image data in batches for items needing updating (itemReferences)
     func fetchImageData()
     {
-        //print("*** fetchImageData - \(itemReferences.count) items need new images...")
+        print("*** fetchImageData - \(itemReferences.count) items need new images...")
+        
+        //let uniqueArray = Array(Set(itemReferences))
+        //print("    of \(itemReferences.count) items \(uniqueArray.count) are unique...")
+        
+        let batchSize = 50         // size of the batch request block
         
         if let database = privateDatabase {
-            // clear the record array
-            imageArray.removeAll()
-            
-            let predicate = NSPredicate (format: "owningItem IN %@", argumentArray: [itemReferences])
-            let imageQuery = CKQuery(recordType: ImagesRecordType, predicate: predicate)
-            let imageFetch = CKQueryOperation(query: imageQuery)
-            
-            imageFetch.recordFetchedBlock = { (record : CKRecord!) in
-                self.imageArray.append(record)
-                print("image recordFetchedBlock - GUID: \(record[key_imageGUID]) recordId: \(record.recordID.recordName)")
+            if itemReferences.count == 0 {
+                print("fetchImageData = itemReferences.count == 0")
+                return
             }
             
-            // set up completion block with cursors so they can recursively gather all of the image records
-            imageFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
-                if cursor != nil {
-                    print("there is more data to fetch")
-                    let newOperation = CKQueryOperation(cursor: cursor!)
-                    newOperation.recordFetchedBlock = imageFetch.recordFetchedBlock
-                    newOperation.queryCompletionBlock = imageFetch.queryCompletionBlock
-                    database.addOperation(newOperation)
+            // submit a limited number of references in each operation
+            var startIndex = 0
+            var stopIndex = -1
+            var loop = 0
+            
+            repeat {
+                startIndex = stopIndex + 1
+                stopIndex += batchSize
+                loop += 1
+                
+                if stopIndex > itemReferences.count - 1 {
+                    stopIndex = itemReferences.count - 1
                 }
                 
-                if error != nil {
-                    print("imageFetch error: \(error?.localizedDescription)")
+                if stopIndex < startIndex {
+                    print("ERROR: fetchImageData - stopIndex < startIndex")
+                    return
                 }
                 
-                if cursor == nil {
-                    print("The image record fetch operation is complete...")
-                    print("array count - image: \(self.imageArray.count)")
+                // temp image record array
+                var imageArray = [CKRecord]()
+                
+                // set up a temp arrary of references for this batch
+                var batchReferences = [CKReference]()
+                for i in startIndex...stopIndex {
+                    batchReferences.append(itemReferences[i])
+                }
+                
+                print("fetchImageData - \(startIndex+1) to \(stopIndex+1) of \(itemReferences.count)")
+                
+                let predicate = NSPredicate (format: "owningItem IN %@", argumentArray: [batchReferences])
+                let imageQuery = CKQuery(recordType: ImagesRecordType, predicate: predicate)
+                let imageFetch = CKQueryOperation(query: imageQuery)
+                
+                imageFetch.recordFetchedBlock = { (record : CKRecord!) in
+                    imageArray.append(record)
+                    //print("image recordFetchedBlock - GUID: \(record[key_imageGUID]) recordId: \(record.recordID.recordName)")
+                }
+                
+                imageFetch.queryCompletionBlock = { [loop, startIndex, stopIndex] (cursor : CKQueryCursor?, error : NSError?) in
+                    if cursor != nil {
+                        print("******* ERROR:  fetchImageData - there is more data to fetch and there should not be...")
+                    }
                     
+                    if error != nil {
+                        print("imageFetch error: \(error?.localizedDescription)")
+                    }
+                    
+                    print("image record fetch operation for loop \(loop) is complete... \(startIndex+1) to \(stopIndex+1)")
+                    
+                    // send this batch of image records to the merge method on the main thread
                     dispatch_async(dispatch_get_main_queue()) {
-                        self.mergeImageCloudData()
+                        self.mergeImageCloudData(imageArray)
                     }
                 }
-            }
+                
+                // execute the query operation
+                database.addOperation(imageFetch)
+                
+            } while stopIndex < itemReferences.count - 1
             
-            // execute the query operation
-            database.addOperation(imageFetch)
         }
-    
     }
     
     // after fetching cloud data, merge with local data
@@ -938,11 +975,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // giving more time for cloud records to arrive before refreshing the UI
     }
     
-    func mergeImageCloudData()
+    func mergeImageCloudData(imageRecords: [CKRecord])
     {
-        print("mergeImageCloudData...")
+        //print("mergeImageCloudData...")
         
-        for cloudImage in imageArray {
+        for cloudImage in imageRecords {
             updateFromRecord(cloudImage, forceUpdate: false)
         }
     }
