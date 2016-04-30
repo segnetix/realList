@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/AppDelegate.swift"
-            timestampString = "483657876.468211"
+            timestampString = "483753378.76372"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "594"
-            endingLineNumber = "594"
+            startingLineNumber = "593"
+            endingLineNumber = "593"
             landmarkName = "batchRecordUpdate()"
             landmarkType = "5">
          </BreakpointContent>
@@ -44,11 +44,11 @@
             condition = "cloudCategory[&quot;name&quot;] == &quot;crash&quot;"
             continueAfterRunningActions = "No"
             filePath = "ListApp/AppDelegate.swift"
-            timestampString = "483663317.13127"
+            timestampString = "483753378.76372"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "957"
-            endingLineNumber = "957"
+            startingLineNumber = "952"
+            endingLineNumber = "952"
             landmarkName = "mergeCloudData()"
             landmarkType = "5">
          </BreakpointContent>
@@ -60,11 +60,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "ListApp/AppDelegate.swift"
-            timestampString = "483663317.13127"
+            timestampString = "483753378.76372"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1147"
-            endingLineNumber = "1147"
+            startingLineNumber = "1141"
+            endingLineNumber = "1141"
             landmarkName = "getLocalList(_:)"
             landmarkType = "5">
          </BreakpointContent>
@@ -162,22 +162,6 @@
             startingLineNumber = "218"
             endingLineNumber = "218"
             landmarkName = "adjustConstraints(_:)"
-            landmarkType = "5">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "ListApp/ListData.swift"
-            timestampString = "483662821.513522"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1645"
-            endingLineNumber = "1645"
-            landmarkName = "updateFromRecord(_:)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

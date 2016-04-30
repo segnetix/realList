@@ -239,10 +239,8 @@ class List: NSObject, NSCoding
             return
         }
         
-        if let database = appDelegate.privateDatabase
-        {
-            if listRecord != nil
-            {
+        if let database = appDelegate.privateDatabase {
+            if listRecord != nil {
                 // commit change to cloud
                 if needToDelete {
                     deleteRecord(listRecord!, database: database)
@@ -606,8 +604,7 @@ class List: NSObject, NSCoding
     /// Removed the category (and associated items) at the given index.
     func removeCatetoryAtIndex(sourceCatIndex: Int)
     {
-        if sourceCatIndex < self.categories.count
-        {
+        if sourceCatIndex < self.categories.count {
             categories.removeAtIndex(sourceCatIndex)
         }
         
@@ -943,16 +940,13 @@ class List: NSObject, NSCoding
         var indexPaths = [NSIndexPath]()
         var pos = -1
         
-        for category in categories
-        {
+        for category in categories {
             if category.displayHeader {
                 pos += 1
             }
             
-            if category.expanded
-            {
-                for item in category.items
-                {
+            if category.expanded {
+                for item in category.items {
                     if item.state == ItemState.Complete {
                         pos += 1
                         indexPaths.append(NSIndexPath(forRow: pos, inSection: 0))
@@ -1915,12 +1909,10 @@ class ImageAsset: NSObject, NSCoding
     // commits the image to cloud storage (if needed)
     func saveToCloud(itemReference: CKReference)
     {
-        if let database = appDelegate.privateDatabase {
-            if needToSave {
-                saveRecord(imageRecord, itemReference: itemReference)
-            } else if needToDelete {
-                deleteRecord(imageRecord, database: database)
-            }
+        if needToSave {
+            saveRecord(imageRecord, itemReference: itemReference)
+        } else if needToDelete {
+            deleteRecord(imageRecord)
         }
     }
     
@@ -1939,7 +1931,7 @@ class ImageAsset: NSObject, NSCoding
     
     // deletes the image from the cloud by setting the
     // image asset to nil in the imageRecord and updating
-    func deleteRecord(imageRecord: CKRecord, database: CKDatabase)
+    func deleteRecord(imageRecord: CKRecord)
     {
         imageRecord[key_modifiedDate]  = self.modifiedDate
         imageRecord[key_imageAsset]    = nil
@@ -2189,6 +2181,7 @@ func createDeleteRecord(database: CKDatabase, recordName: String, objectType: St
     deleteRecord[key_objectType] = objectType
     deleteRecord[key_objectName] = objectName
     deleteRecord[key_deletedDate] = NSDate.init()
+    
     database.saveRecord(deleteRecord, completionHandler: { returnRecord, error in
         if let err = error {
             print("Save deleteRecord Error for '\(objectName)': \(err.localizedDescription)")
