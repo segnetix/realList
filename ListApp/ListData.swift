@@ -289,6 +289,10 @@ class List: NSObject, NSCoding
         
         self.listRecord = record
         self.listReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
+        
+        // list record is now updated
+        needToSave = false
+        
         //print("updated list: \(list!.name)")
     }
     
@@ -1321,6 +1325,10 @@ class Category: ListObj, NSCoding
         
         self.categoryRecord = record
         self.categoryReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
+        
+        // category record is now updated
+        needToSave = false
+        
         //print("updated category: \(category!.name)")
     }
     
@@ -1692,6 +1700,8 @@ class Item: ListObj, NSCoding
             }
         }
         
+        // item record is now updated
+        needToSave = false
         //print("updated item: \(item.name)")
     }
     
@@ -1969,6 +1979,9 @@ class ImageAsset: NSObject, NSCoding
         }
         
         self.imageRecord = record
+        
+        // image record is now updated
+        needToSave = false
     }
     
     func deleteFromCloud()

@@ -10,6 +10,7 @@ import UIKit
 import QuartzCore
 import iAd
 import MessageUI
+import PKHUD
 
 let itemCellID     = "ItemCell"
 let categoryCellID = "CategoryCell"
@@ -37,7 +38,7 @@ let kItemCellHeight:     CGFloat = 56.0
 let kCategoryCellHeight: CGFloat = 44.0
 let kAddItemCellHeight:  CGFloat = 44.0
 
-class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate, UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate
+class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate, UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate
 {
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var adBanner: ADBannerView!
@@ -77,6 +78,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        manager.delegate = self
         
         if appDelegate.appIsUpgraded {
             adBanner.delegate = nil
@@ -91,6 +93,10 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
         
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         //self.navigationItem.rightBarButtonItem = self.editButtonItem()
+        
+        // HUD setup
+        HUD.dimsBackground = true
+        HUD.allowsInteraction = false
         
         // set up long press gesture recognizer for the cell move functionality
         longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(ItemViewController.longPressAction(_:)))
@@ -592,7 +598,7 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
             }
         }
         
-        appDelegate.saveAll()
+        appDelegate.saveListData(true)
     }
     
     func collapseAllCategories() {
@@ -1457,6 +1463,16 @@ class ItemViewController: UIViewController, UITextFieldDelegate, UITableViewData
     func getHTMLforPrinting() -> String
     {
         return list.htmlForPrinting()
+    }
+    
+    func startHUD(title: String, subtitle: String)
+    {
+        HUD.show(HUDContentType.LabeledProgress(title: title, subtitle: subtitle))
+    }
+    
+    func stopHUD()
+    {
+        HUD.hide()
     }
     
 ////////////////////////////////////////////////////////////////

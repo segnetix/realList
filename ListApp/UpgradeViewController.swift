@@ -8,7 +8,7 @@
 
 import UIKit
 
-class UpgradeViewController: UIViewController
+class UpgradeViewController: UIAppViewController
 {
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
@@ -20,6 +20,7 @@ class UpgradeViewController: UIViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        manager.delegate = self
         
         buyButton.backgroundColor = UIColor.clearColor()
         buyButton.layer.cornerRadius = 5

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class AppSettingsViewController: UIViewController
+class AppSettingsViewController: UIAppViewController
 {
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
@@ -19,10 +19,12 @@ class AppSettingsViewController: UIViewController
     @IBOutlet weak var notesSpellCheckSwitch: UISwitch!
     @IBOutlet weak var notesAutocorrectionSwitch: UISwitch!
     @IBOutlet weak var picsInPrintAndEmailSwitch: UISwitch!
-    
+    //@IBOutlet weak var syncCloudOnLaunch: UISwitch!
+
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        manager.delegate = self
 
         // set initial values for switches
         self.namesCapitalizeSwitch.on     = appDelegate.namesCapitalize
@@ -32,6 +34,7 @@ class AppSettingsViewController: UIViewController
         self.notesSpellCheckSwitch.on     = appDelegate.notesSpellCheck
         self.notesAutocorrectionSwitch.on = appDelegate.notesAutocorrection
         self.picsInPrintAndEmailSwitch.on = appDelegate.picsInPrintAndEmail
+        //self.syncCloudOnLaunch.on         = appDelegate.syncCloudOnLaunch
     }
 
     override func didReceiveMemoryWarning() {
@@ -49,6 +52,9 @@ class AppSettingsViewController: UIViewController
         appDelegate.notesSpellCheck      = self.notesSpellCheckSwitch.on
         appDelegate.notesAutocorrection  = self.notesAutocorrectionSwitch.on
         appDelegate.picsInPrintAndEmail  = self.picsInPrintAndEmailSwitch.on
+        //appDelegate.syncCloudOnLaunch    = self.syncCloudOnLaunch.on
+        
+        appDelegate.saveState(true)
         
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }

@@ -97,7 +97,7 @@ extension IAPHelper: SKProductsRequestDelegate
     
     public func request(request: SKRequest, didFailWithError error: NSError) {
         print("Failed to load list of products.")
-        print("Error: \(error.localizedDescription)")
+        print("IAPHelper - request - Error: \(error.localizedDescription)")
         productsRequestCompletionHandler?(success: false, products: nil)
         clearRequestAndHandler()
     }

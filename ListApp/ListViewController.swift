@@ -797,7 +797,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             let selectedCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: selectionIndex, inSection: 0))
             selectedCell?.backgroundColor = selectedCellColor
             
-            appDelegate.saveState()
+            appDelegate.saveState(true)
         }
     }
     
@@ -828,6 +828,46 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         snapshot.layer.shadowOpacity = 0.4
         
         return snapshot
+    }
+    
+    /*
+    func clearNeedToSave() {
+        for list in lists {
+            list.needToSave = false
+            
+            for category in list.categories {
+                category.needToSave = false
+                
+                for item in category.items {
+                    item.needToSave = false
+                }
+            }
+        }
+    }
+    */
+    
+    func countNeedToSave() -> Int {
+        var count = 0
+        
+        for list in lists {
+            if list.needToSave {
+                count += 1
+            }
+            
+            for category in list.categories {
+                if category.needToSave {
+                    count += 1
+                }
+                
+                for item in category.items {
+                    if item.needToSave {
+                        count += 1
+                    }
+                }
+            }
+        }
+        
+        return count
     }
     
     // reorder lists, categories and items according to order number
@@ -1028,6 +1068,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.tableView.reloadData()
     }
     
+    /*
     func addTestItems()
     {
         // list1
@@ -1105,7 +1146,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         list4.addItem(cat4_1, name: "Ramen noodles", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         list4.addItem(cat4_1, name: "Sleeping bags", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         list4.addItem(cat4_1, name: "Soap", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Towles", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
+        list4.addItem(cat4_1, name: "Towels", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         list4.addItem(cat4_1, name: "Food", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         list4.addItem(cat4_1, name: "Bacon", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         list4.addItem(cat4_1, name: "Cereal", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
@@ -1153,4 +1194,5 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         list6.updateCellTypeArray()
         */
     }
+    */
 }

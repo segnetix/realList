@@ -21,7 +21,7 @@ enum PermissionStatus: Int, CustomStringConvertible {
     }
 }
 
-class AboutViewController: UIViewController
+class AboutViewController: UIAppViewController
 {
     @IBOutlet weak var versionLabel: UILabel!
     @IBOutlet weak var cloudButton: UIButton!
@@ -33,7 +33,7 @@ class AboutViewController: UIViewController
     override func viewDidLoad()
     {
         super.viewDidLoad()
-
+        manager.delegate = self
         appDelegate.aboutViewController = self
         
         // get the bundle version string
@@ -59,6 +59,13 @@ class AboutViewController: UIViewController
         } else {
             upgradeButton.setImage(UIImage(named: "Upgrade"), forState: .Normal)
         }
+    }
+    
+    // callback function for network status change
+    override func reachabilityStatusChangeHandler(reachability: Reachability)
+    {
+        super.reachabilityStatusChangeHandler(reachability)
+        updateCloudStatus()
     }
     
     override func didReceiveMemoryWarning()

@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SettingsViewController: UIViewController
+class SettingsViewController: UIAppViewController
 {
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     let containerView: UIView = UIView()
@@ -487,7 +487,7 @@ class SettingsViewController: UIViewController
         itemVC?.presentPrintDialog()
         
         // dismiss settings view controller
-        self.itemVC?.appDelegate.saveAll()
+        self.itemVC?.appDelegate.saveListData(true)
         self.presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
@@ -497,13 +497,13 @@ class SettingsViewController: UIViewController
         itemVC?.scheduleEmailDialog()
         
         // dismiss settings view controller
-        self.itemVC?.appDelegate.saveAll()
+        self.itemVC?.appDelegate.saveListData(true)
         self.presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
     
     func close()
     {
-        itemVC?.appDelegate.saveAll()
+        itemVC?.appDelegate.saveListData(true)
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
 }

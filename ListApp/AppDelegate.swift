@@ -84,6 +84,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     let container = CKContainer.defaultContainer()
     var privateDatabase: CKDatabase?
     
+    // reachability manager
+    var manager: AppManager = AppManager.sharedInstance
+    
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool
     {
         // set up controller access for application state persistence
@@ -104,11 +107,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         privateDatabase = container.privateCloudDatabase
 
-        // push notification setup
+        // init the reachability monitor
+        AppManager.sharedInstance.initReachabilityMonitor()
+        
+        // app setup
+        pushNotificationSetup(application)          // asks user for notification permission the first time app is run
+        restoreListDataFromLocalStorage()           // gets list data from local storage
+        restoreAppSettings()                        // restores the general app settings
+        restoreUpgradeStatus()                      // restores upgrade status from local storage otherwise gets data from app store regarding upgrade pricing
+        fetchCloudData()                            // gets cloud data and merges with local data including cloud deletes
+        
+        return true
+    }
+    
+    func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError)
+    {
+        print("*** didFailToRegisterForRemoteNotificationsWithError: \(error)")
+    }
+    
+    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
+        print("*** didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
+        
+        // will create subscriptions if necessary
+        self.createSubscriptions()
+    }
+
+    func pushNotificationSetup(application: UIApplication) {
         let notificationSettings = UIUserNotificationSettings(forTypes: UIUserNotificationType.None, categories: nil)
         application.registerUserNotificationSettings(notificationSettings)
         application.registerForRemoteNotifications()
-        
+    }
+    
+    func restoreListDataFromLocalStorage() {
         // restore the list data from local storage
         if let archivedListData = NSKeyedUnarchiver.unarchiveObjectWithFile(ArchiveURL.path!) as? [List] {
             listViewController!.lists = archivedListData
@@ -127,9 +157,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             listViewController!.generateTutorial()
             listViewController!.selectList(0)
         }
-        
-        print("iCloudIsAvailable: \(self.iCloudIsAvailable())")
-        
+    }
+    
+    func restoreAppSettings() {
         // restore app settings
         if let printNotes          = NSUserDefaults.standardUserDefaults().objectForKey(key_printNotes)          as? Bool { self.printNotes          = printNotes          }
         if let namesCapitalize     = NSUserDefaults.standardUserDefaults().objectForKey(key_namesCapitalize)     as? Bool { self.namesCapitalize     = namesCapitalize     }
@@ -139,52 +169,41 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         if let notesSpellCheck     = NSUserDefaults.standardUserDefaults().objectForKey(key_notesSpellCheck)     as? Bool { self.notesSpellCheck     = notesSpellCheck     }
         if let notesAutocorrection = NSUserDefaults.standardUserDefaults().objectForKey(key_notesAutocorrection) as? Bool { self.notesAutocorrection = notesAutocorrection }
         if let picsInPrintAndEmail = NSUserDefaults.standardUserDefaults().objectForKey(key_picsInPrintAndEmail) as? Bool { self.picsInPrintAndEmail = picsInPrintAndEmail }
-        
+    }
+    
+    func restoreUpgradeStatus() {
         // restore upgrade status from user defaults
         if RealListProducts.store.isProductPurchased(RealListProducts.FullVersion) {
             self.appIsUpgraded = true
         } else {
-            // check the product on the app store to get pricing
-            self.appIsUpgraded = false
-            RealListProducts.store.requestProducts { success, products in
-                if success {
-                    if let products = products {
-                        if products.count > 0 {
-                            // we have only one product
-                            let product = products[0]
-                            self.upgradeProduct = product
-                            
-                            print("localizedTitle: \(product.localizedTitle)")
-                            print("localizedDescription: \(product.localizedDescription)")
-                            print("productIdentifier: \(product.productIdentifier)")
-                            
-                            if RealListProducts.store.isProductPurchased(product.productIdentifier) {
-                                self.appIsUpgraded = true
-                            } else {
-                                self.appIsUpgraded = false
-                                priceFormatter.locale = product.priceLocale
-                                self.upgradePriceString = priceFormatter.stringFromNumber(product.price)!
+            if (AppManager.sharedInstance.isReachable) {
+                // check the product on the app store to get pricing
+                self.appIsUpgraded = false
+                RealListProducts.store.requestProducts { success, products in
+                    if success {
+                        if let products = products {
+                            if products.count > 0 {
+                                // we have only one product
+                                let product = products[0]
+                                self.upgradeProduct = product
+                                
+                                print("localizedTitle: \(product.localizedTitle)")
+                                print("localizedDescription: \(product.localizedDescription)")
+                                print("productIdentifier: \(product.productIdentifier)")
+                                
+                                if RealListProducts.store.isProductPurchased(product.productIdentifier) {
+                                    self.appIsUpgraded = true
+                                } else {
+                                    self.appIsUpgraded = false
+                                    priceFormatter.locale = product.priceLocale
+                                    self.upgradePriceString = priceFormatter.stringFromNumber(product.price)!
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        
-        return true
-    }
-    
-    func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError)
-    {
-        print("*** didFailToRegisterForRemoteNotificationsWithError: \(error)")
-    }
-    
-    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData)
-    {
-        print("*** didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
-        
-        // will create subscriptions if necessary
-        self.createSubscriptions()
     }
     
     // iCloud sent notification of a change
@@ -243,14 +262,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
         
         print("applicationWillEnterForeground...")
-        aboutViewController?.updateCloudStatus()
+        //aboutViewController?.updateCloudStatus()
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
         print("applicationDidBecomeActive...")
-        
-        fetchCloudData()
     }
     
     // called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground
@@ -258,8 +275,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         print("applicationWillTerminate...")
         
-        // save state and data
-        saveAll()
+        // save state and data synchronously
+        saveAll(false)
     }
     
 ////////////////////////////////////////////////////////////////
@@ -272,6 +289,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func createSubscriptions()
     {
         guard let database = privateDatabase else { return }
+        guard iCloudIsAvailable() else { print("createSubscriptions - iCloud is not available..."); return }
         
         //print("called createSubscriptions...")
         
@@ -296,8 +314,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // subscription check
         database.fetchAllSubscriptionsWithCompletionHandler() { (subscriptions, error) -> Void in
-            if error == nil
-            {
+            if error == nil {
                 var haveListsSub = false
                 var haveCategoriesSub = false
                 var haveItemsSub = false
@@ -340,71 +357,122 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // checks if the user has logged into their iCloud account or not
     func iCloudIsAvailable() -> Bool
     {
+        var iCloudDriveOn = false
+        var netReachable  = false
+        var networkType   = "network not reachable"
+        
+        // determine if iCloudDrive is enabled for realList
         if let _ = NSFileManager.defaultManager().ubiquityIdentityToken {
-            return true
+            iCloudDriveOn = true
+        }
+        
+        // determine if network is reachable
+        if (AppManager.sharedInstance.isReachable) {
+            netReachable = true
+        }
+        
+        // determine network Type
+        if netReachable {
+            if (AppManager.sharedInstance.reachabiltyNetworkType == "Wifi") {
+                networkType = ".Wifi"
+            } else if (AppManager.sharedInstance.reachabiltyNetworkType == "Cellular") {
+                networkType = ".Cellular"
+            }
+        }
+        
+        print("iCloudDrive: \(iCloudDriveOn)  network reachable: \(netReachable)  network type: \(networkType)")
+        
+        return iCloudDriveOn && netReachable
+    }
+    
+    func saveState(asynchronously: Bool)
+    {
+        func save() {
+            // save current selection
+            NSUserDefaults.standardUserDefaults().setObject(listViewController!.selectionIndex, forKey: key_selectionIndex)
+            NSUserDefaults.standardUserDefaults().setObject(printNotes,                         forKey: key_printNotes)
+            
+            // save app settings
+            NSUserDefaults.standardUserDefaults().setObject(namesCapitalize,                    forKey: key_namesCapitalize)
+            NSUserDefaults.standardUserDefaults().setObject(namesSpellCheck,                    forKey: key_namesSpellCheck)
+            NSUserDefaults.standardUserDefaults().setObject(namesAutocorrection,                forKey: key_namesAutocorrection)
+            NSUserDefaults.standardUserDefaults().setObject(notesCapitalize,                    forKey: key_notesCapitalize)
+            NSUserDefaults.standardUserDefaults().setObject(notesSpellCheck,                    forKey: key_notesSpellCheck)
+            NSUserDefaults.standardUserDefaults().setObject(notesAutocorrection,                forKey: key_notesAutocorrection)
+            NSUserDefaults.standardUserDefaults().setObject(picsInPrintAndEmail,                forKey: key_picsInPrintAndEmail)
+            
+            NSUserDefaults.standardUserDefaults().synchronize()
+        }
+        
+        if asynchronously {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
+                save()
+            }
         } else {
-            return false
+            save()
         }
     }
     
-    func saveState()
+    /// Writes any dirty objects to the cloud in a batch operation.
+    func saveListDataCloud(asynchronously: Bool)
     {
-        // save current selection
-        NSUserDefaults.standardUserDefaults().setObject(listViewController!.selectionIndex, forKey: key_selectionIndex)
-        NSUserDefaults.standardUserDefaults().setObject(printNotes,                         forKey: key_printNotes)
-        
-        // save app settings
-        NSUserDefaults.standardUserDefaults().setObject(namesCapitalize,                    forKey: key_namesCapitalize)
-        NSUserDefaults.standardUserDefaults().setObject(namesSpellCheck,                    forKey: key_namesSpellCheck)
-        NSUserDefaults.standardUserDefaults().setObject(namesAutocorrection,                forKey: key_namesAutocorrection)
-        NSUserDefaults.standardUserDefaults().setObject(notesCapitalize,                    forKey: key_notesCapitalize)
-        NSUserDefaults.standardUserDefaults().setObject(notesSpellCheck,                    forKey: key_notesSpellCheck)
-        NSUserDefaults.standardUserDefaults().setObject(notesAutocorrection,                forKey: key_notesAutocorrection)
-        NSUserDefaults.standardUserDefaults().setObject(picsInPrintAndEmail,                forKey: key_picsInPrintAndEmail)
-        
-        NSUserDefaults.standardUserDefaults().synchronize()
-    }
-    
-    /// Writes the complete object graph locally and writes any dirty objects to the cloud in a batch operation
-    func saveListData(cloudOnly: Bool)
-    {
-        // save the list data - iCloud
-        //cloudUploadSuccess = true
         updateRecords.removeAll()       // empty the updateRecords array
+        guard iCloudIsAvailable() else { print("saveListDataCloud - iCloud is not available..."); return }
         
-        // saveToCloud will add all records needing updating to the updateRecords array
-        if iCloudIsAvailable() {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
-            {
-                if let listVC = self.listViewController {
-                    for list in listVC.lists {
-                        list.saveToCloud()
-                    }
+        func save() {
+            if let listVC = self.listViewController {
+                for list in listVC.lists {
+                    list.saveToCloud()
                 }
-                
-                // cloud batch save ready -- now send the records for batch updating
-                self.batchRecordUpdate()
             }
+            
+            // cloud batch save ready -- now send the records for batch updating
+            self.batchRecordUpdate()
         }
         
-        if !cloudOnly {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0))
-            {
-                // save the list data - local
-                if let listVC = self.listViewController {
-                    let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: self.ArchiveURL.path!)
-                    
-                    if !successfulSave {
-                        print("ERROR: Failed to save list data locally...")
-                    }
-                }
+        if asynchronously {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
+                save()
             }
+        } else {
+            save()
         }
     }
     
-    func saveAll() {
-        saveState()
-        saveListData(false)
+    /// Writes the complete object graph locally.
+    func saveListDataLocal(asynchronously: Bool)
+    {
+        func save() {
+            if let listVC = self.listViewController {
+                let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: self.ArchiveURL.path!)
+                
+                if !successfulSave {
+                    print("ERROR: Failed to save list data locally...")
+                } else {
+                    //print("SAVE LOCAL DATA worked...!!!")
+                }
+            }
+        }
+        
+        if asynchronously {
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
+                save()
+            }
+        } else {
+            save()
+        }
+    }
+    
+    // Writes list data locally and to the cloud
+    func saveListData(asynchronously: Bool) {
+        saveListDataCloud(asynchronously)
+        saveListDataLocal(asynchronously)
+    }
+    
+    // Saves all app data.  If asynchronous then the save is put on a background thread.
+    func saveAll(asynchronously: Bool) {
+        saveState(asynchronously)
+        saveListData(asynchronously)
         print("all list data saved locally...")
     }
     
@@ -522,6 +590,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
         
         if !refreshEventIsPending {
+            NSLog("preparing refreshEvent timer for delete...")
             print("preparing refreshEvent timer for update...")
             NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
             refreshEventIsPending = true
@@ -562,7 +631,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // now reorder and refresh the table view
         if !refreshEventIsPending {
-            print("preparing refreshEvent timer for delete...")
+            NSLog("preparing refreshEvent timer for delete...")
             NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
             refreshEventIsPending = true
         }
@@ -570,10 +639,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     // called from a timer to batch refreshes
     func refreshEvent() {
-        print("refreshEvent timer did fire...")
+        NSLog("refreshEvent timer did fire...")
         refreshEventIsPending = false
         self.refreshListData()
-        print("refreshEvent did finish...")
+        NSLog("refreshEvent did finish...")
     }
     
     func addToUpdateRecords(record: CKRecord, obj: AnyObject) {
@@ -590,19 +659,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         guard let database = privateDatabase else { return }
         
-        let batchSize = 250        // this number must be no greater than 400
-        
+        let batchSize = 250                                 // this number must be no greater than 400
         var ckRecords = [CKRecord](updateRecords.keys)      // initializes an array of CKRecords with the keys from the updateRecords dictionary
+        var startIndex = 0                                  // start index for each loop
+        var stopIndex = -1                                  // stop index for each loop
         
         if ckRecords.count == 0 {
             print("batchRecordUpdate - ckRecords.count == 0")
             return
         }
         
-        // submit a limited number of records in each operation
-        var startIndex = 0
-        var stopIndex = -1
-        
+        // submit a limited number (batchSize) of records in each operation
         repeat {
             startIndex = stopIndex + 1
             stopIndex += batchSize
@@ -721,6 +788,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func fetchCloudData()
     {
         guard let database = privateDatabase else { return }
+        guard let itemVC = itemViewController else { return }
+        guard iCloudIsAvailable() else { print("fetchCloudData - iCloud is not available..."); return }
+        
+        itemVC.startHUD("iCloud", subtitle: "Fetching data...")
         
         let resultCount = 0         // default value will let iCloud server decide how much to send in each block
         
@@ -829,9 +900,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
         }
         
-        itemFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+        itemFetch.queryCompletionBlock = { [itemVC] (cursor : CKQueryCursor?, error : NSError?) in
             if error != nil {
                 print("itemFetch error: \(error?.localizedDescription)")
+                dispatch_async(dispatch_get_main_queue()) {
+                    itemVC.stopHUD()
+                }
             }
             
             if cursor != nil {
@@ -864,6 +938,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func fetchImageData()
     {
         guard let database = privateDatabase else { return }
+        guard let itemVC = itemViewController else { return }
+        
+        itemVC.startHUD("iCloud", subtitle: "Fetching images...")
         
         print("*** fetchImageData - \(itemReferences.count) items need new images...")
         
@@ -874,6 +951,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         if itemReferences.count == 0 {
             print("fetchImageData = itemReferences.count == 0")
+            itemVC.stopHUD()
             return
         }
         
@@ -893,6 +971,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             if stopIndex < startIndex {
                 print("ERROR: fetchImageData - stopIndex < startIndex")
+                itemVC.stopHUD()
                 return
             }
             
@@ -923,6 +1002,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 
                 if error != nil {
                     print("imageFetch error: \(error?.localizedDescription)")
+                    dispatch_async(dispatch_get_main_queue()) {
+                        itemVC.stopHUD()
+                    }
                 }
                 
                 print("image record fetch operation for loop \(loop) is complete... \(startIndex+1) to \(stopIndex+1)")
@@ -944,6 +1026,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         print("mergeCloudData...")
         
+        guard let itemVC = itemViewController else { return }
+        
+        itemVC.startHUD("iCloud", subtitle: "Merging data...")
+        
         for cloudList in listArray {
             updateFromRecord(cloudList, forceUpdate: false)
         }
@@ -952,6 +1038,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             updateFromRecord(cloudCategory, forceUpdate: false)
         }
         
+        // updateFromRecord will set a timer to fire refreshListData after three seconds,
+        // giving more time for cloud records to arrive before refreshing the UI
         for cloudItem in itemArray {
            updateFromRecord(cloudItem, forceUpdate: false)
         }
@@ -964,19 +1052,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // now that items are merged we can call fetchImageData to
         // retreive any images that need updating
-        self.fetchImageData()
+        fetchImageData()
         
-        // updateFromRecord will set a timer to fire refreshListData after three seconds,
-        // giving more time for cloud records to arrive before refreshing the UI
+        print("mergeCloudData - need to save count: \(countNeedToSave())")
     }
     
     func mergeImageCloudData(imageRecords: [CKRecord])
     {
-        //print("mergeImageCloudData...")
+        guard let itemVC = itemViewController else { return }
+        
+        itemVC.startHUD("iCloud", subtitle: "Merging images...")
         
         for cloudImage in imageRecords {
             updateFromRecord(cloudImage, forceUpdate: false)
         }
+        
+        itemVC.stopHUD()
     }
     
     // check if any of the local objects are in the deleted list (deletedArray) and if so delete
@@ -1097,6 +1188,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 itemVC.resetCellViewTags()
             }
         }
+    }
+    
+    func countNeedToSave() -> Int? {
+        if let listVC = listViewController {
+            return listVC.countNeedToSave()
+        }
+        
+        return nil
     }
     
     // returns a ListData object from the given recordName

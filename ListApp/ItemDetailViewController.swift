@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate
+class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate
 {
     var containerView: UIView = UIView()
     var titleLabel: UILabel = UILabel()
@@ -58,6 +58,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
     {
         super.viewDidLoad()
         imagePicker.delegate = self
+        manager.delegate = self
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -461,7 +462,7 @@ class ItemDetailViewController: UIViewController, UITextViewDelegate, UINavigati
         //self.item.setImage(imageView.image)
         self.item.needToSave = true
         self.itemVC.tableView.reloadData()
-        self.itemVC.appDelegate.saveAll()
+        self.itemVC.appDelegate.saveListData(true)
         
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }
