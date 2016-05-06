@@ -353,9 +353,13 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
     func addPhoto(sender: UIButton)
     {
         var photoAction: UIAlertAction?
+        let photoLibrary   = NSLocalizedString("Photo_Library", comment: "Photo Library title in the photo import dialog.")
+        let takePhotoTitle = NSLocalizedString("Take_Photo", comment: "Take Photo button label in photo import dialog.")
+        let addPhotoTitle  = NSLocalizedString("Add_Photo", comment: "Add Photo button label in photo import dialog.")
+        let cancelTitle    = NSLocalizedString("Cancel", comment: "Cancel button label in photo import dialog.")
         
         if UIImagePickerController.availableCaptureModesForCameraDevice(.Rear) != nil {
-            photoAction = UIAlertAction(title: "Take Photo", style: .Default, handler: { (alert: UIAlertAction!) in
+            photoAction = UIAlertAction(title: takePhotoTitle, style: .Default, handler: { (alert: UIAlertAction!) in
                 dispatch_async(dispatch_get_main_queue()) {
                     self.imagePicker.allowsEditing = false
                     self.imagePicker.sourceType = .Camera
@@ -365,17 +369,18 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         }
         
         let alertVC = UIAlertController(
-            title: "Add Photo",
+            title: addPhotoTitle,
             message: "",
             preferredStyle: .Alert)
-        let libraryAction = UIAlertAction(title: "Photo Library", style: .Default, handler: { (alert: UIAlertAction!) in
+        let libraryAction = UIAlertAction(title: photoLibrary, style: .Default, handler: { (alert: UIAlertAction!) in
             dispatch_async(dispatch_get_main_queue()) {
                 self.imagePicker.allowsEditing = false
                 self.imagePicker.sourceType = .PhotoLibrary
                 self.presentViewController(self.imagePicker, animated: true, completion: nil)
             }
         })
-        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil )
+        
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
 
         if photoAction != nil {
             alertVC.addAction(photoAction!)
@@ -388,17 +393,22 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
     
     func deletePhoto(sender: UIButton)
     {
+        let deletePhotoTitle = NSLocalizedString("Delete_Photo", comment: "Delete Photo title for the delete photo dialog.")
+        let deletePhotoMsg   = NSLocalizedString("Delete_Photo_Msg", comment: "Delete Photo question for the delete photo button.")
+        let deleteTitle      = NSLocalizedString("Delete", comment: "Delete button title on the photo delete dialog.")
+        let cancelTitle      = NSLocalizedString("Cancel", comment: "Cancel button label in photo delete dialog.")
+        
         let alertVC = UIAlertController(
-            title: "Delete Photo?",
-            message: "Are you sure want to delete this photo?",
+            title: deletePhotoTitle,
+            message: deletePhotoMsg,
             preferredStyle: .Alert)
-        let deleteAction = UIAlertAction(title: "Delete", style: .Destructive, handler: { (alert: UIAlertAction!) in
+        let deleteAction = UIAlertAction(title: deleteTitle, style: .Destructive, handler: { (alert: UIAlertAction!) in
             dispatch_async(dispatch_get_main_queue()) {
                 self.imageView.image = nil
                 self.setPhotoButton(true)
             }
         })
-        let cancelAction = UIAlertAction(title: "Cancel", style: .Cancel, handler: nil )
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil )
         alertVC.addAction(deleteAction)
         alertVC.addAction(cancelAction)
         presentViewController(alertVC, animated: true, completion: nil)

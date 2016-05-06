@@ -791,7 +791,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         guard let itemVC = itemViewController else { return }
         guard iCloudIsAvailable() else { print("fetchCloudData - iCloud is not available..."); return }
         
-        itemVC.startHUD("iCloud", subtitle: "Fetching data...")
+        itemVC.startHUD("iCloud", subtitle: NSLocalizedString("Fetching_Data", comment: "Fetching data message for the iCloud import HUD."))
         
         let resultCount = 0         // default value will let iCloud server decide how much to send in each block
         
@@ -940,7 +940,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         guard let database = privateDatabase else { return }
         guard let itemVC = itemViewController else { return }
         
-        itemVC.startHUD("iCloud", subtitle: "Fetching images...")
+        itemVC.startHUD("iCloud", subtitle: NSLocalizedString("Fetching_Images", comment: "Fetching images message for the iCloud import HUD."))
         
         print("*** fetchImageData - \(itemReferences.count) items need new images...")
         
@@ -1028,7 +1028,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         guard let itemVC = itemViewController else { return }
         
-        itemVC.startHUD("iCloud", subtitle: "Merging data...")
+        itemVC.startHUD("iCloud", subtitle: NSLocalizedString("Merging_Data", comment: "Merging data message for the iCloud import HUD."))
         
         for cloudList in listArray {
             updateFromRecord(cloudList, forceUpdate: false)
@@ -1061,7 +1061,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         guard let itemVC = itemViewController else { return }
         
-        itemVC.startHUD("iCloud", subtitle: "Merging images...")
+        itemVC.startHUD("iCloud", subtitle: NSLocalizedString("Merging_Images", comment: "Merging images message for the iCloud import HUD."))
         
         for cloudImage in imageRecords {
             updateFromRecord(cloudImage, forceUpdate: false)

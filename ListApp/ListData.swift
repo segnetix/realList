@@ -1103,7 +1103,7 @@ class List: NSObject, NSCoding
     }
     
     // list
-    func htmlForPrinting() -> String
+    func htmlForPrinting(includePics: Bool) -> String
     {
         //let listLabel = NSLocalizedString("List", comment: "label for 'List:'")
         
@@ -1116,7 +1116,7 @@ class List: NSObject, NSCoding
         // categories
         for category in categories {
             html += "<p>"
-            html += category.htmlForPrinting(self)
+            html += category.htmlForPrinting(self, includePics: includePics)
             html += "</p>"
         }
         
@@ -1390,7 +1390,7 @@ class Category: ListObj, NSCoding
     }
     
     // category
-    func htmlForPrinting(list: List) -> String
+    func htmlForPrinting(list: List, includePics: Bool) -> String
     {
         // header
         var html: String = ""
@@ -1406,7 +1406,7 @@ class Category: ListObj, NSCoding
         if self.expanded {
             for item in items {
                 if list.isDisplayedItem(item) {
-                    html += item.htmlForPrinting()
+                    html += item.htmlForPrinting(includePics)
                 }
             }
         }
@@ -1732,7 +1732,7 @@ class Item: ListObj, NSCoding
     }
     
     // item
-    func htmlForPrinting() -> String
+    func htmlForPrinting(includePics: Bool) -> String
     {
         var html = ""
         
@@ -1758,7 +1758,7 @@ class Item: ListObj, NSCoding
         }
         
         // image
-        if appDelegate.printNotes && appDelegate.picsInPrintAndEmail {
+        if appDelegate.printNotes && includePics {
             if let image = imageAsset?.image {
                 let resizedImage = resizeImage(image, newWidth: 120)
                 let imageData = UIImageJPEGRepresentation(resizedImage, jpegCompressionQuality)

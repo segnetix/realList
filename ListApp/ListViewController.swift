@@ -381,12 +381,16 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         if appDelegate.appIsUpgraded == false && listCount >= kMaxListCount
         {
+            let listLimitTitle = NSLocalizedString("List_Limit", comment: "List Limit title for the list limit exceeded dialog in the free version.")
+            let listLimitMsg = String(format: NSLocalizedString("List_Limit_Message", comment: "The free version of realList is limited to %i lists.  Please upgrade or restore your purchase for unlimited lists."), kMaxListCount)
+            let okTitle = NSLocalizedString("OK", comment: "OK - to commit the action or dismiss a dialog.")
+            
             // max list count (not including the tutorial) will be exceeded
             let alertVC = UIAlertController(
-                title: "List Limit",
-                message: "The free version of realList is limited to \(kMaxListCount) lists.  Please upgrade or restore your purchase for unlimited lists.",
+                title: listLimitTitle,
+                message: listLimitMsg,
                 preferredStyle: .Alert)
-            let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil )
+            let okAction = UIAlertAction(title: okTitle, style: .Default, handler: nil)
             alertVC.addAction(okAction)
             
             presentViewController(alertVC, animated: true, completion: nil)
