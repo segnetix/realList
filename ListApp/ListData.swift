@@ -1198,6 +1198,7 @@ class Category: ListObj, NSCoding
     var categoryReference: CKReference?
     var categoryRecord: CKRecord?
     var isTutorialCategory = false
+    var itemAddCount = 0
     
     // new category initializer
     init(name: String, displayHeader: Bool, createRecord: Bool, tutorial: Bool = false)

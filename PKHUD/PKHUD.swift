@@ -39,6 +39,7 @@ public class PKHUD: NSObject {
                                               .FlexibleRightMargin,
                                               .FlexibleTopMargin,
                                               .FlexibleBottomMargin ]
+        window.frameView.userInteractionEnabled = true
     }
     
     public var dimsBackground = true

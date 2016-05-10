@@ -18,7 +18,7 @@ public enum HUDContentType {
     
     case LabeledSuccess(title: String?, subtitle: String?)
     case LabeledError(title: String?, subtitle: String?)
-    case LabeledProgress(title: String?, subtitle: String?)
+    case LabeledProgress(title: String?, subtitle: String?, buttonTitle: String?)
     case LabeledImage(image: UIImage?, title: String?, subtitle: String?)
     case LabeledRotatingImage(image: UIImage?, title: String?, subtitle: String?)
     
@@ -40,6 +40,8 @@ public final class HUD {
     }
     
     public static var isVisible: Bool { return PKHUD.sharedHUD.isVisible }
+    
+    //public static var cancelButton: UIButton { return PKHUD
     
     // MARK: Public methods, PKHUD based
     public static func show(content: HUDContentType) {
@@ -88,8 +90,8 @@ public final class HUD {
             return PKHUDSuccessView(title: title, subtitle: subtitle)
         case let .LabeledError(title, subtitle):
             return PKHUDErrorView(title: title, subtitle: subtitle)
-        case let .LabeledProgress(title, subtitle):
-            return PKHUDProgressView(title: title, subtitle: subtitle)
+        case let .LabeledProgress(title, subtitle, buttonTitle):
+            return PKHUDProgressView(title: title, subtitle: subtitle, buttonTitle: buttonTitle)
         case let .LabeledImage(image, title, subtitle):
             return PKHUDSquareBaseView(image: image, title: title, subtitle: subtitle)
         case let .LabeledRotatingImage(image, title, subtitle):

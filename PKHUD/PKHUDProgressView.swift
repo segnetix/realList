@@ -13,14 +13,14 @@ import QuartzCore
 /// PKHUDProgressView provides an indeterminate progress view.
 public class PKHUDProgressView: PKHUDSquareBaseView, PKHUDAnimating {
     
-    public init(title: String? = nil, subtitle: String? = nil) {
-        super.init(image: PKHUDAssets.progressActivityImage, title: title, subtitle: subtitle)
+    public init(title: String? = nil, subtitle: String? = nil, buttonTitle: String? = nil) {
+        super.init(image: PKHUDAssets.progressActivityImage, title: title, subtitle: subtitle, buttonTitle: buttonTitle)
     }
 
     public required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
     }
-        
+    
     func startAnimation() {
         imageView.layer.addAnimation(PKHUDAnimation.discreteRotation, forKey: "progressAnimation")
     }

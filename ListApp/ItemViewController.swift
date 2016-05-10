@@ -10,7 +10,6 @@ import UIKit
 import QuartzCore
 import iAd
 import MessageUI
-import PKHUD
 
 let itemCellID     = "ItemCell"
 let categoryCellID = "CategoryCell"
@@ -93,10 +92,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         //self.navigationItem.rightBarButtonItem = self.editButtonItem()
-        
-        // HUD setup
-        HUD.dimsBackground = true
-        HUD.allowsInteraction = false
         
         // set up long press gesture recognizer for the cell move functionality
         longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(ItemViewController.longPressAction(_:)))
@@ -413,15 +408,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         var info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
         let keyboardHeight = keyboardFrame.height
-        //let topBarHeight = getTopBarHeight()
+        let topBarHeight = getTopBarHeight()
         
         // need to shrink the tableView height so it shows above the keyboard
-        self.tableView.frame.size.height = self.view.frame.height - keyboardHeight
+        self.tableView.frame.size.height = self.view.frame.height - keyboardHeight - topBarHeight
         
         // while the keyboard is visible
-        UIView.animateWithDuration(0.3, animations: { () -> Void in
-            self.view.layoutIfNeeded()
-        })
+        self.view.layoutIfNeeded()
     }
     
     func keyboardWillHide(notification: NSNotification)
@@ -430,40 +423,15 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         editingNewCategoryName = false
         editingNewItemName = false
         
-        layoutAnimated(true)
+        // need to bypass this call if we are keeping the keyboard up for another edit
+        //layoutAnimated(false)         // - will be handler in textFieldShouldReturn
         
-        tableView.reloadData()
+        //tableView.reloadData()
         resetCellViewTags()
     }
     
     func textFieldShouldBeginEditing(textField: UITextField) -> Bool
     {
-        let obj = list.objectForTag(textField.tag)
-        
-        // scroll the editing cell into view if necessary
-        if obj != nil {
-            let category = list.categoryForObj(obj!)
-            
-            if let category = category {
-                let indexPath = list.displayIndexPathForAddItemInCategory(category)
-                
-                if indexPath != nil {
-                    print("*** addItem indexPath row is \(indexPath!.row)")
-                    let delay = 0.20 * Double(NSEC_PER_SEC)
-                    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay))
-                    
-                    dispatch_after(time, dispatch_get_main_queue(), {
-                        if self.tableView.indexPathsForVisibleRows?.contains(indexPath!) == false {
-                            print("*** addItem is not visible...")
-                            self.tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Bottom, animated: false)
-                        } else {
-                            print("*** addItem is visible...")
-                        }
-                    })
-                }
-            }
-        }
-        
         // this clears an initial space in a new cell name
         if textField.text == " " {
             textField.text = ""
@@ -502,6 +470,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             editingNewCategoryName = false
         }
         
+        layoutAnimated(true)
+        
         appDelegate.saveListData(true)
         
         return true
@@ -516,7 +486,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     func addItemButtonTapped(sender: UIButton)
     {
-        if appDelegate.appIsUpgraded == false && list.itemCount() >= kMaxItemCount
+        // create a new item and append to the category of the add button
+        guard let category = list.categoryForTag(sender.tag) else { return }
+        
+        if (appDelegate.appIsUpgraded == false && category.isTutorialCategory == false && list.itemCount() >= kMaxItemCount) ||
+           (appDelegate.appIsUpgraded == false && category.isTutorialCategory && category.itemAddCount > 0)
         {
             let itemLimitTitle = NSLocalizedString("Item_Limit", comment: "Item Limit dialog title.")
             let itemLimitMsg = String(format: NSLocalizedString("Item_Limit_Message", comment: "The free version of realList is limited to %i items per list.  Please upgrade or restore your purchase for unlimited items."), kMaxItemCount)
@@ -535,13 +509,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             return
         }
         
-        // create a new item and append to the category of the add button
-        let category = list.categoryForTag(sender.tag)
         var newItem: Item? = nil
         
-        if let category = category {
-            newItem = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true, createRecord: true)
-        }
+        newItem = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true, createRecord: true)
+        
+        // keep track of items added to this category for item limits in non-upgraded version
+        category.itemAddCount += 1
         
         list.updateIndices()
         tableView.reloadData()
@@ -556,6 +529,19 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                     cell.itemName.becomeFirstResponder()
                     editingNewItemName = true
                 }
+            }
+        }
+        
+        // scroll the editing cell into view if necessary
+        let indexPath = list.displayIndexPathForAddItemInCategory(category)
+        
+        if indexPath != nil {
+            print("*** addItem indexPath row is \(indexPath!.row)")
+            if self.tableView.indexPathsForVisibleRows?.contains(indexPath!) == false {
+                print("*** addItem is not visible...")
+                self.tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Bottom, animated: true)
+            } else {
+                print("*** addItem is visible...")
             }
         }
     }
@@ -877,7 +863,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 center.y = location.y
                 self.snapshot?.center = center
                 self.snapshot?.transform = CGAffineTransformMakeScale(1.05, 1.05)
-                self.snapshot?.alpha = 0.98
+                self.snapshot?.alpha = 0.7
                 cell.alpha = 0.0
                 }, completion: { (finished: Bool) -> Void in
                     cell.hidden = true      // hides the real cell while moving
@@ -1086,9 +1072,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         let currentOffset = tableView.contentOffset
         let topBarHeight = getTopBarHeight()
-        let newOffsetY = max(currentOffset.y - kItemViewScrollRate, -topBarHeight)
+        var newOffsetY = max(currentOffset.y - kItemViewScrollRate, -topBarHeight)
         let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
         let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+        
+        if newOffsetY < 0 {
+            newOffsetY = 0
+        }
         
         self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: newOffsetY), animated: false)
         
@@ -1173,7 +1163,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             removedPaths = currentList.removeItemAtIndexPath(indexPath, preserveCategories: preserveCat, updateIndices: true)
             
             // table view delete
-            tableView.deleteRowsAtIndexPaths(removedPaths, withRowAnimation: .Automatic)
+            tableView.deleteRowsAtIndexPaths(removedPaths, withRowAnimation: .Fade)
             
             deleteItemIndexPath = nil
             
@@ -1238,7 +1228,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         snapshot.layer.cornerRadius = 0.0
         snapshot.layer.shadowOffset = CGSize(width: -5.0, height: 0.0)
         snapshot.layer.shadowRadius = 5.0
-        snapshot.layer.shadowOpacity = 0.4
+        snapshot.layer.shadowOpacity = 0.3
+        snapshot.layer.opacity = 0.6
         
         return snapshot
     }
@@ -1469,14 +1460,20 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         return list.htmlForPrinting(includePics)
     }
     
-    func startHUD(title: String, subtitle: String)
-    {
-        HUD.show(HUDContentType.LabeledProgress(title: title, subtitle: subtitle))
-    }
-    
-    func stopHUD()
-    {
-        HUD.hide()
+    func dataFetchCanceledAlert() {
+        let canceledTitle = NSLocalizedString("Data_Fetch_Canceled", comment: "Data Fetch Canceled title")
+        let canceledMsg = NSLocalizedString("Data_Fetch_Canceled_Message", comment: "The iCloud data fetch operation was canceled.")
+        let okTitle = NSLocalizedString("OK", comment: "OK - to commit the action or dismiss a dialog.")
+        
+        // max list count (not including the tutorial) will be exceeded
+        let alertVC = UIAlertController(
+            title: canceledTitle,
+            message: canceledMsg,
+            preferredStyle: .Alert)
+        let okAction = UIAlertAction(title: okTitle, style: .Default, handler: nil)
+        alertVC.addAction(okAction)
+        
+        presentViewController(alertVC, animated: true, completion: nil)
     }
     
 ////////////////////////////////////////////////////////////////

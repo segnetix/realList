@@ -22,20 +22,22 @@ public class PKHUDSquareBaseView: UIView {
         super.init(coder: aDecoder)
     }
     
-    public init(image: UIImage? = nil, title: String? = nil, subtitle: String? = nil) {
+    public init(image: UIImage? = nil, title: String? = nil, subtitle: String? = nil, buttonTitle: String? = nil) {
         super.init(frame: PKHUDSquareBaseView.defaultSquareBaseViewFrame)
         self.imageView.image = image
         titleLabel.text = title
         subtitleLabel.text = subtitle
+        hudButton.setTitle(buttonTitle, forState: .Normal)
         
         addSubview(imageView)
         addSubview(titleLabel)
         addSubview(subtitleLabel)
+        addSubview(hudButton)
     }
 
     public let imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.alpha = 0.85
+        imageView.alpha = 0.75
         imageView.clipsToBounds = true
         imageView.contentMode = .Center
         return imageView
@@ -59,18 +61,31 @@ public class PKHUDSquareBaseView: UIView {
         return label
     }()
     
+    public let hudButton: UIButton = {
+        let button = UIButton()
+        //button.setTitle(, forState: .Normal)
+        //button.userInteractionEnabled = true
+        return button
+    }()
+    
     public override func layoutSubviews() {
         super.layoutSubviews()
     
         let viewWidth = bounds.size.width
         let viewHeight = bounds.size.height
         
-        let halfHeight = CGFloat(ceilf(CFloat(viewHeight / 2.0)))
-        let quarterHeight = CGFloat(ceilf(CFloat(viewHeight / 4.0)))
-        let threeQuarterHeight = CGFloat(ceilf(CFloat(viewHeight / 4.0 * 3.0)))
+        let oneFifthHeight = CGFloat(ceilf(CFloat(viewHeight / 5.0)))
+        let twoFifthsHeight = CGFloat(ceilf(CFloat(viewHeight / 5.0 * 2.0)))
+        let threeFifthsHeight = CGFloat(ceilf(CFloat(viewHeight / 5.0 * 3.0)))
+        let fourFifthsHeight = CGFloat(ceilf(CFloat(viewHeight / 5.0 * 4.0)))
         
-        titleLabel.frame = CGRect(origin: CGPointZero, size: CGSize(width: viewWidth, height: quarterHeight))
-        imageView.frame = CGRect(origin: CGPoint(x:0.0, y:quarterHeight), size: CGSize(width: viewWidth, height: halfHeight))
-        subtitleLabel.frame = CGRect(origin: CGPoint(x:0.0, y:threeQuarterHeight), size: CGSize(width: viewWidth, height: quarterHeight))
+        //let halfHeight = CGFloat(ceilf(CFloat(viewHeight / 2.0)))
+        //let quarterHeight = CGFloat(ceilf(CFloat(viewHeight / 4.0)))
+        //let threeQuarterHeight = CGFloat(ceilf(CFloat(viewHeight / 4.0 * 3.0)))
+        
+        titleLabel.frame = CGRect(origin: CGPointZero, size: CGSize(width: viewWidth, height: oneFifthHeight))
+        imageView.frame = CGRect(origin: CGPoint(x:0.0, y:oneFifthHeight), size: CGSize(width: viewWidth, height: twoFifthsHeight))
+        subtitleLabel.frame = CGRect(origin: CGPoint(x:0.0, y:threeFifthsHeight), size: CGSize(width: viewWidth, height: oneFifthHeight))
+        hudButton.frame = CGRect(origin: CGPoint(x:0.0, y:fourFifthsHeight), size: CGSize(width: viewWidth, height: oneFifthHeight))
     }
 }

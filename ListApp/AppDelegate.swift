@@ -24,6 +24,9 @@ let key_picsInPrintAndEmail  = "picsInPrintAndEmail"
 let kMaxListCount            =  3
 let kMaxItemCount            = 20
 
+// iCloud fetch max time allowed before terminating the operations
+//let kMaxCloudFetchTime       = 15.0       -- removed as user can cancel the fetch if they want
+
 // price formatter function
 let priceFormatter: NSNumberFormatter = {
     let formatter = NSNumberFormatter()
@@ -84,8 +87,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     let container = CKContainer.defaultContainer()
     var privateDatabase: CKDatabase?
     
+    // iCloud query operations
+    var externalListFetch: CKQueryOperation?
+    var externalCategoryFetch: CKQueryOperation?
+    var externalDeleteFetch: CKQueryOperation?
+    var externalItemFetch: CKQueryOperation?
+    
     // reachability manager
     var manager: AppManager = AppManager.sharedInstance
+    
+    // HUD
+    var hud: MBProgressHUD?
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool
     {
@@ -787,11 +799,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // pulls all list, category and item data from cloud storage
     func fetchCloudData()
     {
+        NSLog("fetchCloudData...")
+        
         guard let database = privateDatabase else { return }
-        guard let itemVC = itemViewController else { return }
         guard iCloudIsAvailable() else { print("fetchCloudData - iCloud is not available..."); return }
         
-        itemVC.startHUD("iCloud", subtitle: NSLocalizedString("Fetching_Data", comment: "Fetching data message for the iCloud import HUD."))
+        startHUD("iCloud", subtitle: NSLocalizedString("Fetching_Data", comment: "Fetching data message for the iCloud import HUD."))
         
         let resultCount = 0         // default value will let iCloud server decide how much to send in each block
         
@@ -816,13 +829,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         var listFetch = CKQueryOperation(query: listQuery)
         var categoryFetch = CKQueryOperation(query: categoryQuery)
-        var itemFetch = CKQueryOperation(query: itemQuery)
         var deleteFetch = CKQueryOperation(query: deleteQuery)
+        var itemFetch = CKQueryOperation(query: itemQuery)
         
         listFetch.resultsLimit = resultCount
         categoryFetch.resultsLimit = resultCount
-        itemFetch.resultsLimit = resultCount
         deleteFetch.resultsLimit = resultCount
+        itemFetch.resultsLimit = resultCount
         
         // set up the record fetched block
         listFetch.recordFetchedBlock = { (record : CKRecord!) in
@@ -835,17 +848,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             //print("category recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
         }
         
-        itemFetch.recordFetchedBlock = { (record : CKRecord!) in
-            self.itemArray.append(record)
-            //print("item recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
-        }
-        
         deleteFetch.recordFetchedBlock = { (record : CKRecord!) in
             self.deleteArray.append(record)
             //print("delete recordFetchedBlock: \(record[key_itemName]) \(record[key_deletedDate]) \(record.recordID.recordName)")
         }
         
+        itemFetch.recordFetchedBlock = { (record : CKRecord!) in
+            self.itemArray.append(record)
+            //print("item recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
+        }
+
         // set up completion blocks with cursors so they can recursively gather all of the records
+        // also handles cascading cancellation of the operations
+        
+        // listFetch
         listFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
             if error != nil {
                 print("listFetch error: \(error?.localizedDescription)")
@@ -858,12 +874,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 newOperation.queryCompletionBlock = listFetch.queryCompletionBlock
                 newOperation.resultsLimit = resultCount
                 listFetch = newOperation
+                self.externalListFetch = listFetch
                 database.addOperation(newOperation)
+            } else if listFetch.cancelled {
+                print("listFetch cancelled...")
+                self.externalListFetch = nil
+                self.externalCategoryFetch?.cancel()
+                self.externalDeleteFetch?.cancel()
+                self.externalItemFetch?.cancel()
+                self.stopHUD()
             } else {
                 print("list fetch complete")
+                dispatch_async(dispatch_get_main_queue()) { self.externalListFetch = nil }
             }
         }
         
+        // categoryFetch
         categoryFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
             if error != nil {
                 print("categoryFetch error: \(error?.localizedDescription)")
@@ -876,12 +902,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 newOperation.queryCompletionBlock = categoryFetch.queryCompletionBlock
                 newOperation.resultsLimit = resultCount
                 categoryFetch = newOperation
+                self.externalCategoryFetch = categoryFetch
                 database.addOperation(newOperation)
+            } else if categoryFetch.cancelled {
+                print("categoryFetch cancelled...")
+                self.externalCategoryFetch = nil
+                self.externalDeleteFetch?.cancel()
+                self.externalItemFetch?.cancel()
+                self.stopHUD()
             } else {
                 print("category fetch complete")
+                dispatch_async(dispatch_get_main_queue()) { self.externalCategoryFetch = nil }
             }
         }
         
+        // deleteFetch
         deleteFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
             if error != nil {
                 print("deleteFetch error: \(error?.localizedDescription)")
@@ -894,18 +929,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 newOperation.queryCompletionBlock = deleteFetch.queryCompletionBlock
                 newOperation.resultsLimit = resultCount
                 deleteFetch = newOperation
+                self.externalDeleteFetch = deleteFetch
                 database.addOperation(newOperation)
+            } else if deleteFetch.cancelled {
+                print("deleteFetch cancelled...")
+                self.externalDeleteFetch = nil
+                self.externalItemFetch?.cancel()
+                self.stopHUD()
             } else {
                 print("delete fetch complete")
+                dispatch_async(dispatch_get_main_queue()) { self.externalDeleteFetch = nil }
             }
         }
         
-        itemFetch.queryCompletionBlock = { [itemVC] (cursor : CKQueryCursor?, error : NSError?) in
+        // itemFetch - passed on to mergeCloudData when complete
+        itemFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
             if error != nil {
                 print("itemFetch error: \(error?.localizedDescription)")
-                dispatch_async(dispatch_get_main_queue()) {
-                    itemVC.stopHUD()
-                }
             }
             
             if cursor != nil {
@@ -916,42 +956,93 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 newOperation.queryCompletionBlock = itemFetch.queryCompletionBlock
                 newOperation.resultsLimit = resultCount
                 itemFetch = newOperation
+                self.externalItemFetch = itemFetch
                 database.addOperation(newOperation)
+            } else if itemFetch.cancelled {
+                print("itemFetch cancelled...")
+                self.externalItemFetch = nil
+                self.stopHUD()
             } else {
                 print("The item record fetch operation is complete...")
                 print("array counts - list: \(self.listArray.count) category: \(self.categoryArray.count) item: \(self.itemArray.count) delete: \(self.deleteArray.count)")
                 
-                dispatch_async(dispatch_get_main_queue()) {
+                dispatch_async(dispatch_get_main_queue())
+                {
+                    // clear external fetch pointers
+                    self.externalListFetch = nil
+                    self.externalCategoryFetch = nil
+                    self.externalDeleteFetch = nil
+                    self.externalItemFetch = nil
+                    
+                    // merge cloud data
                     self.mergeCloudData()
                 }
             }
         }
         
+        // start a timer to verify completion of the fetch operations
+        // cancelCloudDataFetch will be called on the main thread
+        //NSTimer.scheduledTimerWithTimeInterval(kMaxCloudFetchTime, target: self, selector: #selector(AppDelegate.cancelCloudDataFetch), userInfo: nil, repeats: false)
+        // *** Automatic fetch cancel was removed as the use can now cancel the fetch if they want
+        
+        // set external fetch pointers
+        externalListFetch = listFetch
+        externalCategoryFetch = categoryFetch
+        externalDeleteFetch = deleteFetch
+        externalItemFetch = itemFetch
+        
         // execute the query operations
         database.addOperation(listFetch)
         database.addOperation(categoryFetch)
-        database.addOperation(itemFetch)
         database.addOperation(deleteFetch)
+        database.addOperation(itemFetch)
+    }
+    
+    // must be called on main thread
+    func cancelCloudDataFetch()
+    {
+        print("*** cancelCloudDataFetch ***")
+        var canceled = false
+        
+        // executes on main thread
+        if let externalListFetch = externalListFetch {
+            externalListFetch.cancel()
+            canceled = true
+        }
+        if let externalCategoryFetch = externalCategoryFetch {
+            externalCategoryFetch.cancel()
+            canceled = true
+        }
+        if let externalDeleteFetch = externalDeleteFetch {
+            externalDeleteFetch.cancel()
+            canceled = true
+        }
+        if let externalItemFetch = externalItemFetch {
+            externalItemFetch.cancel()
+            canceled = true
+        }
+        
+        if canceled {
+            if let itemVC = itemViewController {
+                itemVC.dataFetchCanceledAlert()
+            }
+        }
     }
     
     // pulls image data in batches for items needing updating (itemReferences)
     func fetchImageData()
     {
+        NSLog("fetchImageData - \(itemReferences.count) items need new images...")
+        
         guard let database = privateDatabase else { return }
-        guard let itemVC = itemViewController else { return }
         
-        itemVC.startHUD("iCloud", subtitle: NSLocalizedString("Fetching_Images", comment: "Fetching images message for the iCloud import HUD."))
-        
-        print("*** fetchImageData - \(itemReferences.count) items need new images...")
-        
-        //let uniqueArray = Array(Set(itemReferences))
-        //print("    of \(itemReferences.count) items \(uniqueArray.count) are unique...")
+        startHUD("iCloud", subtitle: NSLocalizedString("Fetching_Images", comment: "Fetching images message for the iCloud import HUD."))
         
         let batchSize = 50         // size of the batch request block
         
         if itemReferences.count == 0 {
             print("fetchImageData = itemReferences.count == 0")
-            itemVC.stopHUD()
+            stopHUD()
             return
         }
         
@@ -971,7 +1062,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             if stopIndex < startIndex {
                 print("ERROR: fetchImageData - stopIndex < startIndex")
-                itemVC.stopHUD()
+                stopHUD()
                 return
             }
             
@@ -1002,9 +1093,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 
                 if error != nil {
                     print("imageFetch error: \(error?.localizedDescription)")
-                    dispatch_async(dispatch_get_main_queue()) {
-                        itemVC.stopHUD()
-                    }
                 }
                 
                 print("image record fetch operation for loop \(loop) is complete... \(startIndex+1) to \(stopIndex+1)")
@@ -1024,11 +1112,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // after fetching cloud data, merge with local data
     func mergeCloudData()
     {
-        print("mergeCloudData...")
+        NSLog("mergeCloudData...")
         
-        guard let itemVC = itemViewController else { return }
-        
-        itemVC.startHUD("iCloud", subtitle: NSLocalizedString("Merging_Data", comment: "Merging data message for the iCloud import HUD."))
+        startHUD("iCloud", subtitle: NSLocalizedString("Merging_Data", comment: "Merging data message for the iCloud import HUD."))
         
         for cloudList in listArray {
             updateFromRecord(cloudList, forceUpdate: false)
@@ -1053,27 +1139,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // now that items are merged we can call fetchImageData to
         // retreive any images that need updating
         fetchImageData()
-        
-        print("mergeCloudData - need to save count: \(countNeedToSave())")
     }
     
     func mergeImageCloudData(imageRecords: [CKRecord])
     {
-        guard let itemVC = itemViewController else { return }
+        NSLog("mergeImageCloudData...")
         
-        itemVC.startHUD("iCloud", subtitle: NSLocalizedString("Merging_Images", comment: "Merging images message for the iCloud import HUD."))
+        startHUD("iCloud", subtitle: NSLocalizedString("Merging_Images", comment: "Merging images message for the iCloud import HUD."))
         
         for cloudImage in imageRecords {
             updateFromRecord(cloudImage, forceUpdate: false)
         }
         
-        itemVC.stopHUD()
+        // shows the completed HUD then dismisses itself
+        startHUDwithDone()
     }
     
     // check if any of the local objects are in the deleted list (deletedArray) and if so delete
     func processDeletedObjects()
     {
-        print("processing deleted objects...")
+        NSLog("processDeletedObjects...")
         
         // create an array of recordID.recordName from the cloud delete records
         var listDeleteRecordIDs = [String]()
@@ -1149,6 +1234,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // purge any delete records older than one month
     func purgeOldDeleteRecords()
     {
+        NSLog("purgeOldDeleteRecords...")
+        
         let now = NSDate.init()
         let userCalendar = NSCalendar.currentCalendar()
         let timeInterval = NSDateComponents()
@@ -1170,6 +1257,70 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // submit delete operation
         batchRecordDelete(purgeRecords)
     }
+    
+    ////////////////////////////////////////////////////////////////
+    //
+    //  MARK: - HUD Methods
+    //
+    ////////////////////////////////////////////////////////////////
+    
+    // these methods may be called from background threads
+    func startHUD(title: String, subtitle: String) {
+        guard let theView = splitViewController!.view else { return }
+        
+        dispatch_async(dispatch_get_main_queue()) {
+            if self.hud == nil {
+                self.hud = MBProgressHUD.showHUDAddedTo(theView, animated: true)
+                self.hud?.minSize = CGSize(width: 150, height: 150)
+            }
+            
+            self.hud!.mode = MBProgressHUDMode.Indeterminate
+            self.hud!.label.text = title
+            self.hud!.detailsLabel.text = subtitle
+            self.hud!.button.setTitle("Cancel", forState: .Normal)
+            self.hud!.button.addTarget(self, action: #selector(AppDelegate.cancelCloudDataFetch), forControlEvents: .TouchUpInside)
+        }
+    }
+    
+    // displays a done HUD for 1.5 seconds
+    func startHUDwithDone() {
+        guard let theView = splitViewController!.view else { return }
+        
+        dispatch_async(dispatch_get_main_queue()) {
+            if self.hud != nil {
+                self.hud!.hideAnimated(false)
+                self.hud = nil
+            }
+            
+            self.hud = MBProgressHUD.showHUDAddedTo(theView, animated: true)
+            
+            if let hud = self.hud {
+                hud.mode = MBProgressHUDMode.CustomView
+                hud.minSize = CGSize(width: 150, height: 150)
+                let imageView = UIImageView(image: UIImage(named: "checkbox_blue"))
+                hud.customView = imageView
+                hud.label.text = NSLocalizedString("Done", comment: "Done")
+                hud.hideAnimated(true, afterDelay: 1.5)
+                self.hud = nil
+                NSLog("HUD completed...")
+            }
+        }
+    }
+    
+    func stopHUD() {
+        dispatch_async(dispatch_get_main_queue()) {
+            if let hud = self.hud {
+                hud.hideAnimated(true)
+                self.hud = nil
+            }
+        }
+    }
+    
+    ////////////////////////////////////////////////////////////////
+    //
+    //  MARK: - List Data access methods
+    //
+    ////////////////////////////////////////////////////////////////
     
     // sorts all lists, categories and items and updates indices
     func refreshListData()
@@ -1337,3 +1488,9 @@ func print(items: Any..., separator: String = " ", terminator: String = "\n")
     
     #endif
 }
+
+func runAfterDelay(delay: NSTimeInterval, block: dispatch_block_t) {
+    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_SEC)))
+    dispatch_after(time, dispatch_get_main_queue(), block)
+}
+
