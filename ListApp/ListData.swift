@@ -46,7 +46,7 @@ let key_itemReference       = "itemReference"
 let key_state               = "state"
 let key_tutorial            = "tutorial"
 let key_owningItem          = "owningItem"
-let key_image               = "image"
+let key_imageData           = "imageData"
 let key_imageGUID           = "imageGUID"
 let key_imageAsset          = "imageAsset"
 let key_imageRecord         = "imageRecord"
@@ -1784,6 +1784,7 @@ class Item: ListObj, NSCoding
             // image was updated
             self.imageAsset!.itemName = self.name
             self.imageModifiedDate = NSDate.init()
+            self.needToSave = true
         }
     }
     
@@ -1813,12 +1814,9 @@ class Item: ListObj, NSCoding
 
 class ImageAsset: NSObject, NSCoding
 {
-    var itemName: String! {
-        didSet {
-            _ = 0
-        }
-    }
+    var itemName: String!
     var image: UIImage?
+    var imageData: NSData?
     var imageGUID: String
     var imageFileURL: NSURL?
     var itemReference: CKReference?
@@ -1844,6 +1842,7 @@ class ImageAsset: NSObject, NSCoding
         }
         self.itemName = name
         self.image = nil
+        self.imageData = nil
         self.imageGUID = NSUUID().UUIDString
         self.imageFileURL = nil
         self.itemReference = itemReference
@@ -1854,10 +1853,10 @@ class ImageAsset: NSObject, NSCoding
     }
     
     // memberwise initializer
-    init(itemName: String?, image: UIImage?, imageGUID: String?, imageAsset: CKAsset?, itemReference: CKReference?, imageRecord: CKRecord?, modifiedDate: NSDate?)
+    init(itemName: String?, imageData: NSData?, imageGUID: String?, imageAsset: CKAsset?, itemReference: CKReference?, imageRecord: CKRecord?, modifiedDate: NSDate?)
     {
         if let itemName      = itemName      { self.itemName      = itemName      } else { self.itemName      = ""                                          }
-        if let image         = image         { self.image         = image         } else { self.image         = nil                                         }
+        if let imageData     = imageData     { self.imageData     = imageData     } else { self.imageData     = nil                                         }
         if let imageGUID     = imageGUID     { self.imageGUID     = imageGUID     } else { self.imageGUID     = NSUUID().UUIDString                         }
         if let imageRecord   = imageRecord   { self.imageRecord   = imageRecord   } else { self.imageRecord   = CKRecord.init(recordType: ImagesRecordType) }
         if let modifiedDate  = modifiedDate  { self.modifiedDate  = modifiedDate  } else { self.modifiedDate  = NSDate.init(timeIntervalSince1970: 0)       }
@@ -1867,6 +1866,12 @@ class ImageAsset: NSObject, NSCoding
         } else {
             print("*** ERROR: itemReference is nil in itemAsset initializer...")
         }
+        
+        // restore image from imageData
+        if let imageData = self.imageData {
+            self.image = UIImage(data: imageData)
+        }
+
         self.needToSave = false
         self.needToDelete = false
         self.imageFileURL = nil
@@ -1882,13 +1887,14 @@ class ImageAsset: NSObject, NSCoding
         coder.encodeObject(self.imageRecord,   forKey: key_imageRecord)
         coder.encodeObject(self.modifiedDate,  forKey: key_modifiedDate)
         
-        // compress image with JPG and save as NSData
-        if let image = self.image {
-            if let jpgImageData = UIImageJPEGRepresentation(image, jpegCompressionQuality) {
-                //let jpgImage = UIImage(data: jpgImageData, scale: 1.0)        // this converts the data to jpg image
-                coder.encodeObject(jpgImageData,   forKey: key_image)
-            }
+        // encode the image data pulled from local storage
+        if image != nil && imageData == nil {
+            // if image came from cloud data then we have an image but no image data
+            // so need a one-time conversion of image to JPEG NSData and encode
+            imageData = UIImageJPEGRepresentation(image!, jpegCompressionQuality)
+            print("imageAsset - converted image to image data for encoding: \(itemName)")
         }
+        coder.encodeObject(self.imageData,     forKey: key_imageData)
     }
     
     // decoder
@@ -1900,16 +1906,10 @@ class ImageAsset: NSObject, NSCoding
         let imageAsset    = decoder.decodeObjectForKey(key_imageAsset)    as? CKAsset
         let imageRecord   = decoder.decodeObjectForKey(key_imageRecord)   as? CKRecord
         let modifiedDate  = decoder.decodeObjectForKey(key_modifiedDate)  as? NSDate
-        let imageData     = decoder.decodeObjectForKey(key_image)         as? NSData
-        var image: UIImage?
-        
-        // restore image from jpg data
-        if let imageData = imageData {
-            image = UIImage(data: imageData)
-        }
+        let imageData     = decoder.decodeObjectForKey(key_imageData)     as? NSData
         
         self.init(itemName:      itemName,
-                  image:         image,
+                  imageData:     imageData,
                   imageGUID:     imageGUID,
                   imageAsset:    imageAsset,
                   itemReference: itemReference,
@@ -1976,7 +1976,7 @@ class ImageAsset: NSObject, NSCoding
         if let path = imageAsset?.fileURL.path {
             let image = UIImage(contentsOfFile: path)
             self.image = image
-            //print("ImageAsset.updateFromRecord: got image update for \(imageGUID)...")
+            print("ImageAsset.updateFromRecord: got image update for \(imageGUID)...")
         }
         
         self.imageRecord = record
@@ -1999,7 +1999,7 @@ class ImageAsset: NSObject, NSCoding
         
         if self.image !== image
         {
-            print("setItemImage - new image is different than old...")
+            print("setItemImage - new image is different than old: \(itemName)")
             self.image = image
             imageWasUpdated = true
             
@@ -2009,8 +2009,9 @@ class ImageAsset: NSObject, NSCoding
                     let docsDir: AnyObject = dirPaths[0]
                     self.imageFileURL = NSURL.fileURLWithPath(docsDir.stringByAppendingPathComponent(self.imageGUID + ".png"))
                     
-                    //try UIImagePNGRepresentation(image!)!.writeToURL(imageFileURL!, options: .AtomicWrite)                            // without compression
-                    try UIImageJPEGRepresentation(image!, jpegCompressionQuality)!.writeToURL(imageFileURL!, options: .AtomicWrite)     // with compression
+                    //try UIImagePNGRepresentation(image!)!.writeToURL(imageFileURL!, options: .AtomicWrite)        // without compression
+                    self.imageData = UIImageJPEGRepresentation(image!, jpegCompressionQuality)                      // compress to JPG - imageData is used for local storage
+                    try self.imageData!.writeToURL(imageFileURL!, options: .AtomicWrite)                            // write compressed file
                     
                     self.imageAsset = CKAsset(fileURL: imageFileURL!)
                     self.needToSave = true
@@ -2020,6 +2021,7 @@ class ImageAsset: NSObject, NSCoding
             } else {
                 // delete current image from cloud
                 self.deleteFromCloud()
+                self.imageData = nil
             }
         } else {
             print("setItemImage - new image is the same as old image...")

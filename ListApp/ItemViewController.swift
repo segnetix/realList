@@ -119,6 +119,10 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         refreshItems()
     }
     
+    override func viewWillAppear(animated: Bool) {
+        super.viewWillAppear(animated)
+    }
+    
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         layoutAnimated(false)
@@ -424,7 +428,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         editingNewItemName = false
         
         // need to bypass this call if we are keeping the keyboard up for another edit
-        //layoutAnimated(false)         // - will be handler in textFieldShouldReturn
+        //layoutAnimated(false)         // - will be handled in textFieldShouldReturn
         
         //tableView.reloadData()
         resetCellViewTags()
@@ -1178,7 +1182,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func cancelDeleteItem(alertAction: UIAlertAction!)
+    func cancelDeleteItem(alertAction: UIAlertAction!) 
     {
         deleteItemIndexPath = nil
         self.tableView.setEditing(false, animated: true)
@@ -1722,7 +1726,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    // move the adBanner on and off the screen
+    // resize the frame and move the adBanner on and off the screen
     func layoutAnimated(animated: Bool)
     {
         if inEditMode {
@@ -1760,9 +1764,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             tableView.frame.size.height = self.view.frame.height - topBarHeight
         }
         
-        UIView.animateWithDuration(animated ? 0.5 : 0.0, animations: { () -> Void in
+        UIView.animateWithDuration(animated ? 0.5 : 0.0) {
             self.view.layoutIfNeeded()
-        })
+        }
     }
 }
 

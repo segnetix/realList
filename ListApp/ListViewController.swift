@@ -22,7 +22,7 @@ protocol ListSelectionDelegate: class
     func listDeleted(deletedList: List)
 }
 
-let kListViewScrollRate: CGFloat = 6.0
+let kListViewScrollRate: CGFloat =  6.0
 let kListViewCellHeight: CGFloat = 60.0
 
 class ListViewController: UITableViewController, UITextFieldDelegate
@@ -89,16 +89,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        
-        //navigationController?.hidesBarsOnSwipe = false
-        
-        // in this case, it's good to combine hidesBarsOnTap with hidesBarsWhenKeyboardAppears
-        // so the user can get back to the navigation bar to save
-        //navigationController?.hidesBarsOnTap = true
-        //navigationController?.hidesBarsWhenKeyboardAppears = true
-        
-        //print("*** List view did appear...")
-        //self.tableView.reloadData()
         
         // selectionIndex can be set by the AppDelegate with an initial list selection on app start (from saved state)
         self.selectList(selectionIndex)
@@ -676,7 +666,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     {
         let currentOffset = tableView.contentOffset
         let topBarHeight = getTopBarHeight()
-        let newOffsetY = max(currentOffset.y - kItemViewScrollRate, -topBarHeight)
+        let newOffsetY = max(currentOffset.y - kListViewScrollRate, -topBarHeight)
         let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
         let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
         
@@ -695,7 +685,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let lastCell = tableView.cellForRowAtIndexPath(lastCellIndex)
         
         if lastCell == nil {
-            self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: currentOffset.y + kItemViewScrollRate), animated: false)
+            self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: currentOffset.y + kListViewScrollRate), animated: false)
             
             let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
             let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)

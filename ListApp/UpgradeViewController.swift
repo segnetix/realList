@@ -17,6 +17,8 @@ class UpgradeViewController: UIAppViewController
     @IBOutlet weak var restoreButton: UIButton!
     weak var aboutViewController: AboutViewController?
     
+    var hud: MBProgressHUD?
+    
     override func viewDidLoad()
     {
         super.viewDidLoad()
@@ -89,6 +91,8 @@ class UpgradeViewController: UIAppViewController
     {
         appDelegate.appIsUpgraded = true
         
+        stopHUD()
+        
         let alertVC = UIAlertController(
             title: "Thank You",
             message: "Your purchase is confirmed.",
@@ -107,6 +111,8 @@ class UpgradeViewController: UIAppViewController
         
         appDelegate.appIsUpgraded = true
         
+        stopHUD()
+        
         let alertVC = UIAlertController(
             title: "Thank You",
             message: "Your purchase was restored.",
@@ -124,6 +130,8 @@ class UpgradeViewController: UIAppViewController
     
     func handleFailedTransaction(notification: NSNotification)
     {
+        stopHUD()
+        
         if let message = notification.object as? String {
             let alertVC = UIAlertController(
                 title: "Transaction Error",
@@ -143,11 +151,15 @@ class UpgradeViewController: UIAppViewController
             return
         }
         
+        startHUD(NSLocalizedString("Purchasing", comment: "Purchasing"), subtitle: "")
+        
         RealListProducts.store.buyProduct(product)
     }
     
     @IBAction func restorePurchases(sender: UIButton)
     {
+        startHUD(NSLocalizedString("Restoring_purchase", comment: ""), subtitle: "")
+        
         RealListProducts.store.restorePurchases()
     }
     
@@ -156,6 +168,61 @@ class UpgradeViewController: UIAppViewController
         if let aboutVC = aboutViewController {
             aboutVC.updateUpgradeStatus()
         }
+        
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+    }
+    
+    ////////////////////////////////////////////////////////////////
+    //
+    //  MARK: - HUD Methods
+    //
+    ////////////////////////////////////////////////////////////////
+    
+    // these methods may be called from background threads
+    func startHUD(title: String, subtitle: String) {
+        dispatch_async(dispatch_get_main_queue()) {
+            if self.hud == nil {
+                self.hud = MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+                self.hud?.minSize = CGSize(width: 150, height: 150)
+            }
+            
+            self.hud!.mode = MBProgressHUDMode.Indeterminate
+            self.hud!.label.text = title
+            self.hud!.detailsLabel.text = subtitle
+            self.hud!.button.setTitle("Cancel", forState: .Normal)
+            self.hud!.button.addTarget(self, action: #selector(AppDelegate.cancelCloudDataFetch), forControlEvents: .TouchUpInside)
+        }
+    }
+    
+    // displays a done HUD for 1.5 seconds
+    func startHUDwithDone() {
+        dispatch_async(dispatch_get_main_queue()) {
+            if self.hud != nil {
+                self.hud!.hideAnimated(false)
+                self.hud = nil
+            }
+            
+            self.hud = MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+            
+            if let hud = self.hud {
+                hud.mode = MBProgressHUDMode.CustomView
+                hud.minSize = CGSize(width: 150, height: 150)
+                let imageView = UIImageView(image: UIImage(named: "checkbox_blue"))
+                hud.customView = imageView
+                hud.label.text = NSLocalizedString("Done", comment: "Done")
+                hud.hideAnimated(true, afterDelay: 1.5)
+                self.hud = nil
+                NSLog("HUD completed...")
+            }
+        }
+    }
+    
+    func stopHUD() {
+        dispatch_async(dispatch_get_main_queue()) {
+            if let hud = self.hud {
+                hud.hideAnimated(true)
+                self.hud = nil
+            }
+        }
     }
 }

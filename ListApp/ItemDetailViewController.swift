@@ -408,7 +408,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
                 self.setPhotoButton(true)
             }
         })
-        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil )
+        let cancelAction = UIAlertAction(title: cancelTitle, style: .Cancel, handler: nil)
         alertVC.addAction(deleteAction)
         alertVC.addAction(cancelAction)
         presentViewController(alertVC, animated: true, completion: nil)
@@ -470,9 +470,14 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
     {
         //self.item.note = noteTextView.text
         //self.item.setImage(imageView.image)
-        self.item.needToSave = true
         self.itemVC.tableView.reloadData()
-        self.itemVC.appDelegate.saveListData(true)
+        
+        if item.needToSave {
+            self.itemVC.appDelegate.saveListData(true)
+        }
+        
+        // handles resizing in case the keyboard was presented in the item detail view controller
+        self.itemVC.layoutAnimated(false)
         
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }

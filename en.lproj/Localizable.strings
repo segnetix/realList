@@ -47,3 +47,5 @@ Fetching_Images = "Fetching images...";
 Merging_Data = "Merging data...";
 Merging_Images = "Merging images...";
 Done = "Done";
+Purchasing = "Purchasing...";
+Restoring_purchase = "Restoring purchases...";

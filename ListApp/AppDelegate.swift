@@ -425,21 +425,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
-    /// Writes any dirty objects to the cloud in a batch operation.
+    // writes any dirty objects to the cloud in a batch operation
     func saveListDataCloud(asynchronously: Bool)
     {
-        updateRecords.removeAll()       // empty the updateRecords array
+        updateRecords.removeAll()   // empty the updateRecords array
         guard iCloudIsAvailable() else { print("saveListDataCloud - iCloud is not available..."); return }
         
         func save() {
-            if let listVC = self.listViewController {
-                for list in listVC.lists {
-                    list.saveToCloud()
-                }
-            }
-            
             // cloud batch save ready -- now send the records for batch updating
             self.batchRecordUpdate()
+        }
+        
+        // this part must be run on the main thread to ensure that
+        // we have gathered any records to be deleted before the
+        // list data for the object is deleted
+        if let listVC = self.listViewController {
+            for list in listVC.lists {
+                list.saveToCloud()
+            }
         }
         
         if asynchronously {
@@ -451,7 +454,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
-    /// Writes the complete object graph locally.
+    // writes the complete object graph locally
     func saveListDataLocal(asynchronously: Bool)
     {
         func save() {
@@ -731,16 +734,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     let obj = self.updateRecords[record!]
                     if obj is List {
                         let list = obj as! List
-                        print("batch update error: \(list.name) \(error!.localizedDescription)")
+                        print("batch update error: list \(list.name) \(error!.localizedDescription)")
                     } else if obj is Category {
                         let category = obj as! Category
-                        print("batch update error: \(category.name) \(error!.localizedDescription)")
+                        print("batch update error: category \(category.name) \(error!.localizedDescription)")
                     } else if obj is Item {
                         let item = obj as! Item
-                        print("batch update error: \(item.name) \(error!.localizedDescription)")
+                        print("batch update error: item \(item.name) \(error!.localizedDescription)")
                     } else if obj is ImageAsset {
                         let image = obj as! ImageAsset
-                        print("batch update error: \(image.imageGUID) \(error!.localizedDescription)")
+                        print("batch update error: image \(image.imageGUID) \(error!.localizedDescription)")
                     }
                 }
             }
