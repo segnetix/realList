@@ -477,7 +477,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         }
         
         // handles resizing in case the keyboard was presented in the item detail view controller
-        self.itemVC.layoutAnimated(false)
+        self.itemVC.layoutAnimated(true)
         
         presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
     }

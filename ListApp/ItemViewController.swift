@@ -43,15 +43,15 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     @IBOutlet weak var adBanner: ADBannerView!
     
     var inEditMode = false
-    var deleteItemIndexPath: NSIndexPath? = nil
-    var editModeRow = -1
-    var longPressGestureRecognizer: UILongPressGestureRecognizer? = nil
-    var sourceIndexPath: NSIndexPath? = nil
-    var movingFromIndexPath: NSIndexPath? = nil
-    var newCatIndexPath: NSIndexPath? = nil
-    var prevLocation: CGPoint? = nil
-    var snapshot: UIView? = nil
-    var displayLink: CADisplayLink? = nil
+    var deleteItemIndexPath: NSIndexPath?
+    var editModeIndexPath: NSIndexPath?
+    var longPressGestureRecognizer: UILongPressGestureRecognizer?
+    var sourceIndexPath: NSIndexPath?
+    var movingFromIndexPath: NSIndexPath?
+    var newCatIndexPath: NSIndexPath?
+    var prevLocation: CGPoint?
+    var snapshot: UIView?
+    var displayLink: CADisplayLink?
     var longPressActive = false
     var editingNewItemName = false
     var editingNewCategoryName = false
@@ -138,14 +138,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // Dispose of any resources that can be recreated.
         
     }
-    
-    /*
-    override func viewWillLayoutSubviews() {
-        print("viewWillLayoutSubviews with width: \(self.view.frame.width)")
-        //super.viewWillLayoutSubviews()
-        layoutAnimated(true)
-    }
-    */
     
     override func viewDidLayoutSubviews() {
         print("viewDidLayoutSubviews with width: \(self.view.frame.width)")
@@ -397,6 +389,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
+    func scrollViewWillBeginDragging(scrollView: UIScrollView) {
+        print("******* scrollViewWillBeginDragging - inEditMode: \(inEditMode)")
+        if inEditMode {
+            layoutAnimated(true)
+        }
+    }
     
 ////////////////////////////////////////////////////////////////
 //
@@ -407,35 +405,45 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     func keyboardWillShow(notification: NSNotification)
     {
+        print("keyboardWillShow")
         inEditMode = true
         
         var info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
         let keyboardHeight = keyboardFrame.height
-        let topBarHeight = getTopBarHeight()
         
         // need to shrink the tableView height so it shows above the keyboard
-        self.tableView.frame.size.height = self.view.frame.height - keyboardHeight - topBarHeight
+        let oldFrameHeight = tableView.frame.size.height
+        self.tableView.frame.size.height = self.view.frame.height - keyboardHeight
+        print("keyboardWillShow - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
         
-        // while the keyboard is visible
-        self.view.layoutIfNeeded()
+        // now make sure we have our edit cell in view
+        if let indexPath = editModeIndexPath {
+            //indexPath = NSIndexPath(forRow: indexPath.row+2, inSection: 0)
+            tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
+        }
+        let _ = 0
     }
     
     func keyboardWillHide(notification: NSNotification)
     {
+        print("keyboardWillHide")
+        
+        if !inEditMode {
+            layoutAnimated(true)
+        }
+        
         inEditMode = false
         editingNewCategoryName = false
         editingNewItemName = false
+        editModeIndexPath = nil
         
-        // need to bypass this call if we are keeping the keyboard up for another edit
-        //layoutAnimated(false)         // - will be handled in textFieldShouldReturn
-        
-        //tableView.reloadData()
         resetCellViewTags()
     }
     
     func textFieldShouldBeginEditing(textField: UITextField) -> Bool
     {
+        print("textFieldShouldBeginEditing")
         // this clears an initial space in a new cell name
         if textField.text == " " {
             textField.text = ""
@@ -444,8 +452,14 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         return true
     }
     
+    func textFieldDidEndEditing(textField: UITextField) {
+        print("textFieldDidEndEditing")
+        
+    }
+    
     func textFieldShouldReturn(textField: UITextField) -> Bool
     {
+        print("textFieldShouldReturn")
         textField.userInteractionEnabled = false
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
@@ -474,6 +488,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             editingNewCategoryName = false
         }
         
+        // always run layout
         layoutAnimated(true)
         
         appDelegate.saveListData(true)
@@ -487,11 +502,15 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         let newName = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
         list.updateObjNameAtTag(textField.tag, name: newName)
     }
-    
-    func addItemButtonTapped(sender: UIButton)
+
+    func addNewItem(sender: UIButton)
     {
         // create a new item and append to the category of the add button
         guard let category = list.categoryForTag(sender.tag) else { return }
+        
+        if !inEditMode {
+            layoutAnimated(true)
+        }
         
         if (appDelegate.appIsUpgraded == false && category.isTutorialCategory == false && list.itemCount() >= kMaxItemCount) ||
            (appDelegate.appIsUpgraded == false && category.isTutorialCategory && category.itemAddCount > 0)
@@ -540,14 +559,16 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         let indexPath = list.displayIndexPathForAddItemInCategory(category)
         
         if indexPath != nil {
-            print("*** addItem indexPath row is \(indexPath!.row)")
+            //print("*** addItem indexPath row is \(indexPath!.row)")
             if self.tableView.indexPathsForVisibleRows?.contains(indexPath!) == false {
-                print("*** addItem is not visible...")
+                //print("*** addItem is not visible...")
                 self.tableView.scrollToRowAtIndexPath(indexPath!, atScrollPosition: UITableViewScrollPosition.Bottom, animated: true)
             } else {
-                print("*** addItem is visible...")
+                //print("*** addItem is visible...")
             }
         }
+        
+        print("addNewItem - need to bypass layout...")
     }
     
     func addNewCategory()
@@ -591,8 +612,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 newCatIndexPath = nil
             }
         }
-        
-        appDelegate.saveListData(true)
     }
     
     func collapseAllCategories() {
@@ -703,7 +722,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 // save expanded state change to the clould
                 appDelegate.saveListData(true)
             } else if obj is Item {
-                self.loadItemDetailView(obj as! Item)
+                if !inEditMode {
+                    self.loadItemDetailView(obj as! Item)
+                } else {
+                    self.view.endEditing(true)
+                    self.layoutAnimated(true)
+                }
             }
         } else {
             print("ERROR: cellSingleTapAction received a nil sender.view!")
@@ -716,16 +740,15 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         if sender.view != nil {
             let obj = list.objectForTag(sender.view!.tag)
             let pathResult = list.displayIndexPathForObj(obj!)
+            editModeIndexPath = pathResult.indexPath
             
-            if let indexPath = pathResult.indexPath {
+            if let indexPath = editModeIndexPath {
                 if obj is Item {
                     let cell = tableView.cellForRowAtIndexPath(indexPath) as! ItemCell
-                    
                     cell.itemName.userInteractionEnabled = true
                     cell.itemName.becomeFirstResponder()
                 } else if obj is Category {
                     let cell = tableView.cellForRowAtIndexPath(indexPath) as! CategoryCell
-                    
                     cell.categoryName.userInteractionEnabled = true
                     cell.categoryName.becomeFirstResponder()
                 }
@@ -1558,7 +1581,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             // cycle item state
             item.state.next()
             
-            // instead we will call saveListData - cloudOnly mode
+            // call saveListData - cloudOnly mode
             appDelegate.saveListData(true)
             
             // set item name text color
@@ -1729,15 +1752,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     // resize the frame and move the adBanner on and off the screen
     func layoutAnimated(animated: Bool)
     {
-        if inEditMode {
-            return
-        }
-        
         var topBarHeight = getTopBarHeight()
         var bannerHeight: CGFloat = 0.0
         var bannerLoaded = false
         let bannerXpos   = self.view.frame.size.height
         let showAdBanner = !appDelegate.appIsUpgraded
+        let oldFrameHeight = tableView.frame.size.height
         
         if appDelegate.appIsUpgraded {
             topBarHeight = 0.0
@@ -1764,6 +1784,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             tableView.frame.size.height = self.view.frame.height - topBarHeight
         }
         
+        print("layoutAnimated - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
         UIView.animateWithDuration(animated ? 0.5 : 0.0) {
             self.view.layoutIfNeeded()
         }

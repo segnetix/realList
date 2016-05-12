@@ -34,7 +34,7 @@ class AddButton: UIButton
     
     func buttonTapped(sender: UIButton) {
         if sender == self && itemVC != nil {
-            itemVC!.addItemButtonTapped(self)
+            itemVC!.addNewItem(self)
         }
     }
     

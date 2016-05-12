@@ -343,16 +343,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 lists.removeLast()
                 self.tableView.reloadData()
             }
-            //appDelegate.saveListData(false)
         }
         
         editingNewListName = false
-        
-        /*
-        // update list in cloud
-        let updatedList = lists[textField.tag]
-        updatedList.saveToCloud()
-        */
         
         appDelegate.saveListData(true)
         
