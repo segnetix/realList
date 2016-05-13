@@ -389,8 +389,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func scrollViewWillBeginDragging(scrollView: UIScrollView) {
-        print("******* scrollViewWillBeginDragging - inEditMode: \(inEditMode)")
+    func scrollViewWillBeginDragging(scrollView: UIScrollView)
+    {
+        // this is needed
         if inEditMode {
             layoutAnimated(true)
         }
@@ -415,6 +416,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // need to shrink the tableView height so it shows above the keyboard
         let oldFrameHeight = tableView.frame.size.height
         self.tableView.frame.size.height = self.view.frame.height - keyboardHeight
+        if !appDelegate.appIsUpgraded {
+            self.tableView.frame.size.height -= getTopBarHeight()
+        }
         print("keyboardWillShow - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
         
         // now make sure we have our edit cell in view
@@ -723,8 +727,10 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 appDelegate.saveListData(true)
             } else if obj is Item {
                 if !inEditMode {
+                    // not in edit mode so can present item detail view
                     self.loadItemDetailView(obj as! Item)
                 } else {
+                    // in edit mode so dismiss keyboard (end editing) and re-layout the view
                     self.view.endEditing(true)
                     self.layoutAnimated(true)
                 }
@@ -1727,17 +1733,23 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         if self.allowActionToRun() {
             self.adBanner.hidden = true
-            self.layoutAnimated(false)
+            if !inEditMode {
+                self.layoutAnimated(false)
+            }
         } else {
             self.adBanner.hidden = false
-            self.layoutAnimated(true)
+            if !inEditMode {
+                self.layoutAnimated(true)
+            }
         }
     }
     
     func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!)
     {
         self.adBanner.hidden = true
-        self.layoutAnimated(true)
+        if !inEditMode {
+            self.layoutAnimated(true)
+        }
     }
     
     func allowActionToRun() -> Bool {

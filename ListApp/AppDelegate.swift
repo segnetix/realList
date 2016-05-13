@@ -221,6 +221,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // iCloud sent notification of a change
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject])
     {
+        print("******* Recieved a cloud kit notification *******")
+        
         let cloudKitNotification = CKNotification(fromRemoteNotificationDictionary: userInfo as! [String : NSObject])
         
         if cloudKitNotification.notificationType == .Query {
@@ -306,20 +308,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         //print("called createSubscriptions...")
         
         // create a single subscription of the given type
-        func createSubscription(recordType: String) {
+        func createSubscription(recordType: String, delay: Double) {
             guard let database = privateDatabase else { return }
             
             // run later, making sure that all subscriptions have been deleted before re-subscribing...
             let predicate = NSPredicate(format: "TRUEPREDICATE")
             
             // save new subscription
-            print("preparing to subscribe to \(recordType) changes")
-            let subscription = CKSubscription(recordType: recordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
-            database.saveSubscription(subscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
-                if subscription != nil {
-                    print("saved \(recordType) subscription... \(subscription!.subscriptionID)")
-                } else {
-                    print("ERROR: saveSubscription error for \(recordType): \(error!.localizedDescription)")
+            runAfterDelay(delay) {
+                print("preparing to subscribe to \(recordType) changes")
+                let subscription = CKSubscription(recordType: recordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
+                database.saveSubscription(subscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
+                    if subscription != nil {
+                        print("saved \(recordType) subscription... \(subscription!.subscriptionID)")
+                    } else {
+                        print("ERROR: saveSubscription error for \(recordType): \(error!.localizedDescription)")
+                    }
                 }
             }
         }
@@ -355,10 +359,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
                 
                 // create any missing subscriptions
-                if !haveListsSub      { createSubscription(ListsRecordType)      }
-                if !haveCategoriesSub { createSubscription(CategoriesRecordType) }
-                if !haveItemsSub      { createSubscription(ItemsRecordType)      }
-                if !haveImagesSub     { createSubscription(ImagesRecordType)     }
+                // delay enables the subscriptions to be made in a single pass
+                if !haveImagesSub     { createSubscription(ImagesRecordType,     delay: 0.0) }
+                if !haveItemsSub      { createSubscription(ItemsRecordType,      delay: 3.0) }
+                if !haveCategoriesSub { createSubscription(CategoriesRecordType, delay: 6.0) }
+                if !haveListsSub      { createSubscription(ListsRecordType,      delay: 9.0) }
                 
             } else {
                 print("fetchAllSubscriptionsWithCompletionHandler error: \(error!.localizedDescription)")
@@ -807,9 +812,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         guard let database = privateDatabase else { return }
         guard iCloudIsAvailable() else { print("fetchCloudData - iCloud is not available..."); return }
         
-        startHUD("iCloud", subtitle: NSLocalizedString("Fetching_Data", comment: "Fetching data message for the iCloud import HUD."))
-        
         let resultCount = 0         // default value will let iCloud server decide how much to send in each block
+        var itemFetchCount = 0      // holds the number of item records fetched
+        let msg = NSLocalizedString("Fetching_Data", comment: "Fetching data message for the iCloud import HUD.")
+        
+        startHUD("iCloud", subtitle: msg + " 0")
         
         // clear the record arrays
         listArray.removeAll()
@@ -858,6 +865,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         itemFetch.recordFetchedBlock = { (record : CKRecord!) in
             self.itemArray.append(record)
+            itemFetchCount += 1
             //print("item recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
         }
 
@@ -951,6 +959,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 print("itemFetch error: \(error?.localizedDescription)")
             }
             
+            // update HUD
+            dispatch_async(dispatch_get_main_queue()) {
+                if self.hud != nil {
+                    self.hud!.detailsLabel.text = msg + " \(itemFetchCount)"
+                }
+            }
+            
             if cursor != nil {
                 //print("item cursor: \(cursor)")
                 print("\(self.itemArray.count) items - there is more data to fetch...")
@@ -985,7 +1000,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // start a timer to verify completion of the fetch operations
         // cancelCloudDataFetch will be called on the main thread
-        //NSTimer.scheduledTimerWithTimeInterval(kMaxCloudFetchTime, target: self, selector: #selector(AppDelegate.cancelCloudDataFetch), userInfo: nil, repeats: false)
+        // NSTimer.scheduledTimerWithTimeInterval(kMaxCloudFetchTime, target: self, selector: #selector(AppDelegate.cancelCloudDataFetch), userInfo: nil, repeats: false)
         // *** Automatic fetch cancel was removed as the use can now cancel the fetch if they want
         
         // set external fetch pointers
@@ -1039,9 +1054,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         guard let database = privateDatabase else { return }
         
-        startHUD("iCloud", subtitle: NSLocalizedString("Fetching_Images", comment: "Fetching images message for the iCloud import HUD."))
-        
-        let batchSize = 50         // size of the batch request block
+        let batchSize = 50          // size of the batch request block
+        var imageFetchCount = 0     // holds count of fetched images
         
         if itemReferences.count == 0 {
             print("fetchImageData = itemReferences.count == 0")
@@ -1053,6 +1067,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         var startIndex = 0
         var stopIndex = -1
         var loop = 0
+        //let msg = NSLocalizedString("Fetching_Images", comment: "Fetching images message for the iCloud import HUD.")
+        
+        //startHUD("iCloud", subtitle: msg + " 0")
         
         repeat {
             startIndex = stopIndex + 1
@@ -1086,7 +1103,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             imageFetch.recordFetchedBlock = { (record : CKRecord!) in
                 imageArray.append(record)
+                imageFetchCount += 1
                 //print("image recordFetchedBlock - GUID: \(record[key_imageGUID]) recordId: \(record.recordID.recordName)")
+                
+                // update HUD
+                /*
+                dispatch_async(dispatch_get_main_queue()) {
+                    if self.hud != nil {
+                        self.hud!.detailsLabel.text = msg + " \(imageFetchCount)"
+                    }
+                }*/
             }
             
             imageFetch.queryCompletionBlock = { [loop, startIndex, stopIndex] (cursor : CKQueryCursor?, error : NSError?) in
@@ -1117,7 +1143,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         NSLog("mergeCloudData...")
         
-        startHUD("iCloud", subtitle: NSLocalizedString("Merging_Data", comment: "Merging data message for the iCloud import HUD."))
+        //startHUD("iCloud", subtitle: NSLocalizedString("Merging_Data", comment: "Merging data message for the iCloud import HUD."))
         
         for cloudList in listArray {
             updateFromRecord(cloudList, forceUpdate: false)
@@ -1142,20 +1168,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // now that items are merged we can call fetchImageData to
         // retreive any images that need updating
         fetchImageData()
+        
+        // shows the completed HUD then dismisses itself
+        startHUDwithDone()
     }
     
     func mergeImageCloudData(imageRecords: [CKRecord])
     {
         NSLog("mergeImageCloudData...")
         
-        startHUD("iCloud", subtitle: NSLocalizedString("Merging_Images", comment: "Merging images message for the iCloud import HUD."))
+        //startHUD("iCloud", subtitle: NSLocalizedString("Merging_Images", comment: "Merging images message for the iCloud import HUD."))
         
         for cloudImage in imageRecords {
             updateFromRecord(cloudImage, forceUpdate: false)
         }
-        
-        // shows the completed HUD then dismisses itself
-        startHUDwithDone()
     }
     
     // check if any of the local objects are in the deleted list (deletedArray) and if so delete
@@ -1274,14 +1300,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         dispatch_async(dispatch_get_main_queue()) {
             if self.hud == nil {
                 self.hud = MBProgressHUD.showHUDAddedTo(theView, animated: true)
-                self.hud?.minSize = CGSize(width: 150, height: 150)
+                self.hud?.minSize = CGSize(width: 160, height: 160)
+                self.hud?.offset = CGPoint(x: 0, y: -60)
+                self.hud!.contentColor = UIColor.darkGrayColor()
+                self.hud!.mode = MBProgressHUDMode.Indeterminate
+                self.hud!.minShowTime = NSTimeInterval(1.5)
+                self.hud!.button.setTitle("Cancel", forState: .Normal)
+                self.hud!.button.addTarget(self, action: #selector(AppDelegate.cancelCloudDataFetch), forControlEvents: .TouchUpInside)
             }
             
-            self.hud!.mode = MBProgressHUDMode.Indeterminate
+            // dynamic elements
             self.hud!.label.text = title
             self.hud!.detailsLabel.text = subtitle
-            self.hud!.button.setTitle("Cancel", forState: .Normal)
-            self.hud!.button.addTarget(self, action: #selector(AppDelegate.cancelCloudDataFetch), forControlEvents: .TouchUpInside)
         }
     }
     
@@ -1299,7 +1329,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             if let hud = self.hud {
                 hud.mode = MBProgressHUDMode.CustomView
-                hud.minSize = CGSize(width: 150, height: 150)
+                hud.offset = CGPoint(x: 0, y: -60)
+                hud.contentColor = UIColor.darkGrayColor()
+                hud.minSize = CGSize(width: 160, height: 160)
                 let imageView = UIImageView(image: UIImage(named: "checkbox_blue"))
                 hud.customView = imageView
                 hud.label.text = NSLocalizedString("Done", comment: "Done")

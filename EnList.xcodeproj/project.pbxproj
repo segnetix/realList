@@ -123,6 +123,86 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		B07C39ED1CE6240E006027AA /* Reachability */ = {
+			isa = PBXGroup;
+			children = (
+				B041E8551CDA4DC7005C4D16 /* UIAppViewController.swift */,
+				B041E8511CDA4CC6005C4D16 /* Reachability.swift */,
+				B041E8531CDA4D62005C4D16 /* AppManager.swift */,
+			);
+			name = Reachability;
+			sourceTree = "<group>";
+		};
+		B07C39EE1CE62451006027AA /* MBProgressHUD */ = {
+			isa = PBXGroup;
+			children = (
+				B02597261CE242E100615138 /* MBProgressHUD.h */,
+				B02597271CE242E100615138 /* MBProgressHUD.m */,
+				B02597251CE242E100615138 /* EnList-Bridging-Header.h */,
+			);
+			name = MBProgressHUD;
+			sourceTree = "<group>";
+		};
+		B07C39F01CE624DE006027AA /* XIB */ = {
+			isa = PBXGroup;
+			children = (
+				B07CCC7D1CA1A76500CBCFC1 /* AboutViewController.xib */,
+				B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */,
+				B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */,
+				B0A3026F1C349F7A00F6FB44 /* Main.storyboard */,
+				B0A302741C349F7A00F6FB44 /* LaunchScreen.storyboard */,
+			);
+			name = XIB;
+			sourceTree = "<group>";
+		};
+		B07C39F11CE6257E006027AA /* Transition Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */,
+				B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */,
+				B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */,
+				B0930D6F1C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift */,
+				B0930D6B1C652DE9007EBAA0 /* SettingsPresentationController.swift */,
+				B0930D6D1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift */,
+			);
+			name = "Transition Controllers";
+			sourceTree = "<group>";
+		};
+		B07C39F21CE625C3006027AA /* Cell and UI Classes */ = {
+			isa = PBXGroup;
+			children = (
+				B06836A11CAB1A7200422742 /* AddButton.swift */,
+				B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */,
+				B07828971C36000B009D356F /* ListCell.swift */,
+				B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */,
+				B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */,
+				B0FF8C361C4AE58900C0A33C /* AddListCell.swift */,
+				B07828991C360020009D356F /* ItemCell.swift */,
+			);
+			name = "Cell and UI Classes";
+			sourceTree = "<group>";
+		};
+		B07C39F31CE625EA006027AA /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				B0A302721C349F7A00F6FB44 /* Assets.xcassets */,
+				B02174D41C6D57110087D5A3 /* Localizable.strings */,
+				B0A302771C349F7A00F6FB44 /* Info.plist */,
+				B07CCC791CA197E700CBCFC1 /* EnList.entitlements */,
+				B0026FDB1CA5AE2800DA1785 /* EnList_Development_Profile.mobileprovision */,
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		B07C39F41CE62647006027AA /* IAP */ = {
+			isa = PBXGroup;
+			children = (
+				B0EC54D71CBFF7100017553B /* IAPHelper.swift */,
+				B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */,
+			);
+			name = IAP;
+			sourceTree = "<group>";
+		};
 		B0A3025F1C349F7A00F6FB44 = {
 			isa = PBXGroup;
 			children = (
@@ -148,44 +228,20 @@
 			children = (
 				B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */,
 				B0A302871C35915B00F6FB44 /* ListData.swift */,
-				B07828971C36000B009D356F /* ListCell.swift */,
-				B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */,
-				B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */,
-				B0FF8C361C4AE58900C0A33C /* AddListCell.swift */,
-				B06836A11CAB1A7200422742 /* AddButton.swift */,
-				B07828991C360020009D356F /* ItemCell.swift */,
-				B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */,
 				B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */,
 				B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */,
 				B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */,
-				B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */,
-				B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */,
-				B03C46801C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift */,
 				B0930D691C652DA5007EBAA0 /* SettingsViewController.swift */,
-				B0930D6F1C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift */,
-				B0930D6B1C652DE9007EBAA0 /* SettingsPresentationController.swift */,
-				B0930D6D1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift */,
 				B07CCC7C1CA1A76500CBCFC1 /* AboutViewController.swift */,
-				B07CCC7D1CA1A76500CBCFC1 /* AboutViewController.xib */,
 				B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */,
-				B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */,
 				B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */,
-				B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */,
-				B041E8511CDA4CC6005C4D16 /* Reachability.swift */,
-				B041E8531CDA4D62005C4D16 /* AppManager.swift */,
-				B041E8551CDA4DC7005C4D16 /* UIAppViewController.swift */,
-				B0EC54D71CBFF7100017553B /* IAPHelper.swift */,
-				B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */,
-				B0A3026F1C349F7A00F6FB44 /* Main.storyboard */,
-				B0A302721C349F7A00F6FB44 /* Assets.xcassets */,
-				B02174D41C6D57110087D5A3 /* Localizable.strings */,
-				B0A302741C349F7A00F6FB44 /* LaunchScreen.storyboard */,
-				B0A302771C349F7A00F6FB44 /* Info.plist */,
-				B07CCC791CA197E700CBCFC1 /* EnList.entitlements */,
-				B0026FDB1CA5AE2800DA1785 /* EnList_Development_Profile.mobileprovision */,
-				B02597261CE242E100615138 /* MBProgressHUD.h */,
-				B02597271CE242E100615138 /* MBProgressHUD.m */,
-				B02597251CE242E100615138 /* EnList-Bridging-Header.h */,
+				B07C39F21CE625C3006027AA /* Cell and UI Classes */,
+				B07C39F11CE6257E006027AA /* Transition Controllers */,
+				B07C39F41CE62647006027AA /* IAP */,
+				B07C39F01CE624DE006027AA /* XIB */,
+				B07C39EE1CE62451006027AA /* MBProgressHUD */,
+				B07C39ED1CE6240E006027AA /* Reachability */,
+				B07C39F31CE625EA006027AA /* Resources */,
 			);
 			name = EnList;
 			path = ListApp;

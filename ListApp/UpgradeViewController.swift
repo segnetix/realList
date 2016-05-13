@@ -91,7 +91,7 @@ class UpgradeViewController: UIAppViewController
     {
         appDelegate.appIsUpgraded = true
         
-        stopHUD()
+        //stopHUD()
         
         let alertVC = UIAlertController(
             title: "Thank You",
@@ -111,7 +111,7 @@ class UpgradeViewController: UIAppViewController
         
         appDelegate.appIsUpgraded = true
         
-        stopHUD()
+        //stopHUD()
         
         let alertVC = UIAlertController(
             title: "Thank You",
@@ -130,8 +130,6 @@ class UpgradeViewController: UIAppViewController
     
     func handleFailedTransaction(notification: NSNotification)
     {
-        stopHUD()
-        
         if let message = notification.object as? String {
             let alertVC = UIAlertController(
                 title: "Transaction Error",
@@ -151,14 +149,14 @@ class UpgradeViewController: UIAppViewController
             return
         }
         
-        startHUD(NSLocalizedString("Purchasing", comment: "Purchasing"), subtitle: "")
+        //startHUD(NSLocalizedString("Purchasing", comment: "Purchasing"), subtitle: "")
         
         RealListProducts.store.buyProduct(product)
     }
     
     @IBAction func restorePurchases(sender: UIButton)
     {
-        startHUD(NSLocalizedString("Restoring_purchase", comment: ""), subtitle: "")
+        //startHUD(NSLocalizedString("Restoring_purchase", comment: ""), subtitle: "")
         
         RealListProducts.store.restorePurchases()
     }
@@ -178,6 +176,7 @@ class UpgradeViewController: UIAppViewController
     //
     ////////////////////////////////////////////////////////////////
     
+    /*
     // these methods may be called from background threads
     func startHUD(title: String, subtitle: String) {
         dispatch_async(dispatch_get_main_queue()) {
@@ -189,8 +188,6 @@ class UpgradeViewController: UIAppViewController
             self.hud!.mode = MBProgressHUDMode.Indeterminate
             self.hud!.label.text = title
             self.hud!.detailsLabel.text = subtitle
-            self.hud!.button.setTitle("Cancel", forState: .Normal)
-            self.hud!.button.addTarget(self, action: #selector(AppDelegate.cancelCloudDataFetch), forControlEvents: .TouchUpInside)
         }
     }
     
@@ -225,4 +222,5 @@ class UpgradeViewController: UIAppViewController
             }
         }
     }
+    */
 }
