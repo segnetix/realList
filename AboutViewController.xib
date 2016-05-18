@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -103,11 +103,12 @@
                             </variation>
                         </label>
                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="v0.0.0" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yvv-4j-eX7">
-                            <rect key="frame" x="145" y="32" width="72" height="33"/>
+                            <rect key="frame" x="137" y="32" width="80" height="33"/>
                             <constraints>
-                                <constraint firstAttribute="width" constant="72" id="d42-8v-YZq">
-                                    <variation key="widthClass=compact" constant="64"/>
-                                    <variation key="heightClass=regular-widthClass=regular" constant="80"/>
+                                <constraint firstAttribute="width" constant="80" id="d42-8v-YZq">
+                                    <variation key="widthClass=compact" constant="72"/>
+                                    <variation key="widthClass=regular" constant="96"/>
+                                    <variation key="heightClass=regular-widthClass=regular" constant="96"/>
                                 </constraint>
                                 <constraint firstAttribute="height" constant="33" id="eDj-h3-WxD">
                                     <variation key="widthClass=compact" constant="16"/>
@@ -1375,7 +1376,7 @@
                     <variation key="heightClass=regular-widthClass=regular" constant="42"/>
                 </constraint>
                 <constraint firstItem="9ip-3R-HpT" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" constant="40" id="Vck-es-0i6">
-                    <variation key="heightClass=regular-widthClass=regular" constant="-40"/>
+                    <variation key="heightClass=regular-widthClass=regular" constant="-16"/>
                 </constraint>
                 <constraint firstItem="9ip-3R-HpT" firstAttribute="centerY" secondItem="i5M-Pr-FkT" secondAttribute="centerY" id="Y2f-g7-ShV">
                     <variation key="widthClass=compact" constant="-16"/>
@@ -1451,6 +1452,7 @@
                     <exclude reference="i3I-mJ-OKi"/>
                 </mask>
             </variation>
+            <point key="canvasLocation" x="768" y="501"/>
         </view>
     </objects>
     <resources>

@@ -184,6 +184,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     func restoreUpgradeStatus() {
+        // testing only...
+        //self.appIsUpgraded = false
+        //return
+        
         // restore upgrade status from user defaults
         if RealListProducts.store.isProductPurchased(RealListProducts.FullVersion) {
             self.appIsUpgraded = true
@@ -610,8 +614,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
         
         if !refreshEventIsPending {
-            NSLog("preparing refreshEvent timer for delete...")
-            print("preparing refreshEvent timer for update...")
+            //NSLog("preparing refreshEvent timer for delete...")
             NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
             refreshEventIsPending = true
         }
@@ -651,7 +654,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // now reorder and refresh the table view
         if !refreshEventIsPending {
-            NSLog("preparing refreshEvent timer for delete...")
+            //NSLog("preparing refreshEvent timer for delete...")
             NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
             refreshEventIsPending = true
         }
@@ -659,10 +662,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     // called from a timer to batch refreshes
     func refreshEvent() {
-        NSLog("refreshEvent timer did fire...")
+        //NSLog("refreshEvent timer did fire...")
         refreshEventIsPending = false
         self.refreshListData()
-        NSLog("refreshEvent did finish...")
+        //NSLog("refreshEvent did finish...")
     }
     
     func addToUpdateRecords(record: CKRecord, obj: AnyObject) {
@@ -807,7 +810,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // pulls all list, category and item data from cloud storage
     func fetchCloudData()
     {
-        NSLog("fetchCloudData...")
+        //NSLog("fetchCloudData...")
         
         guard let database = privateDatabase else { return }
         guard iCloudIsAvailable() else { print("fetchCloudData - iCloud is not available..."); return }
@@ -1050,7 +1053,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // pulls image data in batches for items needing updating (itemReferences)
     func fetchImageData()
     {
-        NSLog("fetchImageData - \(itemReferences.count) items need new images...")
+        //NSLog("fetchImageData - \(itemReferences.count) items need new images...")
         
         guard let database = privateDatabase else { return }
         
@@ -1141,7 +1144,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // after fetching cloud data, merge with local data
     func mergeCloudData()
     {
-        NSLog("mergeCloudData...")
+        //NSLog("mergeCloudData...")
         
         //startHUD("iCloud", subtitle: NSLocalizedString("Merging_Data", comment: "Merging data message for the iCloud import HUD."))
         
@@ -1175,7 +1178,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     func mergeImageCloudData(imageRecords: [CKRecord])
     {
-        NSLog("mergeImageCloudData...")
+        //NSLog("mergeImageCloudData...")
         
         //startHUD("iCloud", subtitle: NSLocalizedString("Merging_Images", comment: "Merging images message for the iCloud import HUD."))
         
@@ -1187,7 +1190,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // check if any of the local objects are in the deleted list (deletedArray) and if so delete
     func processDeletedObjects()
     {
-        NSLog("processDeletedObjects...")
+        //NSLog("processDeletedObjects...")
         
         // create an array of recordID.recordName from the cloud delete records
         var listDeleteRecordIDs = [String]()
@@ -1263,7 +1266,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // purge any delete records older than one month
     func purgeOldDeleteRecords()
     {
-        NSLog("purgeOldDeleteRecords...")
+        //NSLog("purgeOldDeleteRecords...")
         
         let now = NSDate.init()
         let userCalendar = NSCalendar.currentCalendar()
@@ -1337,7 +1340,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 hud.label.text = NSLocalizedString("Done", comment: "Done")
                 hud.hideAnimated(true, afterDelay: 1.5)
                 self.hud = nil
-                NSLog("HUD completed...")
+                //NSLog("HUD completed...")
             }
         }
     }

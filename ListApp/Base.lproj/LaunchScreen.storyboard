@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" initialViewController="01J-lp-oVM">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" launchScreen="YES" useTraitCollections="YES" initialViewController="01J-lp-oVM">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
@@ -17,13 +17,18 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <navigationBar contentMode="scaleToFill" ambiguous="YES" misplaced="YES" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="8Mm-9Q-BlT">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="44"/>
-                            </navigationBar>
+                            <imageView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" image="EnListIcon_180" translatesAutoresizingMaskIntoConstraints="NO" id="cyD-1i-xfE">
+                                <rect key="frame" x="210" y="81" width="180" height="180"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="180" id="3z8-C7-b0z"/>
+                                    <constraint firstAttribute="height" constant="180" id="VLf-we-uqx"/>
+                                </constraints>
+                            </imageView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="8Mm-9Q-BlT" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="dlh-HQ-Mhi"/>
+                            <constraint firstItem="cyD-1i-xfE" firstAttribute="centerX" secondItem="Ze5-6b-2t3" secondAttribute="centerX" id="pLG-Kx-g0Q"/>
+                            <constraint firstItem="cyD-1i-xfE" firstAttribute="top" secondItem="Llm-lL-Icb" secondAttribute="bottom" constant="61" id="qN5-v8-mKL"/>
                         </constraints>
                     </view>
                 </viewController>
@@ -32,4 +37,7 @@
             <point key="canvasLocation" x="53" y="375"/>
         </scene>
     </scenes>
+    <resources>
+        <image name="EnListIcon_180" width="180" height="180"/>
+    </resources>
 </document>

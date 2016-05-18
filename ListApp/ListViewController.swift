@@ -37,7 +37,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     var prevLocation: CGPoint? = nil
     var snapshot: UIView? = nil
     var displayLink: CADisplayLink? = nil
-    var scrollLoopCount = 0     // debugging var
     var longPressActive = false    
     var selectionIndex = 0
     var editingNewListName = false
@@ -466,7 +465,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             // if we moved above the table view then set the destination to the top cell and end the long press
             if longPressActive {
                 indexPath = NSIndexPath(forRow: 0, inSection: 0)
-                longPressEnded(indexPath, location: location)
+                longPressEnded(indexPath, location: location)   // comment out this line to let the moving cell hang at the top until released -- may cause problems with snapshot not getting cleared
             }
             return
         }
@@ -493,11 +492,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             if touchLocation.y < (tableView.bounds.height - kScrollZoneHeight) {
                 displayLink!.invalidate()
                 displayLink = nil
-                scrollLoopCount = 0
             } else if touchLocation.y > (topBarHeight + kScrollZoneHeight) {
                 displayLink!.invalidate()
                 displayLink = nil
-                scrollLoopCount = 0
             }
         }
         
@@ -512,8 +509,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             return
         }
         
-        switch (state)
-        {
+        switch (state) {
         case UIGestureRecognizerState.Began:
             longPressActive = true
             sourceIndexPath = indexPath
@@ -531,7 +527,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 center.y = location.y
                 self.snapshot?.center = center
                 self.snapshot?.transform = CGAffineTransformMakeScale(1.05, 1.05)
-                self.snapshot?.alpha = 0.98
+                self.snapshot?.alpha = 0.7
                 cell.alpha = 0.0
                 }, completion: { (finished: Bool) -> Void in
                     cell.hidden = true      // hides the real cell while moving
@@ -547,7 +543,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         default:
             // long press has ended - call clean up method
             self.longPressEnded(indexPath!, location: location)
-            
         }   // end switch
         
     }
@@ -561,7 +556,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             
             if indexPath != nil && location.y > 0 {
                 // check if destination is different from source and valid then move the cell in the tableView
-                if indexPath != sourceIndexPath && movingFromIndexPath != nil
+                if movingFromIndexPath != nil
                 {
                     // ... move the rows
                     tableView.moveRowAtIndexPath(movingFromIndexPath!, toIndexPath: indexPath!)
@@ -576,39 +571,35 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     // clean up after a long press gesture
     func longPressEnded(idxPath: NSIndexPath?, location: CGPoint)
     {
-        var indexPath = idxPath
         longPressActive = false
         
         // cancel any scroll loop
         displayLink?.invalidate()
         displayLink = nil
-        scrollLoopCount = 0
         
-        guard indexPath != nil else { return }
+        guard var indexPath = idxPath else { return }
         
-        let destCell = self.tableView.cellForRowAtIndexPath(indexPath!)
+        let destCell = self.tableView.cellForRowAtIndexPath(indexPath)
         
         // if we are dropping on the AddList cell then move dest to just above the AddList cell
         if destCell is AddListCell {
-            indexPath = NSIndexPath(forRow: indexPath!.row-1, inSection: 0)
+            indexPath = NSIndexPath(forRow: indexPath.row-1, inSection: 0)
         }
         
         // finalize list data with new location for sourceIndexObj
-        if sourceIndexPath != nil
-        {
+        if sourceIndexPath != nil {
             var center: CGPoint = snapshot!.center
             center.y = location.y
             snapshot?.center = center
             
             // check if destination is different from source and valid
-            if indexPath != sourceIndexPath && indexPath != nil
-            {
+            if indexPath != sourceIndexPath {
                 // we are moving an item
                 tableView.beginUpdates()
                 
                 // remove the item from its original location
                 let removedList = lists.removeAtIndex(sourceIndexPath!.row)
-                lists.insert(removedList, atIndex: indexPath!.row)
+                lists.insert(removedList, atIndex: indexPath.row)
 
                 tableView.endUpdates()
             }
@@ -617,11 +608,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
         
         // clean up any snapshot views or displayLink scrolls
-        var cell: UITableViewCell? = nil
-        
-        if indexPath != nil {
-            cell = tableView.cellForRowAtIndexPath(indexPath!)
-        }
+        let cell: UITableViewCell? = tableView.cellForRowAtIndexPath(indexPath)
         
         cell?.alpha = 0.0
         UIView.animateWithDuration(0.25, animations: { () -> Void in
@@ -645,10 +632,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.displayLink = nil
         
         // need to reset the list order values
-        var i = -1
+        var i = 0
         for list in lists {
-            i += 1
             list.order = i
+            i += 1
         }
         
         // and save data changes locally and to the cloud

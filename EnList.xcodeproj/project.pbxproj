@@ -226,15 +226,7 @@
 		B0A3026A1C349F7A00F6FB44 /* EnList */ = {
 			isa = PBXGroup;
 			children = (
-				B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */,
-				B0A302871C35915B00F6FB44 /* ListData.swift */,
-				B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */,
-				B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */,
-				B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */,
-				B0930D691C652DA5007EBAA0 /* SettingsViewController.swift */,
-				B07CCC7C1CA1A76500CBCFC1 /* AboutViewController.swift */,
-				B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */,
-				B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */,
+				B0B7183B1CEB74BC00CB7084 /* Main Source Files */,
 				B07C39F21CE625C3006027AA /* Cell and UI Classes */,
 				B07C39F11CE6257E006027AA /* Transition Controllers */,
 				B07C39F41CE62647006027AA /* IAP */,
@@ -245,6 +237,22 @@
 			);
 			name = EnList;
 			path = ListApp;
+			sourceTree = "<group>";
+		};
+		B0B7183B1CEB74BC00CB7084 /* Main Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */,
+				B0A302871C35915B00F6FB44 /* ListData.swift */,
+				B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */,
+				B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */,
+				B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */,
+				B0930D691C652DA5007EBAA0 /* SettingsViewController.swift */,
+				B07CCC7C1CA1A76500CBCFC1 /* AboutViewController.swift */,
+				B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */,
+				B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */,
+			);
+			name = "Main Source Files";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

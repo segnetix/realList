@@ -209,7 +209,7 @@ class UpgradeViewController: UIAppViewController
                 hud.label.text = NSLocalizedString("Done", comment: "Done")
                 hud.hideAnimated(true, afterDelay: 1.5)
                 self.hud = nil
-                NSLog("HUD completed...")
+                //NSLog("HUD completed...")
             }
         }
     }

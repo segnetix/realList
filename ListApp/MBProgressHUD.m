@@ -93,12 +93,12 @@ static const CGFloat MBDefaultDetailsLabelFontSize = 12.f;
     _animationType = MBProgressHUDAnimationFade;
     _mode = MBProgressHUDModeIndeterminate;
     _margin = 20.0f;
-    _opacity = 0.9f;
+    _opacity = 0.95f;
     _defaultMotionEffectsEnabled = YES;
 
     // Default color, depending on the current iOS version
     BOOL isLegacy = kCFCoreFoundationVersionNumber < kCFCoreFoundationVersionNumber_iOS_7_0;
-    _contentColor = isLegacy ? [UIColor whiteColor] : [UIColor colorWithWhite:0.f alpha:0.7f];
+    _contentColor = isLegacy ? [UIColor whiteColor] : [UIColor colorWithWhite:0.f alpha:0.9f];
     // Transparent background
     self.opaque = NO;
     self.backgroundColor = [UIColor clearColor];
