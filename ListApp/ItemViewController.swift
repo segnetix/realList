@@ -56,6 +56,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     var editingNewItemName = false
     var editingNewCategoryName = false
     var tempCollapsedCategoryIsMoving = false
+    var inAddNewItemLoop = false
+    var inTextFieldShouldReturnLoop = false
     let settingsTransitionDelegate = SettingsTransitioningDelegate()
     let itemDetailTransitionDelegate = ItemDetailTransitioningDelegate()
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -115,6 +117,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // set up keyboard show/hide notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
+        
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardDidShow(_:)), name: UIKeyboardDidShowNotification, object: nil)
+        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardDidHide(_:)), name: UIKeyboardDidHideNotification, object: nil)
         
         refreshItems()
     }
@@ -432,7 +437,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         print("keyboardWillHide")
         
-        if !inEditMode {
+        if (!inEditMode && !inAddNewItemLoop) || (inEditMode && !inAddNewItemLoop && !inTextFieldShouldReturnLoop) {
             layoutAnimated(true)
         }
         
@@ -442,6 +447,14 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         editModeIndexPath = nil
         
         resetCellViewTags()
+    }
+    
+    func keyboardDidShow(notification: NSNotification) {
+        print("keyboardDidShow")
+    }
+    
+    func keyboardDidHide(notification: NSNotification) {
+        print("keyboardDidHide")
     }
     
     func textFieldShouldBeginEditing(textField: UITextField) -> Bool
@@ -457,12 +470,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     func textFieldDidEndEditing(textField: UITextField) {
         print("textFieldDidEndEditing")
-        
     }
     
     func textFieldShouldReturn(textField: UITextField) -> Bool
     {
         print("textFieldShouldReturn")
+        inTextFieldShouldReturnLoop = true
         textField.userInteractionEnabled = false
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
@@ -492,9 +505,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
         
         // always run layout
-        layoutAnimated(true)
+        runAfterDelay(0.5) {
+            self.layoutAnimated(true)
+        }
         
         appDelegate.saveListData(true)
+        
+        inTextFieldShouldReturnLoop = false
         
         return true
     }
@@ -510,6 +527,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         // create a new item and append to the category of the add button
         guard let category = list.categoryForTag(sender.tag) else { return }
+        
+        inAddNewItemLoop = true
         
         if !inEditMode {
             layoutAnimated(true)
@@ -571,7 +590,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             }
         }
         
-        print("addNewItem - need to bypass layout...")
+        inAddNewItemLoop = false
     }
     
     func addNewCategory()
@@ -1750,7 +1769,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         var bannerLoaded = false
         let bannerXpos   = self.view.frame.size.height
         let showAdBanner = !appDelegate.appIsUpgraded
-        let oldFrameHeight = tableView.frame.size.height
+        //let oldFrameHeight = tableView.frame.size.height
         
         if appDelegate.appIsUpgraded {
             topBarHeight = 0.0
@@ -1777,7 +1796,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             tableView.frame.size.height = self.view.frame.height - topBarHeight
         }
         
-        print("layoutAnimated - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
+        //print("layoutAnimated - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
         UIView.animateWithDuration(animated ? 0.5 : 0.0) {
             self.view.layoutIfNeeded()
         }

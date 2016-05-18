@@ -6,10 +6,10 @@
          contextName = "AppDelegate.mergeCloudData() -&gt; ():AppDelegate.swift">
          <PersistentStrings>
             <PersistentString
-               value = "saveCount">
+               value = "localItem.name">
             </PersistentString>
             <PersistentString
-               value = "localItem.name">
+               value = "saveCount">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -44,10 +44,10 @@
                value = "name">
             </PersistentString>
             <PersistentString
-               value = "item.note">
+               value = "item.name">
             </PersistentString>
             <PersistentString
-               value = "item.name">
+               value = "item.note">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -63,6 +63,17 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "ItemViewController.keyboardDidHide(NSNotification) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "inEditMode">
+            </PersistentString>
+            <PersistentString
+               value = "textFieldShouldReturnWasCalled">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ItemViewController.loadItemDetailView(Item) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
@@ -74,22 +85,13 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "Item.updateFromRecord(CKRecord) -&gt; ():ListData.swift">
+         contextName = "ItemViewController.textFieldShouldReturn(UITextField) -&gt; Bool:ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "self.modifiedBy">
+               value = "inEditMode">
             </PersistentString>
             <PersistentString
-               value = "self.modifiedDate">
-            </PersistentString>
-            <PersistentString
-               value = "name">
-            </PersistentString>
-            <PersistentString
-               value = "modifiedDate">
-            </PersistentString>
-            <PersistentString
-               value = "needToSave">
+               value = "textField.isFirstResponder()">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -97,13 +99,13 @@
          contextName = "ItemViewController.tableView(UITableView, commitEditingStyle : UITableViewCellEditingStyle, forRowAtIndexPath : NSIndexPath) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "(item as! Item).name">
+               value = "indexPath.section">
             </PersistentString>
             <PersistentString
                value = "indexPath.row">
             </PersistentString>
             <PersistentString
-               value = "indexPath.section">
+               value = "(item as! Item).name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -111,7 +113,10 @@
          contextName = "ItemViewController.keyboardWillHide(NSNotification) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "bypassLayout">
+               value = "inEditMode">
+            </PersistentString>
+            <PersistentString
+               value = "inAddNewItemLoop">
             </PersistentString>
             <PersistentString
                value = "editModeIndexPath">
@@ -120,10 +125,10 @@
                value = "editingNewCategoryName">
             </PersistentString>
             <PersistentString
-               value = "editingNewItemName">
+               value = "bypassLayout">
             </PersistentString>
             <PersistentString
-               value = "inEditMode">
+               value = "editingNewItemName">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -162,10 +167,22 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
-         contextName = "ItemViewController.textFieldShouldReturn(UITextField) -&gt; Bool:ItemViewController.swift">
+         contextName = "Item.updateFromRecord(CKRecord) -&gt; ():ListData.swift">
          <PersistentStrings>
             <PersistentString
-               value = "inEditMode">
+               value = "self.modifiedBy">
+            </PersistentString>
+            <PersistentString
+               value = "self.modifiedDate">
+            </PersistentString>
+            <PersistentString
+               value = "name">
+            </PersistentString>
+            <PersistentString
+               value = "modifiedDate">
+            </PersistentString>
+            <PersistentString
+               value = "needToSave">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -228,10 +245,19 @@
          contextName = "ItemViewController.textFieldDidEndEditing(UITextField) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "bypassLayout">
+               value = "inEditMode">
             </PersistentString>
             <PersistentString
-               value = "inEditMode">
+               value = "textFieldShouldReturnWasCalled">
+            </PersistentString>
+            <PersistentString
+               value = "editModeIndexPath">
+            </PersistentString>
+            <PersistentString
+               value = "textField.isFirstResponder()">
+            </PersistentString>
+            <PersistentString
+               value = "bypassLayout">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -303,10 +329,10 @@
                value = "item!.name">
             </PersistentString>
             <PersistentString
-               value = "item!.note">
+               value = "item">
             </PersistentString>
             <PersistentString
-               value = "item">
+               value = "item!.note">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -414,21 +440,37 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "ItemViewController.keyboardDidShow(NSNotification) -&gt; ():ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "inEditMode">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "ItemViewController.itemNameDidChange(UITextField) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "selectedCategory">
+               value = "textField.text">
             </PersistentString>
             <PersistentString
                value = "list.categories[selectedCategory].items[i].name">
             </PersistentString>
             <PersistentString
-               value = "textField.text">
+               value = "selectedCategory">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "List.removeItemAtIndexPath(NSIndexPath, preserveCategories : Bool) -&gt; [NSIndexPath]?:ListData.swift">
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.textFieldShouldBeginEditing(UITextField) -&gt; Bool:ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "inEditMode">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "Item.deleteRecord(CKRecord, database : CKDatabase) -&gt; ():ListData.swift">
@@ -486,10 +528,10 @@
                value = "appDelegate.namesSpellCheck">
             </PersistentString>
             <PersistentString
-               value = "appDelegate.namesCapitalize">
+               value = "appDelegate.namesAutocorrection">
             </PersistentString>
             <PersistentString
-               value = "appDelegate.namesAutocorrection">
+               value = "appDelegate.namesCapitalize">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -500,10 +542,10 @@
                value = "category.name">
             </PersistentString>
             <PersistentString
-               value = "list.name">
+               value = "item.name">
             </PersistentString>
             <PersistentString
-               value = "item.name">
+               value = "list.name">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -608,10 +650,10 @@
          contextName = "ItemViewController.longPressAction(UILongPressGestureRecognizer) -&gt; ():ItemViewController.swift">
          <PersistentStrings>
             <PersistentString
-               value = "indexPath!.row">
+               value = "destCat.name">
             </PersistentString>
             <PersistentString
-               value = "destCat.name">
+               value = "indexPath!.row">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

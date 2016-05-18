@@ -340,7 +340,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
             textView.resignFirstResponder()
             return false
         }
-        
+ 
         return true
     }
     
