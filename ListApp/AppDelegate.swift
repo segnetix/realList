@@ -278,7 +278,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
         
         print("applicationWillEnterForeground...")
-        //aboutViewController?.updateCloudStatus()
+        
+        // check for updates while app was in the background
+        fetchCloudData()
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
@@ -636,7 +638,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
         } else if obj is Category {
             let category = obj as! Category
-            let list = listVC.getListForCategory(category)
+            let list = getListForCategory(category)
             if list != nil {
                 let i = list!.categories.indexOf(category)
                 if i != nil {
@@ -645,7 +647,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
         } else if obj is Item {
             let item = obj as! Item
-            let category = listVC.getCategoryForItem(item)
+            let category = getCategoryForItem(item)
             if category != nil {
                 let i = category!.items.indexOf(item)
                 if i != nil {
@@ -657,7 +659,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // now reorder and refresh the table view
         if !refreshEventIsPending {
             //NSLog("preparing refreshEvent timer for delete...")
-            NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
+            NSTimer.scheduledTimerWithTimeInterval(2.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
             refreshEventIsPending = true
         }
     }
@@ -1082,7 +1084,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         var loop = 0
         //let msg = NSLocalizedString("Fetching_Images", comment: "Fetching images message for the iCloud import HUD.")
         
-        //startHUD("iCloud", subtitle: msg + " 0")
+        //if itemReferences.count > 5 {
+        //    startHUD("iCloud", subtitle: msg + " 0")
+        //}
         
         repeat {
             startIndex = stopIndex + 1
@@ -1489,14 +1493,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         return nil
     }
     
-    // returns a Category object that has the given Item in its item array
-    func getOwningCategory(item: Item) -> Category?
+    // returns the list that contains the given category
+    func getListForCategory(searchCategory: Category) -> List?
     {
         if let listVC = listViewController {
             for list in listVC.lists {
                 for category in list.categories {
-                    for itemObj in category.items {
-                        if itemObj == item {
+                    if category === searchCategory {
+                        return list
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns the category that contains the given item
+    func getCategoryForItem(searchItem: Item) -> Category?
+    {
+        if let listVC = listViewController {
+            for list in listVC.lists {
+                for category in list.categories {
+                    for item in category.items {
+                        if item === searchItem {
                             return category
                         }
                     }
@@ -1506,6 +1526,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         return nil
     }
+    
 }
 
 ////////////////////////////////////////////////////////////////

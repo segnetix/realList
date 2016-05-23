@@ -1679,7 +1679,7 @@ class Item: ListObj, NSCoding
         // reset modifiedBy after changes
         if let modifiedBy = record[key_modifiedBy] { self.modifiedBy = modifiedBy as! String }
         
-        let currentCategory = appDelegate.getOwningCategory(self)   // current category by doing a category item search in the list data
+        let currentCategory = appDelegate.getCategoryForItem(self)   // current category by doing a category item search in the list data
         let updateCategory = getCategoryFromReference(record)       // destination category from the update record
         
         if currentCategory != updateCategory {

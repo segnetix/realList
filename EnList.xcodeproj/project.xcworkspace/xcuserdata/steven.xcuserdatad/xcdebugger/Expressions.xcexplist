@@ -476,6 +476,14 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "AppDelegate.application(UIApplication, didReceiveRemoteNotification : [NSObject : AnyObject]) -&gt; ():AppDelegate.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "queryNotification.queryNotificationReason">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "Item.deleteRecord(CKRecord, database : CKDatabase) -&gt; ():ListData.swift">
          <PersistentStrings>
             <PersistentString

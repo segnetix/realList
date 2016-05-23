@@ -860,35 +860,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             list.updateIndices()
         }
     }
-    
-    func getListForCategory(category: Category) -> List?
-    {
-        for list in lists {
-            for category in list.categories {
-                if category === category {
-                    return list
-                }
-            }
-        }
         
-        return nil
-    }
-    
-    func getCategoryForItem(searchItem: Item) -> Category?
-    {
-        for list in lists {
-            for category in list.categories {
-                for item in category.items {
-                    if item === searchItem {
-                        return category
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-    
 ////////////////////////////////////////////////////////////////
     
     func generateTutorial()
