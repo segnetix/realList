@@ -181,7 +181,6 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         infoVertStackView.addArrangedSubview(createdLabel)
         infoVertStackView.addArrangedSubview(createdByText)
         infoVertStackView.addArrangedSubview(createdDateText)
-        //infoVertStackView.addArrangedSubview(spacerLabel)
         infoVertStackView.addArrangedSubview(spacerView)
         infoVertStackView.addArrangedSubview(modifiedLabel)
         infoVertStackView.addArrangedSubview(modifiedByText)
@@ -314,14 +313,14 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         } else if !shortDisplay {
             containerView.addConstraints(
                 NSLayoutConstraint.constraintsWithVisualFormat(
-                    "V:|-20-[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView(125)]-(>=12)-[closeButton]-16-|",
+                    "V:|-20-[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView(135)]-(>=12)-[closeButton]-16-|",
                     options: NSLayoutFormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else {
             containerView.addConstraints(
                 NSLayoutConstraint.constraintsWithVisualFormat(
-                    "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(125)]-(>=8)-[closeButton]-8-|",
+                    "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(135)]-(>=8)-[closeButton]-8-|",
                     options: NSLayoutFormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))

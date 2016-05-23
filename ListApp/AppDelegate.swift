@@ -225,8 +225,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     // iCloud sent notification of a change
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject])
     {
-        print("******* Recieved a cloud kit notification *******")
-        
         let cloudKitNotification = CKNotification(fromRemoteNotificationDictionary: userInfo as! [String : NSObject])
         
         if cloudKitNotification.notificationType == .Query {
@@ -555,10 +553,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         if update && (list != nil || category != nil || item != nil || imageAsset != nil) {
             // local record exists, so update the object
             switch record.recordType {
-            case ListsRecordType:       list!.updateFromRecord(record)
-            case CategoriesRecordType:  category!.updateFromRecord(record)
-            case ItemsRecordType:       item!.updateFromRecord(record)
-            case ImagesRecordType:      imageAsset!.updateFromRecord(record)
+            case ListsRecordType:
+                list!.updateFromRecord(record)
+            case CategoriesRecordType:
+                category!.updateFromRecord(record)
+            case ItemsRecordType:
+                item!.updateFromRecord(record)
+            case ImagesRecordType:
+                imageAsset!.updateFromRecord(record)
             default:
                 break
             }
@@ -898,7 +900,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.externalItemFetch?.cancel()
                 self.stopHUD()
             } else {
-                print("list fetch complete")
+                NSLog("list fetch complete")
                 dispatch_async(dispatch_get_main_queue()) { self.externalListFetch = nil }
             }
         }
@@ -925,7 +927,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.externalItemFetch?.cancel()
                 self.stopHUD()
             } else {
-                print("category fetch complete")
+                NSLog("category fetch complete")
                 dispatch_async(dispatch_get_main_queue()) { self.externalCategoryFetch = nil }
             }
         }
@@ -951,12 +953,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.externalItemFetch?.cancel()
                 self.stopHUD()
             } else {
-                print("delete fetch complete")
+                NSLog("delete fetch complete")
                 dispatch_async(dispatch_get_main_queue()) { self.externalDeleteFetch = nil }
             }
         }
         
-        // itemFetch - passed on to mergeCloudData when complete
+        // itemFetch - passes on to mergeCloudData when complete
         itemFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
             if error != nil {
                 print("itemFetch error: \(error?.localizedDescription)")
@@ -984,16 +986,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.externalItemFetch = nil
                 self.stopHUD()
             } else {
-                print("The item record fetch operation is complete...")
-                print("array counts - list: \(self.listArray.count) category: \(self.categoryArray.count) item: \(self.itemArray.count) delete: \(self.deleteArray.count)")
+                NSLog("item fetch complete")
+                
+                // need to wait for all fetches before continuing to merge
+                NSLog("start fetch wait...")
+                repeat {
+                    // hold until other completion blocks finish
+                } while self.externalListFetch != nil || self.externalCategoryFetch != nil || self.externalDeleteFetch != nil
+                NSLog("end fetch wait...")
+                
+                NSLog("array counts - list: \(self.listArray.count) category: \(self.categoryArray.count) item: \(self.itemArray.count) delete: \(self.deleteArray.count)")
                 
                 dispatch_async(dispatch_get_main_queue())
                 {
-                    // clear external fetch pointers
+                    NSLog("dispatch main thread merge")
                     self.externalListFetch = nil
                     self.externalCategoryFetch = nil
-                    self.externalDeleteFetch = nil
                     self.externalItemFetch = nil
+                    self.externalDeleteFetch = nil
                     
                     // merge cloud data
                     self.mergeCloudData()
@@ -1013,10 +1023,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         externalItemFetch = itemFetch
         
         // execute the query operations
-        database.addOperation(listFetch)
-        database.addOperation(categoryFetch)
-        database.addOperation(deleteFetch)
         database.addOperation(itemFetch)
+        database.addOperation(categoryFetch)
+        database.addOperation(listFetch)
+        database.addOperation(deleteFetch)
     }
     
     // must be called on main thread
@@ -1142,6 +1152,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // after fetching cloud data, merge with local data
+    // NOTE: this must be called from the main thread
     func mergeCloudData()
     {
         //NSLog("mergeCloudData...")
@@ -1171,6 +1182,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // now that items are merged we can call fetchImageData to
         // retreive any images that need updating
         fetchImageData()
+        
+        // reload list and item views
+        if let itemVC = itemViewController {
+            itemVC.refreshItems()
+        }
+        
+        if let listVC = listViewController {
+            listVC.tableView.reloadData()
+        }
         
         // shows the completed HUD then dismisses itself
         startHUDwithDone()
@@ -1307,7 +1327,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.hud?.offset = CGPoint(x: 0, y: -60)
                 self.hud!.contentColor = UIColor.darkGrayColor()
                 self.hud!.mode = MBProgressHUDMode.Indeterminate
-                self.hud!.minShowTime = NSTimeInterval(1.5)
+                self.hud!.minShowTime = NSTimeInterval(1.0)
                 self.hud!.button.setTitle("Cancel", forState: .Normal)
                 self.hud!.button.addTarget(self, action: #selector(AppDelegate.cancelCloudDataFetch), forControlEvents: .TouchUpInside)
             }
@@ -1318,7 +1338,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
-    // displays a done HUD for 1.5 seconds
+    // displays a done HUD for 0.8 seconds
     func startHUDwithDone() {
         guard let theView = splitViewController!.view else { return }
         
@@ -1338,7 +1358,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 let imageView = UIImageView(image: UIImage(named: "checkbox_blue"))
                 hud.customView = imageView
                 hud.label.text = NSLocalizedString("Done", comment: "Done")
-                hud.hideAnimated(true, afterDelay: 1.5)
+                hud.hideAnimated(true, afterDelay: 0.8)
                 self.hud = nil
                 //NSLog("HUD completed...")
             }
@@ -1469,6 +1489,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         return nil
     }
     
+    // returns a Category object that has the given Item in its item array
+    func getOwningCategory(item: Item) -> Category?
+    {
+        if let listVC = listViewController {
+            for list in listVC.lists {
+                for category in list.categories {
+                    for itemObj in category.items {
+                        if itemObj == item {
+                            return category
+                        }
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
 }
 
 ////////////////////////////////////////////////////////////////

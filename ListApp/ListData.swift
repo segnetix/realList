@@ -537,8 +537,12 @@ class List: NSObject, NSCoding
                         // delete the category and its items from cloud storage
                         //category.deleteFromCloud()
                         
-                        // add paths of category, add item row, and items
-                        removedPaths = displayIndexPathsForCategoryFromIndexPath(indexPath, includeCategoryAndAddItemIndexPaths: true)
+                        if category.expanded {
+                            // add paths of category, add item row, and items
+                            removedPaths = displayIndexPathsForCategoryFromIndexPath(indexPath, includeCategoryAndAddItemIndexPaths: true)
+                        } else {
+                            removedPaths = [indexPath]
+                        }
                         
                         // remove the category and its items from the list
                         self.categories.removeAtIndex(catIndex)
@@ -1675,29 +1679,27 @@ class Item: ListObj, NSCoding
         // reset modifiedBy after changes
         if let modifiedBy = record[key_modifiedBy] { self.modifiedBy = modifiedBy as! String }
         
-        // handle if item has changed categories
-        if let itemRecord = self.itemRecord {
-            let currentCategory = getCategoryFromReference(itemRecord)
-            let updateCategory = getCategoryFromReference(record)
+        let currentCategory = appDelegate.getOwningCategory(self)   // current category by doing a category item search in the list data
+        let updateCategory = getCategoryFromReference(record)       // destination category from the update record
+        
+        if currentCategory != updateCategory {
+            // delete item from current category
+            if currentCategory != nil {
+                let index = currentCategory!.items.indexOf(self)
+                if index != nil {
+                    currentCategory!.items.removeAtIndex(index!)
+                    print("Item Move: deleted \(self.name) from \(currentCategory!.name)")
+                }
+            }
             
-            if currentCategory != updateCategory && updateCategory != nil {
-                // item changed categories = delete item from old category
-                if currentCategory != nil {
-                    let index = currentCategory!.items.indexOf(self)
-                    if index != nil {
-                        currentCategory!.items.removeAtIndex(index!)
-                        print("Item Move: deleted \(self.name) from \(currentCategory!.name)")
-                    }
+            // add item to new category
+            if self.order >= 0 {
+                if self.order < updateCategory!.items.count {
+                    updateCategory!.items.insert(self, atIndex: self.order)
+                } else {
+                    updateCategory!.items.append(self)
                 }
-                // add item to new category
-                if self.order >= 0 {
-                    if self.order < updateCategory!.items.count {
-                        updateCategory!.items.insert(self, atIndex: self.order)
-                    } else {
-                        updateCategory!.items.append(self)
-                    }
-                    print("Item Move: inserted \(self.name) in \(updateCategory!.name) at pos \(self.order)")
-                }
+                print("Item Move: inserted \(self.name) in \(updateCategory!.name) at pos \(self.order)")
             }
         }
         
