@@ -384,6 +384,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let newList = List(name: "", createRecord: true)
         newList.listColorName = r1_2
         lists.append(newList)
+        resetListOrderByPosition()
         
         newList.addCategory("", displayHeader: false, updateIndices: true, createRecord: true)
         
@@ -804,22 +805,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return snapshot
     }
     
-    /*
-    func clearNeedToSave() {
-        for list in lists {
-            list.needToSave = false
-            
-            for category in list.categories {
-                category.needToSave = false
-                
-                for item in category.items {
-                    item.needToSave = false
-                }
-            }
-        }
-    }
-    */
-    
     func countNeedToSave() -> Int {
         var count = 0
         
@@ -860,6 +845,26 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             list.updateIndices()
         }
     }
+    
+    // reset the order field for each list based on current position in the list array
+    func resetListOrderByPosition() {
+        var pos = 0
+        for list in lists {
+            list.order = pos
+            pos += 1
+        }
+    }
+    
+    // reset the order field for each list
+    func resetListCategoryAndItemOrderByPosition() {
+        var listPos = 0
+        for list in lists {
+            list.order = listPos
+            listPos += 1
+            
+            list.resetCategoryAndItemOrderByPosition()
+        }
+    }
         
 ////////////////////////////////////////////////////////////////
     
@@ -879,7 +884,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let tutorial = List(name: "realList Tutorial", createRecord: true, tutorial: true)
         tutorial.listColorName = r1_2
         lists.append(tutorial)
-        tutorial.order = lists.count-1
+        resetListOrderByPosition()
         
         var item: Item?
         

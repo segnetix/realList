@@ -384,7 +384,7 @@ class List: NSObject, NSCoding
             print("ERROR: addItem given invalid category!")
         }
         
-        if (updateIndices) {
+        if updateIndices {
             self.updateIndices()
         }
         
@@ -409,6 +409,15 @@ class List: NSObject, NSCoding
         }
     }
     
+    // sets all items needToSave to false
+    func clearNeedToSave() {
+        self.needToSave = false
+        
+        for category in categories {
+            category.clearNeedToSave()
+        }
+    }
+    
 ///////////////////////////////////////////////////////
 //
 //  MARK: New remove and insert methods for List objects
@@ -424,7 +433,9 @@ class List: NSObject, NSCoding
         if indexPath != nil {
             let catIdx = item.categoryIndex
             let itmIdx = item.itemIndex - 1         // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
+            
             self.categories[catIdx].items.removeAtIndex(itmIdx)
+            self.categories[catIdx].resetItemOrderByPosition()
             removedPaths.append(indexPath!)
         }
         
@@ -454,6 +465,7 @@ class List: NSObject, NSCoding
         }
         
         category.items.insert(item, atIndex: itmIdx + 1)
+        category.resetItemOrderByPosition()
         
         if updateIndices {
             self.updateIndices()
@@ -476,6 +488,7 @@ class List: NSObject, NSCoding
         }
         
         categories[catIdx].items.insert(item, atIndex: itmIdx)
+        categories[catIdx].resetItemOrderByPosition()
         
         if updateIndices {
             self.updateIndices()
@@ -496,6 +509,8 @@ class List: NSObject, NSCoding
         default:
             break
         }
+        
+        inCategory.resetItemOrderByPosition()
         
         if updateIndices {
             self.updateIndices()
@@ -525,11 +540,13 @@ class List: NSObject, NSCoding
                 // remove the item from the category
                 self.categories[catIndex].items.removeAtIndex(itemIndex)
                 removedPaths.append(indexPath)
+                self.categories[catIndex].resetItemOrderByPosition()
             } else {
                 if preserveCategories {
                     // remove the first item in this category
                     self.categories[catIndex].items.removeAtIndex(0)
                     removedPaths.append(indexPath)
+                    self.categories[catIndex].resetItemOrderByPosition()
                 } else {
                     let category = obj as! Category
                     
@@ -562,6 +579,7 @@ class List: NSObject, NSCoding
                         // remove the items from the category
                         category.deleteItems()
                     }
+                    self.resetCategoryOrderByPosition()
                 }
             }
         }
@@ -604,6 +622,8 @@ class List: NSObject, NSCoding
             }
         }
         
+        categories[catIndex].resetItemOrderByPosition()
+        
         if updateIndices {
             self.updateIndices()
         }
@@ -629,6 +649,8 @@ class List: NSObject, NSCoding
             self.categories.insert(category, atIndex: atIndex)
         }
         
+        self.resetCategoryOrderByPosition()
+        
         updateIndices()
     }
     
@@ -647,6 +669,24 @@ class List: NSObject, NSCoding
             i += 1
             cat.updateIndices(i)
             cat.order = i
+        }
+    }
+    
+    func resetCategoryAndItemOrderByPosition() {
+        var catPos = 0
+        for category in categories {
+            category.order = catPos
+            catPos += 1
+            
+            category.resetItemOrderByPosition()
+        }
+    }
+    
+    func resetCategoryOrderByPosition() {
+        var pos = 0
+        for category in categories {
+            category.order = pos
+            pos += 1
         }
     }
     
@@ -1376,6 +1416,14 @@ class Category: ListObj, NSCoding
         items.removeAll(keepCapacity: true)
     }
     
+    func clearNeedToSave() {
+        self.needToSave = false
+        
+        for item in items {
+            item.clearNeedToSave()
+        }
+    }
+    
     // updates the indices for all items in this category
     func updateIndices(catIndex: Int)
     {
@@ -1392,6 +1440,14 @@ class Category: ListObj, NSCoding
         addItem.categoryIndex = catIndex
         i += 1
         addItem.itemIndex = i
+    }
+    
+    func resetItemOrderByPosition() {
+        var pos = 0
+        for item in items {
+            item.order = pos
+            pos += 1
+        }
     }
     
     // category
@@ -1732,6 +1788,11 @@ class Item: ListObj, NSCoding
     {
         self.needToDelete = true
         appDelegate.saveListData(true)
+    }
+    
+    func clearNeedToSave() {
+        self.needToSave = false
+        self.imageAsset?.needToSave = false
     }
     
     // item

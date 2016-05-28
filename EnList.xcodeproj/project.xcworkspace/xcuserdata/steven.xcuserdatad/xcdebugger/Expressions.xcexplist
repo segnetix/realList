@@ -212,10 +212,31 @@
          contextName = "ListViewController.reorderListObjects() -&gt; ():ListViewController.swift">
          <PersistentStrings>
             <PersistentString
+               value = "list.categories[0].items[0].name">
+            </PersistentString>
+            <PersistentString
+               value = "list.categories[0].items[2].order">
+            </PersistentString>
+            <PersistentString
+               value = "list.categories[0].items[2].name">
+            </PersistentString>
+            <PersistentString
                value = "category.name">
             </PersistentString>
             <PersistentString
+               value = "list.categories[0].items[0].order">
+            </PersistentString>
+            <PersistentString
+               value = "list.categories[0].items[1].name">
+            </PersistentString>
+            <PersistentString
                value = "category.items[0].name">
+            </PersistentString>
+            <PersistentString
+               value = "list.name">
+            </PersistentString>
+            <PersistentString
+               value = "list.categories[0].items[1].order">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -275,6 +296,20 @@
             </PersistentString>
             <PersistentString
                value = "jpgImageData.length">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ItemViewController.hasKeyboard(NSNotification) -&gt; Bool:ItemViewController.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "keyboard.origin.y + keyboard.size.height">
+            </PersistentString>
+            <PersistentString
+               value = "keyboard.origin.y">
+            </PersistentString>
+            <PersistentString
+               value = "keyboard.size.height">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
@@ -466,6 +501,17 @@
       </ContextState>
       <ContextState
          contextName = "List.removeItemAtIndexPath(NSIndexPath, preserveCategories : Bool) -&gt; [NSIndexPath]?:ListData.swift">
+      </ContextState>
+      <ContextState
+         contextName = "AppDelegate.processNotificationRecords() -&gt; ():AppDelegate.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "itemRecord[&quot;order&quot;] as! Int">
+            </PersistentString>
+            <PersistentString
+               value = "itemRecord[&quot;name&quot;] as! String">
+            </PersistentString>
+         </PersistentStrings>
       </ContextState>
       <ContextState
          contextName = "ItemViewController.textFieldShouldBeginEditing(UITextField) -&gt; Bool:ItemViewController.swift">
@@ -687,6 +733,14 @@
          <PersistentStrings>
             <PersistentString
                value = "inEditMode">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "ImageAsset.updateFromRecord(CKRecord) -&gt; ():ListData.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "itemName">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

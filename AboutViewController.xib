@@ -1035,7 +1035,9 @@
                         <constraint firstAttribute="bottom" secondItem="bBt-PD-dw3" secondAttribute="bottom" constant="36" id="IMa-qV-Qt6"/>
                         <constraint firstAttribute="bottom" secondItem="uaQ-Rn-OE6" secondAttribute="bottom" id="ITX-rg-WUu"/>
                         <constraint firstItem="P0Q-va-TMq" firstAttribute="top" secondItem="9ip-3R-HpT" secondAttribute="top" id="J3A-6Q-092"/>
-                        <constraint firstAttribute="height" constant="220" id="JQ2-sF-F8G"/>
+                        <constraint firstAttribute="height" constant="220" id="JQ2-sF-F8G">
+                            <variation key="widthClass=compact" constant="210"/>
+                        </constraint>
                         <constraint firstAttribute="trailing" secondItem="mT3-nO-HGF" secondAttribute="trailing" constant="200" id="MMP-ev-ba6"/>
                         <constraint firstItem="JKG-WX-Jjb" firstAttribute="leading" secondItem="9ip-3R-HpT" secondAttribute="leading" constant="30" id="MsF-W0-0ac"/>
                         <constraint firstItem="JKG-WX-Jjb" firstAttribute="top" secondItem="9ip-3R-HpT" secondAttribute="top" id="NCc-LX-otE"/>

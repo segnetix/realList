@@ -58,6 +58,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     var tempCollapsedCategoryIsMoving = false
     var inAddNewItemLoop = false
     var inTextFieldShouldReturnLoop = false
+    var longPressCellType: ItemViewCellType = .Item
     let settingsTransitionDelegate = SettingsTransitioningDelegate()
     let itemDetailTransitionDelegate = ItemDetailTransitioningDelegate()
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
@@ -416,7 +417,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         
         var info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
-        let keyboardHeight = keyboardFrame.height
+        var keyboardHeight = keyboardFrame.height
+        let toolbarHeight = self.view.frame.size.height - keyboardFrame.origin.y
+        
+        if hasKeyboard(notification) {
+            keyboardHeight = toolbarHeight
+        }
         
         // need to shrink the tableView height so it shows above the keyboard
         let oldFrameHeight = tableView.frame.size.height
@@ -431,6 +437,19 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             //indexPath = NSIndexPath(forRow: indexPath.row+2, inSection: 0)
             tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
         }
+    }
+    
+    func hasKeyboard(notification: NSNotification) -> Bool {
+        var info = notification.userInfo!
+        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
+        let keyboard = self.view.convertRect(keyboardFrame, toView: self.view.window)
+        let height = self.view.frame.size.height
+        
+        if (keyboard.origin.y + keyboard.size.height) > height {
+            return true
+        }
+        
+        return false
     }
     
     func keyboardWillHide(notification: NSNotification)
@@ -900,6 +919,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 cat.expanded = false
                 handleCategoryCollapseExpand(cat)
             }
+            longPressCellType = .Category
+        } else if obj is Item {
+            longPressCellType = .Item
+        } else {
+            longPressCellType = .AddItem
+            return
         }
         
         // create snapshot for long press cell moving
@@ -925,6 +950,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         guard var indexPath = idxPath else { return }
         guard prevLocation != nil else { return }
+        guard longPressCellType != .AddItem else { return }
         
         // if an item, then adjust indexPath if necessary so we don't move above top-most category
         indexPath = adjustIndexPathIfItemMovingAboveTopRow(indexPath)
@@ -937,22 +963,40 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             // check if destination is different from source and valid then move the cell in the tableView
             if movingFromIndexPath != nil
             {
-                // adjust dest index path if we moved over an AddCell/Category pair (which should be kept together)
-                if cellAtIndexPathIsAddCellCategoryPair(indexPath)
-                {
+                // adjust dest index path for moves over groups being kept together
+                if longPressCellType == .Item && cellAtIndexPathIsAddCellCategoryPair(indexPath) {
+                    // an item is moving over an AddCell/Category pair
                     let moveDirection = location.y < prevLocation!.y ? MoveDirection.Up : MoveDirection.Down
                     
                     if moveDirection == .Down {
                         let rowCount = list.totalDisplayCount()
                         // this is to prevent dragging past the last row
-                        if indexPath.row < rowCount-1 {
-                            indexPath = NSIndexPath(forRow: indexPath.row + 1, inSection: 0)
-                        } else {
+                        if indexPath.row >= rowCount-1 {
                             indexPath = NSIndexPath(forRow: indexPath.row, inSection: 0)
+                        } else {
+                            indexPath = NSIndexPath(forRow: indexPath.row + 1, inSection: 0)
                         }
                     } else {
                         indexPath = NSIndexPath(forRow: indexPath.row - 1, inSection: 0)
                     }
+                } else if longPressCellType == .Category {
+                    /*
+                    // a category is moving over another category
+                    let moveDirection = location.y < prevLocation!.y ? MoveDirection.Up : MoveDirection.Down
+                    let catRowCount = categoryTotalRowCount(indexPath)
+                    
+                    if moveDirection == .Down {
+                        let rowCount = list.totalDisplayCount()
+                        // this is to prevent dragging past the last row
+                        if indexPath.row >= rowCount-1 {
+                            indexPath = NSIndexPath(forRow: indexPath.row, inSection: 0)
+                        } else {
+                            indexPath = NSIndexPath(forRow: indexPath.row + catRowCount, inSection: 0)
+                        }
+                    } else {
+                        indexPath = NSIndexPath(forRow: indexPath.row - catRowCount, inSection: 0)
+                    }
+                    */
                 }
                 
                 // ... move the rows
@@ -972,6 +1016,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // cancel any scroll loop
         displayLink?.invalidate()
         displayLink = nil
+        
+        if longPressCellType == .AddItem {
+            self.prevLocation = nil
+            return
+        }
         
         // finalize list data with new location for srcIndexObj
         if sourceIndexPath != nil {
@@ -1357,6 +1406,26 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         return isPair
     }
 
+    // Returns the row count (cat header, items, add item row) of the category at the given index path.
+    func categoryTotalRowCount(indexPath: NSIndexPath) -> Int
+    {
+        var rowCount = 0
+        let category = list.categoryForIndexPath(indexPath)
+        
+        if let category = category {
+            if category.displayHeader {
+                rowCount += 1
+            }
+            
+            if category.expanded {
+                rowCount += category.items.count
+                rowCount += 1
+            }
+        }
+        
+        return rowCount
+    }
+    
     // calculates the top bar height, inlcuding the status bar and nav bar (if present)
     func getTopBarHeight() -> CGFloat
     {

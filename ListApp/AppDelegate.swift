@@ -24,9 +24,6 @@ let key_picsInPrintAndEmail  = "picsInPrintAndEmail"
 let kMaxListCount            =  3
 let kMaxItemCount            = 20
 
-// iCloud fetch max time allowed before terminating the operations
-//let kMaxCloudFetchTime       = 15.0       -- removed as user can cancel the fetch if they want
-
 // price formatter function
 let priceFormatter: NSNumberFormatter = {
     let formatter = NSNumberFormatter()
@@ -49,12 +46,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var ArchiveURL = NSURL()
     var cloudUploadStatusRecord: CKRecord?
     var updateRecords = [CKRecord: AnyObject]()
-    var itemReferences = [CKReference]()                // holds references to items that have outdated image assets
-    var listArray = [CKRecord]()                        // holds fetched list records for app launch data merge
-    var categoryArray = [CKRecord]()                    // "
-    var itemArray = [CKRecord]()                        // "
-    var deleteArray = [CKRecord]()                      // "
-    var refreshEventIsPending = false
+    
+    // holds references to items that have outdated image assets
+    var itemReferences = [CKReference]()
+    
+    // cloud record fetch arrays for launch data merge
+    var listFetchArray = [CKRecord]()
+    var categoryFetchArray = [CKRecord]()
+    var itemFetchArray = [CKRecord]()
+    var deleteFetchArray = [CKRecord]()
+    
+    // notification record arrays
+    var notificationArray = [CKRecord]()
+    var deleteNotificationArray = [String]()
+    
+    // notification processing delay
+    let kNotificationProcessingDelay = 2.0
+    
+    var notificationProcessingEventIsPending = false
     var printNotes = true
     var upgradePriceString = ""
     var upgradeProduct: SKProduct?
@@ -115,6 +124,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         DocumentsDirectory = NSFileManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
         ArchiveURL = DocumentsDirectory!.URLByAppendingPathComponent(key_listData)
         
+        // show both list and item view controllers if possible
         splitViewController!.preferredDisplayMode = UISplitViewControllerDisplayMode.AllVisible
         
         privateDatabase = container.privateCloudDatabase
@@ -140,7 +150,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
         print("*** didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
         
-        // will create subscriptions if necessary
+        // user agreed to notifications so create subscriptions if necessary
         self.createSubscriptions()
     }
 
@@ -184,9 +194,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     func restoreUpgradeStatus() {
-        // testing only...
-        //self.appIsUpgraded = false
-        //return
+        #if DEBUG
+            //testing only...
+            //self.appIsUpgraded = true
+            //return
+        #endif
         
         // restore upgrade status from user defaults
         if RealListProducts.store.isProductPurchased(RealListProducts.FullVersion) {
@@ -223,6 +235,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // iCloud sent notification of a change
+    // add records to update arrays and trigger a notification processing event (if needed)
     func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject])
     {
         let cloudKitNotification = CKNotification(fromRemoteNotificationDictionary: userInfo as! [String : NSObject])
@@ -230,20 +243,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         if cloudKitNotification.notificationType == .Query {
             let queryNotification = cloudKitNotification as! CKQueryNotification
             if queryNotification.queryNotificationReason == .RecordDeleted {
-                // If the record has been deleted in CloudKit then delete the local copy here
+                
+                // if the record has been deleted in cloud then add the reference to the delete array and delete the local copy later in the batch process (processNotificationRecords)
                 print("CloudKit: delete notification... \(queryNotification.recordID!.recordName)")
-                dispatch_async(dispatch_get_main_queue()) {
-                    if queryNotification.recordID != nil {
-                        self.deleteRecord(queryNotification.recordID!.recordName)
-                    } else {
-                        print("queryNotification gave nil recordID...!")
+                if queryNotification.recordID != nil {
+                    dispatch_async(dispatch_get_main_queue()) {
+                        //NSLog("*** adding delete record")
+                        self.deleteNotificationArray.append(queryNotification.recordID!.recordName)
                     }
+                } else {
+                    print("queryNotification gave nil recordID for delete...!")
                 }
             } else {
-                // If the record has been created or changed, we fetch the data from CloudKit
+                // if the record has been created or changed, we fetch the data from cloud
                 guard let database = privateDatabase else { return }
                 
-                database.fetchRecordWithID(queryNotification.recordID!, completionHandler: { (record: CKRecord?, error: NSError?) -> Void in
+                database.fetchRecordWithID(queryNotification.recordID!) { (record: CKRecord?, error: NSError?) -> Void in
                     if error != nil {
                         // Handle the error here
                         print("Notification error: \(error?.localizedDescription)")
@@ -251,10 +266,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     }
                     if record != nil {
                         dispatch_async(dispatch_get_main_queue()) {
-                            self.updateFromRecord(record!, forceUpdate: true)
+                            /*
+                            if record!.recordType == ImagesRecordType {
+                                //NSLog("*** adding update record: image for \(record![key_itemName])")
+                            } else {
+                                //NSLog("*** adding update record: \(record![key_name])")
+                            }
+                            */
+                            self.notificationArray.append(record!)
                         }
                     }
-                })
+                }
+            }
+            
+            if !notificationProcessingEventIsPending {
+                //NSLog("preparing notification processing event timer...")
+                NSTimer.scheduledTimerWithTimeInterval(kNotificationProcessingDelay, target: self, selector: #selector(self.processNotificationRecords), userInfo: nil, repeats: false)
+                notificationProcessingEventIsPending = true
             }
         }
     }
@@ -571,7 +599,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             switch record.recordType {
             case ListsRecordType:
                 let newList = List(name: "", createRecord: false)
-                
                 newList.updateFromRecord(record)
                 
                 if let listVC = listViewController {
@@ -580,8 +607,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
             case CategoriesRecordType:
                 if let list = getListFromReference(record) {
-                    let newCategory = list.addCategory("", displayHeader: true, updateIndices: true, createRecord: false)
-                    
+                    let newCategory = list.addCategory("", displayHeader: true, updateIndices: false, createRecord: false)
                     newCategory.updateFromRecord(record)
                     
                     print("added new category: \(newCategory.name)")
@@ -592,7 +618,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 if let category = getCategoryFromReference(record) {
                     if category.categoryRecord != nil {
                         if let list = getListFromReference(category.categoryRecord!) {
-                            let item = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true, createRecord: false)
+                            let item = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: false)
                             
                             if let newItem = item {
                                 newItem.updateFromRecord(record)
@@ -615,12 +641,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             default:
                 break
             }
-        }
-        
-        if !refreshEventIsPending {
-            //NSLog("preparing refreshEvent timer for delete...")
-            NSTimer.scheduledTimerWithTimeInterval(3.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
-            refreshEventIsPending = true
         }
     }
     
@@ -655,21 +675,61 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
             }
         }
-        
-        // now reorder and refresh the table view
-        if !refreshEventIsPending {
-            //NSLog("preparing refreshEvent timer for delete...")
-            NSTimer.scheduledTimerWithTimeInterval(2.0, target: self, selector: #selector(AppDelegate.refreshEvent), userInfo: nil, repeats: false)
-            refreshEventIsPending = true
-        }
     }
     
-    // called from a timer to batch refreshes
-    func refreshEvent() {
-        //NSLog("refreshEvent timer did fire...")
-        refreshEventIsPending = false
+    // process the notification records
+    func processNotificationRecords()
+    {
+        //NSLog("*** processNotificationRecords - update records: \(notificationArray.count)  delete records: \(deleteNotificationArray.count)")
+        
+        // separate notification records into list, category, item and image arrays
+        var listRecords = [CKRecord]()
+        var categoryRecords = [CKRecord]()
+        var itemRecords = [CKRecord]()
+        var imageRecords = [CKRecord]()
+        
+        for record in notificationArray {
+            switch record.recordType {
+            case ListsRecordType:
+                listRecords.append(record)
+            case CategoriesRecordType:
+                categoryRecords.append(record)
+            case ItemsRecordType:
+                itemRecords.append(record)
+            case ImagesRecordType:
+                imageRecords.append(record)
+            default:
+                break
+            }
+        }
+        
+        // process the updates in logical order
+        for listRecord in listRecords {
+            updateFromRecord(listRecord, forceUpdate: false)
+        }
+        for categoryRecord in categoryRecords {
+            updateFromRecord(categoryRecord, forceUpdate: false)
+        }
+        for itemRecord in itemRecords {
+            updateFromRecord(itemRecord, forceUpdate: false)
+        }
+        for imageRecord in imageRecords {
+            updateFromRecord(imageRecord, forceUpdate: false)
+        }
+        
+        // process the delete records
+        for deleteRecordIDName in deleteNotificationArray {
+            deleteRecord(deleteRecordIDName)
+        }
+        
+        // clear notification arrays and event flag
+        notificationArray.removeAll()
+        deleteNotificationArray.removeAll()
+        notificationProcessingEventIsPending = false
+        
+        // now refresh the list data
         self.refreshListData()
-        //NSLog("refreshEvent did finish...")
+        //NSLog("*** processNotificationRecords - finished")
     }
     
     func addToUpdateRecords(record: CKRecord, obj: AnyObject) {
@@ -826,10 +886,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         startHUD("iCloud", subtitle: msg + " 0")
         
         // clear the record arrays
-        listArray.removeAll()
-        categoryArray.removeAll()
-        itemArray.removeAll()
-        deleteArray.removeAll()
+        listFetchArray.removeAll()
+        categoryFetchArray.removeAll()
+        itemFetchArray.removeAll()
+        deleteFetchArray.removeAll()
         itemReferences.removeAll()   // this array will be populated after the items have been merged with any item references that need image updates
         
         // set up query operations
@@ -856,22 +916,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // set up the record fetched block
         listFetch.recordFetchedBlock = { (record : CKRecord!) in
-            self.listArray.append(record)
+            self.listFetchArray.append(record)
             //print("list recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
         }
         
         categoryFetch.recordFetchedBlock = { (record : CKRecord!) in
-            self.categoryArray.append(record)
+            self.categoryFetchArray.append(record)
             //print("category recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
         }
         
         deleteFetch.recordFetchedBlock = { (record : CKRecord!) in
-            self.deleteArray.append(record)
+            self.deleteFetchArray.append(record)
             //print("delete recordFetchedBlock: \(record[key_itemName]) \(record[key_deletedDate]) \(record.recordID.recordName)")
         }
         
         itemFetch.recordFetchedBlock = { (record : CKRecord!) in
-            self.itemArray.append(record)
+            self.itemFetchArray.append(record)
             itemFetchCount += 1
             //print("item recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
         }
@@ -886,7 +946,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
             
             if cursor != nil {
-                print("\(self.listArray.count) lists - there is more data to fetch...")
+                print("\(self.listFetchArray.count) lists - there is more data to fetch...")
                 let newOperation = CKQueryOperation(cursor: cursor!)
                 newOperation.recordFetchedBlock = listFetch.recordFetchedBlock
                 newOperation.queryCompletionBlock = listFetch.queryCompletionBlock
@@ -902,7 +962,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.externalItemFetch?.cancel()
                 self.stopHUD()
             } else {
-                NSLog("list fetch complete")
+                //NSLog("list fetch complete")
                 dispatch_async(dispatch_get_main_queue()) { self.externalListFetch = nil }
             }
         }
@@ -914,7 +974,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
             
             if cursor != nil {
-                print("\(self.categoryArray.count) categories - there is more data to fetch...")
+                print("\(self.categoryFetchArray.count) categories - there is more data to fetch...")
                 let newOperation = CKQueryOperation(cursor: cursor!)
                 newOperation.recordFetchedBlock = categoryFetch.recordFetchedBlock
                 newOperation.queryCompletionBlock = categoryFetch.queryCompletionBlock
@@ -929,7 +989,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.externalItemFetch?.cancel()
                 self.stopHUD()
             } else {
-                NSLog("category fetch complete")
+                //NSLog("category fetch complete")
                 dispatch_async(dispatch_get_main_queue()) { self.externalCategoryFetch = nil }
             }
         }
@@ -941,7 +1001,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
             
             if cursor != nil {
-                print("\(self.deleteArray.count) delete items - there is more data to fetch...")
+                print("\(self.deleteFetchArray.count) delete items - there is more data to fetch...")
                 let newOperation = CKQueryOperation(cursor: cursor!)
                 newOperation.recordFetchedBlock = deleteFetch.recordFetchedBlock
                 newOperation.queryCompletionBlock = deleteFetch.queryCompletionBlock
@@ -955,7 +1015,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.externalItemFetch?.cancel()
                 self.stopHUD()
             } else {
-                NSLog("delete fetch complete")
+                //NSLog("delete fetch complete")
                 dispatch_async(dispatch_get_main_queue()) { self.externalDeleteFetch = nil }
             }
         }
@@ -975,7 +1035,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             if cursor != nil {
                 //print("item cursor: \(cursor)")
-                print("\(self.itemArray.count) items - there is more data to fetch...")
+                print("\(self.itemFetchArray.count) items - there is more data to fetch...")
                 let newOperation = CKQueryOperation(cursor: cursor!)
                 newOperation.recordFetchedBlock = itemFetch.recordFetchedBlock
                 newOperation.queryCompletionBlock = itemFetch.queryCompletionBlock
@@ -988,20 +1048,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.externalItemFetch = nil
                 self.stopHUD()
             } else {
-                NSLog("item fetch complete")
+                //NSLog("item fetch complete")
                 
                 // need to wait for all fetches before continuing to merge
-                NSLog("start fetch wait...")
+                //NSLog("start fetch wait...")
                 repeat {
                     // hold until other completion blocks finish
                 } while self.externalListFetch != nil || self.externalCategoryFetch != nil || self.externalDeleteFetch != nil
-                NSLog("end fetch wait...")
+                //NSLog("end fetch wait...")
                 
-                NSLog("array counts - list: \(self.listArray.count) category: \(self.categoryArray.count) item: \(self.itemArray.count) delete: \(self.deleteArray.count)")
+                //NSLog("array counts - list: \(self.listFetchArray.count) category: \(self.categoryFetchArray.count) item: \(self.itemFetchArray.count) delete: \(self.deleteFetchArray.count)")
                 
                 dispatch_async(dispatch_get_main_queue())
                 {
-                    NSLog("dispatch main thread merge")
+                    //NSLog("dispatch main thread merge")
                     self.externalListFetch = nil
                     self.externalCategoryFetch = nil
                     self.externalItemFetch = nil
@@ -1012,11 +1072,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
             }
         }
-        
-        // start a timer to verify completion of the fetch operations
-        // cancelCloudDataFetch will be called on the main thread
-        // NSTimer.scheduledTimerWithTimeInterval(kMaxCloudFetchTime, target: self, selector: #selector(AppDelegate.cancelCloudDataFetch), userInfo: nil, repeats: false)
-        // *** Automatic fetch cancel was removed as the use can now cancel the fetch if they want
         
         // set external fetch pointers
         externalListFetch = listFetch
@@ -1163,17 +1218,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         //startHUD("iCloud", subtitle: NSLocalizedString("Merging_Data", comment: "Merging data message for the iCloud import HUD."))
         
-        for cloudList in listArray {
+        for cloudList in listFetchArray {
             updateFromRecord(cloudList, forceUpdate: false)
         }
         
-        for cloudCategory in categoryArray {
+        for cloudCategory in categoryFetchArray {
             updateFromRecord(cloudCategory, forceUpdate: false)
         }
         
         // updateFromRecord will set a timer to fire refreshListData after three seconds,
         // giving more time for cloud records to arrive before refreshing the UI
-        for cloudItem in itemArray {
+        for cloudItem in itemFetchArray {
            updateFromRecord(cloudItem, forceUpdate: false)
         }
         
@@ -1187,13 +1242,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // retreive any images that need updating
         fetchImageData()
         
-        // reload list and item views
+        // reload list and item views and update orders
         if let itemVC = itemViewController {
             itemVC.refreshItems()
         }
         
         if let listVC = listViewController {
             listVC.tableView.reloadData()
+        }
+        
+        resetListCategoryAndItemOrderByPosition()
+        
+        // clear needToSave on all objects as we are clean from local load
+        if let listVC = listViewController {
+            for list in listVC.lists {
+                list.updateIndices()
+                list.clearNeedToSave()
+            }
         }
         
         // shows the completed HUD then dismisses itself
@@ -1222,7 +1287,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         var itemDeleteRecordIDs = [String]()
         
         // populate the delete record arrays by record type
-        for deleteRecord in deleteArray {
+        for deleteRecord in deleteFetchArray {
             let recordType = deleteRecord[key_objectType] as? String
             let recordID = deleteRecord[key_objectRecordID] as? String
             
@@ -1300,7 +1365,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         var purgeRecords = [CKRecord]()
         
         // collect records to be purged
-        for record in deleteArray {
+        for record in deleteFetchArray {
             if let deleteDate = record[key_deletedDate] as? NSDate {
                 let expirationDate = userCalendar.dateByAddingComponents(timeInterval, toDate: deleteDate, options: [])!
                 
@@ -1385,6 +1450,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     ////////////////////////////////////////////////////////////////
     
     // sorts all lists, categories and items and updates indices
+    // called as part of the notification chain
     func refreshListData()
     {
         if let listVC = listViewController {
@@ -1400,6 +1466,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 itemVC.tableView.reloadData()
                 itemVC.resetCellViewTags()
             }
+        }
+    }
+    
+    func resetListCategoryAndItemOrderByPosition() {
+        if let listVC = listViewController {
+            listVC.resetListCategoryAndItemOrderByPosition()
         }
     }
     
@@ -1581,7 +1653,6 @@ func print(items: Any..., separator: String = " ", terminator: String = "\n")
         Swift.print(items[idx], separator: separator, terminator: idx == (endIdx - 1) ? terminator : separator)
         idx += 1
     } while idx < endIdx
-    
     #endif
 }
 
