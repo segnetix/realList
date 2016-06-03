@@ -67,6 +67,11 @@ class CheckBox: UIButton
         } else {
             self.tintColor = defaultColor
         }
+        
+        // special handling for yellow (color4_1)
+        if item!.state != ItemState.Inactive && list!.listColorName == r4_1 {
+            self.tintColor = color4_1_alt
+        }
     }
     
 }

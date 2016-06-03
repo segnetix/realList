@@ -963,6 +963,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.note = "...with the list add button."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddList")
         
+        item = tutorial.addItem(cat4, name: "Press, hold and drag a list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item!.note = "...to move it."
+        
         // Settings actions...
         let cat5 = tutorial.addCategory("Settings actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         

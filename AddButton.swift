@@ -44,7 +44,9 @@ class AddButton: UIButton
         let tintedImage = addButtonImage!.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
         self.setImage(tintedImage, forState: .Normal)
         
-        if list!.listColor != nil {
+        if list!.listColorName == r4_1 {
+            self.tintColor = color4_1_alt
+        } else if list!.listColor != nil {
             self.tintColor = list!.listColor
         } else {
             self.tintColor = defaultColor
