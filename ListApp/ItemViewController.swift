@@ -8,7 +8,7 @@
 
 import UIKit
 import QuartzCore
-import iAd
+//import iAd
 import MessageUI
 
 let itemCellID     = "ItemCell"
@@ -37,10 +37,10 @@ let kItemCellHeight:     CGFloat = 56.0
 let kCategoryCellHeight: CGFloat = 44.0
 let kAddItemCellHeight:  CGFloat = 44.0
 
-class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, ADBannerViewDelegate, UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate
+class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, /*ADBannerViewDelegate,*/ UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate
 {
     @IBOutlet weak var tableView: UITableView!
-    @IBOutlet weak var adBanner: ADBannerView!
+    //@IBOutlet weak var adBanner: ADBannerView!
     
     var inEditMode = false
     var deleteItemIndexPath: NSIndexPath?
@@ -82,6 +82,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         super.viewDidLoad()
         manager.delegate = self
         
+        /*
         if appDelegate.appIsUpgraded {
             adBanner.delegate = nil
             adBanner.removeFromSuperview()
@@ -89,6 +90,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         } else {
             adBanner.delegate = self
         }
+        */
         
         // Uncomment the following line to preserve selection between presentations
         //self.clearsSelectionOnViewWillAppear = false
@@ -636,6 +638,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     func addNewCategory()
     {
+        guard list.categories.count > 0 else { print("*** ERROR: addNewCategory - list \(list.name) has no categories"); return }
         var newCategory: Category
         
         if list.categories[0].displayHeader == false {
@@ -1800,6 +1803,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 //
 ////////////////////////////////////////////////////////////////
     
+    /*
     func bannerViewActionShouldBegin(banner: ADBannerView!, willLeaveApplication willLeave: Bool) -> Bool
     {
         print("Banner view is beginning an ad action")
@@ -1851,41 +1855,45 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             return true
         }
     }
+    */
     
-    // resize the frame and move the adBanner on and off the screen
+    // resize the frame /* and move the adBanner on and off the screen */
     func layoutAnimated(animated: Bool)
     {
-        var topBarHeight = getTopBarHeight()
-        var bannerHeight: CGFloat = 0.0
-        var bannerLoaded = false
-        let bannerXpos   = self.view.frame.size.height
-        let showAdBanner = !appDelegate.appIsUpgraded
+        //var topBarHeight = getTopBarHeight()
+        //var bannerHeight: CGFloat = 0.0
+        //var bannerLoaded = false
+        //let bannerXpos   = self.view.frame.size.height
+        //let showAdBanner = !appDelegate.appIsUpgraded
         //let oldFrameHeight = tableView.frame.size.height
         
-        if appDelegate.appIsUpgraded {
-            topBarHeight = 0.0
-        }
+        //if appDelegate.appIsUpgraded {
+        //    topBarHeight = 0.0
+        //}
         
-        if adBanner != nil {
-            bannerHeight = adBanner!.frame.size.height
-            bannerLoaded = adBanner!.bannerLoaded
-        }
+        //tableView.frame.origin.y = 0//getTopBarHeight()
+        //tableView.frame.size.height = self.view.frame.height //- topBarHeight
         
-        if showAdBanner && bannerLoaded {
-            // show the ad banner
-            adBanner.hidden = false
-            adBanner.frame.origin.y = bannerXpos - bannerHeight
-            tableView.frame.size.height = self.view.frame.height - bannerHeight - topBarHeight
-            tableView.frame.origin.y = topBarHeight
-        } else {
+        //if adBanner != nil {
+        //    bannerHeight = adBanner!.frame.size.height
+        //    bannerLoaded = adBanner!.bannerLoaded
+        //}
+        
+        //if showAdBanner && bannerLoaded {
+        //    // show the ad banner
+        //    adBanner.hidden = false
+        //    adBanner.frame.origin.y = bannerXpos - bannerHeight
+        //    tableView.frame.size.height = self.view.frame.height - bannerHeight - topBarHeight
+        //    tableView.frame.origin.y = topBarHeight
+        //} else {
             // hide the ad banner
-            if adBanner != nil {
-                adBanner.hidden = true
-                adBanner.frame.origin.y = bannerXpos
-            }
-            tableView.frame.origin.y = topBarHeight
-            tableView.frame.size.height = self.view.frame.height - topBarHeight
-        }
+            //if adBanner != nil {
+            //    adBanner.hidden = true
+            //    adBanner.frame.origin.y = bannerXpos
+            //}
+            //tableView.frame.origin.y = topBarHeight
+            //tableView.frame.size.height = self.view.frame.height - topBarHeight
+        //}
         
         //print("layoutAnimated - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
         UIView.animateWithDuration(animated ? 0.5 : 0.0) {

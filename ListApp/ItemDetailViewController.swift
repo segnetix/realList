@@ -21,7 +21,6 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
     var noteTextView = UITextView()
     var addPhotoButton = UIButton()
     var imageView = UIImageView()
-    //var spacerLabel = UILabel()
     var spacerView = UIView()
     var infoVertStackView = UIStackView()
     var closeButton: UIButton = UIButton()
@@ -181,7 +180,9 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         infoVertStackView.addArrangedSubview(createdLabel)
         infoVertStackView.addArrangedSubview(createdByText)
         infoVertStackView.addArrangedSubview(createdDateText)
-        infoVertStackView.addArrangedSubview(spacerView)
+        if !shortDisplay {
+            infoVertStackView.addArrangedSubview(spacerView)
+        }
         infoVertStackView.addArrangedSubview(modifiedLabel)
         infoVertStackView.addArrangedSubview(modifiedByText)
         infoVertStackView.addArrangedSubview(modifiedDateText)
@@ -320,7 +321,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         } else {
             containerView.addConstraints(
                 NSLayoutConstraint.constraintsWithVisualFormat(
-                    "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(135)]-(>=8)-[closeButton]-8-|",
+                    "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(100)]-(>=8)-[closeButton]-8-|",
                     options: NSLayoutFormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))

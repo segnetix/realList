@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10117" systemVersion="15F34" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
     </dependencies>
     <objects>
@@ -65,9 +64,12 @@
                     <constraints>
                         <constraint firstAttribute="height" constant="21" id="Qga-0V-f6o"/>
                     </constraints>
-                    <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="15"/>
+                    <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="17"/>
                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                     <nil key="highlightedColor"/>
+                    <variation key="widthClass=compact">
+                        <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="15"/>
+                    </variation>
                 </label>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="r88-0o-nyK">
                     <rect key="frame" x="456" y="141" width="80" height="30"/>
@@ -81,8 +83,8 @@
                         <action selector="buyButtonTapped:" destination="-1" eventType="touchUpInside" id="xPI-6N-pBD"/>
                     </connections>
                 </button>
-                <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vcp-af-Nsx">
-                    <rect key="frame" x="220" y="317" width="160" height="36"/>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Vcp-af-Nsx">
+                    <rect key="frame" x="220" y="317" width="160" height="30"/>
                     <constraints>
                         <constraint firstAttribute="width" constant="160" id="Xvj-By-39y"/>
                         <constraint firstAttribute="height" constant="30" id="kbf-A9-LZu"/>
@@ -93,15 +95,6 @@
                         <action selector="restorePurchases:" destination="-1" eventType="touchUpInside" id="8HK-7Q-0Fp"/>
                     </connections>
                 </button>
-                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="- no ads" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="G3Y-Os-ulD">
-                    <rect key="frame" x="80" y="235" width="520" height="21"/>
-                    <constraints>
-                        <constraint firstAttribute="height" constant="21" id="ZG6-Jx-ShO"/>
-                    </constraints>
-                    <fontDescription key="fontDescription" name="Avenir-Book" family="Avenir" pointSize="15"/>
-                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                    <nil key="highlightedColor"/>
-                </label>
                 <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="checkbox_blue" translatesAutoresizingMaskIntoConstraints="NO" id="qsv-FY-QQd">
                     <rect key="frame" x="492" y="134" width="44" height="44"/>
                     <constraints>
@@ -113,9 +106,7 @@
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
             <constraints>
                 <constraint firstItem="lDB-Xi-voL" firstAttribute="top" secondItem="jVP-r7-bjU" secondAttribute="bottom" constant="8" id="0LQ-72-RUT"/>
-                <constraint firstItem="G3Y-Os-ulD" firstAttribute="top" secondItem="lDB-Xi-voL" secondAttribute="bottom" constant="8" id="6hQ-B5-0Lu"/>
                 <constraint firstItem="r88-0o-nyK" firstAttribute="leading" secondItem="qsv-FY-QQd" secondAttribute="trailing" id="72G-kG-lZC"/>
-                <constraint firstAttribute="trailing" secondItem="G3Y-Os-ulD" secondAttribute="trailing" id="7t4-tC-3cc"/>
                 <constraint firstItem="jVP-r7-bjU" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="80" id="7wK-e1-tNJ">
                     <variation key="widthClass=compact" constant="40"/>
                     <variation key="widthClass=regular" constant="124"/>
@@ -124,6 +115,7 @@
                 <constraint firstItem="r88-0o-nyK" firstAttribute="leading" secondItem="PFS-dN-LG7" secondAttribute="trailing" id="EOP-eS-GJR"/>
                 <constraint firstAttribute="trailing" secondItem="jVP-r7-bjU" secondAttribute="trailing" id="Fns-OV-e6n"/>
                 <constraint firstItem="r88-0o-nyK" firstAttribute="leading" secondItem="PFS-dN-LG7" secondAttribute="trailing" constant="8" symbolic="YES" id="IcL-MZ-JMd"/>
+                <constraint firstItem="Vcp-af-Nsx" firstAttribute="top" secondItem="lDB-Xi-voL" secondAttribute="bottom" constant="90" id="KeP-Kg-zKa"/>
                 <constraint firstAttribute="bottom" secondItem="qe7-VV-4I2" secondAttribute="bottom" constant="24" id="MdM-XU-HSf"/>
                 <constraint firstItem="lDB-Xi-voL" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="80" id="NDn-kF-dKz">
                     <variation key="widthClass=compact" constant="40"/>
@@ -136,13 +128,6 @@
                 <constraint firstItem="jdx-qw-1nx" firstAttribute="top" secondItem="i5M-Pr-FkT" secondAttribute="top" constant="30" id="QUa-NE-99i">
                     <variation key="widthClass=compact" constant="24"/>
                     <variation key="widthClass=regular" constant="24"/>
-                </constraint>
-                <constraint firstItem="Vcp-af-Nsx" firstAttribute="top" secondItem="G3Y-Os-ulD" secondAttribute="bottom" constant="64" id="SOC-Ib-c1P">
-                    <variation key="widthClass=compact" constant="48"/>
-                </constraint>
-                <constraint firstItem="G3Y-Os-ulD" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="80" id="Uk6-PP-Qmo">
-                    <variation key="widthClass=compact" constant="40"/>
-                    <variation key="widthClass=regular" constant="124"/>
                 </constraint>
                 <constraint firstItem="jdx-qw-1nx" firstAttribute="leading" secondItem="i5M-Pr-FkT" secondAttribute="leading" constant="-8" id="ZMt-hb-4gH">
                     <variation key="widthClass=compact" constant="0.0"/>

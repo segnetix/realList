@@ -21,8 +21,8 @@ let key_notesAutocorrection  = "notesAutocorrection"
 let key_picsInPrintAndEmail  = "picsInPrintAndEmail"
 
 // list and item limits for free version
-let kMaxListCount            =  3
-let kMaxItemCount            = 20
+let kMaxListCount            =  2
+let kMaxItemCount            = 12
 
 // price formatter function
 let priceFormatter: NSNumberFormatter = {
@@ -71,10 +71,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         didSet {
             if let itemVC = itemViewController {
                 print("appIsUpgraded was set to \(appIsUpgraded)")
-                if itemVC.adBanner != nil && appIsUpgraded {
-                    itemVC.adBanner.delegate = nil
-                    itemVC.adBanner.removeFromSuperview()
-                }
+                //if itemVC.adBanner != nil && appIsUpgraded {
+                //    itemVC.adBanner.delegate = nil
+                //    itemVC.adBanner.removeFromSuperview()
+                //}
                 itemVC.layoutAnimated(false)
             }
         }
@@ -196,7 +196,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func restoreUpgradeStatus() {
         #if DEBUG
             //testing only...
-            //self.appIsUpgraded = true
+            //self.appIsUpgraded = false
             //return
         #endif
         

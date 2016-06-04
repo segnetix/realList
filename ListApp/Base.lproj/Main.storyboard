@@ -17,29 +17,14 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <adBannerView opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cIg-QC-tHH">
-                                <rect key="frame" x="0.0" y="534" width="600" height="66"/>
-                                <variation key="widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="0.0" y="534" width="400" height="66"/>
-                                </variation>
-                                <variation key="widthClass=regular" misplaced="YES">
-                                    <rect key="frame" x="0.0" y="534" width="800" height="66"/>
-                                </variation>
-                                <variation key="heightClass=regular-widthClass=compact" misplaced="YES">
-                                    <rect key="frame" x="0.0" y="734" width="400" height="66"/>
-                                </variation>
-                                <variation key="heightClass=regular-widthClass=regular" misplaced="YES">
-                                    <rect key="frame" x="0.0" y="734" width="800" height="66"/>
-                                </variation>
-                            </adBannerView>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" keyboardDismissMode="onDrag" dataMode="prototypes" style="plain" allowsSelection="NO" rowHeight="32" sectionHeaderHeight="32" sectionFooterHeight="32" translatesAutoresizingMaskIntoConstraints="NO" id="ATl-Ia-AoT">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="534"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <inset key="scrollIndicatorInsets" minX="-1" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 <color key="separatorColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="default" accessoryType="disclosureIndicator" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="ItemCell" id="Nku-xk-hbv" userLabel="ItemCell" customClass="ItemCell" customModule="EnList" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="32" width="600" height="32"/>
+                                        <rect key="frame" x="0.0" y="96" width="600" height="32"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Nku-xk-hbv" id="AZO-88-8cc">
                                             <rect key="frame" x="0.0" y="0.0" width="567" height="31"/>
@@ -123,7 +108,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="CategoryCell" id="STC-IF-0Ob" userLabel="CategoryCell" customClass="CategoryCell" customModule="EnList" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="64" width="600" height="32"/>
+                                        <rect key="frame" x="0.0" y="128" width="600" height="32"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="STC-IF-0Ob" id="F5V-gG-q6K">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="31"/>
@@ -184,7 +169,7 @@
                                         </connections>
                                     </tableViewCell>
                                     <tableViewCell contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" shouldIndentWhileEditing="NO" reuseIdentifier="AddItemCell" rowHeight="60" id="Ui4-cJ-iDI" customClass="AddItemCell" customModule="EnList" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="96" width="600" height="60"/>
+                                        <rect key="frame" x="0.0" y="160" width="600" height="60"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Ui4-cJ-iDI" id="gu9-8t-wra">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="59"/>
@@ -219,21 +204,23 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="96F-pd-1Yj" firstAttribute="top" secondItem="cIg-QC-tHH" secondAttribute="bottom" id="1H0-6e-WH4"/>
-                            <constraint firstItem="cIg-QC-tHH" firstAttribute="top" secondItem="ATl-Ia-AoT" secondAttribute="bottom" id="3oZ-MK-hEb"/>
                             <constraint firstAttribute="trailing" secondItem="ATl-Ia-AoT" secondAttribute="trailing" id="7MF-bk-JaJ"/>
+                            <constraint firstItem="ATl-Ia-AoT" firstAttribute="top" secondItem="Gbn-SU-SIi" secondAttribute="top" id="88x-20-8Kf"/>
                             <constraint firstItem="ATl-Ia-AoT" firstAttribute="leading" secondItem="Gbn-SU-SIi" secondAttribute="leading" id="Imd-Tv-SYi"/>
-                            <constraint firstItem="cIg-QC-tHH" firstAttribute="leading" secondItem="Gbn-SU-SIi" secondAttribute="leading" id="hNn-pd-HcJ"/>
                             <constraint firstItem="ATl-Ia-AoT" firstAttribute="top" secondItem="Gbn-SU-SIi" secondAttribute="top" id="k5A-tL-yYV">
                                 <variation key="widthClass=compact" constant="64"/>
                             </constraint>
-                            <constraint firstAttribute="trailing" secondItem="cIg-QC-tHH" secondAttribute="trailing" id="m2f-dF-jiO"/>
+                            <constraint firstItem="96F-pd-1Yj" firstAttribute="top" secondItem="ATl-Ia-AoT" secondAttribute="bottom" id="rGY-Ip-c2m"/>
                         </constraints>
+                        <variation key="default">
+                            <mask key="constraints">
+                                <exclude reference="k5A-tL-yYV"/>
+                            </mask>
+                        </variation>
                     </view>
                     <toolbarItems/>
                     <navigationItem key="navigationItem" id="hVo-Wt-zbt"/>
                     <connections>
-                        <outlet property="adBanner" destination="cIg-QC-tHH" id="Dse-Ds-VbI"/>
                         <outlet property="tableView" destination="ATl-Ia-AoT" id="PLI-Wk-Zed"/>
                     </connections>
                 </viewController>
