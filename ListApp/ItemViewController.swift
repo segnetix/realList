@@ -57,7 +57,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     var editingNewCategoryName = false
     var tempCollapsedCategoryIsMoving = false
     var inAddNewItemLoop = false
-    var inTextFieldShouldReturnLoop = false
     var longPressCellType: ItemViewCellType = .Item
     let settingsTransitionDelegate = SettingsTransitioningDelegate()
     let itemDetailTransitionDelegate = ItemDetailTransitioningDelegate()
@@ -133,7 +132,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
-        layoutAnimated(false)
+        //layoutAnimated(false)
     }
     
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
@@ -443,27 +442,24 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
         var keyboardHeight = keyboardFrame.height
         let toolbarHeight = self.view.frame.size.height - keyboardFrame.origin.y
+        let bHasHardwareKeyboard = hasHardwareKeyboard(notification)
         
-        if hasKeyboard(notification) {
+        if bHasHardwareKeyboard {
             keyboardHeight = toolbarHeight
         }
         
-        // need to shrink the tableView height so it shows above the keyboard
-        let oldFrameHeight = tableView.frame.size.height
+        // shrink the tableView height so it shows above the keyboard
         self.tableView.frame.size.height = self.view.frame.height - keyboardHeight
-        if !appDelegate.appIsUpgraded {
-            self.tableView.frame.size.height -= getTopBarHeight()
-        }
-        print("keyboardWillShow - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
         
         // now make sure we have our edit cell in view
         if let indexPath = editModeIndexPath {
-            //indexPath = NSIndexPath(forRow: indexPath.row+2, inSection: 0)
-            tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
+            if !bHasHardwareKeyboard {
+                tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
+            }
         }
     }
     
-    func hasKeyboard(notification: NSNotification) -> Bool {
+    func hasHardwareKeyboard(notification: NSNotification) -> Bool {
         var info = notification.userInfo!
         let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
         let keyboard = self.view.convertRect(keyboardFrame, toView: self.view.window)
@@ -480,7 +476,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         print("keyboardWillHide")
         
-        if (!inEditMode && !inAddNewItemLoop) || (inEditMode && !inAddNewItemLoop && !inTextFieldShouldReturnLoop) {
+        if !inAddNewItemLoop {
             layoutAnimated(true)
         }
         
@@ -517,8 +513,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     func textFieldShouldReturn(textField: UITextField) -> Bool
     {
-        print("textFieldShouldReturn")
-        inTextFieldShouldReturnLoop = true
+        //print("textFieldShouldReturn")
         textField.userInteractionEnabled = false
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
@@ -553,8 +548,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
         
         appDelegate.saveListData(true)
-        
-        inTextFieldShouldReturnLoop = false
         
         return true
     }
@@ -681,6 +674,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     func collapseAllCategories() {
+        guard let list = self.list else { return }
         print("collapseAllCategories")
         
         for category in list.categories {
@@ -693,6 +687,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     func expandAllCategories() {
+        guard let list = self.list else { return }
         print("expandAllCategories")
         
         for category in list.categories {
@@ -1872,7 +1867,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         //}
         
         //tableView.frame.origin.y = 0//getTopBarHeight()
-        //tableView.frame.size.height = self.view.frame.height //- topBarHeight
+        //tableView.frame.size.height = self.view.frame.height - topBarHeight
         
         //if adBanner != nil {
         //    bannerHeight = adBanner!.frame.size.height
@@ -1894,6 +1889,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             //tableView.frame.origin.y = topBarHeight
             //tableView.frame.size.height = self.view.frame.height - topBarHeight
         //}
+        
+        tableView.frame.size.height = self.view.frame.height// + topBarHeight
+        //tableView.frame.origin.y = topBarHeight
         
         //print("layoutAnimated - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
         UIView.animateWithDuration(animated ? 0.5 : 0.0) {

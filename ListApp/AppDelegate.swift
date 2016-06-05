@@ -67,18 +67,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var printNotes = true
     var upgradePriceString = ""
     var upgradeProduct: SKProduct?
+    var appIsUpgraded: Bool = false
+    /*
     var appIsUpgraded: Bool = false {
         didSet {
             if let itemVC = itemViewController {
                 print("appIsUpgraded was set to \(appIsUpgraded)")
-                //if itemVC.adBanner != nil && appIsUpgraded {
-                //    itemVC.adBanner.delegate = nil
-                //    itemVC.adBanner.removeFromSuperview()
-                //}
+                if itemVC.adBanner != nil && appIsUpgraded {
+                    itemVC.adBanner.delegate = nil
+                    itemVC.adBanner.removeFromSuperview()
+                }
                 itemVC.layoutAnimated(false)
             }
         }
-    }
+    } */
     
     // app settings
     var namesCapitalize = true
