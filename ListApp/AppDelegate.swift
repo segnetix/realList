@@ -1252,7 +1252,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             listVC.tableView.reloadData()
         }
         
-        //resetListCategoryAndItemOrderByPosition()
+        resetListCategoryAndItemOrderByPosition()
         
         // clear needToSave on all objects as we are clean from local load
         if let listVC = listViewController {
