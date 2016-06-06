@@ -980,7 +980,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             center.y = location.y
             snapshot?.center = center
             
-            // check if destination is different from source and valid then move the cell in the tableView
+            // check if destination is valid then move the cell in the tableView
             if movingFromIndexPath != nil
             {
                 // adjust dest index path for moves over groups being kept together
@@ -1174,13 +1174,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         let currentOffset = tableView.contentOffset
         let topBarHeight = getTopBarHeight()
-        var newOffsetY = max(currentOffset.y - kItemViewScrollRate, -topBarHeight)
+        let newOffsetY = max(currentOffset.y - kItemViewScrollRate, -topBarHeight)
         let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
         let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
         
-        if !appDelegate.appIsUpgraded && newOffsetY < 0 {
-            newOffsetY = 0
-        }
+        //if !appDelegate.appIsUpgraded && newOffsetY < 0 {
+        //    newOffsetY = 0
+        //}
         
         self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: newOffsetY), animated: false)
         

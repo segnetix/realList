@@ -1218,8 +1218,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         //NSLog("mergeCloudData...")
         
-        //startHUD("iCloud", subtitle: NSLocalizedString("Merging_Data", comment: "Merging data message for the iCloud import HUD."))
-        
         for cloudList in listFetchArray {
             updateFromRecord(cloudList, forceUpdate: false)
         }
@@ -1228,8 +1226,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             updateFromRecord(cloudCategory, forceUpdate: false)
         }
         
-        // updateFromRecord will set a timer to fire refreshListData after three seconds,
-        // giving more time for cloud records to arrive before refreshing the UI
         for cloudItem in itemFetchArray {
            updateFromRecord(cloudItem, forceUpdate: false)
         }
@@ -1244,6 +1240,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // retreive any images that need updating
         fetchImageData()
         
+        // refreshListData
+        refreshListData()
+        
         // reload list and item views and update orders
         if let itemVC = itemViewController {
             itemVC.refreshItems()
@@ -1253,7 +1252,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             listVC.tableView.reloadData()
         }
         
-        resetListCategoryAndItemOrderByPosition()
+        //resetListCategoryAndItemOrderByPosition()
         
         // clear needToSave on all objects as we are clean from local load
         if let listVC = listViewController {
