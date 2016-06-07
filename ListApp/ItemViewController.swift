@@ -103,8 +103,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 
         // settings button
         let settingsButton: UIButton = UIButton(type: UIButtonType.Custom)
-        settingsButton.setImage(UIImage(named: "Settings"), forState: .Normal)
+        let settingsImage = UIImage(named: "Settings")
         settingsButton.frame = CGRectMake(0, 0, 30, 30)
+        if let settingsImage = settingsImage {
+            let tintedImage = settingsImage.imageWithRenderingMode(UIImageRenderingMode.AlwaysTemplate)
+            settingsButton.setImage(tintedImage, forState: .Normal)
+            settingsButton.tintColor = color1_1
+        }
         settingsButton.addTarget(self, action: #selector(ItemViewController.settingsButtonTapped), forControlEvents: .TouchUpInside)
         let rightBarButton = UIBarButtonItem()
         rightBarButton.customView = settingsButton
@@ -476,7 +481,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         print("keyboardWillHide")
         
-        if !inAddNewItemLoop {
+        if !inAddNewItemLoop || !editingNewItemName {
             layoutAnimated(true)
         }
         
@@ -595,7 +600,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         newItem = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: true, createRecord: true)
         
         // keep track of items added to this category for item limits in non-upgraded version
-        category.itemAddCount += 1
+        if category.isTutorialCategory {
+            category.itemAddCount += 1
+        }
         
         list.updateIndices()
         tableView.reloadData()
@@ -1259,6 +1266,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             } else if deleteObj is Item {
                 let item = deleteObj as! Item
                 item.deleteFromCloud()
+                
+                // tutorial category item delete
+                if let itemCat = list.categoryForObj(item) {
+                    if itemCat.isTutorialCategory {
+                        itemCat.itemAddCount -= 1
+                    }
+                }
             }
             
             // model delete

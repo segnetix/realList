@@ -895,7 +895,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.note = "...check them off as you learn them!"
         
         item = tutorial.addItem(cat1, name: "Make a new list item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...tap the item add button below."
+        item!.note = "...tap the item add button below.  It is always the last row in any category."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddItem")
         
         // Item actions...
@@ -963,6 +963,16 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.note = "...with the list add button."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddList")
         
+        item = tutorial.addItem(cat4, name: "Single tap a list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item!.note = "...to display the list items."
+        
+        item = tutorial.addItem(cat4, name: "Double tap a list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item!.note = "...to edit the list name."
+        
+        item = tutorial.addItem(cat4, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item!.note = "...to delete a list."
+        item!.imageAsset!.image = UIImage(named: "Tutorial_Delete")
+        
         item = tutorial.addItem(cat4, name: "Press, hold and drag a list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to move it."
         
@@ -986,11 +996,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddCategory")
         
         item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...control what items are shown.  The left button will show/hide the completed items and the right button will show/hide inactive items."
+        item!.note = "...control what items are shown.  The left button will show/hide completed items and the right button will show/hide inactive items."
         item!.imageAsset!.image = UIImage(named: "Tutorial_show_hide_items")
         
         item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...set all items to active or inactive."
+        item!.note = "...set all items to active (left) or inactive (right)."
         item!.imageAsset!.image = UIImage(named: "Tutorial_set_all_items")
         
         item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
@@ -1052,7 +1062,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.imageAsset!.image = UIImage(named: "Tutorial_AppSettings_button")
         
         item = tutorial.addItem(cat7, name: "Upgrade...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...the Upgrade view lets you purchase an upgrade that removes limits on lists and items and removes the ad banner at the bottom of the item view.  Here you can also restore your purchase if you have already purchased the upgraded version.  After you have upgraded realList the white arrow in the Upgrade button turns to green."
+        item!.note = "...the Upgrade view lets you purchase an upgrade that removes limits on lists and items.  Here you can also restore your purchase if you have already purchased the upgraded version.  After you have upgraded realList the white arrow in the Upgrade button turns to green."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Upgrade_button")
         
         item = tutorial.addItem(cat7, name: "Tutorial...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
@@ -1080,131 +1090,4 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.tableView.reloadData()
     }
     
-    /*
-    func addTestItems()
-    {
-        // list1
-        let list1 = List(name: "Costco", createRecord: true)
-        lists.append(list1)
-        
-        let cat1_1 = list1.addCategory("Fruits and Veggies", displayHeader: true, updateIndices: false, createRecord: true)
-        let cat1_2 = list1.addCategory("Meats", displayHeader: true, updateIndices: false, createRecord: true)
-        let cat1_3 = list1.addCategory("Other", displayHeader: true, updateIndices: false, createRecord: true)
-        
-        list1.addItem(cat1_1, name: "Carrots", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Squash", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Tomatoes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Potatoes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Apples", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Oranges", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Lettuce", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Onions", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Bananas", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Strawberries", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Grapes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_1, name: "Peaches", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        
-        list1.addItem(cat1_2, name: "Chicken", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_2, name: "Sirloin", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_2, name: "Salmon", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_2, name: "Cod", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_2, name: "Halibut", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_2, name: "Ham", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_2, name: "Bison", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        
-        list1.addItem(cat1_3, name: "Water", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_3, name: "Dinty Moore", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_3, name: "Noodle Chicken Bag", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_3, name: "Tea Bags", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_3, name: "Vegtable Soup", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_3, name: "Cookie Mix", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_3, name: "Salad fixings", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list1.addItem(cat1_3, name: "Salad dressing", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        
-        // list2
-        let list2 = List(name: "Safeway", createRecord: true)
-        lists.append(list2)
-        
-        let cat2_1 = list2.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
-        
-        list2.addItem(cat2_1, name: "Juice", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list2.addItem(cat2_1, name: "Cream Cheese", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list2.addItem(cat2_1, name: "Deli Ham", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list2.addItem(cat2_1, name: "Potatoes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list2.addItem(cat2_1, name: "Bananas", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list2.addItem(cat2_1, name: "Oranges", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        
-        // list3
-        let list3 = List(name: "King Sooper", createRecord: true)
-        lists.append(list3)
-        
-        let cat3_1 = list3.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
-        
-        list3.addItem(cat3_1, name: "Bread", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list3.addItem(cat3_1, name: "Tomatoes", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list3.addItem(cat3_1, name: "Coffee", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list3.addItem(cat3_1, name: "Syrup", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list3.addItem(cat3_1, name: "Dog toys", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list3.addItem(cat3_1, name: "Leggings", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        
-        // list4
-        let list4 = List(name: "Trail Mannor", createRecord: true)
-        lists.append(list4)
-        
-        let cat4_1 = list4.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
-        
-        list4.addItem(cat4_1, name: "Bread", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Popcorn", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Ramen noodles", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Sleeping bags", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Soap", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Towels", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Food", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Bacon", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Cereal", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Coffee", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list4.addItem(cat4_1, name: "Water", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        
-        // list5
-        let list5 = List(name: "Home Depot", createRecord: true)
-        lists.append(list5)
-        
-        let cat5_1 = list5.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
-        
-        list5.addItem(cat5_1, name: "Paint", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Nails", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Extension cord", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Toilet kit", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Shower head", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Garden hose", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Lights", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "3/8' plywood", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Power tools", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Potting soil", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Cat 6 cable", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list5.addItem(cat5_1, name: "Wall plates", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        
-        // list6
-        let list6 = List(name: "Walmart", createRecord: true)
-        lists.append(list6)
-        
-        let cat6_1 = list6.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
-        
-        list6.addItem(cat6_1, name: "Dog Shampoo", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list6.addItem(cat6_1, name: "Chips", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list6.addItem(cat6_1, name: "Movies", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
-        list6.addItem(cat6_1, name: "Subway sandwich", state: ItemState.Incomplete, updateIndices: true, createRecord: true)
-        
-        
-        // update cell type array in temp lists
-        /*
-        list1.updateCellTypeArray()
-        list2.updateCellTypeArray()
-        list3.updateCellTypeArray()
-        list4.updateCellTypeArray()
-        list5.updateCellTypeArray()
-        list6.updateCellTypeArray()
-        */
-    }
-    */
 }

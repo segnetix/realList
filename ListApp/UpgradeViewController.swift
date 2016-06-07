@@ -91,8 +91,7 @@ class UpgradeViewController: UIAppViewController
     {
         appDelegate.appIsUpgraded = true
         
-        //stopHUD()
-        
+        /*
         let alertVC = UIAlertController(
             title: "Thank You",
             message: "Your purchase is confirmed.",
@@ -101,17 +100,14 @@ class UpgradeViewController: UIAppViewController
         alertVC.addAction(okAction)
         
         presentViewController(alertVC, animated: true, completion: nil)
+        */
         
         reload()
     }
     
     func handleRestoreNotification(notification: NSNotification)
     {
-        //guard let productID = notification.object as? String else { return }
-        
         appDelegate.appIsUpgraded = true
-        
-        //stopHUD()
         
         let alertVC = UIAlertController(
             title: "Thank You",

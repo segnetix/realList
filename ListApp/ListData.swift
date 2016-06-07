@@ -45,6 +45,7 @@ let key_itemRecord          = "itemRecord"
 let key_itemReference       = "itemReference"
 let key_state               = "state"
 let key_tutorial            = "tutorial"
+let key_itemAddCount        = "itemAddCount"
 let key_owningItem          = "owningItem"
 let key_imageData           = "imageData"
 let key_imageGUID           = "imageGUID"
@@ -1272,7 +1273,7 @@ class Category: ListObj, NSCoding
     var categoryReference: CKReference?
     var categoryRecord: CKRecord?
     var isTutorialCategory = false
-    var itemAddCount = 0
+    var itemAddCount: Int32 = 0
     
     // new category initializer
     init(name: String, displayHeader: Bool, createRecord: Bool, tutorial: Bool = false)
@@ -1292,12 +1293,13 @@ class Category: ListObj, NSCoding
     }
     
     // memberwise initializer
-    init(name: String?, expanded: Bool?, displayHeader: Bool?, tutorial: Bool?, modificationDate: NSDate?, categoryReference: CKReference?, categoryRecord: CKRecord?, items: [Item]?)
+    init(name: String?, expanded: Bool?, displayHeader: Bool?, tutorial: Bool?, itemAddCount: Int32?, modificationDate: NSDate?, categoryReference: CKReference?, categoryRecord: CKRecord?, items: [Item]?)
     {
-        if let expanded          = expanded          { self.expanded           = expanded          } else { self.expanded           = true }
-        if let displayHeader     = displayHeader     { self.displayHeader      = displayHeader     } else { self.displayHeader      = true }
+        if let expanded          = expanded          { self.expanded           = expanded          } else { self.expanded           = true          }
+        if let displayHeader     = displayHeader     { self.displayHeader      = displayHeader     } else { self.displayHeader      = true          }
         if let modificationDate  = modificationDate  { self.modificationDate   = modificationDate  } else { self.modificationDate   = NSDate.init() }
-        if let tutorial          = tutorial          { self.isTutorialCategory = tutorial          } else { self.isTutorialCategory = false }
+        if let tutorial          = tutorial          { self.isTutorialCategory = tutorial          } else { self.isTutorialCategory = false         }
+        if let itemAddCount      = itemAddCount      { self.itemAddCount       = itemAddCount      } else { self.itemAddCount       = 0             }
         if let categoryReference = categoryReference { self.categoryReference  = categoryReference }
         if let categoryRecord    = categoryRecord    { self.categoryRecord     = categoryRecord    }
         if let items             = items             { self.items              = items             }
@@ -1311,6 +1313,7 @@ class Category: ListObj, NSCoding
         let expanded          = decoder.decodeObjectForKey(key_expanded)          as? Bool
         let displayHeader     = decoder.decodeObjectForKey(key_displayHeader)     as? Bool
         let tutorial          = decoder.decodeObjectForKey(key_tutorial)          as? Bool
+        let itemAddCount      = decoder.decodeIntForKey(key_itemAddCount)         as  Int32
         let modificationDate  = decoder.decodeObjectForKey(key_modificationDate)  as? NSDate
         let categoryReference = decoder.decodeObjectForKey(key_categoryReference) as? CKReference
         let categoryRecord    = decoder.decodeObjectForKey(key_categoryRecord)    as? CKRecord
@@ -1320,6 +1323,7 @@ class Category: ListObj, NSCoding
                   expanded: expanded,
                   displayHeader: displayHeader,
                   tutorial: tutorial,
+                  itemAddCount: itemAddCount,
                   modificationDate: modificationDate,
                   categoryReference: categoryReference,
                   categoryRecord: categoryRecord,
@@ -1334,6 +1338,7 @@ class Category: ListObj, NSCoding
         coder.encodeObject(self.expanded,           forKey: key_expanded)
         coder.encodeObject(self.displayHeader,      forKey: key_displayHeader)
         coder.encodeObject(self.isTutorialCategory, forKey: key_tutorial)
+        coder.encodeInt(self.itemAddCount,          forKey: key_itemAddCount)
         coder.encodeObject(self.modificationDate,   forKey: key_modificationDate)
         coder.encodeObject(self.categoryReference,  forKey: key_categoryReference)
         coder.encodeObject(self.categoryRecord,     forKey: key_categoryRecord)
