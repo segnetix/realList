@@ -892,10 +892,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let cat1 = tutorial.addCategory("Getting started...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         
         item = tutorial.addItem(cat1, name: "Things to know about realList...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...check them off as you learn them!"
+        item!.note = "...check them off as you learn them!  By the way, this tutorial is a list just like any of the other lists you will make except it doesn't synchronize across devices.  Also, you can delete this tutorial and regenerate it any time you want (more on that later)."
         
         item = tutorial.addItem(cat1, name: "Make a new list item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...tap the item add button below.  It is always the last row in any category."
+        item!.note = "...tap the item add button below (in the next row) and give the new item a name (like: 'New Item').  It is always the last row in any category."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddItem")
         
         // Item actions...
@@ -904,7 +904,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.note = "...to add a note like this."
         
         item = tutorial.addItem(cat2, name: "Add a picture to an item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...use the Camera icon to add a picture from your iOS camera or your photo library.  Tap the camera icon again to delete the picture from the item.  Try it!"
+        item!.note = "...use the camera icon to add a picture from your iOS camera or your photo library.  Tap the camera icon again to delete the picture from the item.  Try it!"
         
         item = tutorial.addItem(cat2, name: "Double tap an item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to edit the item name."
@@ -947,7 +947,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.note = "...to edit its name."
         
         item = tutorial.addItem(cat3, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...to delete a category."
+        item!.note = "...to delete a category.  Remember, if you delete a category you will also delete all of the items in it.  If you want to keep any of the items then drag them out of the category before deleting."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Delete_category")
         
         item = tutorial.addItem(cat3, name: "Press, hold and drag a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
@@ -970,7 +970,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.note = "...to edit the list name."
         
         item = tutorial.addItem(cat4, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...to delete a list."
+        item!.note = "...to delete a list.  Of course, this will delete all of the categories and items in the list."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Delete")
         
         item = tutorial.addItem(cat4, name: "Press, hold and drag a list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
@@ -1079,7 +1079,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.imageAsset!.image = UIImage(named: "Tutorial_Tutorial_button")
         
         item = tutorial.addItem(cat8, name: "Now you can...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "... start making your own lists!  If you have any questions please send them to the email contacts on the About view."
+        item!.note = "... start making your own lists!  If you have any questions please send them to the email contacts in the About view."
         item!.imageAsset!.image = UIImage(named: "Tutorial_contacts")
         
         // select the newly added tutorial

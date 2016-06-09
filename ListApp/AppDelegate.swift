@@ -1171,7 +1171,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             print("fetchImageData - \(startIndex+1) to \(stopIndex+1) of \(itemReferences.count)")
             
-            let predicate = NSPredicate (format: "owningItem IN %@", argumentArray: [batchReferences])
+            let predicate = NSPredicate(format: "owningItem IN %@", argumentArray: [batchReferences])
             let imageQuery = CKQuery(recordType: ImagesRecordType, predicate: predicate)
             let imageFetch = CKQueryOperation(query: imageQuery)
             
