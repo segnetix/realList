@@ -143,10 +143,10 @@
 		B07C39F01CE624DE006027AA /* XIB */ = {
 			isa = PBXGroup;
 			children = (
+				B0A3026F1C349F7A00F6FB44 /* Main.storyboard */,
 				B07CCC7D1CA1A76500CBCFC1 /* AboutViewController.xib */,
 				B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */,
 				B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */,
-				B0A3026F1C349F7A00F6FB44 /* Main.storyboard */,
 				B0A302741C349F7A00F6FB44 /* LaunchScreen.storyboard */,
 			);
 			name = XIB;
@@ -168,13 +168,13 @@
 		B07C39F21CE625C3006027AA /* Cell and UI Classes */ = {
 			isa = PBXGroup;
 			children = (
-				B06836A11CAB1A7200422742 /* AddButton.swift */,
-				B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */,
 				B07828971C36000B009D356F /* ListCell.swift */,
 				B0854A881C3895DA00B9D2F7 /* CategoryCell.swift */,
-				B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */,
-				B0FF8C361C4AE58900C0A33C /* AddListCell.swift */,
 				B07828991C360020009D356F /* ItemCell.swift */,
+				B0FF8C361C4AE58900C0A33C /* AddListCell.swift */,
+				B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */,
+				B07AB8A11C6BCF99001F8F81 /* CheckBox.swift */,
+				B06836A11CAB1A7200422742 /* AddButton.swift */,
 			);
 			name = "Cell and UI Classes";
 			sourceTree = "<group>";

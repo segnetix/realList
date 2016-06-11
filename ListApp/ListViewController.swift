@@ -58,17 +58,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         longPressGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(ListViewController.longPressAction(_:)))
         self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
         
-        /*
-        // info button
-        let infoButton: UIButton = UIButton(type: UIButtonType.Custom)
-        infoButton.setImage(UIImage(named: "EnListIcon"), forState: .Normal)
-        infoButton.addTarget(self, action: #selector(ListViewController.infoButtonTapped), forControlEvents: .TouchUpInside)
-        let rightBarButton = UIBarButtonItem()
-        rightBarButton.customView = infoButton
-        self.navigationItem.rightBarButtonItem = rightBarButton
-        */
-        
-        // about button
+        // About button
         let button: UIButton = UIButton(type: UIButtonType.Custom)
         button.setImage(UIImage(named: "EnListIcon"), forState: UIControlState.Normal)
         button.addTarget(self, action: #selector(ListViewController.infoButtonTapped), forControlEvents: UIControlEvents.TouchUpInside)
@@ -76,13 +66,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.leftBarButtonItem = barButton
         
-        // set up keyboard show/hide notifications
-        /*
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ListViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ListViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
-        */
-        
-        // this is to suppress the extra cell separators in the table view
+        // this is to suppress the cell separators below the last populated row in the table view
         self.tableView.tableFooterView = UIView()
     }
     
@@ -110,10 +94,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 ////////////////////////////////////////////////////////////////
     
     /*
-    // we always will have one section only so just let it default
+    // we always will have one section only so just let it default to 1
     override func numberOfSectionsInTableView(tableView: UITableView) -> Int
     {
-        // #warning Incomplete implementation, return the number of sections
         return 1
     }
     */

@@ -102,7 +102,7 @@ let color4_1_alt = UIColor.darkGrayColor()
 //let color4_1_alt = UIColor(colorLiteralRed: 0.004, green: 0.0, blue: 0.663, alpha: alpha) // opposite (blue)
 //let color4_1_alt = UIColor(colorLiteralRed: 0.498, green: 0.5, blue: 0.169, alpha: alpha) // shaded yellow
 
-/*  ORIGINAL
+/*  ORIGINAL COLORS
 // row 1
 var color1_1 = UIColor(colorLiteralRed: 0.00, green: 0.478, blue: 1.00, alpha: 0.85 )         // system blue (default)
 let color1_2 = UIColor(colorLiteralRed: 0.47, green: 0.62,  blue: 0.75, alpha: alpha)         // icon blue
@@ -148,7 +148,7 @@ enum ItemState: Int {
 ////////////////////////////////////////////////////////////////
 
 // 1. lists have one or more categories that hold items
-// 2. if the list has only one category and the category name is empty then the list is treated as though it has no categories
+// 2. if the list has only one category and the category is empty then the list behaves as though it has no categories (actually the one category is hidden)
 // 3. if the user adds a category with an empty name then the data model will set the name to a single space char
 // 4. if the user deletes the last category then the last category is not deleted but the name is set to a single space char
 
