@@ -109,6 +109,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     // HUD
     var hud: MBProgressHUD?
+    var isUpdating = false
+    var refreshControl: UIRefreshControl?
     
     func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool
     {
@@ -139,7 +141,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         restoreListDataFromLocalStorage()           // gets list data from local storage
         restoreAppSettings()                        // restores the general app settings
         restoreUpgradeStatus()                      // restores upgrade status from local storage otherwise gets data from app store regarding upgrade pricing
-        fetchCloudData()                            // gets cloud data and merges with local data including cloud deletes
+        fetchCloudData(nil)                         // gets cloud data and merges with local data including cloud deletes
         
         return true
     }
@@ -310,7 +312,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         print("applicationWillEnterForeground...")
         
         // check for updates while app was in the background
-        fetchCloudData()
+        //fetchCloudData()
     }
 
     func applicationDidBecomeActive(application: UIApplication) {
@@ -874,18 +876,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // pulls all list, category and item data from cloud storage
-    func fetchCloudData()
+    func fetchCloudData(refreshControl: UIRefreshControl?)
     {
         //NSLog("fetchCloudData...")
+        self.refreshControl = refreshControl
+        isUpdating = true
         
         guard let database = privateDatabase else { return }
-        guard iCloudIsAvailable() else { print("fetchCloudData - iCloud is not available..."); return }
+        guard iCloudIsAvailable() else {
+            print("fetchCloudData - iCloud is not available...");
+            if refreshControl != nil {
+                self.refreshControl?.attributedTitle = NSAttributedString(string: NSLocalizedString("iCloud_not_available", comment: "iCloud not available."))
+                runAfterDelay(1.5, block: {
+                    self.refreshControl?.endRefreshing()
+                    self.refreshControl = nil
+                })
+            }
+            isUpdating = false
+            return
+        }
         
         let resultCount = 0         // default value will let iCloud server decide how much to send in each block
         var itemFetchCount = 0      // holds the number of item records fetched
         let msg = NSLocalizedString("Fetching_Data", comment: "Fetching data message for the iCloud import HUD.")
         
-        startHUD("iCloud", subtitle: msg + " 0")
+        if self.refreshControl != nil {
+            self.refreshControl!.attributedTitle = NSAttributedString(string: msg)
+        } else {
+            startHUD("iCloud", subtitle: msg)
+        }
         
         // clear the record arrays
         listFetchArray.removeAll()
@@ -1030,7 +1049,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             // update HUD
             dispatch_async(dispatch_get_main_queue()) {
-                if self.hud != nil {
+                if self.refreshControl != nil {
+                    self.refreshControl!.attributedTitle = NSAttributedString(string: msg + " \(itemFetchCount)")
+                } else if self.hud != nil {
                     self.hud!.detailsLabel.text = msg + " \(itemFetchCount)"
                 }
             }
@@ -1179,14 +1200,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 imageArray.append(record)
                 imageFetchCount += 1
                 //print("image recordFetchedBlock - GUID: \(record[key_imageGUID]) recordId: \(record.recordID.recordName)")
-                
-                // update HUD
-                /*
-                dispatch_async(dispatch_get_main_queue()) {
-                    if self.hud != nil {
-                        self.hud!.detailsLabel.text = msg + " \(imageFetchCount)"
-                    }
-                }*/
             }
             
             imageFetch.queryCompletionBlock = { [loop, startIndex, stopIndex] (cursor : CKQueryCursor?, error : NSError?) in
@@ -1264,6 +1277,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // shows the completed HUD then dismisses itself
         startHUDwithDone()
+        isUpdating = false
+        if self.refreshControl != nil {
+            self.refreshControl!.endRefreshing()
+            self.refreshControl = nil
+        }
     }
     
     func mergeImageCloudData(imageRecords: [CKRecord])

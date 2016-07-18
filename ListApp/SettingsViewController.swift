@@ -410,7 +410,7 @@ class SettingsViewController: UIAppViewController
     
     func newCategory(sender: UIButton) {
         itemVC?.addNewCategory()
-        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+        close()
     }
     
     func collapseAllCategories(send: UIButton) {
@@ -464,6 +464,12 @@ class SettingsViewController: UIAppViewController
         
         itemVC?.list.listColorName = color
         itemVC?.tableView.reloadData()
+        
+        // update the list color bar
+        if let listVC = appDelegate.listViewController?.tableView {
+            listVC.reloadData()
+            itemVC?.appDelegate.saveListData(true)
+        }
     }
     
     func highlightSelectedColorBox(selectedButton: UIButton)
@@ -487,8 +493,7 @@ class SettingsViewController: UIAppViewController
         itemVC?.presentPrintDialog()
         
         // dismiss settings view controller
-        self.itemVC?.appDelegate.saveListData(true)
-        self.presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+        close()
     }
     
     func email()
@@ -497,8 +502,7 @@ class SettingsViewController: UIAppViewController
         itemVC?.scheduleEmailDialog()
         
         // dismiss settings view controller
-        self.itemVC?.appDelegate.saveListData(true)
-        self.presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+        close()
     }
     
     func close()

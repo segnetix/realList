@@ -68,6 +68,16 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // this is to suppress the cell separators below the last populated row in the table view
         self.tableView.tableFooterView = UIView()
+        
+        // refresh control
+        refreshControl = UIRefreshControl()
+        if let refreshControl = refreshControl {
+            refreshControl.backgroundColor = UIColor.init(white: 0.9, alpha: 1.0)
+            refreshControl.tintColor = UIColor.blackColor()
+            //refreshControl.attributedTitle = NSAttributedString(string: "Refreshing..")
+            refreshControl.addTarget(self, action: #selector(self.updateListData(_:)), forControlEvents: UIControlEvents.ValueChanged)
+            self.tableView.addSubview(refreshControl)
+        }
     }
     
     override func viewDidAppear(animated: Bool) {
@@ -85,6 +95,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     required init(coder aDecoder: NSCoder)
     {
         super.init(coder: aDecoder)!
+    }
+    
+    func updateListData(refreshControl: UIRefreshControl)
+    {
+        if !appDelegate.isUpdating {
+            appDelegate.fetchCloudData(refreshControl)
+        }
     }
     
 ////////////////////////////////////////////////////////////////
@@ -138,6 +155,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             } else {
                 cell.backgroundColor = UIColor.whiteColor()
             }
+            
+            // list color bar
+            let colorBar = UIImageView()
+            colorBar.frame = CGRectMake(0, 0, 6, cell.contentView.frame.height)
+            colorBar.backgroundColor = list.listColor
+            cell.contentView.addSubview(colorBar)
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
             let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ListViewController.cellSingleTapAction(_:)))
@@ -241,6 +264,18 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // Return false if you do not want the item to be re-orderable.
         return true
     }
+    
+    /*
+    override func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+        if let refreshControl = refreshControl {
+            if refreshControl.refreshing {
+                if !appDelegate.isUpdating {
+                    appDelegate.fetchCloudData(refreshControl)
+                }
+            }
+        }
+    }
+    */
     
 ////////////////////////////////////////////////////////////////
 //

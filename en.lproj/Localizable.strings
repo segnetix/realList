@@ -44,6 +44,7 @@ Delete_Photo_Msg = "Are you sure want to delete this photo?";
 Photo_Library = "Photo Library";
 Fetching_Data = "Fetching data...";
 Fetching_Images = "Fetching images...";
+iCloud_not_available = "iCloud is not available...";
 Merging_Data = "Merging data...";
 Merging_Images = "Merging images...";
 Done = "Done";

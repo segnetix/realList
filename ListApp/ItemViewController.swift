@@ -61,6 +61,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     let settingsTransitionDelegate = SettingsTransitioningDelegate()
     let itemDetailTransitionDelegate = ItemDetailTransitioningDelegate()
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    var refreshControl : UIRefreshControl!
     
     var list: List! {
         didSet {
@@ -121,6 +122,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // this is to suppress the extra cell separators in the table view
         self.tableView.tableFooterView = UIView()
         
+        refreshControl = UIRefreshControl()
+        refreshControl.backgroundColor = UIColor.init(white: 0.9, alpha: 1.0)
+        refreshControl.tintColor = UIColor.blackColor()
+        //refreshControl.attributedTitle = NSAttributedString(string: "Refreshing..")
+        refreshControl.addTarget(self, action: #selector(self.updateListData(_:)), forControlEvents: UIControlEvents.ValueChanged)
+        self.tableView.addSubview(refreshControl)
+        
         // set up keyboard show/hide notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardWillHide(_:)), name: UIKeyboardWillHideNotification, object: nil)
@@ -160,6 +168,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)!
+    }
+    
+    func updateListData(refreshControl: UIRefreshControl)
+    {
+        if !appDelegate.isUpdating {
+            appDelegate.fetchCloudData(refreshControl)
+        }
     }
     
 ////////////////////////////////////////////////////////////////
