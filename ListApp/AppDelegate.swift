@@ -68,19 +68,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var upgradePriceString = ""
     var upgradeProduct: SKProduct?
     var appIsUpgraded: Bool = false
-    /*
-    var appIsUpgraded: Bool = false {
-        didSet {
-            if let itemVC = itemViewController {
-                print("appIsUpgraded was set to \(appIsUpgraded)")
-                if itemVC.adBanner != nil && appIsUpgraded {
-                    itemVC.adBanner.delegate = nil
-                    itemVC.adBanner.removeFromSuperview()
-                }
-                itemVC.layoutAnimated(false)
-            }
-        }
-    } */
     
     // app settings
     var namesCapitalize = true
@@ -656,9 +643,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         if obj is List {
             let list = obj as! List
-            let i = listVC.lists.indexOf(list)
-            if i != nil {
-                listVC.lists.removeAtIndex(i!)
+            if let i = listVC.lists.indexOf(list) {
+                listVC.lists.removeAtIndex(i)
+                
+                if listVC.lists.count > 0 {
+                    var selectRow = 0
+                    
+                    if i-1 < listVC.lists.count {
+                        // select the previous row before deleting
+                        selectRow = i-1
+                    }
+                    let rowToSelect:NSIndexPath = NSIndexPath(forRow: selectRow, inSection: 0)
+                    listVC.tableView.selectRowAtIndexPath(rowToSelect, animated: true, scrollPosition: UITableViewScrollPosition.None)
+                    listVC.tableView(listVC.tableView, didSelectRowAtIndexPath: rowToSelect)
+                }
             }
         } else if obj is Category {
             let category = obj as! Category
