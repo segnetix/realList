@@ -187,7 +187,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func restoreUpgradeStatus() {
         #if DEBUG
             //testing only...
-            //self.appIsUpgraded = false
+            //self.appIsUpgraded = true
             //return
         #endif
         
