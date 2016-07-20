@@ -42,6 +42,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     var editingNewListName = false
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
+    // refresh view
+    var refreshView: UIView!
+    var refreshAnimation: UIActivityIndicatorView!
+    var refreshLabel: UILabel!
+    var refreshCancelButton: UIButton!
+    
     weak var delegate: ListSelectionDelegate?
     
     override func viewDidLoad()
@@ -71,20 +77,62 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // refresh control
         refreshControl = UIRefreshControl()
-        if let refreshControl = refreshControl {
-            refreshControl.backgroundColor = UIColor.init(white: 0.9, alpha: 1.0)
-            refreshControl.tintColor = UIColor.blackColor()
-            //refreshControl.attributedTitle = NSAttributedString(string: "Refreshing..")
-            refreshControl.addTarget(self, action: #selector(self.updateListData(_:)), forControlEvents: UIControlEvents.ValueChanged)
-            self.tableView.addSubview(refreshControl)
-        }
+        refreshControl!.backgroundColor = UIColor.clearColor()
+        refreshControl!.tintColor = UIColor.clearColor()
+        refreshControl!.addTarget(self, action: #selector(self.updateListData(_:)), forControlEvents: UIControlEvents.ValueChanged)
+        self.tableView.addSubview(refreshControl!)
+        
+        loadCustomRefreshContents()
+    }
+    
+    func loadCustomRefreshContents()
+    {
+        let refreshContents = NSBundle.mainBundle().loadNibNamed("RefreshContents", owner: self, options: nil)
+        
+        // refresh view
+        refreshView = refreshContents[0] as! UIView
+        refreshView.frame = refreshControl!.bounds
+        
+        // refresh activity indicator
+        refreshAnimation = refreshView.viewWithTag(1) as! UIActivityIndicatorView
+        refreshAnimation.alpha = 0.0
+        
+        // refresh label
+        refreshLabel = refreshView.viewWithTag(2) as! UILabel
+        refreshLabel.text = ""
+        
+        // refresh cancel button
+        refreshCancelButton = refreshView.viewWithTag(3) as! UIButton
+        refreshCancelButton.backgroundColor = UIColor.clearColor()
+        refreshCancelButton.layer.cornerRadius = 16
+        refreshCancelButton.layer.borderWidth = 1
+        refreshCancelButton.layer.borderColor = UIColor.blackColor().CGColor
+        refreshCancelButton.addTarget(self, action: #selector(self.cancelFetch(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        refreshCancelButton.enabled = false
+        refreshCancelButton.alpha = 0.3
+        
+        refreshControl!.addSubview(refreshView)
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         
+        //refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
+        
         // selectionIndex can be set by the AppDelegate with an initial list selection on app start (from saved state)
         self.selectList(selectionIndex)
+    }
+    
+    override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+        //print("viewWillTransitionToSize... \(size)")
+        //refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
     }
     
     override func didReceiveMemoryWarning() {
@@ -99,9 +147,29 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     func updateListData(refreshControl: UIRefreshControl)
     {
-        if !appDelegate.isUpdating {
-            appDelegate.fetchCloudData(refreshControl)
-        }
+        //if !appDelegate.isUpdating {
+            refreshAnimation.startAnimating()
+            refreshCancelButton.enabled = true
+            refreshCancelButton.alpha = 1.0
+            refreshAnimation.alpha = 1.0
+            self.tableView.userInteractionEnabled = false
+            appDelegate.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
+        //}
+    }
+    
+    func cancelFetch(button: UIButton) {
+        refreshLabel.text = "Canceled"
+        appDelegate.cancelCloudDataFetch()
+    }
+    
+    func refreshEnd() {
+        refreshLabel.text = ""
+        refreshCancelButton.enabled = false
+        refreshCancelButton.alpha = 0.3
+        refreshAnimation.alpha = 0.0
+        refreshAnimation.stopAnimating()
+        refreshControl?.endRefreshing()
+        self.tableView.userInteractionEnabled = true
     }
     
 ////////////////////////////////////////////////////////////////
@@ -1063,6 +1131,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item = tutorial.addItem(cat6, name: "5. Enable notifications...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "Notifications let realList synchronize between your iOS devices as you make changes to you lists.  Tap the Notification Settings button.  If you answered OK to notifications when realList first launched then this should already be set up.  If Notifications are off, then you can enable it here.  Tap Notifications and enable 'Allow Notifications' and realList is now set up for synchronization.  Be sure to do these steps on all of your iOS devices to share your list data between them."
         item!.imageAsset!.image = UIImage(named: "Tutorial_notifications")
+        
+        item = tutorial.addItem(cat6, name: "Pull down to refresh...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item!.note = "realList will now pull the latest list data from your iCloud account each time the app launches.  If you need to refresh your data after realList returns from the background just pull down on either the list view or the item view and the latest data from iCloud will be retrieved for all of your lists."
+        item!.imageAsset!.image = UIImage(named: "Tutorial_Data_Fetch")
         
         // About view...
         let cat7 = tutorial.addCategory("The About view...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)

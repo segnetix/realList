@@ -2,4 +2,134 @@
 <Bucket
    type = "1"
    version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/AppDelegate.swift"
+            timestampString = "490747178.529224"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1130"
+            endingLineNumber = "1130"
+            landmarkName = "cancelCloudDataFetch()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/AppDelegate.swift"
+            timestampString = "490747178.529224"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1151"
+            endingLineNumber = "1151"
+            landmarkName = "cancelCloudDataFetch()"
+            landmarkType = "5">
+            <Locations>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "EnList.AppDelegate.cancelCloudDataFetch () -&gt; ()"
+                  moduleName = "EnList"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/steven/Library/Mobile%20Documents/com~apple~CloudDocs/Xcode/ListApp/ListApp/AppDelegate.swift"
+                  timestampString = "490738213.000095"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1140"
+                  endingLineNumber = "1140"
+                  offsetFromSymbolStart = "772">
+               </Location>
+               <Location
+                  shouldBeEnabled = "No"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "EnList.AppDelegate.cancelCloudDataFetch () -&gt; ()"
+                  moduleName = "EnList"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/steven/Library/Mobile%20Documents/com~apple~CloudDocs/Xcode/ListApp/ListApp/AppDelegate.swift"
+                  timestampString = "490738213.000228"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "1140"
+                  endingLineNumber = "1140"
+                  offsetFromSymbolStart = "820">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/AppDelegate.swift"
+            timestampString = "490747178.529224"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1156"
+            endingLineNumber = "1156"
+            landmarkName = "cancelCloudDataFetch()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/AppDelegate.swift"
+            timestampString = "490747178.529224"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "1250"
+            endingLineNumber = "1250"
+            landmarkName = "mergeCloudData()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/ItemViewController.swift"
+            timestampString = "490745891.288041"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "227"
+            endingLineNumber = "227"
+            landmarkName = "refreshEnd()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "ListApp/ListViewController.swift"
+            timestampString = "490745897.13221"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "166"
+            endingLineNumber = "166"
+            landmarkName = "refreshEnd()"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
 </Bucket>

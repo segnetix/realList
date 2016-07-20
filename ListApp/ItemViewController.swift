@@ -63,6 +63,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     var refreshControl : UIRefreshControl!
     
+    // refresh view
+    var refreshView: UIView!
+    var refreshAnimation: UIActivityIndicatorView!
+    var refreshLabel: UILabel!
+    var refreshCancelButton: UIButton!
+    
     var list: List! {
         didSet {
             if tableView != nil {
@@ -122,12 +128,14 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // this is to suppress the extra cell separators in the table view
         self.tableView.tableFooterView = UIView()
         
+        // refresh control
         refreshControl = UIRefreshControl()
-        refreshControl.backgroundColor = UIColor.init(white: 0.9, alpha: 1.0)
-        refreshControl.tintColor = UIColor.blackColor()
-        //refreshControl.attributedTitle = NSAttributedString(string: "Refreshing..")
-        refreshControl.addTarget(self, action: #selector(self.updateListData(_:)), forControlEvents: UIControlEvents.ValueChanged)
-        self.tableView.addSubview(refreshControl)
+        refreshControl!.backgroundColor = UIColor.clearColor()
+        refreshControl!.tintColor = UIColor.clearColor()
+        refreshControl!.addTarget(self, action: #selector(self.updateListData(_:)), forControlEvents: UIControlEvents.ValueChanged)
+        self.tableView.addSubview(refreshControl!)
+        
+        loadCustomRefreshContents()
         
         // set up keyboard show/hide notifications
         NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(ItemViewController.keyboardWillShow(_:)), name: UIKeyboardWillShowNotification, object: nil)
@@ -139,13 +147,39 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         refreshItems()
     }
     
-    override func viewWillAppear(animated: Bool) {
-        super.viewWillAppear(animated)
+    func loadCustomRefreshContents()
+    {
+        let refreshContents = NSBundle.mainBundle().loadNibNamed("RefreshContents", owner: self, options: nil)
+        
+        // refresh view
+        refreshView = refreshContents[0] as! UIView
+        refreshView.frame = refreshControl!.bounds
+        
+        // refresh activity indicator
+        refreshAnimation = refreshView.viewWithTag(1) as! UIActivityIndicatorView
+        refreshAnimation.alpha = 0.0
+        
+        // refresh label
+        refreshLabel = refreshView.viewWithTag(2) as! UILabel
+        refreshLabel.text = ""
+        
+        // refresh cancel button
+        refreshCancelButton = refreshView.viewWithTag(3) as! UIButton
+        refreshCancelButton.backgroundColor = UIColor.clearColor()
+        refreshCancelButton.layer.cornerRadius = 16
+        refreshCancelButton.layer.borderWidth = 1
+        refreshCancelButton.layer.borderColor = UIColor.blackColor().CGColor
+        refreshCancelButton.addTarget(self, action: #selector(self.cancelFetch(_:)), forControlEvents: UIControlEvents.TouchUpInside)
+        refreshCancelButton.enabled = false
+        refreshCancelButton.alpha = 0.3
+        
+        refreshControl!.addSubview(refreshView)
     }
     
     override func viewDidAppear(animated: Bool) {
         super.viewDidAppear(animated)
         //layoutAnimated(false)
+        //refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
     }
     
     override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
@@ -163,6 +197,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         print("viewDidLayoutSubviews with width: \(self.view.frame.width)")
         super.viewDidLayoutSubviews()
         
+        refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
+        
         layoutAnimated(true)
     }
     
@@ -172,9 +208,29 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     func updateListData(refreshControl: UIRefreshControl)
     {
-        if !appDelegate.isUpdating {
-            appDelegate.fetchCloudData(refreshControl)
-        }
+        //if !appDelegate.isUpdating {
+            refreshAnimation.startAnimating()
+            refreshCancelButton.enabled = true
+            refreshCancelButton.alpha = 1.0
+            refreshAnimation.alpha = 1.0
+            self.tableView.userInteractionEnabled = false
+            appDelegate.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
+        //}
+    }
+    
+    func cancelFetch(button: UIButton) {
+        refreshLabel.text = "Canceled"
+        appDelegate.cancelCloudDataFetch()
+    }
+    
+    func refreshEnd() {
+        refreshLabel.text = ""
+        refreshCancelButton.enabled = false
+        refreshCancelButton.alpha = 0.3
+        refreshAnimation.alpha = 0.0
+        refreshAnimation.stopAnimating()
+        refreshControl?.endRefreshing()
+        self.tableView.userInteractionEnabled = true
     }
     
 ////////////////////////////////////////////////////////////////

@@ -43,6 +43,7 @@
 		B0A302881C35915B00F6FB44 /* ListData.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A302871C35915B00F6FB44 /* ListData.swift */; };
 		B0EC54D61CBFF5BD0017553B /* RealListProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */; };
 		B0EC54D81CBFF7100017553B /* IAPHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EC54D71CBFF7100017553B /* IAPHelper.swift */; };
+		B0FA02E01D3FE14000B9A4EF /* RefreshContents.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0FA02DF1D3FE14000B9A4EF /* RefreshContents.xib */; };
 		B0FF8C351C4AE2B000C0A33C /* AddItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */; };
 		B0FF8C371C4AE58900C0A33C /* AddListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FF8C361C4AE58900C0A33C /* AddListCell.swift */; };
 /* End PBXBuildFile section */
@@ -103,6 +104,7 @@
 		B0A302871C35915B00F6FB44 /* ListData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListData.swift; sourceTree = "<group>"; };
 		B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealListProducts.swift; sourceTree = "<group>"; };
 		B0EC54D71CBFF7100017553B /* IAPHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IAPHelper.swift; path = ../IAPHelper.swift; sourceTree = "<group>"; };
+		B0FA02DF1D3FE14000B9A4EF /* RefreshContents.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RefreshContents.xib; sourceTree = "<group>"; };
 		B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddItemCell.swift; sourceTree = "<group>"; };
 		B0FF8C361C4AE58900C0A33C /* AddListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddListCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -147,6 +149,7 @@
 				B07CCC7D1CA1A76500CBCFC1 /* AboutViewController.xib */,
 				B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */,
 				B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */,
+				B0FA02DF1D3FE14000B9A4EF /* RefreshContents.xib */,
 				B0A302741C349F7A00F6FB44 /* LaunchScreen.storyboard */,
 			);
 			name = XIB;
@@ -327,6 +330,7 @@
 			files = (
 				B0A1BCE01CC4142700F4F0B1 /* UpgradeViewController.xib in Resources */,
 				B0A302761C349F7A00F6FB44 /* LaunchScreen.storyboard in Resources */,
+				B0FA02E01D3FE14000B9A4EF /* RefreshContents.xib in Resources */,
 				B02174D21C6D57110087D5A3 /* Localizable.strings in Resources */,
 				B0A302731C349F7A00F6FB44 /* Assets.xcassets in Resources */,
 				B0A1BCDC1CC2C6C700F4F0B1 /* AppSettingsViewController.xib in Resources */,
