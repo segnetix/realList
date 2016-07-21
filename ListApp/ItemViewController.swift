@@ -208,14 +208,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     func updateListData(refreshControl: UIRefreshControl)
     {
-        //if !appDelegate.isUpdating {
-            refreshAnimation.startAnimating()
-            refreshCancelButton.enabled = true
-            refreshCancelButton.alpha = 1.0
-            refreshAnimation.alpha = 1.0
-            self.tableView.userInteractionEnabled = false
-            appDelegate.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
-        //}
+        refreshAnimation.startAnimating()
+        refreshCancelButton.enabled = true
+        refreshCancelButton.alpha = 1.0
+        refreshAnimation.alpha = 1.0
+        appDelegate.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
     }
     
     func cancelFetch(button: UIButton) {
@@ -230,7 +227,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         refreshAnimation.alpha = 0.0
         refreshAnimation.stopAnimating()
         refreshControl?.endRefreshing()
-        self.tableView.userInteractionEnabled = true
     }
     
 ////////////////////////////////////////////////////////////////

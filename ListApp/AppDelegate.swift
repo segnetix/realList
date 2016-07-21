@@ -1247,6 +1247,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         //NSLog("mergeCloudData...")
         
+        // the closing hud (1.0 sec) will prevent user interaction during the merge
+        startHUDwithDone()
+        
         for cloudList in listFetchArray {
             updateFromRecord(cloudList, forceUpdate: false)
         }
@@ -1292,7 +1295,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
         
         // shows the completed HUD then dismisses itself
-        startHUDwithDone()
         isUpdating = false
         self.refreshEnd()
         self.refreshLabel = nil
@@ -1461,7 +1463,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 let imageView = UIImageView(image: UIImage(named: "checkbox_blue"))
                 hud.customView = imageView
                 hud.label.text = NSLocalizedString("Done", comment: "Done")
-                hud.hideAnimated(true, afterDelay: 0.8)
+                hud.hideAnimated(true, afterDelay: 1.0)
                 self.hud = nil
                 //NSLog("HUD completed...")
             }
