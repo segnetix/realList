@@ -637,7 +637,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // deletes local data associated with the given recordName
-    func deleteRecord(recordName: String)
+    func deleteRecordLocal(recordName: String)
     {
         guard let listVC = listViewController else { return }
         guard let obj = getLocalObject(recordName) else { print("deleteRecord: recordName not found...!"); return }
@@ -662,20 +662,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         } else if obj is Category {
             let category = obj as! Category
             let list = getListForCategory(category)
-            if list != nil {
-                let i = list!.categories.indexOf(category)
-                if i != nil {
-                    list!.categories.removeAtIndex(i!)
-                }
+            if  let list = list {
+                list.categories.removeObject(category)
             }
         } else if obj is Item {
             let item = obj as! Item
             let category = getCategoryForItem(item)
             if category != nil {
-                let i = category!.items.indexOf(item)
-                if i != nil {
-                    category!.items.removeAtIndex(i!)
-                }
+                category!.items.removeObject(item)
             }
         }
     }
@@ -722,7 +716,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         // process the delete records
         for deleteRecordIDName in deleteNotificationArray {
-            deleteRecord(deleteRecordIDName)
+            deleteRecordLocal(deleteRecordIDName)
         }
         
         // clear notification arrays and event flag
@@ -1415,6 +1409,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         batchRecordDelete(purgeRecords)
     }
     
+    func passGestureToListVC(gesture: UILongPressGestureRecognizer, obj: ListObj?)
+    {
+        if let listVC = self.listViewController {
+            listVC.processGestureFromItemVC(gesture, listObj: obj)
+        }
+    }
+    
     ////////////////////////////////////////////////////////////////
     //
     //  MARK: - HUD Methods
@@ -1609,6 +1610,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 for category in list.categories {
                     if category === searchCategory {
                         return list
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns the list that contains the given item
+    func getListForItem(searchItem: Item) -> List?
+    {
+        if let listVC = listViewController {
+            for list in listVC.lists {
+                for category in list.categories {
+                    for item in category.items {
+                        if item === searchItem {
+                            return list
+                        }
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns the list that contains the given list object
+    func getListForListObj(searchObj: ListObj) -> List?
+    {
+        if let listVC = listViewController {
+            for list in listVC.lists {
+                for category in list.categories {
+                    if category == searchObj {
+                        return list
+                    }
+                    for item in category.items {
+                        if item === searchObj {
+                            return list
+                        }
                     }
                 }
             }

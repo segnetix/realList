@@ -462,11 +462,36 @@ class List: NSObject, NSCoding
         let indexPath = displayIndexPathForItem(item)
         
         if indexPath != nil {
-            let catIdx = item.categoryIndex
-            let itmIdx = item.itemIndex - 1         // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
+            //let catIdx = item.categoryIndex
+            //let itmIdx = item.itemIndex - 1         // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
             
-            self.categories[catIdx].items.removeAtIndex(itmIdx)
-            self.categories[catIdx].resetItemOrderByPosition()
+            //self.categories[catIdx].items.removeAtIndex(itmIdx)
+            
+            // locate this item in list data and delete it
+            if let cat = appDelegate.getCategoryForItem(item) {
+                cat.items.removeObject(item)
+                cat.resetItemOrderByPosition()
+                removedPaths.append(indexPath!)
+            }
+        }
+        
+        if updateIndices {
+            self.updateIndices()
+        }
+        
+        return removedPaths
+    }
+    
+    /// Will remove the given category from the list data.
+    func removeCategory(category: Category, updateIndices: Bool) -> [NSIndexPath]
+    {
+        var removedPaths = [NSIndexPath]()
+        let indexPath = displayIndexPathForCategory(category)
+        
+        if indexPath != nil {
+            //self.categories.removeAtIndex(category.categoryIndex)
+            self.categories.removeObject(category)
+            self.resetCategoryOrderByPosition()
             removedPaths.append(indexPath!)
         }
         
@@ -476,6 +501,7 @@ class List: NSObject, NSCoding
         
         return removedPaths
     }
+
     
     /// Will insert item after afterObj.
     func insertItem(item: Item, afterObj: ListObj, updateIndices: Bool)
@@ -551,41 +577,45 @@ class List: NSObject, NSCoding
     /// Will remove the item at indexPath.
     /// If the path is to a category, will remove the entire category with items.
     /// Returns an array with the display index paths of any removed rows.
-    func removeItemAtIndexPath(indexPath: NSIndexPath, preserveCategories: Bool, updateIndices: Bool) -> [NSIndexPath]
+    func removeListObjAtIndexPath(indexPath: NSIndexPath, preserveCategories: Bool, updateIndices: Bool) -> [NSIndexPath]
     {
         var removedPaths = [NSIndexPath]()
         let obj = objectForIndexPath(indexPath)
         
-        if let obj = obj
-        {
+        if let obj = obj {
             let catIndex = obj.categoryIndex
             let itemIndex = obj.itemIndex - 1       // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
             
             print("remove: indicesForObjectAtIndexPath cat \(catIndex) item \(itemIndex) name: \(obj.name)")
             
-            if itemIndex >= 0 {
+            //if itemIndex >= 0 {
+            if obj is Item {
                 // delete item from cloud storage
                 //let item = obj as! Item
                 //item.deleteFromCloud()
                 
                 // remove the item from the category
-                self.categories[catIndex].items.removeAtIndex(itemIndex)
-                removedPaths.append(indexPath)
-                self.categories[catIndex].resetItemOrderByPosition()
-            } else {
+                //self.categories[catIndex].items.removeAtIndex(itemIndex)
+                
+                // locate this item in list data and delete it
+                let item = obj as! Item
+                
+                if let cat = appDelegate.getCategoryForItem(item) {
+                    cat.items.removeObject(item)
+                    cat.resetItemOrderByPosition()
+                    removedPaths.append(indexPath)
+                }
+            } else if obj is Category {
+                let cat = obj as! Category
+                
                 if preserveCategories {
                     // remove the first item in this category
-                    self.categories[catIndex].items.removeAtIndex(0)
-                    removedPaths.append(indexPath)
+                    cat.items.removeFirst()
                     self.categories[catIndex].resetItemOrderByPosition()
+                    removedPaths.append(indexPath)
                 } else {
-                    let category = obj as! Category
-                    
                     if categories.count > 1 {
-                        // delete the category and its items from cloud storage
-                        //category.deleteFromCloud()
-                        
-                        if category.expanded {
+                        if cat.expanded {
                             // add paths of category, add item row, and items
                             removedPaths = displayIndexPathsForCategoryFromIndexPath(indexPath, includeCategoryAndAddItemIndexPaths: true)
                         } else {
@@ -593,22 +623,22 @@ class List: NSObject, NSCoding
                         }
                         
                         // remove the category and its items from the list
-                        self.categories.removeAtIndex(catIndex)
+                        self.categories.removeObject(cat)
                     } else {
                         // we are deleting the only category which has become visible
                         // so instead only delete the items and set the category.displayHeader to false
                         // leaving the 'new item' row in place with a hidden category header
-                        category.deleteCategoryItemsFromCloudStorage()
+                        cat.deleteCategoryItemsFromCloudStorage()
                         
                         // add paths of items
                         removedPaths = displayIndexPathsForCategoryFromIndexPath(indexPath, includeCategoryAndAddItemIndexPaths: false)
                         
                         // add path of category itself because we are going to hide it
                         removedPaths.append(indexPath)
-                        category.displayHeader = false
+                        cat.displayHeader = false
                         
                         // remove the items from the category
-                        category.deleteItems()
+                        cat.deleteItems()
                     }
                     self.resetCategoryOrderByPosition()
                 }
@@ -661,6 +691,7 @@ class List: NSObject, NSCoding
     }
     
     /// Removed the category (and associated items) at the given index.
+    /*
     func removeCatetoryAtIndex(sourceCatIndex: Int)
     {
         if sourceCatIndex < self.categories.count {
@@ -669,6 +700,7 @@ class List: NSObject, NSCoding
         
         updateIndices()
     }
+    */
     
     /// Inserts the given category at the given index.
     func insertCategory(category: Category, atIndex: Int)
@@ -1353,10 +1385,8 @@ class Category: ListObj, NSCoding
             return
         }
         
-        if let database = appDelegate.privateDatabase
-        {
-            if categoryRecord != nil
-            {
+        if let database = appDelegate.privateDatabase {
+            if categoryRecord != nil {
                 // commit change to cloud
                 if needToDelete {
                     deleteRecord(categoryRecord!, database: database)
@@ -1398,17 +1428,66 @@ class Category: ListObj, NSCoding
     // update this category from cloud storage
     func updateFromRecord(record: CKRecord)
     {
-        if let name          = record[key_name]          { self.name          = name as! String }
-        if let expanded      = record[key_expanded]      { self.expanded      = expanded as! Bool }
+        if let name          = record[key_name]          { self.name          = name as! String        }
+        if let expanded      = record[key_expanded]      { self.expanded      = expanded as! Bool      }
         if let displayHeader = record[key_displayHeader] { self.displayHeader = displayHeader as! Bool }
-        if let order         = record[key_order]         { self.order         = order as! Int }
+        if let order         = record[key_order]         { self.order         = order as! Int          }
+        
+        if self.categoryRecord != nil {
+            let currentOwningListRef = self.categoryRecord!.objectForKey(key_owningList) as! CKReference
+            let newOwningListRef = record.objectForKey(key_owningList) as! CKReference
+            
+            if currentOwningListRef.recordID.recordName != newOwningListRef.recordID.recordName {
+                // category has moved to another list, need to move the category in local list data
+                print("category needs to change lists...!!!")
+                
+                // get references to source and destination list objects
+                let srcList = appDelegate.getLocalList(currentOwningListRef.recordID.recordName)
+                let destList = appDelegate.getLocalList(newOwningListRef.recordID.recordName)
+                
+                if let srcList = srcList, destList = destList {
+                    // remove this category from the old list
+                    srcList.removeCategory(self, updateIndices: false)
+                    
+                    // add to the new list
+                    // check if we've moved the only category from the old list, if so create a new default category for the old list
+                    if srcList.categories.count == 0 {
+                        srcList.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
+                    }
+                    
+                    // check if moving to a list with only a hidden category
+                    // if so, then delete if no items, otherwise
+                    // make the hidden category unhidden (it will likely have no name)
+                    if (destList.categories.count == 1) && (destList.categories[0].displayHeader == false) {
+                        let hiddenCategory = destList.categories[0]
+                        
+                        if hiddenCategory.items.count == 0 {
+                            // only existing category is hidden and empty, so delete it (may already
+                            // be deleted in cloud from initiating device, but not a problem)
+                            hiddenCategory.deleteFromCloud()
+                            destList.removeCategory(hiddenCategory, updateIndices: false)
+                        } else {
+                            hiddenCategory.displayHeader = true
+                        }
+                    }
+                    
+                    // append the moving category to the destination list
+                    destList.categories.append(self)
+                    
+                    print("moving category \(self.name) from \(srcList.name) to \(destList.name)")
+                }
+            }
+        }
         
         self.categoryRecord = record
-        self.categoryReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
+        
+        if self.categoryReference == nil {
+            self.categoryReference = CKReference.init(record: record, action: CKReferenceAction.DeleteSelf)
+        }
         
         // category record is now updated
         needToSave = false
-        
+    
         //print("updated category: \(category!.name)")
     }
     
@@ -1771,11 +1850,12 @@ class Item: ListObj, NSCoding
         if let modifiedBy = record[key_modifiedBy] { self.modifiedBy = modifiedBy as! String }
         
         let currentCategory = appDelegate.getCategoryForItem(self)   // current category by doing a category item search in the list data
-        let updateCategory = getCategoryFromReference(record)       // destination category from the update record
+        let updateCategory = getCategoryFromReference(record)        // destination category from the update record
         
         if currentCategory != updateCategory {
             // delete item from current category
             if currentCategory != nil {
+                //currentCategory!.items.removeObject(self)
                 let index = currentCategory!.items.indexOf(self)
                 if index != nil {
                     currentCategory!.items.removeAtIndex(index!)

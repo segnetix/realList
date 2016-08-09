@@ -40,6 +40,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     var longPressActive = false    
     var selectionIndex = 0
     var editingNewListName = false
+    var tempHighlightListIndex = -1
     let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
     
     // refresh view
@@ -214,7 +215,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             cell.contentView.tag = indexPath.row
             
             // list background color
-            if cell.selected {
+            if indexPath.row == selectionIndex {
                 cell.backgroundColor = selectedCellColor
             } else {
                 cell.backgroundColor = UIColor.whiteColor()
@@ -316,7 +317,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath)
     {
         let list = lists[fromIndexPath.row]
-        lists.removeAtIndex(fromIndexPath.row)
+        //lists.removeAtIndex(fromIndexPath.row)
+        lists.removeObject(list)
         lists.insert(list, atIndex: toIndexPath.row)
         
         self.tableView.reloadData()
@@ -588,7 +590,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 gesture.enabled = true
                 longPressEnded(movingFromIndexPath, location: location)
             }
-            
             return
         }
         
@@ -725,6 +726,86 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         appDelegate.saveListData(true)
     }
     
+    // handle the gesture from the itemVC when moving an item to another list
+    func processGestureFromItemVC(gesture: UILongPressGestureRecognizer, listObj: ListObj?)
+    {
+        let location = gesture.locationOfTouch(0, inView: self.view)
+        
+        if let indexPath = tableView.indexPathForRowAtPoint(location) {
+            if gesture.state == .Changed {
+                // highlight (flash?) the list row under the touch location
+                tempHighlightList(indexPath)
+            } else if gesture.state == .Ended && listObj != nil {
+                // move listObj to target list
+                if indexPath.row >= 0 && indexPath.row < lists.count {
+                    let destList = lists[indexPath.row]
+                    
+                    if let srcList = appDelegate.getListForListObj(listObj!) {
+                        if listObj is Item {
+                            let item = listObj as! Item
+                            let destCategory = destList.categories[destList.categories.count-1]
+                            
+                            // delete the moving item from source list
+                            srcList.removeItem(item, updateIndices: false)
+                            
+                            // add moving item to dest list
+                            destCategory.items.append(item)
+                            
+                            // reset item order based on position in dest list
+                            item.order = destCategory.items.count - 1
+                            
+                            // save the moving item to the cloud with updated owning category
+                            if let destCatRef = destCategory.categoryReference {
+                                item.saveToCloud(destCatRef)
+                            }
+                            
+                            print("removing item \(item.name) from \(srcList.name) and adding to \(destList.name)")
+                        } else if listObj is Category {
+                            let movingCategory = listObj as! Category
+                            
+                            // delete moving category from the source list
+                            srcList.removeCategory(movingCategory, updateIndices: false)
+                            
+                            // check if we've moved the only category from source list, if so create a new one
+                            if srcList.categories.count == 0 {
+                                srcList.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
+                            }
+                            
+                            // check if moving to a list with only a hidden category
+                            // if so, then delete if no items, otherwise
+                            // make the hidden category unhidden (it will likely have no name)
+                            if (destList.categories.count == 1) && (destList.categories[0].displayHeader == false) {
+                                let hiddenCategory = destList.categories[0]
+                                
+                                if hiddenCategory.items.count == 0 {
+                                    // only existing category is hidden and empty, so delete it
+                                    hiddenCategory.deleteFromCloud()
+                                    destList.removeCategory(hiddenCategory, updateIndices: false)
+                                } else {
+                                    hiddenCategory.displayHeader = true
+                                }
+                            }
+                            
+                            // append the moving category to the destination list and set order
+                            destList.categories.append(movingCategory)
+                            movingCategory.order = destList.categories.count - 1
+                            
+                            // save the moving list to the cloud with updated owning list
+                            if let destListRef = destList.listReference {
+                                movingCategory.saveToCloud(destListRef)
+                            }
+                            
+                            print("moving category \(movingCategory.name) from \(srcList.name) to \(destList.name)")
+                        }
+                    }
+                    
+                    // refresh view controllers and update indices
+                    appDelegate.refreshListData()
+                }
+            }
+        }
+    }
+    
     func scrollUpLoop()
     {
         let currentOffset = tableView.contentOffset
@@ -810,7 +891,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             list.deleteFromCloud()
             
             // delete the list from the data source
-            lists.removeAtIndex(indexPath.row)
+            //lists.removeAtIndex(indexPath.row)
+            lists.removeObject(deletedList)
             
             // delete list index path from the table view
             tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
@@ -841,20 +923,64 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             let selectedList = lists[selectionIndex]
             delegate?.listSelected(selectedList)
             
-            // deselect all cells
-            var i = 0
-            for list in lists {
-                list.order = i
-                let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
-                cell?.backgroundColor = UIColor.whiteColor()
-                i += 1
-            }
-            
-            // then select the current cell
-            let selectedCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: selectionIndex, inSection: 0))
-            selectedCell?.backgroundColor = selectedCellColor
+            highlightList(index)
             
             appDelegate.saveState(true)
+        }
+    }
+    
+    func highlightList(index: Int)
+    {
+        // deselect all cells
+        var i = 0
+        for list in lists {
+            list.order = i
+            let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
+            cell?.backgroundColor = UIColor.whiteColor()
+            i += 1
+        }
+        
+        // then select the current cell
+        let selectedCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: selectionIndex, inSection: 0))
+        selectedCell?.backgroundColor = selectedCellColor
+    }
+    
+    // used to highlight list cells when moving an item to another list
+    func tempHighlightList(newHighlightedIndexPath: NSIndexPath)
+    {
+        var oldHighlightedIndexPath: NSIndexPath?
+        var updateIndexPathArray = [NSIndexPath]()
+        
+        if self.tempHighlightListIndex != newHighlightedIndexPath.row {
+            if self.tempHighlightListIndex != -1 {
+                oldHighlightedIndexPath = NSIndexPath(forRow: self.tempHighlightListIndex, inSection: 0)
+                if oldHighlightedIndexPath != nil {
+                    if let oldSelectedCell = self.tableView.cellForRowAtIndexPath(oldHighlightedIndexPath!) {
+                        if self.tempHighlightListIndex == self.selectionIndex {
+                            UIView.animateWithDuration(0.0, animations: { () -> Void in
+                                oldSelectedCell.backgroundColor = selectedCellColor
+                            })
+                        } else {
+                            UIView.animateWithDuration(0.0, animations: { () -> Void in
+                                oldSelectedCell.backgroundColor = UIColor.whiteColor()
+                            })
+                        }
+                        updateIndexPathArray.append(oldHighlightedIndexPath!)
+                    }
+                }
+            }
+            
+            if let newSelectedCell = self.tableView.cellForRowAtIndexPath(newHighlightedIndexPath) {
+                if newSelectedCell is ListCell {
+                    UIView.animateWithDuration(0.0, animations: { () -> Void in
+                        newSelectedCell.backgroundColor = color1_2
+                    })
+                    updateIndexPathArray.append(newHighlightedIndexPath)
+                }
+            }
+            
+            print("tempHighlightList  old \(self.tempHighlightListIndex) - new \(newHighlightedIndexPath.row)")
+            self.tempHighlightListIndex = newHighlightedIndexPath.row
         }
     }
     
@@ -919,6 +1045,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         for list in lists {
             list.categories.sortInPlace { $0.order < $1.order }
+            
+            //print("sort list \(list.name))")
             
             for category in list.categories {
                 category.items.sortInPlace { $0.order < $1.order }

@@ -8,7 +8,6 @@
 
 import UIKit
 import QuartzCore
-//import iAd
 import MessageUI
 
 let itemCellID     = "ItemCell"
@@ -47,6 +46,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     var editModeIndexPath: NSIndexPath?
     var longPressGestureRecognizer: UILongPressGestureRecognizer?
     var sourceIndexPath: NSIndexPath?
+    var sourceObject: ListObj?
     var movingFromIndexPath: NSIndexPath?
     var newCatIndexPath: NSIndexPath?
     var prevLocation: CGPoint?
@@ -57,6 +57,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     var editingNewCategoryName = false
     var tempCollapsedCategoryIsMoving = false
     var inAddNewItemLoop = false
+    var longPressHandedToList = false
     var longPressCellType: ItemViewCellType = .Item
     let settingsTransitionDelegate = SettingsTransitioningDelegate()
     let itemDetailTransitionDelegate = ItemDetailTransitioningDelegate()
@@ -194,7 +195,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     override func viewDidLayoutSubviews() {
-        print("viewDidLayoutSubviews with width: \(self.view.frame.width)")
+        //print("viewDidLayoutSubviews with width: \(self.view.frame.width)")
         super.viewDidLayoutSubviews()
         
         refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
@@ -507,7 +508,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     func keyboardWillShow(notification: NSNotification)
     {
-        print("keyboardWillShow")
+        //print("keyboardWillShow")
         inEditMode = true
         
         var info = notification.userInfo!
@@ -546,7 +547,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     func keyboardWillHide(notification: NSNotification)
     {
-        print("keyboardWillHide")
+        //print("keyboardWillHide")
         
         if !inAddNewItemLoop || !editingNewItemName {
             layoutAnimated(true)
@@ -561,16 +562,16 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     func keyboardDidShow(notification: NSNotification) {
-        print("keyboardDidShow")
+        //print("keyboardDidShow")
     }
     
     func keyboardDidHide(notification: NSNotification) {
-        print("keyboardDidHide")
+        //print("keyboardDidHide")
     }
     
     func textFieldShouldBeginEditing(textField: UITextField) -> Bool
     {
-        print("textFieldShouldBeginEditing")
+        //print("textFieldShouldBeginEditing")
         // this clears an initial space in a new cell name
         if textField.text == " " {
             textField.text = ""
@@ -580,7 +581,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     func textFieldDidEndEditing(textField: UITextField) {
-        print("textFieldDidEndEditing")
+        //print("textFieldDidEndEditing")
     }
     
     func textFieldShouldReturn(textField: UITextField) -> Bool
@@ -735,7 +736,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 self.performSelector(#selector(ItemViewController.scrollToCategoryEnded(_:)), withObject: nil, afterDelay: 0.5)
             } else {
                 // new cell is already visible
-                print("new cell is already visible")
+                //print("new cell is already visible")
                 let cell = tableView.cellForRowAtIndexPath(indexPath) as! CategoryCell
                 
                 cell.categoryName.userInteractionEnabled = true
@@ -905,12 +906,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         if indexPath != nil {
             let cell = tableView.cellForRowAtIndexPath(indexPath!)
             
-            if cell is AddItemCell {
+            if cell is AddItemCell && !longPressHandedToList {
                 // we got a long press action on the AddItem cell...
                 
                 // if it is the last AddItem cell, then we are moving down past the bottom of the tableView, so end the long press
-                if list.indexPathIsLastRowDisplayed(indexPath!) && longPressActive
-                {
+                if list.indexPathIsLastRowDisplayed(indexPath!) && longPressActive {
                     longPressEnded(movingFromIndexPath, location: location)
                     return
                 }
@@ -959,14 +959,23 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             }
         }
 
-        // if indexPath is null then we took our dragged cell some direction off the table
+        // if indexPath is null then we took our dragged cell to the list view
+        // need to transfer control of the long press gesture to the list view
         if indexPath == nil {
-            if gesture.state != .Cancelled {
+            longPressHandedToList = true
+            appDelegate.passGestureToListVC(gesture, obj: sourceObject)
+            
+            if gesture.state == .Ended {
                 gesture.enabled = false
                 gesture.enabled = true
+                sourceIndexPath = nil
                 longPressEnded(movingFromIndexPath, location: location)
+                
+                // clear the last long press hilight
+                if let listVC = appDelegate.listViewController {
+                    listVC.highlightList(listVC.selectionIndex)
+                }
             }
-            
             return
         }
         
@@ -1002,11 +1011,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         let cell = tableView.cellForRowAtIndexPath(indexPath)!
         snapshot = snapshotFromView(cell)
         
-        let obj = list.objectForIndexPath(indexPath)
+        sourceObject = list.objectForIndexPath(indexPath)
         
         // collapse the category before starting the long press
-        if obj is Category {
-            let cat = obj as! Category
+        if sourceObject is Category {
+            let cat = sourceObject as! Category
             
             if cat.expanded {
                 tempCollapsedCategoryIsMoving = true
@@ -1014,7 +1023,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 handleCategoryCollapseExpand(cat)
             }
             longPressCellType = .Category
-        } else if obj is Item {
+        } else if sourceObject is Item {
             longPressCellType = .Item
         } else {
             longPressCellType = .AddItem
@@ -1022,7 +1031,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
         
         // create snapshot for long press cell moving
-        if obj is Item || obj is Category {
+        if sourceObject is Item || sourceObject is Category {
             var center = cell.center
             snapshot?.center = center
             snapshot?.alpha = 0.0
@@ -1110,6 +1119,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // cancel any scroll loop
         displayLink?.invalidate()
         displayLink = nil
+        sourceObject = nil
+        longPressHandedToList = false
         
         if longPressCellType == .AddItem {
             self.prevLocation = nil
@@ -1175,6 +1186,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                     //print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
                     
                     tableView.endUpdates()
+                    
+                    // save item changes to cloud
+                    srcItem.needToSave = true
+                    
+                    tableView.endUpdates()
                 } else if srcDataObj is Category {
                     // we are moving a category
                     let srcCategory = srcDataObj as! Category
@@ -1194,11 +1210,18 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                         tableView.beginUpdates()
                         
                         // remove the category from its original location
-                        list.removeCatetoryAtIndex(srcCategoryIndex)
+                        //list.removeCatetoryAtIndex(srcCategoryIndex)
+                        list.categories.removeObject(srcCategory)
+                        list.updateIndices()
                         
                         list.insertCategory(srcCategory, atIndex: dstCategoryIndex)
                         
                         tableView.endUpdates()
+                        
+                        // save all category order changes to cloud
+                        for cat in list.categories {
+                            cat.needToSave = true
+                        }
                     }
                     
                     // restore a temp collapsed category
@@ -1240,6 +1263,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         self.prevLocation = nil
         self.displayLink?.invalidate()
         self.displayLink = nil
+        longPressHandedToList = false
         
         appDelegate.saveListData(true)
     }
@@ -1315,13 +1339,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     // deletes an item or a category and all of the items in it
     func handleDeleteItem(alertAction: UIAlertAction!) -> Void
     {
-        if let indexPath = deleteItemIndexPath, currentList = list
-        {
+        if let indexPath = deleteItemIndexPath, currentList = list {
             tableView.beginUpdates()
             
             // Delete the row(s) from the data source and return display paths of the removed rows
             var removedPaths: [NSIndexPath]
             var preserveCat = true
+            var catAdded = false
             
             let deleteObj = currentList.objectForIndexPath(indexPath)
             
@@ -1330,12 +1354,22 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 preserveCat = false
                 let cat = deleteObj as! Category
                 cat.deleteFromCloud()
+                
+                // handle if this is the only category in this list which is about to be deleted (add a new category)
+                if list.categories.count == 1 {
+                    let newCategory = list.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
+                    if list.listReference != nil {
+                        newCategory.saveToCloud(list.listReference!)
+                    }
+                    catAdded = true
+                }
             } else if deleteObj is Item {
                 let item = deleteObj as! Item
                 item.deleteFromCloud()
                 
                 // tutorial category item delete
                 if let itemCat = list.categoryForObj(item) {
+                    
                     if itemCat.isTutorialCategory {
                         itemCat.itemAddCount -= 1
                     }
@@ -1343,10 +1377,16 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             }
             
             // model delete
-            removedPaths = currentList.removeItemAtIndexPath(indexPath, preserveCategories: preserveCat, updateIndices: true)
+            removedPaths = currentList.removeListObjAtIndexPath(indexPath, preserveCategories: preserveCat, updateIndices: true)
             
             // table view delete
             tableView.deleteRowsAtIndexPaths(removedPaths, withRowAnimation: .Fade)
+            
+            // handle if we added a new category above
+            if catAdded {
+                let insertIndexPath = NSIndexPath.init(forRow: 0, inSection: 0)
+                tableView.insertRowsAtIndexPaths([insertIndexPath], withRowAnimation: .Automatic)
+            }
             
             deleteItemIndexPath = nil
             
@@ -1357,7 +1397,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             // reload to update the category count
             self.tableView.reloadData()
         } else {
-            print("ERROR: handleDeleteItem received a null indexPath or list!")
+            print("ERROR: handleDeleteItem received a nil indexPath or list!")
         }
     }
     
@@ -1377,11 +1417,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         if list != nil {
             self.title = list!.name
-            tableView.reloadData()
         } else {
             self.title = NSLocalizedString("Items", comment: "Items - the view controller title for an empty list of items.")
-            tableView.reloadData()
         }
+        
+        tableView.reloadData()
     }
     
     func colorForIndex(index: Int) -> UIColor
@@ -1465,12 +1505,10 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         var indexPath = idxPath
         
-        if sourceIndexPath != nil
-        {
+        if sourceIndexPath != nil {
             let srcObj = tableView.cellForRowAtIndexPath(sourceIndexPath!)
         
-            if srcObj is ItemCell && indexPath.row == 0
-            {
+            if srcObj is ItemCell && indexPath.row == 0 {
                 let obj = tableView.cellForRowAtIndexPath(indexPath)
                 
                 if obj is CategoryCell {
