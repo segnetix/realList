@@ -912,6 +912,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 // if it is the last AddItem cell, then we are moving down past the bottom of the tableView, so end the long press
                 if list.indexPathIsLastRowDisplayed(indexPath!) && longPressActive {
                     longPressEnded(movingFromIndexPath, location: location)
+                    gesture.enabled = false
+                    gesture.enabled = true
                     return
                 }
             }
@@ -970,11 +972,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 gesture.enabled = true
                 sourceIndexPath = nil
                 longPressEnded(movingFromIndexPath, location: location)
-                
-                // clear the last long press hilight
-                if let listVC = appDelegate.listViewController {
-                    listVC.highlightList(listVC.selectionIndex)
-                }
             }
             return
         }
@@ -1264,6 +1261,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         self.displayLink?.invalidate()
         self.displayLink = nil
         longPressHandedToList = false
+        
+        // clear any last long press hilight
+        if let listVC = appDelegate.listViewController {
+            listVC.highlightList(listVC.selectionIndex)
+        }
         
         appDelegate.saveListData(true)
     }

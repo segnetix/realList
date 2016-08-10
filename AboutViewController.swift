@@ -37,8 +37,19 @@ class AboutViewController: UIAppViewController
         appDelegate.aboutViewController = self
         
         // get the bundle version string
-        if let text = NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? String {
-            versionLabel.text = "v" + text
+        let version = NSBundle.mainBundle().infoDictionary?["CFBundleShortVersionString"] as? String
+        
+        if var version = version {
+            version = "v" + version
+            
+            #if DEBUG
+                let bundle = NSBundle.mainBundle().infoDictionary?["CFBundleVersion"] as? String
+                if let bundle = bundle {
+                    version += " (" + bundle + ")"
+                }
+            #endif
+            
+            versionLabel.text = version
         }
         
         updateCloudStatus()

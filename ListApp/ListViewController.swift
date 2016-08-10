@@ -731,6 +731,44 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     {
         let location = gesture.locationOfTouch(0, inView: self.view)
         
+        // check if we need to scroll tableView
+        let touchLocation = gesture.locationInView(gesture.view!.window)
+        let topBarHeight = getTopBarHeight()
+        
+        if touchLocation.y > (tableView.bounds.height - kScrollZoneHeight) {
+            // need to scroll down
+            if displayLink == nil {
+                displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
+                displayLink!.frameInterval = 1
+                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+            }
+        } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
+            // need to scroll up
+            if displayLink == nil {
+                displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
+                displayLink!.frameInterval = 1
+                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+            }
+        } else if displayLink != nil {
+            // check if we need to cancel a current scroll update because the touch moved out of scroll area
+            if touchLocation.y < (tableView.bounds.height - kScrollZoneHeight) {
+                displayLink!.invalidate()
+                displayLink = nil
+            } else if touchLocation.y > (topBarHeight + kScrollZoneHeight) {
+                displayLink!.invalidate()
+                displayLink = nil
+            }
+        }
+
+        // cancel scroll loop on gesture end
+        if gesture.state == .Ended {
+            // cancel any scroll loop
+            displayLink?.invalidate()
+            displayLink = nil
+            
+            print("listVC long press gesture ended")
+        }
+        
         if let indexPath = tableView.indexPathForRowAtPoint(location) {
             if gesture.state == .Changed {
                 // highlight (flash?) the list row under the touch location
@@ -979,7 +1017,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 }
             }
             
-            print("tempHighlightList  old \(self.tempHighlightListIndex) - new \(newHighlightedIndexPath.row)")
+            //print("tempHighlightList  old \(self.tempHighlightListIndex) - new \(newHighlightedIndexPath.row)")
             self.tempHighlightListIndex = newHighlightedIndexPath.row
         }
     }
