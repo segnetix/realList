@@ -1276,13 +1276,6 @@ class ListObj: NSObject
         self.needToDelete = false
     }
     
-    func updateIndicesFromTag(tag: Int)
-    {
-        let tag = Tag.indicesFromTag(tag)
-        categoryIndex = tag.catIdx
-        itemIndex = tag.itmIdx
-    }
-    
     func tag() -> Int
     {
         return Tag.tagFromIndices(categoryIndex, itmIdx: itemIndex)
