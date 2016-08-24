@@ -630,25 +630,317 @@ class ListClassTests: ModelClassTests
         
         // given
         let indexPath = list.displayIndexPathForTag(tag)
+        
+        // then
         XCTAssertTrue(indexPath!.row == 7, "displayIndexPathForTag compare indexPath")
     }
     
     // func displayIndexPathForObj(obj: ListObj) -> (indexPath: NSIndexPath?, isItem: Bool)
+    func test_displayIndexPathForObj()
+    {
+        let list = lists[0]
+        let cat = list.categories[1]
+        let item = list.categories[1].items[1]
+        
+        // given
+        let result1 = list.displayIndexPathForObj(cat)
+        let result2 = list.displayIndexPathForObj(item)
+        
+        // then
+        XCTAssertTrue(result1.indexPath!.row == 5, "displayIndexPathForObj result1 indexPath compare")
+        XCTAssertTrue(result2.indexPath!.row == 7, "displayIndexPathForObj result2 indexPath compare")
+        XCTAssertTrue(result1.isItem == false, "displayIndexPathForObj result 1 isItem compare")
+        XCTAssertTrue(result2.isItem == true,  "displayIndexPathForObj result 2 isItem compare")
+    }
+    
     // func displayIndexPathForCategory(category: Category) -> NSIndexPath?
+    func test_displayIndexPathForCategory()
+    {
+        let list = lists[0]
+        let cat = list.categories[1]
+        
+        // given
+        let indexPath = list.displayIndexPathForCategory(cat)
+        
+        // then
+        XCTAssertTrue(indexPath!.row == 5, "displayIndexPathForCategory result indexPath compare")
+    }
+    
     // func displayIndexPathForItem(item: Item) -> NSIndexPath?
+    func test_displayIndexPathForItem()
+    {
+        let list = lists[0]
+        let item = list.categories[1].items[1]
+        
+        // given
+        let indexPath = list.displayIndexPathForItem(item)
+        
+        // then
+        XCTAssertTrue(indexPath!.row == 7, "displayIndexPathForItem indexPath compare")
+    }
+    
     // func displayIndexPathForAddItemInCategory(category: Category) -> NSIndexPath?
+    func test_displayIndexPathForAddItemInCategory()
+    {
+        let list = lists[0]
+        let cat = list.categories[1]
+        
+        // given
+        let indexPath = list.displayIndexPathForAddItemInCategory(cat)
+        
+        // then
+        XCTAssertTrue(indexPath!.row == 9, "displayIndexPathForAddItemInCategory indexPath compare")
+    }
+    
     // func displayIndexPathsForCategoryFromIndexPath(indexPath: NSIndexPath, includeCategoryAndAddItemIndexPaths: Bool) -> [NSIndexPath]
+    func test_displayIndexPathsForCategoryFromIndexPath()
+    {
+        let list = lists[0]
+        let indexPath1 = NSIndexPath.init(forRow: 5, inSection: 0)
+        let indexPath2 = NSIndexPath.init(forRow: 7, inSection: 0)
+        
+        // given
+        let indexPaths1 = list.displayIndexPathsForCategoryFromIndexPath(indexPath1, includeCategoryAndAddItemIndexPaths: true)
+        let indexPaths2 = list.displayIndexPathsForCategoryFromIndexPath(indexPath1, includeCategoryAndAddItemIndexPaths: false)
+        let indexPaths3 = list.displayIndexPathsForCategoryFromIndexPath(indexPath2, includeCategoryAndAddItemIndexPaths: true)
+        let indexPaths4 = list.displayIndexPathsForCategoryFromIndexPath(indexPath2, includeCategoryAndAddItemIndexPaths: false)
+        
+        // then
+        XCTAssertTrue(indexPaths1.count == 5, "displayIndexPathsForCategoryFromIndexPath indexPaths1 true count")
+        XCTAssertTrue(indexPaths2.count == 3, "displayIndexPathsForCategoryFromIndexPath indexPaths1 false count")
+        XCTAssertTrue(indexPaths3.count == 0, "displayIndexPathsForCategoryFromIndexPath indexPaths2 true count")
+        XCTAssertTrue(indexPaths4.count == 0, "displayIndexPathsForCategoryFromIndexPath indexPaths2 false count")
+    }
+    
     // func displayIndexPathsForCategory(category: Category, includeAddItemIndexPath: Bool) -> [NSIndexPath]
+    func test_displayIndexPathsForCategory()
+    {
+        let list = lists[0]
+        let cat1 = list.categories[1]
+        let cat2 = list.categories[2]
+        
+        // given
+        let indexPaths1 = list.displayIndexPathsForCategory(cat1, includeAddItemIndexPath: true)
+        let indexPaths2 = list.displayIndexPathsForCategory(cat1, includeAddItemIndexPath: false)
+        let indexPaths3 = list.displayIndexPathsForCategory(cat2, includeAddItemIndexPath: true)
+        let indexPaths4 = list.displayIndexPathsForCategory(cat2, includeAddItemIndexPath: false)
+        
+        // then
+        XCTAssertTrue(indexPaths1.count == 4, "displayIndexPathsForCategory indexPaths1 true count")
+        XCTAssertTrue(indexPaths2.count == 3, "displayIndexPathsForCategory indexPaths1 false count")
+        XCTAssertTrue(indexPaths3.count == 4, "displayIndexPathsForCategory indexPaths2 true count")
+        XCTAssertTrue(indexPaths4.count == 3, "displayIndexPathsForCategory indexPaths2 false count")
+    }
+    
     // func indexPathsForCompletedRows() -> [NSIndexPath]
+    func test_indexPathsForCompletedRows()
+    {
+        let list = lists[0]
+        let cat0 = list.categories[0]
+        let cat1 = list.categories[1]
+        let cat2 = list.categories[2]
+        
+        // given
+        let indexPaths1 = list.indexPathsForCompletedRows()
+        
+        cat0.items[0].state = .Complete
+        cat0.items[2].state = .Complete
+        cat1.items[1].state = .Complete
+        cat2.items[2].state = .Complete
+        
+        let indexPaths2 = list.indexPathsForCompletedRows()
+        
+        // then
+        XCTAssertTrue(indexPaths1.count == 0, "indexPathsForCompletedRows indexPaths count")
+        XCTAssertTrue(indexPaths2.count == 4, "indexPathsForCompletedRows indexPaths count")
+    }
+    
     // func indexPathsForInactiveRows() -> [NSIndexPath]
+    func test_indexPathsForInactiveRows() {
+        let list = lists[0]
+        let cat0 = list.categories[0]
+        let cat1 = list.categories[1]
+        let cat2 = list.categories[2]
+        
+        // given
+        let indexPaths1 = list.indexPathsForInactiveRows()
+        
+        cat0.items[0].state = .Inactive
+        cat0.items[2].state = .Inactive
+        cat1.items[1].state = .Inactive
+        cat2.items[2].state = .Inactive
+        
+        let indexPaths2 = list.indexPathsForInactiveRows()
+        
+        // then
+        XCTAssertTrue(indexPaths1.count == 0, "indexPathsForInactiveRows indexPaths count")
+        XCTAssertTrue(indexPaths2.count == 4, "indexPathsForInactiveRows indexPaths count")
+    }
+    
+
     // func titleForObjectAtIndexPath(indexPath: NSIndexPath) -> String?
+    func test_titleForObjectAtIndexPath()
+    {
+        let list = lists[0]
+        let indexPath1 = NSIndexPath.init(forRow: 5, inSection: 0)
+        let indexPath2 = NSIndexPath.init(forRow: 7, inSection: 0)
+        let indexPath3 = NSIndexPath.init(forRow: 9, inSection: 0)
+        
+        // given
+        let title1 = list.titleForObjectAtIndexPath(indexPath1)
+        let title2 = list.titleForObjectAtIndexPath(indexPath2)
+        let title3 = list.titleForObjectAtIndexPath(indexPath3)
+        
+        // then
+        XCTAssertTrue(title1 == "Second Category", "titleForObjectAtIndexPath title compare category")
+        XCTAssertTrue(title2 == "Fifth Item", "titleForObjectAtIndexPath title compare item")
+        XCTAssertTrue(title3 == "add item", "titleForObjectAtIndexPath title compare addItem")
+    }
+    
     // func updateObjNameAtTag(tag: Int, name: String)
+    func test_updateObjNameAtTag()
+    {
+        let list = lists[0]
+        let obj5 = list.categories[1]
+        let obj7 = list.categories[1].items[1]
+        let tag5 = kItemIndexMax
+        let tag7 = kItemIndexMax + 2
+        
+        // given
+        list.updateObjNameAtTag(tag5, name: "new name 1")
+        list.updateObjNameAtTag(tag7, name: "new name 2")
+        
+        // then
+        XCTAssertTrue(obj5.name == "new name 1", "updateObjNameAtTag category")
+        XCTAssertTrue(obj7.name == "new name 2", "updateObjNameAtTag item")
+    }
+    
     // func isDisplayedItem(item: Item) -> Bool
+    func test_isDisplayedItem()
+    {
+        let list = lists[0]
+        let item1 = list.categories[0].items[1]
+        let item2 = list.categories[1].items[0]
+        let item3 = list.categories[2].items[1]
+        
+        // given
+        item1.state = .Incomplete
+        item2.state = .Inactive
+        item3.state = .Complete
+
+        list.showInactiveItems = false
+        list.showCompletedItems = false
+        let result1 = list.isDisplayedItem(item1)
+        let result2 = list.isDisplayedItem(item2)
+        let result3 = list.isDisplayedItem(item3)
+        
+        list.showInactiveItems = true
+        list.showCompletedItems = false
+        let result4 = list.isDisplayedItem(item1)
+        let result5 = list.isDisplayedItem(item2)
+        let result6 = list.isDisplayedItem(item3)
+        
+        list.showInactiveItems = false
+        list.showCompletedItems = true
+        let result7 = list.isDisplayedItem(item1)
+        let result8 = list.isDisplayedItem(item2)
+        let result9 = list.isDisplayedItem(item3)
+        
+        list.showInactiveItems = true
+        list.showCompletedItems = true
+        let result10 = list.isDisplayedItem(item1)
+        let result11 = list.isDisplayedItem(item2)
+        let result12 = list.isDisplayedItem(item3)
+        
+        // then
+        XCTAssertTrue(result1  == true,  "isDisplayedItem item1")
+        XCTAssertTrue(result2  == false, "isDisplayedItem item2")
+        XCTAssertTrue(result3  == false, "isDisplayedItem item3")
+        XCTAssertTrue(result4  == true,  "isDisplayedItem item4")
+        XCTAssertTrue(result5  == true,  "isDisplayedItem item5")
+        XCTAssertTrue(result6  == false, "isDisplayedItem item6")
+        XCTAssertTrue(result7  == true,  "isDisplayedItem item7")
+        XCTAssertTrue(result8  == false, "isDisplayedItem item8")
+        XCTAssertTrue(result9  == true,  "isDisplayedItem item9")
+        XCTAssertTrue(result10 == true,  "isDisplayedItem item10")
+        XCTAssertTrue(result11 == true,  "isDisplayedItem item11")
+        XCTAssertTrue(result12 == true,  "isDisplayedItem item12")
+    }
+    
     // func indexPathIsLastRowDisplayed(indexPath: NSIndexPath) -> Bool
+    func test_indexPathIsLastRowDisplayed()
+    {
+        let list = lists[0]
+        let indexPath1 = NSIndexPath.init(forRow: 13, inSection: 0)
+        let indexPath2 = NSIndexPath.init(forRow: 14, inSection: 0)
+        
+        // given
+        let result1 = list.indexPathIsLastRowDisplayed(indexPath1)
+        let result2 = list.indexPathIsLastRowDisplayed(indexPath2)
+        
+        // then
+        XCTAssertTrue(result1 == false, "indexPathIsLastRowDisplayed result1 compare")
+        XCTAssertTrue(result2 == true, "indexPathIsLastRowDisplayed result2 compare")
+    }
+    
     // func tagForIndexPath(indexPath: NSIndexPath) -> Tag
+    func test_tagForIndexPath()
+    {
+        let list = lists[0]
+        let indexPath1 = NSIndexPath.init(forRow: 5, inSection: 0)
+        let indexPath2 = NSIndexPath.init(forRow: 14, inSection: 0)
+        
+        // given
+        let tag1 = list.tagForIndexPath(indexPath1)
+        let tag2 = list.tagForIndexPath(indexPath2)
+        
+        // then
+        XCTAssertTrue(tag1.catIdx == 1, "tagForIndexPath tag1.catIdx compare")
+        XCTAssertTrue(tag1.itmIdx == 0, "tagForIndexPath tag1.itmIdx compare")
+        XCTAssertTrue(tag2.catIdx == 2, "tagForIndexPath tag2.catIdx compare")
+        XCTAssertTrue(tag2.itmIdx == 4, "tagForIndexPath tag2.itmIdx compare")
+    }
+    
     // func tagValueForIndexPath(indexPath: NSIndexPath) -> Int
+    func test_tagValueForIndexPath()
+    {
+        let list = lists[0]
+        let indexPath1 = NSIndexPath.init(forRow: 5, inSection: 0)
+        let indexPath2 = NSIndexPath.init(forRow: 14, inSection: 0)
+        
+        // given
+        let tag1 = list.tagValueForIndexPath(indexPath1)
+        let tag2 = list.tagValueForIndexPath(indexPath2)
+        
+        // then
+        XCTAssertTrue(tag1 == kItemIndexMax,           "tagValueForIndexPath tag1 compare")
+        XCTAssertTrue(tag2 == (kItemIndexMax * 2) + 4, "tagValueForIndexPath tag2 compare")
+    }
+    
     // func htmlForPrinting(includePics: Bool) -> String
+    func test_htmlForPrinting()
+    {
+        let list = lists[0]
+        
+        // given
+        let html = list.htmlForPrinting(false)
+        
+        // then
+        NSLog("html length = \(html.characters.count)")
+        XCTAssertTrue(html.characters.count > 0, "htmlForPrinting character count check")
+    }
+    
     // func itemCount() -> Int
+    func test_itemCount()
+    {
+        let list = lists[0]
+        
+        // given
+        let count = list.itemCount()
+        
+        // then
+        XCTAssertTrue(count == 9, "itemCount")
+    }
     
     func DISABLE_testPerformanceExample() {
         // This is an example of a performance test case.

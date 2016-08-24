@@ -1965,7 +1965,7 @@ class Item: ListObj, NSCoding
         return imageAsset?.getItemImage()
     }
     
-    func addImage(createRecord: Bool) -> ImageAsset?
+    func addImageAsset() -> ImageAsset?
     {
         var imageAsset: ImageAsset?
         

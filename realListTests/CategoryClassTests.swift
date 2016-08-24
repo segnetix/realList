@@ -19,286 +19,172 @@ class CategoryClassTests: ModelClassTests
         super.tearDown()
     }
     
-    //func indexForCategory(category: Category) -> Int
-    func test_indexForCategory()
+    // func deleteItems()
+    func test_deleteItems()
     {
-        // given
-        //  indices should already be set
-        
-        // then
-        for list in lists {
-            var expectedIndex = 0
-            for cat in list.categories {
-                let index = list.indexForCategory(cat)
-                NSLog("index \(index)  expectedIndex \(expectedIndex)")
-                XCTAssertTrue(expectedIndex == index, "indexForCategory")
-                expectedIndex += 1
-            }
-        }
-    }
-    
-    // func addCategory(name: String, displayHeader: Bool, updateIndices: Bool, createRecord: Bool, tutorial: Bool = false) -> Category
-    func test_addCategory()
-    {
-        // given
-        let list = lists[0]
-        let cat = list.addCategory("Added Category", displayHeader: true, updateIndices: true, createRecord: true)
-        
-        // then
-        XCTAssertTrue(list.categories.count == 4, "addCategory count")
-        XCTAssertTrue(cat.name == "Added Category", "addCategory name")
-        XCTAssertTrue(cat.categoryIndex == 3, "addCategory index")
-    }
-    
-    // func addItem(category: Category, name: String, state: ItemState, updateIndices: Bool, createRecord: Bool, tutorial: Bool = false) -> Item?
-    func test_addItem()
-    {
-        // given
-        let list = lists[0]
-        let cat = list.categories[0]
-        let item = list.addItem(cat, name: "Added Item", state: .Complete, updateIndices: true, createRecord: true)
-        
-        // then
-        XCTAssertNotNil(item, "")
-        XCTAssertTrue(item!.name == "Added Item", "addItem name")
-        XCTAssertTrue(cat.items.count == 4, "addItem category count")
-    }
-    
-    // func setAllItemsIncomplete()
-    func test_setAllItemsIncomplete()
-    {
-        let list = lists[0]
+        let cat = lists[0].categories[0]
         
         // given
-        list.setAllItemsIncomplete()
+        cat.deleteItems()
         
         // then
-        for cat in list.categories {
-            for item in cat.items {
-                XCTAssertTrue(item.state == .Incomplete, "setAllItemsIncomplete state")
-            }
-        }
-    }
-    
-    // func setAllItemsInactive()
-    func test_setAllItemsInactive()
-    {
-        let list = lists[0]
-        
-        // given
-        list.setAllItemsInactive()
-        
-        // then
-        for cat in list.categories {
-            for item in cat.items {
-                XCTAssertTrue(item.state == .Inactive, "setAllItemsInactive state")
-            }
-        }
+        XCTAssertTrue(cat.items.count == 0, "deleteItems")
     }
     
     // func clearNeedToSave()
     func test_clearNeedToSave()
     {
+        let cat = lists[0].categories[0]
+        cat.items[0].needToSave = true
+        cat.items[1].needToSave = true
+        cat.items[2].needToSave = true
+        
+        // given
+        cat.clearNeedToSave()
+        
+        // then
+        var count = 0
+        for item in cat.items {
+            if item.needToSave {
+                count += 1
+            }
+        }
+        XCTAssertTrue(count == 0, "clearNeedToSave")
+    }
+    
+    // func updateIndices(catIndex: Int)
+    func test_updateIndices()
+    {
+        // clear all indices
+        for list in lists {
+            for cat in list.categories {
+                cat.categoryIndex = 0
+                cat.itemIndex = 0
+                for item in cat.items {
+                    item.categoryIndex = 0
+                    item.itemIndex = 0
+                }
+                cat.addItem.categoryIndex = 0
+                cat.addItem.itemIndex = 0
+            }
+        }
+        
         // given
         for list in lists {
-            list.clearNeedToSave()
+            list.updateIndices()
         }
         
         // then
         for list in lists {
-            XCTAssertTrue(list.needToSave == false, "clearNeedToSave list")
+            var catIdx = 0
             
             for cat in list.categories {
-                XCTAssertTrue(cat.needToSave == false, "clearNeedToSave category")
+                var itmIdx = 0
                 
+                //NSLog("catIdx \(catIdx) cat.catIndex \(cat.categoryIndex)")
+                XCTAssertTrue(cat.categoryIndex == catIdx, "updateIndices category.categoryIndex")
+                XCTAssertTrue(cat.itemIndex == itmIdx, "updateIndices category.itemIndex")
+                
+                itmIdx += 1
                 for item in cat.items {
-                    XCTAssertTrue(item.needToSave == false, "clearNeedToSave item")
-                    XCTAssertTrue(item.imageAsset?.needToSave == false, "clearNeedToSave image asset")
+                    XCTAssertTrue(item.categoryIndex == catIdx, "updateIndices item.categoryIndex")
+                    XCTAssertTrue(item.itemIndex == itmIdx, "updateIndices item.itemIndex")
+                    itmIdx += 1
                 }
+                catIdx += 1
             }
         }
     }
     
-    // func removeItem(item: Item, updateIndices: Bool) -> [NSIndexPath]
-    func test_removeItem()
+    // func resetItemOrderByPosition()
+    func test_resetItemOrderByPosition()
     {
-        let list = lists[1]
-        let cat = list.categories[1]
-        let removedItem = cat.items[1]
+        let cat = lists[0].categories[0]
         
-        // given
-        let indexPath = list.removeItem(removedItem, updateIndices: true)
-        
-        // then
-        XCTAssertTrue(indexPath[0].row == 7, "removeItem indexPath check")
-        
-        for list in lists {
-            for cat in list.categories {
-                for item in cat.items {
-                    XCTAssertTrue(item != removedItem, "removeItem item compare")
-                }
-            }
+        for item in cat.items {
+            item.order = 0
         }
         
-        XCTAssertTrue(cat.items.count == 2, "removeItem items count")
-    }
-    
-    // func removeCategory(category: Category, updateIndices: Bool) -> [NSIndexPath]
-    func test_removeCategory()
-    {
-        let list = lists[1]
-        let removedCat = list.categories[1]
-        
         // given
-        let indexPath = list.removeCategory(removedCat, updateIndices: true)
+        cat.resetItemOrderByPosition()
         
         // then
-        XCTAssertTrue(indexPath[0].row == 5, "removeCategory indexPath check")
-        
-        for list in lists {
-            for cat in list.categories {
-                XCTAssertTrue(cat != removedCat, "removeCategory category compare")
-            }
+        var order = 0
+        for item in cat.items {
+            XCTAssertTrue(item.order == order, "resetItemOrderByPosition")
+            order += 1
         }
-        
-        XCTAssertTrue(list.categories.count == 2, "removeCategory items count")
     }
     
-    // func insertItem(item: Item, afterObj: ListObj, updateIndices: Bool)
-    func test_insertItem_afterItem()
+    // func htmlForPrinting(list: List, includePics: Bool) -> String
+    func test_htmlForPrinting()
     {
-        let list = lists[1]
-        let cat = list.categories[1]
-        let targetItem = cat.items[1]
-        let newItem = Item.init(name: "Added Item", state: .Complete, createRecord: true)
+        let list = lists[0]
+        let cat = list.categories[0]
         
         // given
-        list.insertItem(newItem, afterObj: targetItem, updateIndices: true)
+        let html = cat.htmlForPrinting(list, includePics: false)
         
         // then
-        let testItem = cat.items[2]
-        XCTAssertTrue(testItem === newItem, "insertItem_afterItem location check")
-        XCTAssertTrue(cat.items.count == 4, "insertItem_afterItem items count")
+        NSLog("html length = \(html.characters.count)")
+        XCTAssertTrue(html.characters.count > 0, "htmlForPrinting character count check")
     }
     
-    // func insertItem(item: Item, beforeObj: ListObj, updateIndices: Bool) -> Category
-    func test_insertItem_beforeItem()
+    // func itemsComplete() -> Int
+    func test_itemsComplete()
     {
-        let list = lists[1]
-        let cat = list.categories[1]
-        let targetItem = cat.items[1]
-        let newItem = Item.init(name: "Added Item", state: .Complete, createRecord: true)
+        let cat = lists[0].categories[0]
         
         // given
-        list.insertItem(newItem, beforeObj: targetItem, updateIndices: true)
+        cat.items[0].state = .Complete
+        cat.items[1].state = .Inactive
+        cat.items[2].state = .Incomplete
         
         // then
-        let testItem1 = cat.items[1]
-        let testItem2 = cat.items[2]
-        XCTAssertTrue(testItem1 === newItem, "insertItem_beforeItem testItem1 location check")
-        XCTAssertTrue(testItem2 === targetItem, "insertItem_beforeItem testItem2 location check")
-        XCTAssertTrue(cat.items.count == 4, "insertItem items count")
+        XCTAssertTrue(cat.itemsComplete() == 1, "itemsComplete")
     }
     
-    // func insertItem(item: Item, inCategory: Category, atPosition: InsertPosition, updateIndices: Bool)
-    func test_insertItem_inCategory()
+    // func itemsActive() -> Int
+    func test_itemsActive()
     {
-        let list = lists[1]
-        let cat = list.categories[1]
-        let newItemBeginning = Item.init(name: "Added Item Beginning", state: .Complete, createRecord: true)
-        let newItemEnd = Item.init(name: "Added Item End", state: .Complete, createRecord: true)
+        let cat = lists[0].categories[0]
         
         // given
-        list.insertItem(newItemBeginning, inCategory: cat, atPosition: .Beginning, updateIndices: true)
-        list.insertItem(newItemEnd, inCategory: cat, atPosition: .End, updateIndices: true)
+        cat.items[0].state = .Complete
+        cat.items[1].state = .Inactive
+        cat.items[2].state = .Incomplete
         
         // then
-        let testItemBeginning = cat.items[0]
-        let testItemEnd = cat.items[cat.items.count-1]
-        XCTAssertTrue(testItemBeginning === newItemBeginning, "insertItem_inCategory beginning item location check")
-        XCTAssertTrue(testItemEnd === newItemEnd, "insertItem_inCategory end item location check")
-        XCTAssertTrue(cat.items.count == 5, "insertItem items count")
+        XCTAssertTrue(cat.itemsActive() == 2, "itemsActive")
     }
     
-    // func removeListObjAtIndexPath(indexPath: NSIndexPath, preserveCategories: Bool, updateIndices: Bool) -> [NSIndexPath]
-    func test_removeListObjAtIndexPath_item()
+    // func itemsInactive() -> Int
+    func test_itemsInactive()
     {
-        let list = lists[1]
-        let indexPath = NSIndexPath.init(forRow: 2, inSection: 0)
+        let cat = lists[0].categories[0]
         
         // given
-        let targetItem = list.itemForIndexPath(indexPath)
-        let returnIndexPath = list.removeListObjAtIndexPath(indexPath, preserveCategories: true, updateIndices: true)
+        cat.items[0].state = .Complete
+        cat.items[1].state = .Inactive
+        cat.items[2].state = .Incomplete
         
         // then
-        for list in lists {
-            for cat in list.categories {
-                for item in cat.items {
-                    XCTAssertTrue(item != targetItem, "removeListObjAtIndexPath_item item compare")
-                }
-            }
-        }
-        
-        XCTAssertNotNil(targetItem, "removeListObjAtIndexPath_item target not nil")
-        XCTAssertTrue(returnIndexPath.count == 1, "removeListObjAtIndexPath_item indexPath count")
-        XCTAssertTrue(indexPath.row == returnIndexPath[0].row, "removeListObjAtIndexPath_item indexPath compare")
+        XCTAssertTrue(cat.itemsInactive() == 1, "itemsInactive")
     }
     
-    func test_removeListObjAtIndexPath_category()
+    // func itemsIncomplete() -> Int
+    func test_itemsIncomplete()
     {
-        let list = lists[1]
-        let indexPath = NSIndexPath.init(forRow: 5, inSection: 0)
+        let cat = lists[0].categories[0]
         
         // given
-        let targetCategory = list.categoryForIndexPath(indexPath)
-        let returnIndexPath = list.removeListObjAtIndexPath(indexPath, preserveCategories: false, updateIndices: true)
+        cat.items[0].state = .Complete
+        cat.items[1].state = .Inactive
+        cat.items[2].state = .Incomplete
         
         // then
-        for list in lists {
-            for cat in list.categories {
-                XCTAssertTrue(cat != targetCategory, "removeListObjAtIndexPath_category category compare")
-            }
-        }
-        
-        XCTAssertNotNil(targetCategory, "removeListObjAtIndexPath_category targetCategory not nil")
-        XCTAssertTrue(returnIndexPath.count == 5, "removeListObjAtIndexPath_category indexPath count")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 5, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 6, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 7, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 8, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 9, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
+        XCTAssertTrue(cat.itemsIncomplete() == 1, "itemsIncomplete")
     }
-    
-    // func insertItemAtIndexPath(item: Item, indexPath: NSIndexPath, atPosition: InsertPosition, updateIndices: Bool)
-    // func insertCategory(category: Category, atIndex: Int)
-    // func updateIndices()
-    // func resetCategoryAndItemOrderByPosition()
-    // func resetCategoryOrderByPosition()
-    // func totalDisplayCount() -> Int
-    // func categoryForTag(tag: Int) -> Category?
-    // func itemForTag(tag: Int) -> Item?
-    // func objectForTag(tag: Int) -> ListObj?
-    // func categoryForObj(item: ListObj) -> Category?
-    // func categoryForIndexPath(indexPath: NSIndexPath) -> Category?
-    // func itemForIndexPath(indexPath: NSIndexPath) -> Item?
-    // func objectForIndexPath(indexPath: NSIndexPath) -> ListObj?
-    // func displayIndexPathForTag(tag: Int) -> NSIndexPath?
-    // func displayIndexPathForObj(obj: ListObj) -> (indexPath: NSIndexPath?, isItem: Bool)
-    // func displayIndexPathForCategory(category: Category) -> NSIndexPath?
-    // func displayIndexPathForItem(item: Item) -> NSIndexPath?
-    // func displayIndexPathForAddItemInCategory(category: Category) -> NSIndexPath?
-    // func displayIndexPathsForCategoryFromIndexPath(indexPath: NSIndexPath, includeCategoryAndAddItemIndexPaths: Bool) -> [NSIndexPath]
-    // func displayIndexPathsForCategory(category: Category, includeAddItemIndexPath: Bool) -> [NSIndexPath]
-    // func indexPathsForCompletedRows() -> [NSIndexPath]
-    // func indexPathsForInactiveRows() -> [NSIndexPath]
-    // func titleForObjectAtIndexPath(indexPath: NSIndexPath) -> String?
-    // func updateObjNameAtTag(tag: Int, name: String)
-    // func isDisplayedItem(item: Item) -> Bool
-    // func indexPathIsLastRowDisplayed(indexPath: NSIndexPath) -> Bool
-    // func tagForIndexPath(indexPath: NSIndexPath) -> Tag
-    // func tagValueForIndexPath(indexPath: NSIndexPath) -> Int
-    // func htmlForPrinting(includePics: Bool) -> String
-    // func itemCount() -> Int
     
     func DISABLE_testPerformanceExample() {
         // This is an example of a performance test case.

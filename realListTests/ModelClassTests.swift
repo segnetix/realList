@@ -34,6 +34,7 @@ class ModelClassTests: XCTestCase
         item = list.addItem(cat!, name: "First Item", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         item!.note = "First Item note..."
         item!.needToSave = true
+        //item!.setImage(UIImage(named: "Cloud_check"))
         
         item = list.addItem(cat!, name: "Second Item", state: ItemState.Incomplete, updateIndices: false, createRecord: true)
         item!.note = "Second Item note..."

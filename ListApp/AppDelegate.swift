@@ -623,7 +623,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
             case ImagesRecordType:
                 if let item = getItemFromReference(record) {
-                    if let image = item.addImage(false) {
+                    if let image = item.addImageAsset() {
                         image.updateFromRecord(record)
                         print("added new image to item: '\(item.name)' imageGUID: \(image.imageGUID)")
                     }
