@@ -1675,6 +1675,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         return nil
     }
     
+    // returns the category that contains the given item in the given list
+    func getCategoryForItem(searchItem: Item, inList: List) -> Category?
+    {
+        for category in inList.categories {
+            for item in category.items {
+                if item === searchItem {
+                    return category
+                }
+            }
+        }
+        
+        return nil
+    }
+    
 }
 
 ////////////////////////////////////////////////////////////////

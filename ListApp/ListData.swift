@@ -386,6 +386,7 @@ class List: NSObject, NSCoding
                 index += 1
                 return index
             }
+            index += 1
         }
         
         return -1
@@ -468,7 +469,7 @@ class List: NSObject, NSCoding
             //self.categories[catIdx].items.removeAtIndex(itmIdx)
             
             // locate this item in list data and delete it
-            if let cat = appDelegate.getCategoryForItem(item) {
+            if let cat = appDelegate.getCategoryForItem(item, inList: self) {
                 cat.items.removeObject(item)
                 cat.resetItemOrderByPosition()
                 removedPaths.append(indexPath!)
@@ -600,7 +601,7 @@ class List: NSObject, NSCoding
                 // locate this item in list data and delete it
                 let item = obj as! Item
                 
-                if let cat = appDelegate.getCategoryForItem(item) {
+                if let cat = appDelegate.getCategoryForItem(item, inList: self) {
                     cat.items.removeObject(item)
                     cat.resetItemOrderByPosition()
                     removedPaths.append(indexPath)
