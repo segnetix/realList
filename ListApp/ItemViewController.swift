@@ -89,6 +89,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         super.viewDidLoad()
         manager.delegate = self
         
+        CheckBox.itemVC = self      // assign CheckBox type property
+        
         /*
         if appDelegate.appIsUpgraded {
             adBanner.delegate = nil
@@ -314,7 +316,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
             cell.tapView.addGestureRecognizer(doubleTapGestureRecognizer)
 
-            cell.checkBox.checkBoxInit(item, list: list, itemVC: self, tag: tag)
+            cell.checkBox.checkBoxInit(item, list: list, tag: tag)
             
             // set item name
             let title = list.titleForObjectAtIndexPath(indexPath)

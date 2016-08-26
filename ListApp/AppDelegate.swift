@@ -869,8 +869,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // pulls all list, category and item data from cloud storage
-    
-    //refreshUpdateText(msg: String) -> Void, refreshEnd,() -> Void
     func fetchCloudData(refreshLabel: UILabel?, refreshEnd:() -> Void)
     {
         //NSLog("fetchCloudData...")

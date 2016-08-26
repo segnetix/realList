@@ -104,7 +104,7 @@ class AppManager: NSObject
         let reachability = note.object as! Reachability
         notifyReachability(reachability)
         
-        print("*** reachability changed to \(isReachable) - networkType change to \(reachabiltyNetworkType)")
+        // print("*** reachability changed to \(isReachable) - networkType change to \(reachabiltyNetworkType)")
         
         dispatch_async(dispatch_get_main_queue()) {
             self.delegate?.reachabilityStatusChangeHandler(reachability)

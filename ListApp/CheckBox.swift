@@ -22,14 +22,14 @@ class CheckBox: UIButton
     // external links
     var item: Item?
     var list: List?
-    var itemVC: ItemViewController?
+    static var itemVC: ItemViewController?      // type property
     
-    func checkBoxInit(item: Item, list: List, itemVC: ItemViewController, tag: Int) {
+    func checkBoxInit(item: Item, list: List, tag: Int) {
         self.item = item
         self.list = list
-        self.itemVC = itemVC
         self.tag = tag
         
+        // intercept button tap events
         self.addTarget(self, action: #selector(CheckBox.buttonTapped(_:)), forControlEvents: UIControlEvents.TouchUpInside)
         
         // set the initial check box image
@@ -38,8 +38,8 @@ class CheckBox: UIButton
     
     // cycle the button image on tap
     func buttonTapped(sender: UIButton) {
-        if sender == self && itemVC != nil {
-            itemVC!.checkButtonTapped(self)
+        if sender == self && CheckBox.itemVC != nil {
+            CheckBox.itemVC!.checkButtonTapped(self)
             self.setImage()
         }
     }
