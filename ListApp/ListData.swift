@@ -183,11 +183,12 @@ class List: NSObject, NSCoding
         }
     }
     
-    // new list initializer
+    // Designated initializer - new list initializer
     init(name: String, createRecord: Bool, tutorial: Bool = false)
     {
         self.name = name
         self.isTutorialList = tutorial
+        super.init()
         
         if createRecord {
             // new list needs a new record and reference
@@ -204,7 +205,7 @@ class List: NSObject, NSCoding
 //
 ///////////////////////////////////////////////////////
     
-    // Memberwise initializer - called when restoring from local storage on launch
+    // Designated memberwise initializer - called when restoring from local storage on launch
     init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, tutorial: Bool?, listColorName: String?, modificationDate: NSDate?, listReference: CKReference?, listRecord: CKRecord?, categories: [Category]?)
     {
         if let name               = name                 { self.name                = name               } else { self.name = ""                        }
@@ -223,7 +224,8 @@ class List: NSObject, NSCoding
         self.setListColor()
     }
     
-    required convenience init?(coder decoder: NSCoder)
+    // Secondary initializer - for unarchiving a list object
+    convenience required init?(coder decoder: NSCoder)
     {
         let name               = decoder.decodeObjectForKey(key_name)               as? String
         let showCompletedItems = decoder.decodeObjectForKey(key_showCompletedItems) as? Bool
@@ -246,7 +248,7 @@ class List: NSObject, NSCoding
                   categories: categories)
     }
     
-    // local storage
+    // to local storage
     func encodeWithCoder(coder: NSCoder)
     {
         self.modificationDate = NSDate.init()
@@ -262,7 +264,7 @@ class List: NSObject, NSCoding
         coder.encodeObject(self.modificationDate,   forKey: key_modificationDate)
     }
     
-    // commits this list and its categories to cloud storage
+    // to cloud storage
     func saveToCloud()
     {
         // don't save tutorial records to the cloud
@@ -373,7 +375,7 @@ class List: NSObject, NSCoding
     
 ///////////////////////////////////////////////////////
 //
-//  MARK: Initializers for Category and Item objects
+//  MARK: Methods for Category and Item objects
 //
 ///////////////////////////////////////////////////////
     
@@ -1267,6 +1269,7 @@ class ListObj: NSObject
         }
     }
     
+    // Designated initializer
     init(name: String?)
     {
         if let name = name { self.name = name } else { self.name = "" }
@@ -1275,6 +1278,8 @@ class ListObj: NSObject
         self.itemIndex = 0
         self.needToSave = true
         self.needToDelete = false
+        
+        super.init()
     }
     
     func tag() -> Int
@@ -1301,7 +1306,7 @@ class Category: ListObj, NSCoding
     var isTutorialCategory = false
     var itemAddCount: Int32 = 0
     
-    // new category initializer
+    // Designated initializer - new category initializer
     init(name: String, displayHeader: Bool, createRecord: Bool, tutorial: Bool = false)
     {
         self.displayHeader = displayHeader
@@ -1318,7 +1323,7 @@ class Category: ListObj, NSCoding
         super.init(name: name)
     }
     
-    // memberwise initializer
+    // Designated initializer - memberwise initializer
     init(name: String?, expanded: Bool?, displayHeader: Bool?, tutorial: Bool?, itemAddCount: Int32?, modificationDate: NSDate?, categoryReference: CKReference?, categoryRecord: CKRecord?, items: [Item]?)
     {
         if let expanded          = expanded          { self.expanded           = expanded          } else { self.expanded           = true          }
@@ -1333,7 +1338,8 @@ class Category: ListObj, NSCoding
         super.init(name: name)
     }
     
-    required convenience init?(coder decoder: NSCoder)
+    // Secondary initializer - for unarchiving a category object
+    convenience required init?(coder decoder: NSCoder)
     {
         let name = decoder.decodeObjectForKey(key_name)                           as? String
         let expanded          = decoder.decodeObjectForKey(key_expanded)          as? Bool
@@ -1635,7 +1641,7 @@ class Item: ListObj, NSCoding
         }
     }
     
-    // new item initializer
+    // Designated initializer - new item initializer
     init(name: String, state: ItemState, createRecord: Bool, tutorial: Bool = false)
     {
         self.state = state
@@ -1666,7 +1672,7 @@ class Item: ListObj, NSCoding
         super.init(name: name)
     }
 
-    // memberwise initializer
+    // Designated memberwise initializer
     init(name: String?, note: String?, imageAsset: ImageAsset?, state: ItemState, tutorial: Bool?, itemRecord: CKRecord?, itemReference: CKReference?, createdBy: String?, createdDate: NSDate?, modifiedBy: String?, modifiedDate: NSDate?, imageModifiedDate: NSDate?)
     {
         if let note               = note              { self.note              = note              } else { self.note              = ""                                                                          }
@@ -1692,7 +1698,8 @@ class Item: ListObj, NSCoding
         super.init(name: name)
     }
     
-    required convenience init?(coder decoder: NSCoder)
+    // Secondary initializer - for unarchiving an item object
+    convenience required init?(coder decoder: NSCoder)
     {
         let name              = decoder.decodeObjectForKey(key_name)              as? String
         let note              = decoder.decodeObjectForKey(key_note)              as? String
@@ -2005,7 +2012,7 @@ class ImageAsset: NSObject, NSCoding
     var needToSave: Bool
     var needToDelete: Bool
     
-    // new item initializer
+    // Designated initializer - new item initializer
     init(itemName: String?, itemReference: CKReference)
     {
         var name = ""
@@ -2022,9 +2029,11 @@ class ImageAsset: NSObject, NSCoding
         self.needToDelete = false
         self.imageRecord = CKRecord.init(recordType: ImagesRecordType)
         self.modifiedDate = NSDate.init()
+        
+        super.init()
     }
     
-    // memberwise initializer
+    // Designated memberwise initializer
     init(itemName: String?, imageData: NSData?, imageGUID: String?, imageAsset: CKAsset?, itemReference: CKReference?, imageRecord: CKRecord?, modifiedDate: NSDate?)
     {
         if let itemName      = itemName      { self.itemName      = itemName      } else { self.itemName      = ""                                          }
@@ -2047,6 +2056,8 @@ class ImageAsset: NSObject, NSCoding
         self.needToSave = false
         self.needToDelete = false
         self.imageFileURL = nil
+        
+        super.init()
     }
     
     // encoder
@@ -2069,8 +2080,8 @@ class ImageAsset: NSObject, NSCoding
         coder.encodeObject(self.imageData,     forKey: key_imageData)
     }
     
-    // decoder
-    required convenience init?(coder decoder: NSCoder)
+    // decoder - Secondary initializer - for unarchiving an ImageAsset object
+    convenience required init?(coder decoder: NSCoder)
     {
         let itemName      = decoder.decodeObjectForKey(key_name)          as? String
         let imageGUID     = decoder.decodeObjectForKey(key_imageGUID)     as? String
@@ -2169,8 +2180,7 @@ class ImageAsset: NSObject, NSCoding
         var imageWasUpdated = false
         self.needToSave = false
         
-        if self.image !== image
-        {
+        if self.image !== image {
             print("setItemImage - new image is different than old: \(itemName)")
             self.image = image
             imageWasUpdated = true

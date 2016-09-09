@@ -9,16 +9,16 @@ import UIKit
 import CloudKit
 import StoreKit
 
-let key_listData             = "listData"
-let key_selectionIndex       = "selectionIndex"
-let key_printNotes           = "printNotes"
-let key_namesCapitalize      = "namesCapitalize"
-let key_namesSpellCheck      = "namesSpellCheck"
-let key_namesAutocorrection  = "namesAutocorrection"
-let key_notesCapitalize      = "notesCapitalize"
-let key_notesSpellCheck      = "notesSpellCheck"
-let key_notesAutocorrection  = "notesAutocorrection"
-let key_picsInPrintAndEmail  = "picsInPrintAndEmail"
+private let key_listData             = "listData"
+private let key_selectionIndex       = "selectionIndex"
+private let key_printNotes           = "printNotes"
+private let key_namesCapitalize      = "namesCapitalize"
+private let key_namesSpellCheck      = "namesSpellCheck"
+private let key_namesAutocorrection  = "namesAutocorrection"
+private let key_notesCapitalize      = "notesCapitalize"
+private let key_notesSpellCheck      = "notesSpellCheck"
+private let key_notesAutocorrection  = "notesAutocorrection"
+private let key_picsInPrintAndEmail  = "picsInPrintAndEmail"
 
 // list and item limits for free version
 let kMaxListCount            =  2

@@ -648,6 +648,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_CODE_COVERAGE = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = EnList.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -670,6 +671,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_CODE_COVERAGE = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = EnList.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -770,6 +772,7 @@
 				B0B3E3CE1D6CB546001D4395 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B0B3E3DB1D6CBD6C001D4395 /* Build configuration list for PBXNativeTarget "realListUITests" */ = {
 			isa = XCConfigurationList;
@@ -778,6 +781,7 @@
 				B0B3E3DD1D6CBD6C001D4395 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
