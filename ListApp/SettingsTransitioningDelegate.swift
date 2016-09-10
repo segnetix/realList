@@ -11,7 +11,7 @@ import UIKit
 class SettingsTransitioningDelegate: NSObject, UIViewControllerTransitioningDelegate {
     
     func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        let presentationController = SettingsPresentationController(presentedViewController:presented, presenting:presenting!)
+        let presentationController = SettingsPresentationController(presentedViewController:presented, presenting:presenting)
         
         return presentationController
     }

@@ -11,7 +11,7 @@ import UIKit
 class ItemDetailTransitioningDelegate: NSObject, UIViewControllerTransitioningDelegate {
     
     func presentationController(forPresented presented: UIViewController, presenting: UIViewController?, source: UIViewController) -> UIPresentationController? {
-        let presentationController = ItemDetailPresentationController(presentedViewController:presented, presenting:presenting!)
+        let presentationController = ItemDetailPresentationController(presentedViewController:presented, presenting:presenting)
         
         return presentationController
     }
