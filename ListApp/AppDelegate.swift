@@ -25,10 +25,10 @@ let kMaxListCount            =  2
 let kMaxItemCount            = 12
 
 // price formatter function
-let priceFormatter: NSNumberFormatter = {
-    let formatter = NSNumberFormatter()
-    formatter.formatterBehavior = .Behavior10_4
-    formatter.numberStyle = .CurrencyStyle
+let priceFormatter: NumberFormatter = {
+    let formatter = NumberFormatter()
+    formatter.formatterBehavior = .behavior10_4
+    formatter.numberStyle = .currency
     return formatter
 }()
 
@@ -42,8 +42,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var rightNavController: UINavigationController?
     var itemViewController: ItemViewController?
     var aboutViewController: AboutViewController?
-    var DocumentsDirectory: NSURL?
-    var ArchiveURL = NSURL()
+    var documentsDirectory: URL?
+    var archiveURL: URL?
     var cloudUploadStatusRecord: CKRecord?
     var updateRecords = [CKRecord: AnyObject]()
     
@@ -82,7 +82,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     let deletePurgeDays = 30                            // delete records will be purged from cloud storage after this many days
     
     // iCloud
-    let container = CKContainer.defaultContainer()
+    let container = CKContainer.default()
     var privateDatabase: CKDatabase?
     
     // iCloud query operations
@@ -100,7 +100,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var refreshLabel: UILabel?
     var refreshEnd: () -> Void = { }
     
-    func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool
     {
         // set up controller access for application state persistence
         splitViewController = self.window!.rootViewController as? UISplitViewController
@@ -111,13 +111,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         listViewController!.delegate = itemViewController
         itemViewController!.navigationItem.leftItemsSupplementBackButton = true
-        itemViewController!.navigationItem.leftBarButtonItem = splitViewController!.displayModeButtonItem()
+        itemViewController!.navigationItem.leftBarButtonItem = splitViewController!.displayModeButtonItem
         
-        DocumentsDirectory = NSFileManager().URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first!
-        ArchiveURL = DocumentsDirectory!.URLByAppendingPathComponent(key_listData)
+        documentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
+        archiveURL = documentsDirectory!.appendingPathComponent(key_listData)
         
         // show both list and item view controllers if possible
-        splitViewController!.preferredDisplayMode = UISplitViewControllerDisplayMode.AllVisible
+        splitViewController!.preferredDisplayMode = UISplitViewControllerDisplayMode.allVisible
         
         privateDatabase = container.privateCloudDatabase
 
@@ -134,31 +134,33 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         return true
     }
     
-    func application(application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: NSError)
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error)
     {
         print("*** didFailToRegisterForRemoteNotificationsWithError: \(error)")
     }
     
-    func application(application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: NSData) {
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         print("*** didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
         
         // user agreed to notifications so create subscriptions if necessary
         self.createSubscriptions()
     }
 
-    func pushNotificationSetup(application: UIApplication) {
-        let notificationSettings = UIUserNotificationSettings(forTypes: UIUserNotificationType.None, categories: nil)
+    func pushNotificationSetup(_ application: UIApplication) {
+        let notificationSettings = UIUserNotificationSettings(types: UIUserNotificationType(), categories: nil)
         application.registerUserNotificationSettings(notificationSettings)
         application.registerForRemoteNotifications()
     }
     
     func restoreListDataFromLocalStorage() {
+        guard let archiveURL = archiveURL else { return }
+        
         // restore the list data from local storage
-        if let archivedListData = NSKeyedUnarchiver.unarchiveObjectWithFile(ArchiveURL.path!) as? [List] {
+        if let archivedListData = NSKeyedUnarchiver.unarchiveObject(withFile: archiveURL.path) as? [List] {
             listViewController!.lists = archivedListData
             
             // restore the selected list
-            if let initialListIndex = NSUserDefaults.standardUserDefaults().objectForKey(key_selectionIndex) as? Int {
+            if let initialListIndex = UserDefaults.standard.object(forKey: key_selectionIndex) as? Int {
                 if initialListIndex >= 0 && initialListIndex < listViewController!.lists.count {
                     itemViewController!.list = listViewController!.lists[initialListIndex]
                     listViewController!.selectionIndex = initialListIndex
@@ -175,14 +177,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     func restoreAppSettings() {
         // restore app settings
-        if let printNotes          = NSUserDefaults.standardUserDefaults().objectForKey(key_printNotes)          as? Bool { self.printNotes          = printNotes          }
-        if let namesCapitalize     = NSUserDefaults.standardUserDefaults().objectForKey(key_namesCapitalize)     as? Bool { self.namesCapitalize     = namesCapitalize     }
-        if let namesSpellCheck     = NSUserDefaults.standardUserDefaults().objectForKey(key_namesSpellCheck)     as? Bool { self.namesSpellCheck     = namesSpellCheck     }
-        if let namesAutocorrection = NSUserDefaults.standardUserDefaults().objectForKey(key_namesAutocorrection) as? Bool { self.namesAutocorrection = namesAutocorrection }
-        if let notesCapitalize     = NSUserDefaults.standardUserDefaults().objectForKey(key_notesCapitalize)     as? Bool { self.notesCapitalize     = notesCapitalize     }
-        if let notesSpellCheck     = NSUserDefaults.standardUserDefaults().objectForKey(key_notesSpellCheck)     as? Bool { self.notesSpellCheck     = notesSpellCheck     }
-        if let notesAutocorrection = NSUserDefaults.standardUserDefaults().objectForKey(key_notesAutocorrection) as? Bool { self.notesAutocorrection = notesAutocorrection }
-        if let picsInPrintAndEmail = NSUserDefaults.standardUserDefaults().objectForKey(key_picsInPrintAndEmail) as? Bool { self.picsInPrintAndEmail = picsInPrintAndEmail }
+        if let printNotes          = UserDefaults.standard.object(forKey: key_printNotes)          as? Bool { self.printNotes          = printNotes          }
+        if let namesCapitalize     = UserDefaults.standard.object(forKey: key_namesCapitalize)     as? Bool { self.namesCapitalize     = namesCapitalize     }
+        if let namesSpellCheck     = UserDefaults.standard.object(forKey: key_namesSpellCheck)     as? Bool { self.namesSpellCheck     = namesSpellCheck     }
+        if let namesAutocorrection = UserDefaults.standard.object(forKey: key_namesAutocorrection) as? Bool { self.namesAutocorrection = namesAutocorrection }
+        if let notesCapitalize     = UserDefaults.standard.object(forKey: key_notesCapitalize)     as? Bool { self.notesCapitalize     = notesCapitalize     }
+        if let notesSpellCheck     = UserDefaults.standard.object(forKey: key_notesSpellCheck)     as? Bool { self.notesSpellCheck     = notesSpellCheck     }
+        if let notesAutocorrection = UserDefaults.standard.object(forKey: key_notesAutocorrection) as? Bool { self.notesAutocorrection = notesAutocorrection }
+        if let picsInPrintAndEmail = UserDefaults.standard.object(forKey: key_picsInPrintAndEmail) as? Bool { self.picsInPrintAndEmail = picsInPrintAndEmail }
     }
     
     func restoreUpgradeStatus() {
@@ -216,7 +218,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                                 } else {
                                     self.appIsUpgraded = false
                                     priceFormatter.locale = product.priceLocale
-                                    self.upgradePriceString = priceFormatter.stringFromNumber(product.price)!
+                                    self.upgradePriceString = priceFormatter.string(from: product.price)!
                                 }
                             }
                         }
@@ -228,18 +230,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     // iCloud sent notification of a change
     // add records to update arrays and trigger a notification processing event (if needed)
-    func application(application: UIApplication, didReceiveRemoteNotification userInfo: [NSObject : AnyObject])
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any])
     {
         let cloudKitNotification = CKNotification(fromRemoteNotificationDictionary: userInfo as! [String : NSObject])
         
-        if cloudKitNotification.notificationType == .Query {
+        if cloudKitNotification.notificationType == .query {
             let queryNotification = cloudKitNotification as! CKQueryNotification
-            if queryNotification.queryNotificationReason == .RecordDeleted {
+            if queryNotification.queryNotificationReason == .recordDeleted {
                 
                 // if the record has been deleted in cloud then add the reference to the delete array and delete the local copy later in the batch process (processNotificationRecords)
                 print("CloudKit: delete notification... \(queryNotification.recordID!.recordName)")
                 if queryNotification.recordID != nil {
-                    dispatch_async(dispatch_get_main_queue()) {
+                    DispatchQueue.main.async {
                         //NSLog("*** adding delete record")
                         self.deleteNotificationArray.append(queryNotification.recordID!.recordName)
                     }
@@ -250,14 +252,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 // if the record has been created or changed, we fetch the data from cloud
                 guard let database = privateDatabase else { return }
                 
-                database.fetchRecordWithID(queryNotification.recordID!) { (record: CKRecord?, error: NSError?) -> Void in
+                database.fetch(withRecordID: queryNotification.recordID!) { (record: CKRecord?, error: Error?) -> Void in
                     if error != nil {
                         // Handle the error here
                         print("Notification error: \(error?.localizedDescription)")
                         return
                     }
                     if record != nil {
-                        dispatch_async(dispatch_get_main_queue()) {
+                        DispatchQueue.main.async {
                             /*
                             if record!.recordType == ImagesRecordType {
                                 //NSLog("*** adding update record: image for \(record![key_itemName])")
@@ -273,20 +275,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             if !notificationProcessingEventIsPending {
                 //NSLog("preparing notification processing event timer...")
-                NSTimer.scheduledTimerWithTimeInterval(kNotificationProcessingDelay, target: self, selector: #selector(self.processNotificationRecords), userInfo: nil, repeats: false)
+                Timer.scheduledTimer(timeInterval: kNotificationProcessingDelay, target: self, selector: #selector(self.processNotificationRecords), userInfo: nil, repeats: false)
                 notificationProcessingEventIsPending = true
             }
         }
     }
     
-    func applicationWillResignActive(application: UIApplication) {
+    func applicationWillResignActive(_ application: UIApplication) {
         // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
         // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
         
         print("applicationWillResignActive...")
     }
 
-    func applicationDidEnterBackground(application: UIApplication) {
+    func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
         
@@ -294,7 +296,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
     }
 
-    func applicationWillEnterForeground(application: UIApplication) {
+    func applicationWillEnterForeground(_ application: UIApplication) {
         // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
         
         print("applicationWillEnterForeground...")
@@ -303,13 +305,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         //fetchCloudData()
     }
 
-    func applicationDidBecomeActive(application: UIApplication) {
+    func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
         print("applicationDidBecomeActive...")
     }
     
     // called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground
-    func applicationWillTerminate(application: UIApplication)
+    func applicationWillTerminate(_ application: UIApplication)
     {
         print("applicationWillTerminate...")
         
@@ -332,7 +334,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         //print("called createSubscriptions...")
         
         // create a single subscription of the given type
-        func createSubscription(recordType: String, delay: Double) {
+        func createSubscription(_ recordType: String, delay: Double) {
             guard let database = privateDatabase else { return }
             
             // run later, making sure that all subscriptions have been deleted before re-subscribing...
@@ -341,19 +343,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             // save new subscription
             runAfterDelay(delay) {
                 print("preparing to subscribe to \(recordType) changes")
-                let subscription = CKSubscription(recordType: recordType, predicate: predicate, options: [.FiresOnRecordCreation, .FiresOnRecordUpdate, .FiresOnRecordDeletion])
-                database.saveSubscription(subscription) { (subscription: CKSubscription?, error: NSError?) -> Void in
+                let subscription = CKSubscription(recordType: recordType, predicate: predicate, options: [.firesOnRecordCreation, .firesOnRecordUpdate, .firesOnRecordDeletion])
+                database.save(subscription, completionHandler: { (subscription: CKSubscription?, error: NSError?) -> Void in
                     if subscription != nil {
                         print("saved \(recordType) subscription... \(subscription!.subscriptionID)")
                     } else {
                         print("ERROR: saveSubscription error for \(recordType): \(error!.localizedDescription)")
                     }
-                }
+                } as! (CKSubscription?, Error?) -> Void) 
             }
         }
         
         // subscription check
-        database.fetchAllSubscriptionsWithCompletionHandler() { (subscriptions, error) -> Void in
+        database.fetchAllSubscriptions() { (subscriptions, error) -> Void in
             if error == nil {
                 var haveListsSub = false
                 var haveCategoriesSub = false
@@ -403,7 +405,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         var networkType   = "network not reachable"
         
         // determine if iCloudDrive is enabled for realList
-        if let _ = NSFileManager.defaultManager().ubiquityIdentityToken {
+        if let _ = FileManager.default.ubiquityIdentityToken {
             iCloudDriveOn = true
         }
         
@@ -426,27 +428,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         return iCloudDriveOn && netReachable
     }
     
-    func saveState(asynchronously: Bool)
+    func saveState(_ asynchronously: Bool)
     {
         func save() {
             // save current selection
-            NSUserDefaults.standardUserDefaults().setObject(listViewController!.selectionIndex, forKey: key_selectionIndex)
-            NSUserDefaults.standardUserDefaults().setObject(printNotes,                         forKey: key_printNotes)
+            UserDefaults.standard.set(listViewController!.selectionIndex, forKey: key_selectionIndex)
+            UserDefaults.standard.set(printNotes,                         forKey: key_printNotes)
             
             // save app settings
-            NSUserDefaults.standardUserDefaults().setObject(namesCapitalize,                    forKey: key_namesCapitalize)
-            NSUserDefaults.standardUserDefaults().setObject(namesSpellCheck,                    forKey: key_namesSpellCheck)
-            NSUserDefaults.standardUserDefaults().setObject(namesAutocorrection,                forKey: key_namesAutocorrection)
-            NSUserDefaults.standardUserDefaults().setObject(notesCapitalize,                    forKey: key_notesCapitalize)
-            NSUserDefaults.standardUserDefaults().setObject(notesSpellCheck,                    forKey: key_notesSpellCheck)
-            NSUserDefaults.standardUserDefaults().setObject(notesAutocorrection,                forKey: key_notesAutocorrection)
-            NSUserDefaults.standardUserDefaults().setObject(picsInPrintAndEmail,                forKey: key_picsInPrintAndEmail)
+            UserDefaults.standard.set(namesCapitalize,                    forKey: key_namesCapitalize)
+            UserDefaults.standard.set(namesSpellCheck,                    forKey: key_namesSpellCheck)
+            UserDefaults.standard.set(namesAutocorrection,                forKey: key_namesAutocorrection)
+            UserDefaults.standard.set(notesCapitalize,                    forKey: key_notesCapitalize)
+            UserDefaults.standard.set(notesSpellCheck,                    forKey: key_notesSpellCheck)
+            UserDefaults.standard.set(notesAutocorrection,                forKey: key_notesAutocorrection)
+            UserDefaults.standard.set(picsInPrintAndEmail,                forKey: key_picsInPrintAndEmail)
             
-            NSUserDefaults.standardUserDefaults().synchronize()
+            UserDefaults.standard.synchronize()
         }
         
         if asynchronously {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
+            DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async {
                 save()
             }
         } else {
@@ -455,7 +457,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // writes any dirty objects to the cloud in a batch operation
-    func saveListDataCloud(asynchronously: Bool)
+    func saveListDataCloud(_ asynchronously: Bool)
     {
         updateRecords.removeAll()   // empty the updateRecords array
         guard iCloudIsAvailable() else { print("saveListDataCloud - iCloud is not available..."); return }
@@ -475,7 +477,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
         
         if asynchronously {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
+            DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async {
                 save()
             }
         } else {
@@ -484,11 +486,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // writes the complete object graph locally
-    func saveListDataLocal(asynchronously: Bool)
+    func saveListDataLocal(_ asynchronously: Bool)
     {
         func save() {
             if let listVC = self.listViewController {
-                let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: self.ArchiveURL.path!)
+                guard let archiveURL = archiveURL else { return }
+                
+                let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: archiveURL.path)
                 
                 if !successfulSave {
                     print("ERROR: Failed to save list data locally...")
@@ -499,7 +503,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
         
         if asynchronously {
-            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)) {
+            DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async {
                 save()
             }
         } else {
@@ -508,20 +512,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // Writes list data locally and to the cloud
-    func saveListData(asynchronously: Bool) {
+    func saveListData(_ asynchronously: Bool) {
         saveListDataCloud(asynchronously)
         saveListDataLocal(asynchronously)
     }
     
     // Saves all app data.  If asynchronous then the save is put on a background thread.
-    func saveAll(asynchronously: Bool) {
+    func saveAll(_ asynchronously: Bool) {
         saveState(asynchronously)
         saveListData(asynchronously)
         print("all list data saved locally...")
     }
     
     // create or update a local object with the given record
-    func updateFromRecord(record: CKRecord, forceUpdate: Bool)
+    func updateFromRecord(_ record: CKRecord, forceUpdate: Bool)
     {
         var list: List?
         var category: Category?
@@ -531,8 +535,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         let localObj = getLocalObject(record.recordID.recordName)
         
         // compare the cloud version with local version
-        var cloudDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
-        var localDataTime: NSDate = NSDate.init(timeIntervalSince1970: NSTimeInterval.init())
+        var cloudDataTime: Date = Date.init(timeIntervalSince1970: TimeInterval.init())
+        var localDataTime: Date = Date.init(timeIntervalSince1970: TimeInterval.init())
         
         // get cloud data mod time and local data mod time
         if record.modificationDate != nil { cloudDataTime = record.modificationDate! }
@@ -542,25 +546,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             if localObj is List {
                 list = localObj as? List
                 if list!.modificationDate != nil {
-                    localDataTime = list!.modificationDate!
+                    localDataTime = list!.modificationDate! as Date
                 }
             }
         case CategoriesRecordType:
             if localObj is Category {
                 category = localObj as? Category
                 if category!.modificationDate != nil {
-                    localDataTime = category!.modificationDate!
+                    localDataTime = category!.modificationDate! as Date
                 }
             }
         case ItemsRecordType:
             if localObj is Item {
                 item = localObj as? Item
-                localDataTime = item!.modifiedDate
+                localDataTime = item!.modifiedDate as Date
             }
         case ImagesRecordType:
             if localObj is ImageAsset {
                 imageAsset = localObj as? ImageAsset
-                localDataTime = imageAsset!.modifiedDate
+                localDataTime = imageAsset!.modifiedDate as Date
             }
         default:
             print("*** ERROR: updateFromRecord - unknown record type received from cloud data...!")
@@ -610,7 +614,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 if let category = getCategoryFromReference(record) {
                     if category.categoryRecord != nil {
                         if let list = getListFromReference(category.categoryRecord!) {
-                            let item = list.addItem(category, name: "", state: ItemState.Incomplete, updateIndices: false, createRecord: false)
+                            let item = list.addItem(category, name: "", state: ItemState.incomplete, updateIndices: false, createRecord: false)
                             
                             if let newItem = item {
                                 newItem.updateFromRecord(record)
@@ -637,15 +641,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // deletes local data associated with the given recordName
-    func deleteRecordLocal(recordName: String)
+    func deleteRecordLocal(_ recordName: String)
     {
         guard let listVC = listViewController else { return }
         guard let obj = getLocalObject(recordName) else { print("deleteRecord: recordName not found...!"); return }
         
         if obj is List {
             let list = obj as! List
-            if let i = listVC.lists.indexOf(list) {
-                listVC.lists.removeAtIndex(i)
+            if let i = listVC.lists.index(of: list) {
+                listVC.lists.remove(at: i)
                 
                 if listVC.lists.count > 0 {
                     var selectRow = 0
@@ -654,9 +658,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                         // select the previous row before deleting
                         selectRow = i-1
                     }
-                    let rowToSelect:NSIndexPath = NSIndexPath(forRow: selectRow, inSection: 0)
-                    listVC.tableView.selectRowAtIndexPath(rowToSelect, animated: true, scrollPosition: UITableViewScrollPosition.None)
-                    listVC.tableView(listVC.tableView, didSelectRowAtIndexPath: rowToSelect)
+                    let rowToSelect:IndexPath = IndexPath(row: selectRow, section: 0)
+                    listVC.tableView.selectRow(at: rowToSelect, animated: true, scrollPosition: UITableViewScrollPosition.none)
+                    listVC.tableView(listVC.tableView, didSelectRowAt: rowToSelect)
                 }
             }
         } else if obj is Category {
@@ -729,12 +733,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         //NSLog("*** processNotificationRecords - finished")
     }
     
-    func addToUpdateRecords(record: CKRecord, obj: AnyObject) {
+    func addToUpdateRecords(_ record: CKRecord, obj: AnyObject) {
         updateRecords[record] = obj
     }
     
     // these are references to items that need an updated image from the cloud
-    func addToItemReferences(reference: CKReference) {
+    func addToItemReferences(_ reference: CKReference) {
         itemReferences.append(reference)
     }
     
@@ -777,7 +781,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             
             let saveRecordsOperation = CKModifyRecordsOperation()
             saveRecordsOperation.recordsToSave = batchRecords
-            saveRecordsOperation.savePolicy = .ChangedKeys
+            saveRecordsOperation.savePolicy = .changedKeys
             saveRecordsOperation.perRecordCompletionBlock = { record, error in
                 // deal with conflicts
                 // set completionHandler of wrapper operation if it's the case
@@ -823,19 +827,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 } else if error != nil {
                     // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
                     print("*** ERROR: batchRecordUpdate - \(error!.localizedDescription)")
-                    print("The following records had problems: \(error!.userInfo[CKPartialErrorsByItemIDKey])")
+                    print("The following records had problems: \((error as? NSError)!.userInfo[CKPartialErrorsByItemIDKey])")
                 }
             }
             
             // execute the batch save operation
-            database.addOperation(saveRecordsOperation)
+            database.add(saveRecordsOperation)
             
         } while stopIndex < ckRecords.count - 1
         
     }
     
     // deletes an array of records
-    func batchRecordDelete(deleteRecords: [CKRecord])
+    func batchRecordDelete(_ deleteRecords: [CKRecord])
     {
         guard let database = privateDatabase else { return }
         
@@ -860,16 +864,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 print("batch delete operation complete - \(savedRecords?.count) deleted.")
             } else {
                 // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
-                print("*** ERROR: batchRecordDelete. The following records had problems: \(error!.userInfo[CKPartialErrorsByItemIDKey])")
+                print("*** ERROR: batchRecordDelete. The following records had problems: \((error as? NSError)!.userInfo[CKPartialErrorsByItemIDKey])")
             }
         }
         
         // execute the batch delete operation
-        database.addOperation(deleteRecordsOperation)
+        database.add(deleteRecordsOperation)
     }
     
     // pulls all list, category and item data from cloud storage
-    func fetchCloudData(refreshLabel: UILabel?, refreshEnd:() -> Void)
+    func fetchCloudData(_ refreshLabel: UILabel?, refreshEnd:@escaping () -> Void)
     {
         //NSLog("fetchCloudData...")
         if isUpdating {
@@ -963,7 +967,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // also handles cascading cancellation of the operations
         
         // listFetch
-        listFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+        listFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : Error?) in
             if error != nil {
                 print("listFetch error: \(error?.localizedDescription)")
             }
@@ -976,8 +980,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 newOperation.resultsLimit = resultCount
                 listFetch = newOperation
                 self.externalListFetch = listFetch
-                database.addOperation(newOperation)
-            } else if listFetch.cancelled {
+                database.add(newOperation)
+            } else if listFetch.isCancelled {
                 print("listFetch cancelled...")
                 self.externalListFetch = nil
                 self.externalCategoryFetch?.cancel()
@@ -988,12 +992,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.refreshEnd()
             } else {
                 //NSLog("list fetch complete")
-                dispatch_async(dispatch_get_main_queue()) { self.externalListFetch = nil }
+                DispatchQueue.main.async { self.externalListFetch = nil }
             }
         }
         
         // categoryFetch
-        categoryFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+        categoryFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : Error?) in
             if error != nil {
                 print("categoryFetch error: \(error?.localizedDescription)")
             }
@@ -1006,8 +1010,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 newOperation.resultsLimit = resultCount
                 categoryFetch = newOperation
                 self.externalCategoryFetch = categoryFetch
-                database.addOperation(newOperation)
-            } else if categoryFetch.cancelled {
+                database.add(newOperation)
+            } else if categoryFetch.isCancelled {
                 print("categoryFetch cancelled...")
                 self.externalCategoryFetch = nil
                 self.externalDeleteFetch?.cancel()
@@ -1015,12 +1019,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 self.stopHUD()
             } else {
                 //NSLog("category fetch complete")
-                dispatch_async(dispatch_get_main_queue()) { self.externalCategoryFetch = nil }
+                DispatchQueue.main.async { self.externalCategoryFetch = nil }
             }
         }
         
         // deleteFetch
-        deleteFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+        deleteFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : Error?) in
             if error != nil {
                 print("deleteFetch error: \(error?.localizedDescription)")
             }
@@ -1033,26 +1037,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 newOperation.resultsLimit = resultCount
                 deleteFetch = newOperation
                 self.externalDeleteFetch = deleteFetch
-                database.addOperation(newOperation)
-            } else if deleteFetch.cancelled {
+                database.add(newOperation)
+            } else if deleteFetch.isCancelled {
                 print("deleteFetch cancelled...")
                 self.externalDeleteFetch = nil
                 self.externalItemFetch?.cancel()
                 self.stopHUD()
             } else {
                 //NSLog("delete fetch complete")
-                dispatch_async(dispatch_get_main_queue()) { self.externalDeleteFetch = nil }
+                DispatchQueue.main.async { self.externalDeleteFetch = nil }
             }
         }
         
         // itemFetch - passes on to mergeCloudData when complete
-        itemFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : NSError?) in
+        itemFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : Error?) in
             if error != nil {
                 print("itemFetch error: \(error?.localizedDescription)")
             }
             
             // update HUD
-            dispatch_async(dispatch_get_main_queue()) {
+            DispatchQueue.main.async {
                 if itemFetchCount > 0 {
                     if let refreshLabel = self.refreshLabel {
                         refreshLabel.text = msg + " \(itemFetchCount)"
@@ -1071,8 +1075,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 newOperation.resultsLimit = resultCount
                 itemFetch = newOperation
                 self.externalItemFetch = itemFetch
-                database.addOperation(newOperation)
-            } else if itemFetch.cancelled {
+                database.add(newOperation)
+            } else if itemFetch.isCancelled {
                 print("itemFetch cancelled...")
                 self.externalItemFetch = nil
                 self.stopHUD()
@@ -1088,7 +1092,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 
                 //NSLog("array counts - list: \(self.listFetchArray.count) category: \(self.categoryFetchArray.count) item: \(self.itemFetchArray.count) delete: \(self.deleteFetchArray.count)")
                 
-                dispatch_async(dispatch_get_main_queue())
+                DispatchQueue.main.async
                 {
                     //NSLog("dispatch main thread merge")
                     self.externalListFetch = nil
@@ -1109,10 +1113,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         externalItemFetch = itemFetch
         
         // execute the query operations
-        database.addOperation(itemFetch)
-        database.addOperation(categoryFetch)
-        database.addOperation(listFetch)
-        database.addOperation(deleteFetch)
+        database.add(itemFetch)
+        database.add(categoryFetch)
+        database.add(listFetch)
+        database.add(deleteFetch)
     }
     
     // must be called on main thread
@@ -1210,7 +1214,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 //print("image recordFetchedBlock - GUID: \(record[key_imageGUID]) recordId: \(record.recordID.recordName)")
             }
             
-            imageFetch.queryCompletionBlock = { [loop, startIndex, stopIndex] (cursor : CKQueryCursor?, error : NSError?) in
+            imageFetch.queryCompletionBlock = { [loop, startIndex, stopIndex] (cursor : CKQueryCursor?, error : Error?) in
                 if cursor != nil {
                     print("******* ERROR:  fetchImageData - there is more data to fetch and there should not be...")
                 }
@@ -1222,13 +1226,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 print("image record fetch operation for loop \(loop) is complete... \(startIndex+1) to \(stopIndex+1)")
                 
                 // send this batch of image records to the merge method on the main thread
-                dispatch_async(dispatch_get_main_queue()) {
+                DispatchQueue.main.async {
                     self.mergeImageCloudData(imageArray)
                 }
             }
             
             // execute the query operation
-            database.addOperation(imageFetch)
+            database.add(imageFetch)
             
         } while stopIndex < itemReferences.count - 1
     }
@@ -1293,7 +1297,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         self.refreshEnd = { }
     }
     
-    func mergeImageCloudData(imageRecords: [CKRecord])
+    func mergeImageCloudData(_ imageRecords: [CKRecord])
     {
         //NSLog("mergeImageCloudData...")
         
@@ -1385,17 +1389,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     {
         //NSLog("purgeOldDeleteRecords...")
         
-        let now = NSDate.init()
-        let userCalendar = NSCalendar.currentCalendar()
-        let timeInterval = NSDateComponents()
+        let now = Date.init()
+        let userCalendar = Calendar.current
+        var timeInterval = DateComponents()
         timeInterval.day = deletePurgeDays
         
         var purgeRecords = [CKRecord]()
         
         // collect records to be purged
         for record in deleteFetchArray {
-            if let deleteDate = record[key_deletedDate] as? NSDate {
-                let expirationDate = userCalendar.dateByAddingComponents(timeInterval, toDate: deleteDate, options: [])!
+            if let deleteDate = record[key_deletedDate] as? Date {
+                let expirationDate = (userCalendar as NSCalendar).date(byAdding: timeInterval, to: deleteDate, options: [])!
                 
                 if now > expirationDate {
                     purgeRecords.append(record)
@@ -1407,7 +1411,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         batchRecordDelete(purgeRecords)
     }
     
-    func passGestureToListVC(gesture: UILongPressGestureRecognizer, obj: ListObj?)
+    func passGestureToListVC(_ gesture: UILongPressGestureRecognizer, obj: ListObj?)
     {
         if let listVC = self.listViewController {
             listVC.processGestureFromItemVC(gesture, listObj: obj)
@@ -1421,19 +1425,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     ////////////////////////////////////////////////////////////////
     
     // these methods may be called from background threads
-    func startHUD(title: String, subtitle: String) {
+    func startHUD(_ title: String, subtitle: String) {
         guard let theView = splitViewController!.view else { return }
         
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             if self.hud == nil {
-                self.hud = MBProgressHUD.showHUDAddedTo(theView, animated: true)
+                self.hud = MBProgressHUD.showAdded(to: theView, animated: true)
                 self.hud?.minSize = CGSize(width: 160, height: 160)
                 self.hud?.offset = CGPoint(x: 0, y: -60)
-                self.hud!.contentColor = UIColor.darkGrayColor()
-                self.hud!.mode = MBProgressHUDMode.Indeterminate
-                self.hud!.minShowTime = NSTimeInterval(1.0)
-                self.hud!.button.setTitle("Cancel", forState: .Normal)
-                self.hud!.button.addTarget(self, action: #selector(AppDelegate.cancelCloudDataFetch), forControlEvents: .TouchUpInside)
+                self.hud!.contentColor = UIColor.darkGray
+                self.hud!.mode = MBProgressHUDMode.indeterminate
+                self.hud!.minShowTime = TimeInterval(1.0)
+                self.hud!.button.setTitle("Cancel", for: UIControlState())
+                self.hud!.button.addTarget(self, action: #selector(AppDelegate.cancelCloudDataFetch), for: .touchUpInside)
             }
             
             // dynamic elements
@@ -1446,23 +1450,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func startHUDwithDone() {
         guard let theView = splitViewController!.view else { return }
         
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             if self.hud != nil {
-                self.hud!.hideAnimated(false)
+                self.hud!.hide(animated: false)
                 self.hud = nil
             }
             
-            self.hud = MBProgressHUD.showHUDAddedTo(theView, animated: true)
+            self.hud = MBProgressHUD.showAdded(to: theView, animated: true)
             
             if let hud = self.hud {
-                hud.mode = MBProgressHUDMode.CustomView
+                hud.mode = MBProgressHUDMode.customView
                 hud.offset = CGPoint(x: 0, y: -60)
-                hud.contentColor = UIColor.darkGrayColor()
+                hud.contentColor = UIColor.darkGray
                 hud.minSize = CGSize(width: 160, height: 160)
                 let imageView = UIImageView(image: UIImage(named: "checkbox_blue"))
                 hud.customView = imageView
                 hud.label.text = NSLocalizedString("Done", comment: "Done")
-                hud.hideAnimated(true, afterDelay: 1.0)
+                hud.hide(animated: true, afterDelay: 1.0)
                 self.hud = nil
                 //NSLog("HUD completed...")
             }
@@ -1470,9 +1474,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     func stopHUD() {
-        dispatch_async(dispatch_get_main_queue()) {
+        DispatchQueue.main.async {
             if let hud = self.hud {
-                hud.hideAnimated(true)
+                hud.hide(animated: true)
                 self.hud = nil
             }
         }
@@ -1519,7 +1523,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // returns a ListData object from the given recordName
-    func getLocalObject(recordIDName: String) -> AnyObject?
+    func getLocalObject(_ recordIDName: String) -> AnyObject?
     {
         if let listVC = listViewController {
             for list in listVC.lists {
@@ -1551,7 +1555,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // returns a List object matching the given CKRecordID
-    func getLocalList(recordIDName: String) -> List?
+    func getLocalList(_ recordIDName: String) -> List?
     {
         if let listVC = listViewController {
             for list in listVC.lists {
@@ -1567,7 +1571,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // returns a Category object matching the given CKRecordID
-    func getLocalCategory(recordIDName: String) -> Category?
+    func getLocalCategory(_ recordIDName: String) -> Category?
     {
         if let listVC = listViewController {
             for list in listVC.lists {
@@ -1583,7 +1587,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
 
     // returns an Item object matching the given CKRecordID
-    func getLocalItem(recordIDName: String) -> Item?
+    func getLocalItem(_ recordIDName: String) -> Item?
     {
         if let listVC = listViewController {
             for list in listVC.lists {
@@ -1601,7 +1605,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // returns the list that contains the given category
-    func getListForCategory(searchCategory: Category) -> List?
+    func getListForCategory(_ searchCategory: Category) -> List?
     {
         if let listVC = listViewController {
             for list in listVC.lists {
@@ -1617,7 +1621,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // returns the list that contains the given item
-    func getListForItem(searchItem: Item) -> List?
+    func getListForItem(_ searchItem: Item) -> List?
     {
         if let listVC = listViewController {
             for list in listVC.lists {
@@ -1635,7 +1639,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // returns the list that contains the given list object
-    func getListForListObj(searchObj: ListObj) -> List?
+    func getListForListObj(_ searchObj: ListObj) -> List?
     {
         if let listVC = listViewController {
             for list in listVC.lists {
@@ -1656,7 +1660,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // returns the category that contains the given item
-    func getCategoryForItem(searchItem: Item) -> Category?
+    func getCategoryForItem(_ searchItem: Item) -> Category?
     {
         if let listVC = listViewController {
             for list in listVC.lists {
@@ -1674,7 +1678,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // returns the category that contains the given item in the given list
-    func getCategoryForItem(searchItem: Item, inList: List) -> Category?
+    func getCategoryForItem(_ searchItem: Item, inList: List) -> Category?
     {
         for category in inList.categories {
             for item in category.items {
@@ -1698,13 +1702,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
 // Array extension for removing objects
 extension Array where Element: Equatable
 {
-    mutating func removeObject(object: Element) {
-        if let index = self.indexOf(object) {
-            self.removeAtIndex(index)
+    mutating func removeObject(_ object: Element) {
+        if let index = self.index(of: object) {
+            self.remove(at: index)
         }
     }
     
-    mutating func removeObjectsInArray(array: [Element]) {
+    mutating func removeObjectsInArray(_ array: [Element]) {
         for object in array {
             self.removeObject(object)
         }
@@ -1712,26 +1716,27 @@ extension Array where Element: Equatable
 }
 
 // Date extension and methods for comparisons
-public func ==(lhs: NSDate, rhs: NSDate) -> Bool
+/*
+public func ==(lhs: Date, rhs: Date) -> Bool
 {
-    return lhs === rhs || lhs.compare(rhs) == .OrderedSame
+    return lhs === rhs || lhs.compare(rhs) == .orderedSame
 }
 
-public func <(lhs: NSDate, rhs: NSDate) -> Bool
+public func <(lhs: Date, rhs: Date) -> Bool
 {
-    return lhs.compare(rhs) == .OrderedAscending
+    return lhs.compare(rhs) == .orderedAscending
 }
 
-public func >(lhs: NSDate, rhs: NSDate) -> Bool
+public func >(lhs: Date, rhs: Date) -> Bool
 {
-    return lhs.compare(rhs) == .OrderedDescending
+    return lhs.compare(rhs) == .orderedDescending
 }
 
-extension NSDate: Comparable { }
-
+extension Date: Comparable { }
+*/
 
 // print wrapper - will remove print statements from the release version
-func print(items: Any..., separator: String = " ", terminator: String = "\n")
+func print(_ items: Any..., separator: String = " ", terminator: String = "\n")
 {
     #if DEBUG
     var idx = items.startIndex
@@ -1744,8 +1749,8 @@ func print(items: Any..., separator: String = " ", terminator: String = "\n")
     #endif
 }
 
-func runAfterDelay(delay: NSTimeInterval, block: dispatch_block_t) {
-    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(delay * Double(NSEC_PER_SEC)))
-    dispatch_after(time, dispatch_get_main_queue(), block)
+func runAfterDelay(_ delay: TimeInterval, block: @escaping ()->()) {
+    let time = DispatchTime.now() + Double(Int64(delay * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+    DispatchQueue.main.asyncAfter(deadline: time, execute: block)
 }
 

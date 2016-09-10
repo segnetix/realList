@@ -56,7 +56,7 @@ class ListClassTests: ModelClassTests
         // given
         let list = lists[0]
         let cat = list.categories[0]
-        let item = list.addItem(cat, name: "Added Item", state: .Complete, updateIndices: true, createRecord: true)
+        let item = list.addItem(cat, name: "Added Item", state: .complete, updateIndices: true, createRecord: true)
         
         // then
         XCTAssertNotNil(item, "")
@@ -75,7 +75,7 @@ class ListClassTests: ModelClassTests
         // then
         for cat in list.categories {
             for item in cat.items {
-                XCTAssertTrue(item.state == .Incomplete, "setAllItemsIncomplete state")
+                XCTAssertTrue(item.state == .incomplete, "setAllItemsIncomplete state")
             }
         }
     }
@@ -91,7 +91,7 @@ class ListClassTests: ModelClassTests
         // then
         for cat in list.categories {
             for item in cat.items {
-                XCTAssertTrue(item.state == .Inactive, "setAllItemsInactive state")
+                XCTAssertTrue(item.state == .inactive, "setAllItemsInactive state")
             }
         }
     }
@@ -130,7 +130,7 @@ class ListClassTests: ModelClassTests
         let indexPath = list.removeItem(removedItem, updateIndices: true)
         
         // then
-        XCTAssertTrue(indexPath[0].row == 7, "removeItem indexPath check")
+        XCTAssertTrue((indexPath[0] as NSIndexPath).row == 7, "removeItem indexPath check")
         
         for list in lists {
             for cat in list.categories {
@@ -153,7 +153,7 @@ class ListClassTests: ModelClassTests
         let indexPath = list.removeCategory(removedCat, updateIndices: true)
         
         // then
-        XCTAssertTrue(indexPath[0].row == 5, "removeCategory indexPath check")
+        XCTAssertTrue((indexPath[0] as NSIndexPath).row == 5, "removeCategory indexPath check")
         
         for list in lists {
             for cat in list.categories {
@@ -170,7 +170,7 @@ class ListClassTests: ModelClassTests
         let list = lists[1]
         let cat = list.categories[1]
         let targetItem = cat.items[1]
-        let newItem = Item.init(name: "Added Item", state: .Complete, createRecord: true)
+        let newItem = Item.init(name: "Added Item", state: .complete, createRecord: true)
         
         // given
         list.insertItem(newItem, afterObj: targetItem, updateIndices: true)
@@ -187,7 +187,7 @@ class ListClassTests: ModelClassTests
         let list = lists[1]
         let cat = list.categories[1]
         let targetItem = cat.items[1]
-        let newItem = Item.init(name: "Added Item", state: .Complete, createRecord: true)
+        let newItem = Item.init(name: "Added Item", state: .complete, createRecord: true)
         
         // given
         list.insertItem(newItem, beforeObj: targetItem, updateIndices: true)
@@ -205,12 +205,12 @@ class ListClassTests: ModelClassTests
     {
         let list = lists[1]
         let cat = list.categories[1]
-        let newItemBeginning = Item.init(name: "Added Item Beginning", state: .Complete, createRecord: true)
-        let newItemEnd = Item.init(name: "Added Item End", state: .Complete, createRecord: true)
+        let newItemBeginning = Item.init(name: "Added Item Beginning", state: .complete, createRecord: true)
+        let newItemEnd = Item.init(name: "Added Item End", state: .complete, createRecord: true)
         
         // given
-        list.insertItem(newItemBeginning, inCategory: cat, atPosition: .Beginning, updateIndices: false)
-        list.insertItem(newItemEnd, inCategory: cat, atPosition: .End, updateIndices: true)
+        list.insertItem(newItemBeginning, inCategory: cat, atPosition: .beginning, updateIndices: false)
+        list.insertItem(newItemEnd, inCategory: cat, atPosition: .end, updateIndices: true)
         
         // then
         let testItemBeginning = cat.items[0]
@@ -224,7 +224,7 @@ class ListClassTests: ModelClassTests
     func test_removeListObjAtIndexPath_item()
     {
         let list = lists[1]
-        let indexPath = NSIndexPath.init(forRow: 2, inSection: 0)
+        let indexPath = IndexPath.init(row: 2, section: 0)
         
         // given
         let targetItem = list.itemForIndexPath(indexPath)
@@ -241,13 +241,13 @@ class ListClassTests: ModelClassTests
         
         XCTAssertNotNil(targetItem, "removeListObjAtIndexPath_item target not nil")
         XCTAssertTrue(returnIndexPath.count == 1, "removeListObjAtIndexPath_item indexPath count")
-        XCTAssertTrue(indexPath.row == returnIndexPath[0].row, "removeListObjAtIndexPath_item indexPath compare")
+        XCTAssertTrue((indexPath as NSIndexPath).row == (returnIndexPath[0] as NSIndexPath).row, "removeListObjAtIndexPath_item indexPath compare")
     }
     
     func test_removeListObjAtIndexPath_category()
     {
         let list = lists[1]
-        let indexPath = NSIndexPath.init(forRow: 5, inSection: 0)
+        let indexPath = IndexPath.init(row: 5, section: 0)
         
         // given
         let targetCategory = list.categoryForIndexPath(indexPath)
@@ -262,11 +262,11 @@ class ListClassTests: ModelClassTests
         
         XCTAssertNotNil(targetCategory, "removeListObjAtIndexPath_category targetCategory not nil")
         XCTAssertTrue(returnIndexPath.count == 5, "removeListObjAtIndexPath_category indexPath count")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 5, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 6, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 7, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 8, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
-        XCTAssertTrue(returnIndexPath.contains(NSIndexPath.init(forRow: 9, inSection: 0)), "removeListObjAtIndexPath_category indexPath compare")
+        XCTAssertTrue(returnIndexPath.contains(IndexPath.init(row: 5, section: 0)), "removeListObjAtIndexPath_category indexPath compare")
+        XCTAssertTrue(returnIndexPath.contains(IndexPath.init(row: 6, section: 0)), "removeListObjAtIndexPath_category indexPath compare")
+        XCTAssertTrue(returnIndexPath.contains(IndexPath.init(row: 7, section: 0)), "removeListObjAtIndexPath_category indexPath compare")
+        XCTAssertTrue(returnIndexPath.contains(IndexPath.init(row: 8, section: 0)), "removeListObjAtIndexPath_category indexPath compare")
+        XCTAssertTrue(returnIndexPath.contains(IndexPath.init(row: 9, section: 0)), "removeListObjAtIndexPath_category indexPath compare")
     }
     
     // func insertItemAtIndexPath(item: Item, indexPath: NSIndexPath, atPosition: InsertPosition, updateIndices: Bool)
@@ -276,17 +276,17 @@ class ListClassTests: ModelClassTests
     {
         let list = lists[1]
         let cat = list.categories[1]
-        var indexPath = NSIndexPath.init(forRow: 7, inSection: 0)
-        let newItem = Item.init(name: "Added Item", state: .Complete, createRecord: true)
-        let newItemBeginning = Item.init(name: "Added Item Beginning", state: .Complete, createRecord: true)
-        let newItemEnd = Item.init(name: "Added Item End", state: .Complete, createRecord: true)
+        var indexPath = IndexPath.init(row: 7, section: 0)
+        let newItem = Item.init(name: "Added Item", state: .complete, createRecord: true)
+        let newItemBeginning = Item.init(name: "Added Item Beginning", state: .complete, createRecord: true)
+        let newItemEnd = Item.init(name: "Added Item End", state: .complete, createRecord: true)
         
         // given
-        list.insertItemAtIndexPath(newItem, indexPath: indexPath, atPosition: .Middle, updateIndices: false)
+        list.insertItemAtIndexPath(newItem, indexPath: indexPath, atPosition: .middle, updateIndices: false)
         let testItem = cat.items[1]
-        indexPath = NSIndexPath.init(forRow: 5, inSection: 0)
-        list.insertItemAtIndexPath(newItemBeginning, indexPath: indexPath, atPosition: .Beginning, updateIndices: false)
-        list.insertItemAtIndexPath(newItemEnd, indexPath: indexPath, atPosition: .End, updateIndices: true)
+        indexPath = IndexPath.init(row: 5, section: 0)
+        list.insertItemAtIndexPath(newItemBeginning, indexPath: indexPath, atPosition: .beginning, updateIndices: false)
+        list.insertItemAtIndexPath(newItemEnd, indexPath: indexPath, atPosition: .end, updateIndices: true)
         
         // then
         let testItemBeginning = cat.items[0]
@@ -567,14 +567,14 @@ class ListClassTests: ModelClassTests
     func test_categoryForIndexPath()
     {
         let list = lists[0]
-        var indexPath = NSIndexPath.init(forRow: 7, inSection: 0)
+        var indexPath = IndexPath.init(row: 7, section: 0)
         let testCat = list.categories[1]
         
         // given
         var cat = list.categoryForIndexPath(indexPath)
         XCTAssertNil(cat, "categoryForIndexPath item path is nil")
         
-        indexPath = NSIndexPath.init(forRow: 5, inSection: 0)
+        indexPath = IndexPath.init(row: 5, section: 0)
         cat = list.categoryForIndexPath(indexPath)
         XCTAssertTrue(cat === testCat, "categoryForIndexPath compare category")
     }
@@ -583,14 +583,14 @@ class ListClassTests: ModelClassTests
     func test_itemForIndexPath()
     {
         let list = lists[0]
-        var indexPath = NSIndexPath.init(forRow: 7, inSection: 0)
+        var indexPath = IndexPath.init(row: 7, section: 0)
         let testItem = list.categories[1].items[1]
         
         // given
         var item = list.itemForIndexPath(indexPath)
         XCTAssertTrue(item === testItem, "itemForIndexPath compare item")
         
-        indexPath = NSIndexPath.init(forRow: 5, inSection: 0)
+        indexPath = IndexPath.init(row: 5, section: 0)
         item = list.itemForIndexPath(indexPath)
         XCTAssertNil(item, "itemForIndexPath item path is nil")
     }
@@ -600,23 +600,23 @@ class ListClassTests: ModelClassTests
     {
         // given
         let list = lists[0]
-        var indexPath: NSIndexPath?
+        var indexPath: IndexPath?
         let testItem = list.categories[1].items[1]
         let testCat = list.categories[1]
         let testAddItem = list.categories[1].addItem
         
         // then
-        indexPath = NSIndexPath.init(forRow: 7, inSection: 0)
+        indexPath = IndexPath.init(row: 7, section: 0)
         var obj = list.objectForIndexPath(indexPath!)
         XCTAssertTrue(obj is Item, "objectForIndexPath obj is Item")
         XCTAssertTrue(obj === testItem, "objectForIndexPath compare item")
         
-        indexPath = NSIndexPath.init(forRow: 5, inSection: 0)
+        indexPath = IndexPath.init(row: 5, section: 0)
         obj = list.objectForIndexPath(indexPath!)
         XCTAssertTrue(obj is EnList.Category, "objectForIndexPath obj is Category")
         XCTAssertTrue(obj === testCat, "objectForIndexPath compare category")
         
-        indexPath = NSIndexPath.init(forRow: 9, inSection: 0)
+        indexPath = IndexPath.init(row: 9, section: 0)
         obj = list.objectForIndexPath(indexPath!)
         XCTAssertTrue(obj is AddItem, "objectForIndexPath obj is AddItem")
         XCTAssertTrue(obj === testAddItem, "objectForIndexPath compare addItem")
@@ -632,7 +632,7 @@ class ListClassTests: ModelClassTests
         let indexPath = list.displayIndexPathForTag(tag)
         
         // then
-        XCTAssertTrue(indexPath!.row == 7, "displayIndexPathForTag compare indexPath")
+        XCTAssertTrue((indexPath! as NSIndexPath).row == 7, "displayIndexPathForTag compare indexPath")
     }
     
     // func displayIndexPathForObj(obj: ListObj) -> (indexPath: NSIndexPath?, isItem: Bool)
@@ -647,8 +647,8 @@ class ListClassTests: ModelClassTests
         let result2 = list.displayIndexPathForObj(item)
         
         // then
-        XCTAssertTrue(result1.indexPath!.row == 5, "displayIndexPathForObj result1 indexPath compare")
-        XCTAssertTrue(result2.indexPath!.row == 7, "displayIndexPathForObj result2 indexPath compare")
+        XCTAssertTrue((result1.indexPath! as NSIndexPath).row == 5, "displayIndexPathForObj result1 indexPath compare")
+        XCTAssertTrue((result2.indexPath! as NSIndexPath).row == 7, "displayIndexPathForObj result2 indexPath compare")
         XCTAssertTrue(result1.isItem == false, "displayIndexPathForObj result 1 isItem compare")
         XCTAssertTrue(result2.isItem == true,  "displayIndexPathForObj result 2 isItem compare")
     }
@@ -663,7 +663,7 @@ class ListClassTests: ModelClassTests
         let indexPath = list.displayIndexPathForCategory(cat)
         
         // then
-        XCTAssertTrue(indexPath!.row == 5, "displayIndexPathForCategory result indexPath compare")
+        XCTAssertTrue((indexPath! as NSIndexPath).row == 5, "displayIndexPathForCategory result indexPath compare")
     }
     
     // func displayIndexPathForItem(item: Item) -> NSIndexPath?
@@ -676,7 +676,7 @@ class ListClassTests: ModelClassTests
         let indexPath = list.displayIndexPathForItem(item)
         
         // then
-        XCTAssertTrue(indexPath!.row == 7, "displayIndexPathForItem indexPath compare")
+        XCTAssertTrue((indexPath! as NSIndexPath).row == 7, "displayIndexPathForItem indexPath compare")
     }
     
     // func displayIndexPathForAddItemInCategory(category: Category) -> NSIndexPath?
@@ -689,15 +689,15 @@ class ListClassTests: ModelClassTests
         let indexPath = list.displayIndexPathForAddItemInCategory(cat)
         
         // then
-        XCTAssertTrue(indexPath!.row == 9, "displayIndexPathForAddItemInCategory indexPath compare")
+        XCTAssertTrue((indexPath! as NSIndexPath).row == 9, "displayIndexPathForAddItemInCategory indexPath compare")
     }
     
     // func displayIndexPathsForCategoryFromIndexPath(indexPath: NSIndexPath, includeCategoryAndAddItemIndexPaths: Bool) -> [NSIndexPath]
     func test_displayIndexPathsForCategoryFromIndexPath()
     {
         let list = lists[0]
-        let indexPath1 = NSIndexPath.init(forRow: 5, inSection: 0)
-        let indexPath2 = NSIndexPath.init(forRow: 7, inSection: 0)
+        let indexPath1 = IndexPath.init(row: 5, section: 0)
+        let indexPath2 = IndexPath.init(row: 7, section: 0)
         
         // given
         let indexPaths1 = list.displayIndexPathsForCategoryFromIndexPath(indexPath1, includeCategoryAndAddItemIndexPaths: true)
@@ -743,10 +743,10 @@ class ListClassTests: ModelClassTests
         // given
         let indexPaths1 = list.indexPathsForCompletedRows()
         
-        cat0.items[0].state = .Complete
-        cat0.items[2].state = .Complete
-        cat1.items[1].state = .Complete
-        cat2.items[2].state = .Complete
+        cat0.items[0].state = .complete
+        cat0.items[2].state = .complete
+        cat1.items[1].state = .complete
+        cat2.items[2].state = .complete
         
         let indexPaths2 = list.indexPathsForCompletedRows()
         
@@ -765,10 +765,10 @@ class ListClassTests: ModelClassTests
         // given
         let indexPaths1 = list.indexPathsForInactiveRows()
         
-        cat0.items[0].state = .Inactive
-        cat0.items[2].state = .Inactive
-        cat1.items[1].state = .Inactive
-        cat2.items[2].state = .Inactive
+        cat0.items[0].state = .inactive
+        cat0.items[2].state = .inactive
+        cat1.items[1].state = .inactive
+        cat2.items[2].state = .inactive
         
         let indexPaths2 = list.indexPathsForInactiveRows()
         
@@ -782,9 +782,9 @@ class ListClassTests: ModelClassTests
     func test_titleForObjectAtIndexPath()
     {
         let list = lists[0]
-        let indexPath1 = NSIndexPath.init(forRow: 5, inSection: 0)
-        let indexPath2 = NSIndexPath.init(forRow: 7, inSection: 0)
-        let indexPath3 = NSIndexPath.init(forRow: 9, inSection: 0)
+        let indexPath1 = IndexPath.init(row: 5, section: 0)
+        let indexPath2 = IndexPath.init(row: 7, section: 0)
+        let indexPath3 = IndexPath.init(row: 9, section: 0)
         
         // given
         let title1 = list.titleForObjectAtIndexPath(indexPath1)
@@ -824,9 +824,9 @@ class ListClassTests: ModelClassTests
         let item3 = list.categories[2].items[1]
         
         // given
-        item1.state = .Incomplete
-        item2.state = .Inactive
-        item3.state = .Complete
+        item1.state = .incomplete
+        item2.state = .inactive
+        item3.state = .complete
 
         list.showInactiveItems = false
         list.showCompletedItems = false
@@ -871,8 +871,8 @@ class ListClassTests: ModelClassTests
     func test_indexPathIsLastRowDisplayed()
     {
         let list = lists[0]
-        let indexPath1 = NSIndexPath.init(forRow: 13, inSection: 0)
-        let indexPath2 = NSIndexPath.init(forRow: 14, inSection: 0)
+        let indexPath1 = IndexPath.init(row: 13, section: 0)
+        let indexPath2 = IndexPath.init(row: 14, section: 0)
         
         // given
         let result1 = list.indexPathIsLastRowDisplayed(indexPath1)
@@ -887,8 +887,8 @@ class ListClassTests: ModelClassTests
     func test_tagForIndexPath()
     {
         let list = lists[0]
-        let indexPath1 = NSIndexPath.init(forRow: 5, inSection: 0)
-        let indexPath2 = NSIndexPath.init(forRow: 14, inSection: 0)
+        let indexPath1 = IndexPath.init(row: 5, section: 0)
+        let indexPath2 = IndexPath.init(row: 14, section: 0)
         
         // given
         let tag1 = list.tagForIndexPath(indexPath1)
@@ -905,8 +905,8 @@ class ListClassTests: ModelClassTests
     func test_tagValueForIndexPath()
     {
         let list = lists[0]
-        let indexPath1 = NSIndexPath.init(forRow: 5, inSection: 0)
-        let indexPath2 = NSIndexPath.init(forRow: 14, inSection: 0)
+        let indexPath1 = IndexPath.init(row: 5, section: 0)
+        let indexPath2 = IndexPath.init(row: 14, section: 0)
         
         // given
         let tag1 = list.tagValueForIndexPath(indexPath1)
@@ -944,7 +944,7 @@ class ListClassTests: ModelClassTests
     
     func DISABLE_testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
         }
     }

@@ -10,7 +10,7 @@ import UIKit
 
 class AppSettingsViewController: UIAppViewController
 {
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
     @IBOutlet weak var namesCapitalizeSwitch: UISwitch!
     @IBOutlet weak var namesSpellCheckSwitch: UISwitch!
@@ -27,13 +27,13 @@ class AppSettingsViewController: UIAppViewController
         manager.delegate = self
 
         // set initial values for switches
-        self.namesCapitalizeSwitch.on     = appDelegate.namesCapitalize
-        self.namesSpellCheckSwitch.on     = appDelegate.namesSpellCheck
-        self.namesAutocorrectionSwitch.on = appDelegate.namesAutocorrection
-        self.notesCapitalizeSwitch.on     = appDelegate.notesCapitalize
-        self.notesSpellCheckSwitch.on     = appDelegate.notesSpellCheck
-        self.notesAutocorrectionSwitch.on = appDelegate.notesAutocorrection
-        self.picsInPrintAndEmailSwitch.on = appDelegate.picsInPrintAndEmail
+        self.namesCapitalizeSwitch.isOn     = appDelegate.namesCapitalize
+        self.namesSpellCheckSwitch.isOn     = appDelegate.namesSpellCheck
+        self.namesAutocorrectionSwitch.isOn = appDelegate.namesAutocorrection
+        self.notesCapitalizeSwitch.isOn     = appDelegate.notesCapitalize
+        self.notesSpellCheckSwitch.isOn     = appDelegate.notesSpellCheck
+        self.notesAutocorrectionSwitch.isOn = appDelegate.notesAutocorrection
+        self.picsInPrintAndEmailSwitch.isOn = appDelegate.picsInPrintAndEmail
         //self.syncCloudOnLaunch.on         = appDelegate.syncCloudOnLaunch
     }
 
@@ -42,21 +42,21 @@ class AppSettingsViewController: UIAppViewController
         // Dispose of any resources that can be recreated.
     }
 
-    @IBAction func close(sender: UIButton)
+    @IBAction func close(_ sender: UIButton)
     {
         // update app delegate values from switches
-        appDelegate.namesCapitalize      = self.namesCapitalizeSwitch.on
-        appDelegate.namesSpellCheck      = self.namesSpellCheckSwitch.on
-        appDelegate.namesAutocorrection  = self.namesAutocorrectionSwitch.on
-        appDelegate.notesCapitalize      = self.notesCapitalizeSwitch.on
-        appDelegate.notesSpellCheck      = self.notesSpellCheckSwitch.on
-        appDelegate.notesAutocorrection  = self.notesAutocorrectionSwitch.on
-        appDelegate.picsInPrintAndEmail  = self.picsInPrintAndEmailSwitch.on
+        appDelegate.namesCapitalize      = self.namesCapitalizeSwitch.isOn
+        appDelegate.namesSpellCheck      = self.namesSpellCheckSwitch.isOn
+        appDelegate.namesAutocorrection  = self.namesAutocorrectionSwitch.isOn
+        appDelegate.notesCapitalize      = self.notesCapitalizeSwitch.isOn
+        appDelegate.notesSpellCheck      = self.notesSpellCheckSwitch.isOn
+        appDelegate.notesAutocorrection  = self.notesAutocorrectionSwitch.isOn
+        appDelegate.picsInPrintAndEmail  = self.picsInPrintAndEmailSwitch.isOn
         //appDelegate.syncCloudOnLaunch    = self.syncCloudOnLaunch.on
         
         appDelegate.saveState(true)
         
-        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+        presentingViewController!.dismiss(animated: true, completion: nil)
     }
 }
 

@@ -12,47 +12,47 @@ class ItemDetailPresentationController: UIPresentationController, UIAdaptivePres
     
     var chromeView: UIView = UIView()
     
-    override init(presentedViewController: UIViewController, presentingViewController: UIViewController) {
-        super.init(presentedViewController:presentedViewController, presentingViewController:presentingViewController)
-        chromeView.backgroundColor = UIColor.whiteColor()
+    override init(presentedViewController: UIViewController, presenting presentingViewController: UIViewController?) {
+        super.init(presentedViewController:presentedViewController, presenting:presentingViewController)
+        chromeView.backgroundColor = UIColor.white
         chromeView.alpha = 1.0
         
         let tap = UITapGestureRecognizer(target: self, action: #selector(ItemDetailPresentationController.chromeViewTapped(_:)))
         chromeView.addGestureRecognizer(tap)
     }
     
-    func chromeViewTapped(gesture: UIGestureRecognizer) {
-        if (gesture.state == UIGestureRecognizerState.Ended) {
-            presentingViewController.dismissViewControllerAnimated(true, completion: nil)
+    func chromeViewTapped(_ gesture: UIGestureRecognizer) {
+        if (gesture.state == UIGestureRecognizerState.ended) {
+            presentingViewController.dismiss(animated: true, completion: nil)
         }
     }
     
-    override func frameOfPresentedViewInContainerView() -> CGRect {
-        var presentedViewFrame = CGRectZero
+    override var frameOfPresentedViewInContainerView : CGRect {
+        var presentedViewFrame = CGRect.zero
         let containerBounds = containerView!.bounds
-        presentedViewFrame.size = sizeForChildContentContainer(presentedViewController, withParentContainerSize: containerBounds.size)
+        presentedViewFrame.size = size(forChildContentContainer: presentedViewController, withParentContainerSize: containerBounds.size)
         presentedViewFrame.origin.x = containerBounds.size.width - presentedViewFrame.size.width
         
         return presentedViewFrame
     }
     
-    override func sizeForChildContentContainer(container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize
+    override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize
     {
         // adaptive sizing width, min 100, max 200
         //let parentWidth = parentSize.width
         //let childWidth = min(max(parentWidth/3.0, 120), 200)
         
         //return CGSizeMake(CGFloat((floorf(Float(childWidth)))), parentSize.height)
-        return CGSizeMake(parentSize.width, parentSize.height)
+        return CGSize(width: parentSize.width, height: parentSize.height)
     }
     
     override func presentationTransitionWillBegin() {
         chromeView.frame = self.containerView!.bounds
         chromeView.alpha = 0.0
-        containerView!.insertSubview(chromeView, atIndex:0)
-        let coordinator = presentedViewController.transitionCoordinator()
+        containerView!.insertSubview(chromeView, at:0)
+        let coordinator = presentedViewController.transitionCoordinator
         if (coordinator != nil) {
-            coordinator!.animateAlongsideTransition({
+            coordinator!.animate(alongsideTransition: {
                 (context:UIViewControllerTransitionCoordinatorContext!) -> Void in
                 self.chromeView.alpha = 1.0
                 }, completion:nil)
@@ -62,9 +62,9 @@ class ItemDetailPresentationController: UIPresentationController, UIAdaptivePres
     }
     
     override func dismissalTransitionWillBegin() {
-        let coordinator = presentedViewController.transitionCoordinator()
+        let coordinator = presentedViewController.transitionCoordinator
         if (coordinator != nil) {
-            coordinator!.animateAlongsideTransition({
+            coordinator!.animate(alongsideTransition: {
                 (context:UIViewControllerTransitionCoordinatorContext!) -> Void in
                 self.chromeView.alpha = 0.0
                 }, completion:nil)
@@ -75,15 +75,15 @@ class ItemDetailPresentationController: UIPresentationController, UIAdaptivePres
     
     override func containerViewWillLayoutSubviews() {
         chromeView.frame = containerView!.bounds
-        presentedView()!.frame = frameOfPresentedViewInContainerView()
+        presentedView!.frame = frameOfPresentedViewInContainerView
     }
     
-    override func shouldPresentInFullscreen() -> Bool {
+    override var shouldPresentInFullscreen : Bool {
         return true
     }
     
-    override func adaptivePresentationStyle() -> UIModalPresentationStyle {
-        return UIModalPresentationStyle.OverFullScreen
+    override var adaptivePresentationStyle : UIModalPresentationStyle {
+        return UIModalPresentationStyle.overFullScreen
     }
     
     //func adaptivePresentationStyleForPresentationController(controller: UIPresentationController) -> UIModalPresentationStyle {

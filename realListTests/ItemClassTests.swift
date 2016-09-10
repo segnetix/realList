@@ -52,7 +52,7 @@ class ItemClassTests: ModelClassTests
         let image = UIImage(named: "Cloud_check")
         
         // given
-        let imageModDate = NSDate.init()
+        let imageModDate = Date.init()
         item.setImage(image)
         
         // then
@@ -90,7 +90,7 @@ class ItemClassTests: ModelClassTests
     
     func DISABLE_testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
         }
     }

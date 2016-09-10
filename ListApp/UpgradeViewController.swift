@@ -10,7 +10,7 @@ import UIKit
 
 class UpgradeViewController: UIAppViewController
 {
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
     @IBOutlet weak var buyButton: UIButton!
     @IBOutlet weak var purchasedCheck: UIImageView!
@@ -24,39 +24,39 @@ class UpgradeViewController: UIAppViewController
         super.viewDidLoad()
         manager.delegate = self
         
-        buyButton.backgroundColor = UIColor.clearColor()
+        buyButton.backgroundColor = UIColor.clear
         buyButton.layer.cornerRadius = 5
         buyButton.layer.borderWidth = 1
-        buyButton.layer.borderColor = view.tintColor.CGColor
+        buyButton.layer.borderColor = view.tintColor.cgColor
         
-        restoreButton.backgroundColor = UIColor.clearColor()
+        restoreButton.backgroundColor = UIColor.clear
         restoreButton.layer.cornerRadius = 5
         restoreButton.layer.borderWidth = 1
-        restoreButton.layer.borderColor = view.tintColor.CGColor
+        restoreButton.layer.borderColor = view.tintColor.cgColor
         
         self.reload()
         
         // set up notifications for purchase and restore events
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(UpgradeViewController.handlePurchaseNotification(_:)),
-                                                         name: IAPHelper.IAPHelperPurchaseNotification,
+        NotificationCenter.default.addObserver(self, selector: #selector(UpgradeViewController.handlePurchaseNotification(_:)),
+                                                         name: NSNotification.Name(rawValue: IAPHelper.IAPHelperPurchaseNotification),
                                                          object: nil)
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(UpgradeViewController.handleRestoreNotification(_:)),
-                                                         name: IAPHelper.IAPHelperRestoreNotification,
+        NotificationCenter.default.addObserver(self, selector: #selector(UpgradeViewController.handleRestoreNotification(_:)),
+                                                         name: NSNotification.Name(rawValue: IAPHelper.IAPHelperRestoreNotification),
                                                          object: nil)
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(UpgradeViewController.handleFailedTransaction(_:)),
-                                                         name: IAPHelper.IAPHelperFailedTransaction,
+        NotificationCenter.default.addObserver(self, selector: #selector(UpgradeViewController.handleFailedTransaction(_:)),
+                                                         name: NSNotification.Name(rawValue: IAPHelper.IAPHelperFailedTransaction),
                                                          object: nil)
         
         if appDelegate.appIsUpgraded {
-            restoreButton.enabled = false
-            restoreButton.layer.borderColor = UIColor.lightGrayColor().CGColor
+            restoreButton.isEnabled = false
+            restoreButton.layer.borderColor = UIColor.lightGray.cgColor
         } else {
-            restoreButton.enabled = true
+            restoreButton.isEnabled = true
         }
     }
 
-    override func viewDidAppear(animated: Bool)
+    override func viewDidAppear(_ animated: Bool)
     {
         
     }
@@ -70,24 +70,24 @@ class UpgradeViewController: UIAppViewController
     {
         if appDelegate.appIsUpgraded {
             // already purchased
-            purchasedCheck.hidden = false
-            buyButton.hidden = true
+            purchasedCheck.isHidden = false
+            buyButton.isHidden = true
         } else if IAPHelper.canMakePayments() {
             // can buy
-            purchasedCheck.hidden = true
-            buyButton.hidden = false
-            buyButton.enabled = true
-            buyButton.setTitle(appDelegate.upgradePriceString, forState: .Normal)
+            purchasedCheck.isHidden = true
+            buyButton.isHidden = false
+            buyButton.isEnabled = true
+            buyButton.setTitle(appDelegate.upgradePriceString, for: UIControlState())
         } else {
             // purchases not allowed
-            purchasedCheck.hidden = true
-            buyButton.hidden = false
-            buyButton.enabled = false
-            buyButton.setTitle("N/A", forState: .Normal)
+            purchasedCheck.isHidden = true
+            buyButton.isHidden = false
+            buyButton.isEnabled = false
+            buyButton.setTitle("N/A", for: UIControlState())
         }
     }
     
-    func handlePurchaseNotification(notification: NSNotification)
+    func handlePurchaseNotification(_ notification: Notification)
     {
         appDelegate.appIsUpgraded = true
         
@@ -105,40 +105,40 @@ class UpgradeViewController: UIAppViewController
         reload()
     }
     
-    func handleRestoreNotification(notification: NSNotification)
+    func handleRestoreNotification(_ notification: Notification)
     {
         appDelegate.appIsUpgraded = true
         
         let alertVC = UIAlertController(
             title: "Thank You",
             message: "Your purchase was restored.",
-            preferredStyle: .Alert)
-        let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil )
+            preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil )
         alertVC.addAction(okAction)
         
-        presentViewController(alertVC, animated: true, completion: nil)
+        present(alertVC, animated: true, completion: nil)
         
-        restoreButton.enabled = false
-        restoreButton.layer.borderColor = UIColor.lightGrayColor().CGColor
+        restoreButton.isEnabled = false
+        restoreButton.layer.borderColor = UIColor.lightGray.cgColor
         
         reload()
     }
     
-    func handleFailedTransaction(notification: NSNotification)
+    func handleFailedTransaction(_ notification: Notification)
     {
         if let message = notification.object as? String {
             let alertVC = UIAlertController(
                 title: "Transaction Error",
                 message: message,
-                preferredStyle: .Alert)
-            let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil )
+                preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "OK", style: .default, handler: nil )
             alertVC.addAction(okAction)
             
-            presentViewController(alertVC, animated: true, completion: nil)
+            present(alertVC, animated: true, completion: nil)
         }
     }
     
-    @IBAction func buyButtonTapped(sender: UIButton)
+    @IBAction func buyButtonTapped(_ sender: UIButton)
     {
         guard let product = appDelegate.upgradeProduct else {
             print("ERROR: buyButtonTapped --- product is nil...")
@@ -150,20 +150,20 @@ class UpgradeViewController: UIAppViewController
         RealListProducts.store.buyProduct(product)
     }
     
-    @IBAction func restorePurchases(sender: UIButton)
+    @IBAction func restorePurchases(_ sender: UIButton)
     {
         //startHUD(NSLocalizedString("Restoring_purchase", comment: ""), subtitle: "")
         
         RealListProducts.store.restorePurchases()
     }
     
-    @IBAction func close(sender: AnyObject)
+    @IBAction func close(_ sender: AnyObject)
     {
         if let aboutVC = aboutViewController {
             aboutVC.updateUpgradeStatus()
         }
         
-        presentingViewController!.dismissViewControllerAnimated(true, completion: nil)
+        presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
     ////////////////////////////////////////////////////////////////

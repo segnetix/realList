@@ -23,7 +23,7 @@ class UIAppViewController: UIViewController, AppManagerDelegate
         super.didReceiveMemoryWarning()
     }
     
-    func reachabilityStatusChangeHandler(reachability: Reachability) {
+    func reachabilityStatusChangeHandler(_ reachability: Reachability) {
         if reachability.isReachable() {
             print("isReachable")
         } else {

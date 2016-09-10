@@ -17,9 +17,9 @@ let selectedCellColor: UIColor = UIColor(colorLiteralRed: 0.9, green: 0.9, blue:
 // ListSelectionDelegate protocol
 protocol ListSelectionDelegate: class
 {
-    func listSelected(newList: List)
-    func listNameChanged(newName: String)
-    func listDeleted(deletedList: List)
+    func listSelected(_ newList: List)
+    func listNameChanged(_ newName: String)
+    func listDeleted(_ deletedList: List)
 }
 
 let kListViewScrollRate: CGFloat =  6.0
@@ -29,11 +29,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 {
     var lists = [List]()
     var inEditMode = false
-    var deleteListIndexPath: NSIndexPath? = nil
+    var deleteListIndexPath: IndexPath? = nil
     var editModeRow = -1
     var longPressGestureRecognizer: UILongPressGestureRecognizer? = nil
-    var sourceIndexPath: NSIndexPath? = nil
-    var movingFromIndexPath: NSIndexPath? = nil
+    var sourceIndexPath: IndexPath? = nil
+    var movingFromIndexPath: IndexPath? = nil
     var prevLocation: CGPoint? = nil
     var snapshot: UIView? = nil
     var displayLink: CADisplayLink? = nil
@@ -41,7 +41,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     var selectionIndex = 0
     var editingNewListName = false
     var tempHighlightListIndex = -1
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+    let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
     // refresh view
     var refreshView: UIView!
@@ -66,10 +66,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
         
         // About button
-        let button: UIButton = UIButton(type: UIButtonType.Custom)
-        button.setImage(UIImage(named: "EnListIcon"), forState: UIControlState.Normal)
-        button.addTarget(self, action: #selector(ListViewController.infoButtonTapped), forControlEvents: UIControlEvents.TouchUpInside)
-        button.frame = CGRectMake(0, 0, 32, 32)
+        let button: UIButton = UIButton(type: UIButtonType.custom)
+        button.setImage(UIImage(named: "EnListIcon"), for: UIControlState())
+        button.addTarget(self, action: #selector(ListViewController.infoButtonTapped), for: UIControlEvents.touchUpInside)
+        button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.leftBarButtonItem = barButton
         
@@ -78,9 +78,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // refresh control
         refreshControl = UIRefreshControl()
-        refreshControl!.backgroundColor = UIColor.clearColor()
-        refreshControl!.tintColor = UIColor.clearColor()
-        refreshControl!.addTarget(self, action: #selector(self.updateListData(_:)), forControlEvents: UIControlEvents.ValueChanged)
+        refreshControl!.backgroundColor = UIColor.clear
+        refreshControl!.tintColor = UIColor.clear
+        refreshControl!.addTarget(self, action: #selector(self.updateListData(_:)), for: UIControlEvents.valueChanged)
         self.tableView.addSubview(refreshControl!)
         
         loadCustomRefreshContents()
@@ -88,10 +88,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     func loadCustomRefreshContents()
     {
-        let refreshContents = NSBundle.mainBundle().loadNibNamed("RefreshContents", owner: self, options: nil)
+        let refreshContents = Bundle.main.loadNibNamed("RefreshContents", owner: self, options: nil)
         
         // refresh view
-        refreshView = refreshContents[0] as! UIView
+        refreshView = refreshContents?[0] as! UIView
         refreshView.frame = refreshControl!.bounds
         
         // refresh activity indicator
@@ -104,18 +104,18 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // refresh cancel button
         refreshCancelButton = refreshView.viewWithTag(3) as! UIButton
-        refreshCancelButton.backgroundColor = UIColor.clearColor()
+        refreshCancelButton.backgroundColor = UIColor.clear
         refreshCancelButton.layer.cornerRadius = 16
         refreshCancelButton.layer.borderWidth = 1
-        refreshCancelButton.layer.borderColor = UIColor.blackColor().CGColor
-        refreshCancelButton.addTarget(self, action: #selector(self.cancelFetch(_:)), forControlEvents: UIControlEvents.TouchUpInside)
-        refreshCancelButton.enabled = false
+        refreshCancelButton.layer.borderColor = UIColor.black.cgColor
+        refreshCancelButton.addTarget(self, action: #selector(self.cancelFetch(_:)), for: UIControlEvents.touchUpInside)
+        refreshCancelButton.isEnabled = false
         refreshCancelButton.alpha = 0.3
         
         refreshControl!.addSubview(refreshView)
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
         //refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
@@ -124,8 +124,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.selectList(selectionIndex)
     }
     
-    override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
-        super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        super.viewWillTransition(to: size, with: coordinator)
         //print("viewWillTransitionToSize... \(size)")
         //refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
     }
@@ -133,7 +133,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
+        refreshView.frame = CGRect(x: 0, y: 0, width: self.tableView.bounds.width, height: refreshView.frame.height)
     }
     
     override func didReceiveMemoryWarning() {
@@ -146,23 +146,23 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         super.init(coder: aDecoder)!
     }
     
-    func updateListData(refreshControl: UIRefreshControl)
+    func updateListData(_ refreshControl: UIRefreshControl)
     {
         refreshAnimation.startAnimating()
-        refreshCancelButton.enabled = true
+        refreshCancelButton.isEnabled = true
         refreshCancelButton.alpha = 1.0
         refreshAnimation.alpha = 1.0
         appDelegate.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
     }
     
-    func cancelFetch(button: UIButton) {
+    func cancelFetch(_ button: UIButton) {
         refreshLabel.text = "Canceled"
         appDelegate.cancelCloudDataFetch()
     }
     
     func refreshEnd() {
         refreshLabel.text = ""
-        refreshCancelButton.enabled = false
+        refreshCancelButton.isEnabled = false
         refreshCancelButton.alpha = 0.3
         refreshAnimation.alpha = 0.0
         refreshAnimation.stopAnimating()
@@ -183,47 +183,47 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     */
     
-    override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         // return the number of rows (plus 1 for the Add row)
         return lists.count + 1
     }
 
-    override func tableView(tableView: UITableView, heightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return UITableViewAutomaticDimension
         //return kListViewCellHeight
     }
     
-    override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
-        if indexPath.row < lists.count {
+        if (indexPath as NSIndexPath).row < lists.count {
             // set up a List row
-            let cell = tableView.dequeueReusableCellWithIdentifier(listCellID, forIndexPath: indexPath) as! ListCell
+            let cell = tableView.dequeueReusableCell(withIdentifier: listCellID, for: indexPath) as! ListCell
             
             // Configure the cell...
-            let list = lists[indexPath.row]
+            let list = lists[(indexPath as NSIndexPath).row]
             
-            cell.listName.userInteractionEnabled = false
+            cell.listName.isUserInteractionEnabled = false
             cell.listName.delegate = self
-            cell.listName.addTarget(self, action: #selector(ListViewController.listNameDidChange(_:)), forControlEvents: UIControlEvents.EditingChanged)
-            cell.listName.font = UIFont.preferredFontForTextStyle(UIFontTextStyleHeadline)
+            cell.listName.addTarget(self, action: #selector(ListViewController.listNameDidChange(_:)), for: UIControlEvents.editingChanged)
+            cell.listName.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
             cell.listName.text = list.name
-            cell.listName.autocapitalizationType = appDelegate.namesCapitalize ? .Words : .None
-            cell.listName.spellCheckingType = appDelegate.namesSpellCheck ? .Yes : .No
-            cell.listName.autocorrectionType = appDelegate.namesAutocorrection ? .Yes : .No
-            cell.listName.tag = indexPath.row
-            cell.contentView.tag = indexPath.row
+            cell.listName.autocapitalizationType = appDelegate.namesCapitalize ? .words : .none
+            cell.listName.spellCheckingType = appDelegate.namesSpellCheck ? .yes : .no
+            cell.listName.autocorrectionType = appDelegate.namesAutocorrection ? .yes : .no
+            cell.listName.tag = (indexPath as NSIndexPath).row
+            cell.contentView.tag = (indexPath as NSIndexPath).row
             
             // list background color
-            if indexPath.row == selectionIndex {
+            if (indexPath as NSIndexPath).row == selectionIndex {
                 cell.backgroundColor = selectedCellColor
             } else {
-                cell.backgroundColor = UIColor.whiteColor()
+                cell.backgroundColor = UIColor.white
             }
             
             // list color bar
             let colorBar = UIImageView()
-            colorBar.frame = CGRectMake(0, 0, 6, cell.contentView.frame.height)
+            colorBar.frame = CGRect(x: 0, y: 0, width: 6, height: cell.contentView.frame.height)
             colorBar.backgroundColor = list.listColor
             cell.contentView.addSubview(colorBar)
             
@@ -235,23 +235,23 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             // set up double tap gesture recognizer in item cell to enable cell moving
             let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ListViewController.cellDoubleTapAction(_:)))
             doubleTapGestureRecognizer.numberOfTapsRequired = 2
-            singleTapGestureRecognizer.requireGestureRecognizerToFail(doubleTapGestureRecognizer)
+            singleTapGestureRecognizer.require(toFail: doubleTapGestureRecognizer)
             cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
             
             // cell separator
             cell.preservesSuperviewLayoutMargins = false
-            cell.separatorInset = UIEdgeInsetsZero
-            cell.layoutMargins = UIEdgeInsetsZero
+            cell.separatorInset = UIEdgeInsets.zero
+            cell.layoutMargins = UIEdgeInsets.zero
             
             return cell
         } else {
             // set up Add row
-            let cell = tableView.dequeueReusableCellWithIdentifier(addListCellId)
+            let cell = tableView.dequeueReusableCell(withIdentifier: addListCellId)
             
             // cell separator
             cell!.preservesSuperviewLayoutMargins = false
-            cell!.separatorInset = UIEdgeInsetsZero
-            cell!.layoutMargins = UIEdgeInsetsZero
+            cell!.separatorInset = UIEdgeInsets.zero
+            cell!.layoutMargins = UIEdgeInsets.zero
             
             return cell!
         }
@@ -271,9 +271,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     */
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
     {
-        self.selectList(indexPath.row)
+        self.selectList((indexPath as NSIndexPath).row)
     }
     
     /*
@@ -294,38 +294,38 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     */
     
     // override to support conditional editing of the table view
-    override func tableView(tableView: UITableView, canEditRowAtIndexPath indexPath: NSIndexPath) -> Bool {
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
-        return indexPath.row < lists.count
+        return (indexPath as NSIndexPath).row < lists.count
     }
     
     // override to support editing the table view
-    override func tableView(tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: NSIndexPath)
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath)
     {
-        if editingStyle == .Delete {
+        if editingStyle == .delete {
             deleteListIndexPath = indexPath
-            let deletedList = lists[indexPath.row]
+            let deletedList = lists[(indexPath as NSIndexPath).row]
             
             confirmDelete(deletedList.name)
         }
-        else if editingStyle == .Insert {
+        else if editingStyle == .insert {
             // Create a new list instance, insert it into the array of lists, and add a new row to the table view
         }
     }
     
     // Override to support rearranging the table view.
-    override func tableView(tableView: UITableView, moveRowAtIndexPath fromIndexPath: NSIndexPath, toIndexPath: NSIndexPath)
+    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to toIndexPath: IndexPath)
     {
-        let list = lists[fromIndexPath.row]
+        let list = lists[(fromIndexPath as NSIndexPath).row]
         //lists.removeAtIndex(fromIndexPath.row)
         lists.removeObject(list)
-        lists.insert(list, atIndex: toIndexPath.row)
+        lists.insert(list, at: (toIndexPath as NSIndexPath).row)
         
         self.tableView.reloadData()
     }
     
     // Override to support conditional rearranging of the table view.
-    override func tableView(tableView: UITableView, canMoveRowAtIndexPath indexPath: NSIndexPath) -> Bool
+    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool
     {
         // Return false if you do not want the item to be re-orderable.
         return true
@@ -380,14 +380,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     */
     
-    func textFieldShouldBeginEditing(textField: UITextField) -> Bool
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool
     {
         // scroll the editing cell into view if necessary
-        let indexPath = NSIndexPath(forRow: textField.tag, inSection: 0)
+        let indexPath = IndexPath(row: textField.tag, section: 0)
         
         if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false
         {
-            tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: UITableViewScrollPosition.Bottom, animated: false)
+            tableView.scrollToRow(at: indexPath, at: UITableViewScrollPosition.bottom, animated: false)
         }
         
         // this clears an initial space in a new cell name
@@ -399,28 +399,28 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
 
     
-    func listNameDidChange(textField: UITextField)
+    func listNameDidChange(_ textField: UITextField)
     {
         // update list name data with new value
         let i = textField.tag
-        lists[i].name = textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet())
+        lists[i].name = textField.text!.trimmingCharacters(in: CharacterSet.whitespaces)
         
         // update ItemVC list name
         delegate?.listNameChanged(textField.text!)
     }
 
     
-    func textFieldShouldReturn(textField: UITextField) -> Bool
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool
     {
         inEditMode = false
-        textField.userInteractionEnabled = false
+        textField.isUserInteractionEnabled = false
         textField.resignFirstResponder()
         self.tableView.setEditing(false, animated: true)
         
         // delete the newly added list if user didn't create a name
         if editingNewListName
         {
-            if textField.text!.stringByTrimmingCharactersInSet(NSCharacterSet.whitespaceCharacterSet()).isEmpty
+            if textField.text!.trimmingCharacters(in: CharacterSet.whitespaces).isEmpty
             {
                 // delete from lists array
                 lists.removeLast()
@@ -435,7 +435,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return true
     }
     
-    @IBAction func addListButtonTapped(sender: UIButton)
+    @IBAction func addListButtonTapped(_ sender: UIButton)
     {
         var listCount = 0
         
@@ -455,11 +455,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             let alertVC = UIAlertController(
                 title: listLimitTitle,
                 message: listLimitMsg,
-                preferredStyle: .Alert)
-            let okAction = UIAlertAction(title: okTitle, style: .Default, handler: nil)
+                preferredStyle: .alert)
+            let okAction = UIAlertAction(title: okTitle, style: .default, handler: nil)
             alertVC.addAction(okAction)
             
-            presentViewController(alertVC, animated: true, completion: nil)
+            present(alertVC, animated: true, completion: nil)
             
             return
         }
@@ -470,17 +470,17 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         lists.append(newList)
         resetListOrderByPosition()
         
-        newList.addCategory("", displayHeader: false, updateIndices: true, createRecord: true)
+        _ = newList.addCategory("", displayHeader: false, updateIndices: true, createRecord: true)
         
         self.tableView.reloadData()
         
         // set up editing mode for list name
-        let indexPath = NSIndexPath(forRow: lists.count - 1, inSection: 0)
-        let cell = tableView.cellForRowAtIndexPath(indexPath) as! ListCell
+        let indexPath = IndexPath(row: lists.count - 1, section: 0)
+        let cell = tableView.cellForRow(at: indexPath) as! ListCell
         
         inEditMode = true
         editingNewListName = true
-        cell.listName.userInteractionEnabled = true
+        cell.listName.isUserInteractionEnabled = true
         cell.listName.becomeFirstResponder()
         editingNewListName = true
     }
@@ -492,12 +492,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 ////////////////////////////////////////////////////////////////
     
     // respond to a single tap (display the selected list in the ItemListViewController)
-    func cellSingleTapAction(sender: UITapGestureRecognizer)
+    func cellSingleTapAction(_ sender: UITapGestureRecognizer)
     {
         let i = sender.view?.tag
-        let indexPath = NSIndexPath(forRow: i!, inSection: 0)
+        let indexPath = IndexPath(row: i!, section: 0)
         
-        let selectedList = self.lists[indexPath.row]
+        let selectedList = self.lists[(indexPath as NSIndexPath).row]
         self.delegate?.listSelected(selectedList)
         
         if let itemViewController = self.delegate as? ItemViewController {
@@ -506,35 +506,35 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // respond to a double tap (list name edit)
-    func cellDoubleTapAction(sender: UITapGestureRecognizer)
+    func cellDoubleTapAction(_ sender: UITapGestureRecognizer)
     {
         if sender.view != nil {
-            let indexPath = NSIndexPath(forRow: (sender.view?.tag)!, inSection: 0)
-            let cell = tableView.cellForRowAtIndexPath(indexPath) as! ListCell
+            let indexPath = IndexPath(row: (sender.view?.tag)!, section: 0)
+            let cell = tableView.cellForRow(at: indexPath) as! ListCell
             
             inEditMode = true
-            cell.listName.userInteractionEnabled = true
+            cell.listName.isUserInteractionEnabled = true
             cell.listName.becomeFirstResponder()
         }
     }
     
     // handle cell move on long press (move)
-    func longPressAction(gesture: UILongPressGestureRecognizer)
+    func longPressAction(_ gesture: UILongPressGestureRecognizer)
     {
         let state: UIGestureRecognizerState = gesture.state
-        let location: CGPoint = gesture.locationInView(tableView)
+        let location: CGPoint = gesture.location(in: tableView)
         let topBarHeight = getTopBarHeight()
-        var indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+        var indexPath: IndexPath? = tableView.indexPathForRow(at: location)
         
         // prevent long press action on an AddItem cell
         if indexPath != nil {
-            let cell = tableView.cellForRowAtIndexPath(indexPath!)
+            let cell = tableView.cellForRow(at: indexPath!)
             
             if cell is AddListCell
             {
                 // we got a long press on the AddList cell... cancel the action
                 if longPressActive {
-                    indexPath = NSIndexPath(forRow: lists.count - 1, inSection: 0)
+                    indexPath = IndexPath(row: lists.count - 1, section: 0)
                     longPressEnded(indexPath, location: location)
                 }
                 return
@@ -542,35 +542,35 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
         
         // check if we need to end scrolling
-        let touchLocationInWindow = tableView.convertPoint(location, toView: tableView.window)
+        let touchLocationInWindow = tableView.convert(location, to: tableView.window)
         
         // we need to end the long press if we move above the top cell and into the top bar
         if touchLocationInWindow.y <= topBarHeight && location.y <= 0
         {
             // if we moved above the table view then set the destination to the top cell and end the long press
             if longPressActive {
-                indexPath = NSIndexPath(forRow: 0, inSection: 0)
+                indexPath = IndexPath(row: 0, section: 0)
                 longPressEnded(indexPath, location: location)   // comment out this line to let the moving cell hang at the top until released -- may cause problems with snapshot not getting cleared
             }
             return
         }
         
         // check if we need to scroll tableView
-        let touchLocation = gesture.locationInView(gesture.view!.window)
+        let touchLocation = gesture.location(in: gesture.view!.window)
         
         if touchLocation.y > (tableView.bounds.height - kScrollZoneHeight) {
             // need to scroll down
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
                 displayLink!.frameInterval = 1
-                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+                displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
                 displayLink!.frameInterval = 1
-                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+                displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if displayLink != nil {
             // check if we need to cancel a current scroll update because the touch moved out of scroll area
@@ -585,21 +585,21 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         // if indexPath is null then we took our dragged cell some direction off the table
         if indexPath == nil {
-            if gesture.state != .Cancelled {
-                gesture.enabled = false
-                gesture.enabled = true
+            if gesture.state != .cancelled {
+                gesture.isEnabled = false
+                gesture.isEnabled = true
                 longPressEnded(movingFromIndexPath, location: location)
             }
             return
         }
         
         switch (state) {
-        case UIGestureRecognizerState.Began:
+        case UIGestureRecognizerState.began:
             longPressActive = true
             sourceIndexPath = indexPath
             movingFromIndexPath = indexPath
             
-            let cell = tableView.cellForRowAtIndexPath(indexPath!)!
+            let cell = tableView.cellForRow(at: indexPath!)!
             snapshot = snapshotFromView(cell)
             
             var center = cell.center
@@ -607,19 +607,19 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             snapshot?.alpha = 0.0
             tableView.addSubview(snapshot!)
             
-            UIView.animateWithDuration(0.25, animations: { () -> Void in
+            UIView.animate(withDuration: 0.25, animations: { () -> Void in
                 center.y = location.y
                 self.snapshot?.center = center
-                self.snapshot?.transform = CGAffineTransformMakeScale(1.05, 1.05)
+                self.snapshot?.transform = CGAffineTransform(scaleX: 1.05, y: 1.05)
                 self.snapshot?.alpha = 0.7
                 cell.alpha = 0.0
                 }, completion: { (finished: Bool) -> Void in
-                    cell.hidden = true      // hides the real cell while moving
+                    cell.isHidden = true      // hides the real cell while moving
             })
             
             prevLocation = location
             
-        case UIGestureRecognizerState.Changed:
+        case UIGestureRecognizerState.changed:
             // long press has moved - call move method
             self.longPressMoved(indexPath!, location: location)
             prevLocation = location
@@ -631,7 +631,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
     }
     
-    func longPressMoved(indexPath: NSIndexPath?, location: CGPoint)
+    func longPressMoved(_ indexPath: IndexPath?, location: CGPoint)
     {
         if snapshot != nil {
             var center: CGPoint = snapshot!.center
@@ -643,7 +643,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 if movingFromIndexPath != nil
                 {
                     // ... move the rows
-                    tableView.moveRowAtIndexPath(movingFromIndexPath!, toIndexPath: indexPath!)
+                    tableView.moveRow(at: movingFromIndexPath!, to: indexPath!)
                     
                     // ... and update movingFromIndexPath so it is in sync with UI changes
                     movingFromIndexPath = indexPath
@@ -653,7 +653,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // clean up after a long press gesture
-    func longPressEnded(idxPath: NSIndexPath?, location: CGPoint)
+    func longPressEnded(_ idxPath: IndexPath?, location: CGPoint)
     {
         longPressActive = false
         
@@ -663,11 +663,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         guard var indexPath = idxPath else { return }
         
-        let destCell = self.tableView.cellForRowAtIndexPath(indexPath)
+        let destCell = self.tableView.cellForRow(at: indexPath)
         
         // if we are dropping on the AddList cell then move dest to just above the AddList cell
         if destCell is AddListCell {
-            indexPath = NSIndexPath(forRow: indexPath.row-1, inSection: 0)
+            indexPath = IndexPath(row: (indexPath as NSIndexPath).row-1, section: 0)
         }
         
         // finalize list data with new location for sourceIndexObj
@@ -682,8 +682,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 tableView.beginUpdates()
                 
                 // remove the item from its original location
-                let removedList = lists.removeAtIndex(sourceIndexPath!.row)
-                lists.insert(removedList, atIndex: indexPath.row)
+                let removedList = lists.remove(at: (sourceIndexPath! as NSIndexPath).row)
+                lists.insert(removedList, at: (indexPath as NSIndexPath).row)
 
                 tableView.endUpdates()
             }
@@ -692,14 +692,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
         
         // clean up any snapshot views or displayLink scrolls
-        let cell: UITableViewCell? = tableView.cellForRowAtIndexPath(indexPath)
+        let cell: UITableViewCell? = tableView.cellForRow(at: indexPath)
         
         cell?.alpha = 0.0
-        UIView.animateWithDuration(0.25, animations: { () -> Void in
+        UIView.animate(withDuration: 0.25, animations: { () -> Void in
             if cell != nil {
                 self.snapshot?.center = cell!.center
             }
-            self.snapshot?.transform = CGAffineTransformIdentity
+            self.snapshot?.transform = CGAffineTransform.identity
             self.snapshot?.alpha = 0.0
             
             // undo fade out
@@ -727,12 +727,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // handle the gesture from the itemVC when moving an item to another list
-    func processGestureFromItemVC(gesture: UILongPressGestureRecognizer, listObj: ListObj?)
+    func processGestureFromItemVC(_ gesture: UILongPressGestureRecognizer, listObj: ListObj?)
     {
-        let location = gesture.locationOfTouch(0, inView: self.view)
+        let location = gesture.location(ofTouch: 0, in: self.view)
         
         // check if we need to scroll tableView
-        let touchLocation = gesture.locationInView(gesture.view!.window)
+        let touchLocation = gesture.location(in: gesture.view!.window)
         let topBarHeight = getTopBarHeight()
         
         if touchLocation.y > (tableView.bounds.height - kScrollZoneHeight) {
@@ -740,14 +740,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
                 displayLink!.frameInterval = 1
-                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+                displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
                 displayLink!.frameInterval = 1
-                displayLink!.addToRunLoop(NSRunLoop.mainRunLoop(), forMode: NSDefaultRunLoopMode)
+                displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if displayLink != nil {
             // check if we need to cancel a current scroll update because the touch moved out of scroll area
@@ -761,7 +761,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
 
         // cancel scroll loop on gesture end
-        if gesture.state == .Ended {
+        if gesture.state == .ended {
             // cancel any scroll loop
             displayLink?.invalidate()
             displayLink = nil
@@ -769,14 +769,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             print("listVC long press gesture ended")
         }
         
-        if let indexPath = tableView.indexPathForRowAtPoint(location) {
-            if gesture.state == .Changed {
+        if let indexPath = tableView.indexPathForRow(at: location) {
+            if gesture.state == .changed {
                 // highlight (flash?) the list row under the touch location
                 tempHighlightList(indexPath)
-            } else if gesture.state == .Ended && listObj != nil {
+            } else if gesture.state == .ended && listObj != nil {
                 // move listObj to target list
-                if indexPath.row >= 0 && indexPath.row < lists.count {
-                    let destList = lists[indexPath.row]
+                if (indexPath as NSIndexPath).row >= 0 && (indexPath as NSIndexPath).row < lists.count {
+                    let destList = lists[(indexPath as NSIndexPath).row]
                     
                     if let srcList = appDelegate.getListForListObj(listObj!) {
                         if listObj is Item {
@@ -784,7 +784,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                             let destCategory = destList.categories[destList.categories.count-1]
                             
                             // delete the moving item from source list
-                            srcList.removeItem(item, updateIndices: false)
+                            _ = srcList.removeItem(item, updateIndices: false)
                             
                             // add moving item to dest list
                             destCategory.items.append(item)
@@ -802,11 +802,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                             let movingCategory = listObj as! Category
                             
                             // delete moving category from the source list
-                            srcList.removeCategory(movingCategory, updateIndices: false)
+                            _ = srcList.removeCategory(movingCategory, updateIndices: false)
                             
                             // check if we've moved the only category from source list, if so create a new one
                             if srcList.categories.count == 0 {
-                                srcList.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
+                                _ = srcList.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
                             }
                             
                             // check if moving to a list with only a hidden category
@@ -818,7 +818,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                                 if hiddenCategory.items.count == 0 {
                                     // only existing category is hidden and empty, so delete it
                                     hiddenCategory.deleteFromCloud()
-                                    destList.removeCategory(hiddenCategory, updateIndices: false)
+                                    _ = destList.removeCategory(hiddenCategory, updateIndices: false)
                                 } else {
                                     hiddenCategory.displayHeader = true
                                 }
@@ -849,8 +849,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let currentOffset = tableView.contentOffset
         let topBarHeight = getTopBarHeight()
         let newOffsetY = max(currentOffset.y - kListViewScrollRate, -topBarHeight)
-        let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
-        let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+        let location: CGPoint = longPressGestureRecognizer!.location(in: tableView)
+        let indexPath: IndexPath? = tableView.indexPathForRow(at: location)
         
         self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: newOffsetY), animated: false)
         
@@ -863,21 +863,21 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     func scrollDownLoop()
     {
         let currentOffset = tableView.contentOffset
-        let lastCellIndex = NSIndexPath(forRow: lists.count - 1, inSection: 0)
-        let lastCell = tableView.cellForRowAtIndexPath(lastCellIndex)
+        let lastCellIndex = IndexPath(row: lists.count - 1, section: 0)
+        let lastCell = tableView.cellForRow(at: lastCellIndex)
         
         if lastCell == nil {
             self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: currentOffset.y + kListViewScrollRate), animated: false)
             
-            let location: CGPoint = longPressGestureRecognizer!.locationInView(tableView)
-            let indexPath: NSIndexPath? = tableView.indexPathForRowAtPoint(location)
+            let location: CGPoint = longPressGestureRecognizer!.location(in: tableView)
+            let indexPath: IndexPath? = tableView.indexPathForRow(at: location)
             
             if let path = indexPath {
                 longPressMoved(path, location: location)
                 prevLocation = location
             }
         } else {
-            self.tableView.scrollToRowAtIndexPath(lastCellIndex, atScrollPosition: .Bottom, animated: true)
+            self.tableView.scrollToRow(at: lastCellIndex, at: .bottom, animated: true)
         }
     }
 
@@ -892,40 +892,40 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     {
         let aboutVC = AboutViewController()
         aboutVC.listVC = self
-        presentViewController(aboutVC, animated: true, completion: nil)
+        present(aboutVC, animated: true, completion: nil)
     }
     
-    func confirmDelete(listName: String)
+    func confirmDelete(_ listName: String)
     {
         let DeleteListTitle = NSLocalizedString("Delete_List_Title", comment: "A title in an alert asking if the user wants to delete a list.")
         let DeleteListMessage = String(format: NSLocalizedString("Delete_List_Message", comment: "Are you sure you want to permanently delete the list %@?"), listName)
         
-        let alert = UIAlertController(title: DeleteListTitle, message: DeleteListMessage, preferredStyle: .Alert)
-        let deleteAction = UIAlertAction(title: NSLocalizedString("Delete", comment: "The Delete button title"), style: .Destructive, handler: handleDeleteList)
-        let cancelAction = UIAlertAction(title: NSLocalizedString("Cancel", comment: "The Cancel button title"), style: .Cancel, handler: cancelDeleteList)
+        let alert = UIAlertController(title: DeleteListTitle, message: DeleteListMessage, preferredStyle: .alert)
+        let deleteAction = UIAlertAction(title: NSLocalizedString("Delete", comment: "The Delete button title"), style: .destructive, handler: handleDeleteList)
+        let cancelAction = UIAlertAction(title: NSLocalizedString("Cancel", comment: "The Cancel button title"), style: .cancel, handler: cancelDeleteList)
         
         alert.addAction(deleteAction)
         alert.addAction(cancelAction)
         
         // Support display in iPad
         alert.popoverPresentationController?.sourceView = self.view
-        alert.popoverPresentationController?.sourceRect = CGRectMake(self.view.bounds.size.width / 2.0, self.view.bounds.size.height / 2.0, 1.0, 1.0)
+        alert.popoverPresentationController?.sourceRect = CGRect(x: self.view.bounds.size.width / 2.0, y: self.view.bounds.size.height / 2.0, width: 1.0, height: 1.0)
         
-        self.presentViewController(alert, animated: true, completion: nil)
+        self.present(alert, animated: true, completion: nil)
     }
     
-    func handleDeleteList(alertAction: UIAlertAction!) -> Void
+    func handleDeleteList(_ alertAction: UIAlertAction!) -> Void
     {
         if let indexPath = deleteListIndexPath
         {
             tableView.beginUpdates()
             
             // notify the ItemViewController that a list is being deleted
-            let deletedList = lists[indexPath.row]
+            let deletedList = lists[(indexPath as NSIndexPath).row]
             self.delegate?.listDeleted(deletedList)
             
             // delete the list from cloud storage
-            let list = lists[indexPath.row]
+            let list = lists[(indexPath as NSIndexPath).row]
             list.deleteFromCloud()
             
             // delete the list from the data source
@@ -933,7 +933,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             lists.removeObject(deletedList)
             
             // delete list index path from the table view
-            tableView.deleteRowsAtIndexPaths([indexPath], withRowAnimation: .Fade)
+            tableView.deleteRows(at: [indexPath], with: .fade)
             self.tableView.reloadData()
             deleteListIndexPath = nil
             
@@ -941,7 +941,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    func cancelDeleteList(alertAction: UIAlertAction!)
+    func cancelDeleteList(_ alertAction: UIAlertAction!)
     {
         deleteListIndexPath = nil
         self.setEditing(false, animated: true)
@@ -953,7 +953,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
 
-    func selectList(index: Int)
+    func selectList(_ index: Int)
     {
         selectionIndex = index
         
@@ -967,40 +967,40 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    func highlightList(index: Int)
+    func highlightList(_ index: Int)
     {
         // deselect all cells
         var i = 0
         for list in lists {
             list.order = i
-            let cell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: i, inSection: 0))
-            cell?.backgroundColor = UIColor.whiteColor()
+            let cell = tableView.cellForRow(at: IndexPath(row: i, section: 0))
+            cell?.backgroundColor = UIColor.white
             i += 1
         }
         
         // then select the current cell
-        let selectedCell = tableView.cellForRowAtIndexPath(NSIndexPath(forRow: selectionIndex, inSection: 0))
+        let selectedCell = tableView.cellForRow(at: IndexPath(row: selectionIndex, section: 0))
         selectedCell?.backgroundColor = selectedCellColor
     }
     
     // used to highlight list cells when moving an item to another list
-    func tempHighlightList(newHighlightedIndexPath: NSIndexPath)
+    func tempHighlightList(_ newHighlightedIndexPath: IndexPath)
     {
-        var oldHighlightedIndexPath: NSIndexPath?
-        var updateIndexPathArray = [NSIndexPath]()
+        var oldHighlightedIndexPath: IndexPath?
+        var updateIndexPathArray = [IndexPath]()
         
-        if self.tempHighlightListIndex != newHighlightedIndexPath.row {
+        if self.tempHighlightListIndex != (newHighlightedIndexPath as NSIndexPath).row {
             if self.tempHighlightListIndex != -1 {
-                oldHighlightedIndexPath = NSIndexPath(forRow: self.tempHighlightListIndex, inSection: 0)
+                oldHighlightedIndexPath = IndexPath(row: self.tempHighlightListIndex, section: 0)
                 if oldHighlightedIndexPath != nil {
-                    if let oldSelectedCell = self.tableView.cellForRowAtIndexPath(oldHighlightedIndexPath!) {
+                    if let oldSelectedCell = self.tableView.cellForRow(at: oldHighlightedIndexPath!) {
                         if self.tempHighlightListIndex == self.selectionIndex {
-                            UIView.animateWithDuration(0.0, animations: { () -> Void in
+                            UIView.animate(withDuration: 0.0, animations: { () -> Void in
                                 oldSelectedCell.backgroundColor = selectedCellColor
                             })
                         } else {
-                            UIView.animateWithDuration(0.0, animations: { () -> Void in
-                                oldSelectedCell.backgroundColor = UIColor.whiteColor()
+                            UIView.animate(withDuration: 0.0, animations: { () -> Void in
+                                oldSelectedCell.backgroundColor = UIColor.white
                             })
                         }
                         updateIndexPathArray.append(oldHighlightedIndexPath!)
@@ -1008,9 +1008,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 }
             }
             
-            if let newSelectedCell = self.tableView.cellForRowAtIndexPath(newHighlightedIndexPath) {
+            if let newSelectedCell = self.tableView.cellForRow(at: newHighlightedIndexPath) {
                 if newSelectedCell is ListCell {
-                    UIView.animateWithDuration(0.0, animations: { () -> Void in
+                    UIView.animate(withDuration: 0.0, animations: { () -> Void in
                         newSelectedCell.backgroundColor = color1_2
                     })
                     updateIndexPathArray.append(newHighlightedIndexPath)
@@ -1018,24 +1018,24 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             }
             
             //print("tempHighlightList  old \(self.tempHighlightListIndex) - new \(newHighlightedIndexPath.row)")
-            self.tempHighlightListIndex = newHighlightedIndexPath.row
+            self.tempHighlightListIndex = (newHighlightedIndexPath as NSIndexPath).row
         }
     }
     
     func getTopBarHeight() -> CGFloat {
-        let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height
+        let statusBarHeight = UIApplication.shared.statusBarFrame.size.height
         let navBarHeight = self.navigationController!.navigationBar.frame.size.height
         
         return statusBarHeight + navBarHeight
     }
     
-    func snapshotFromView(inputView: UIView) -> UIView
+    func snapshotFromView(_ inputView: UIView) -> UIView
     {
         // Make an image from the input view.
         UIGraphicsBeginImageContextWithOptions(inputView.bounds.size, false, 0)
         if let context = UIGraphicsGetCurrentContext()
         {
-            inputView.layer.renderInContext(context)
+            inputView.layer.render(in: context)
         }
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
@@ -1079,15 +1079,15 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     func reorderListObjects()
     {
         // sort lists
-        lists.sortInPlace { $0.order < $1.order }
+        lists.sort { $0.order < $1.order }
         
         for list in lists {
-            list.categories.sortInPlace { $0.order < $1.order }
+            list.categories.sort { $0.order < $1.order }
             
             //print("sort list \(list.name))")
             
             for category in list.categories {
-                category.items.sortInPlace { $0.order < $1.order }
+                category.items.sort { $0.order < $1.order }
             }
             
             list.updateIndices()
@@ -1139,198 +1139,198 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // Getting started...
         let cat1 = tutorial.addCategory("Getting started...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         
-        item = tutorial.addItem(cat1, name: "Things to know about realList...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat1, name: "Things to know about realList...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...check them off as you learn them!  By the way, this tutorial is a list just like any of the other lists you will make except it doesn't synchronize across devices.  Also, you can delete this tutorial and regenerate it any time you want (more on that later)."
         
-        item = tutorial.addItem(cat1, name: "Make a new list item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat1, name: "Make a new list item...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...tap the item add button below (in the next row) and give the new item a name (like: 'New Item').  It is always the last row in any category."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddItem")
         
         // Item actions...
         let cat2 = tutorial.addCategory("Item actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
-        item = tutorial.addItem(cat2, name: "Single tap an item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat2, name: "Single tap an item...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to add a note like this."
         
-        item = tutorial.addItem(cat2, name: "Add a picture to an item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat2, name: "Add a picture to an item...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...use the camera icon to add a picture from your iOS camera or your photo library.  Tap the camera icon again to delete the picture from the item.  Try it!"
         
-        item = tutorial.addItem(cat2, name: "Double tap an item...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat2, name: "Double tap an item...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to edit the item name."
         
-        item = tutorial.addItem(cat2, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat2, name: "Swipe left...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to delete an item."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Delete")
         
-        item = tutorial.addItem(cat2, name: "Tap the check box...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat2, name: "Tap the check box...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to mark the item as completed."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Checkbox_checked")
         
-        item = tutorial.addItem(cat2, name: "Tap again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat2, name: "Tap again...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to mark it as inactive."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Checkbox_inactive")
         
-        item = tutorial.addItem(cat2, name: "Tap again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat2, name: "Tap again...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to mark it as active."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Checkbox_active")
         
-        item = tutorial.addItem(cat2, name: "Press, hold and drag...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat2, name: "Press, hold and drag...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to move an item."
         
         // Category actions...
         let cat3 = tutorial.addCategory("Category actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         
-        item = tutorial.addItem(cat3, name: "Create a new category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat3, name: "Create a new category...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...tap the settings icon (upper right) and then tap the icon with the green plus to make a new category."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddCategory")
         
-        item = tutorial.addItem(cat3, name: "Single tap a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat3, name: "Single tap a category...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to collapse all the items in that category."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Category_collapsed")
         
-        item = tutorial.addItem(cat3, name: "Single tap it again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat3, name: "Single tap it again...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to expand it."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Category_expanded")
         
-        item = tutorial.addItem(cat3, name: "Double tap a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat3, name: "Double tap a category...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to edit its name."
         
-        item = tutorial.addItem(cat3, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat3, name: "Swipe left...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to delete a category.  Remember, if you delete a category you will also delete all of the items in it.  If you want to keep any of the items then drag them out of the category before deleting."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Delete_category")
         
-        item = tutorial.addItem(cat3, name: "Press, hold and drag a category...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat3, name: "Press, hold and drag a category...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to move it."
         
         // List actions...
         let cat4 = tutorial.addCategory("List actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
-        item = tutorial.addItem(cat4, name: "Tap the 'Lists' button above...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat4, name: "Tap the 'Lists' button above...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to go back to the lists view.  (Note: on an iPad the Lists will always be on the left so there is no Lists button.)"
         item!.imageAsset!.image = UIImage(named: "Tutorial_Lists_button")
         
-        item = tutorial.addItem(cat4, name: "Create a new list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat4, name: "Create a new list...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...with the list add button."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddList")
         
-        item = tutorial.addItem(cat4, name: "Single tap a list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat4, name: "Single tap a list...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to display the list items."
         
-        item = tutorial.addItem(cat4, name: "Double tap a list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat4, name: "Double tap a list...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to edit the list name."
         
-        item = tutorial.addItem(cat4, name: "Swipe left...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat4, name: "Swipe left...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to delete a list.  Of course, this will delete all of the categories and items in the list."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Delete")
         
-        item = tutorial.addItem(cat4, name: "Press, hold and drag a list...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat4, name: "Press, hold and drag a list...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to move it."
         
         // Settings actions...
         let cat5 = tutorial.addCategory("Settings actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         
-        item = tutorial.addItem(cat5, name: "Tap the settings button...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "Tap the settings button...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...for general list item actions."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Settings")
         
-        item = tutorial.addItem(cat5, name: "These buttons let you...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "These buttons let you...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...collapse all categories."
         item!.imageAsset!.image = UIImage(named: "Tutorial_collapse_all")
         
-        item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "and...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...expand all categories."
         item!.imageAsset!.image = UIImage(named: "Tutorial_expand_all")
         
-        item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "and...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...create new categories."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddCategory")
         
-        item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "and...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...control what items are shown.  The left button will show/hide completed items and the right button will show/hide inactive items."
         item!.imageAsset!.image = UIImage(named: "Tutorial_show_hide_items")
         
-        item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "and...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...set all items to active (left) or inactive (right)."
         item!.imageAsset!.image = UIImage(named: "Tutorial_set_all_items")
         
-        item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "and...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...change the color of your list."
         item!.imageAsset!.image = UIImage(named: "Tutorial_list_colors")
         
-        item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "and...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...print your list with AirPrint."
         item!.imageAsset!.image = UIImage(named: "Tutorial_print")
         
-        item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "and...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...email your list."
         item!.imageAsset!.image = UIImage(named: "Tutorial_email")
         
-        item = tutorial.addItem(cat5, name: "and...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat5, name: "and...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...print and email your lists with or without notes."
         item!.imageAsset!.image = UIImage(named: "Tutorial_include_notes")
         
         // Synchronize devices...
         let cat6 = tutorial.addCategory("Synchronize devices...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         
-        item = tutorial.addItem(cat6, name: "realList can synchronize lists...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat6, name: "realList can synchronize lists...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...between all of your iOS devices.  Follow the next steps to set up iCloud synchronization for realList."
         item!.imageAsset!.image = UIImage(named: "Tutorial_iCloud_sync")
         
-        item = tutorial.addItem(cat6, name: "1. Go to the About view...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat6, name: "1. Go to the About view...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...access from the realList icon at the top of the List view."
         item!.imageAsset!.image = UIImage(named: "Tutorial_About_button")
         
-        item = tutorial.addItem(cat6, name: "2. Check if iCloud is enabled...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat6, name: "2. Check if iCloud is enabled...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...if there is a green check mark in the cloud then realList is connected to iCloud.  If not, then go to the next steps to set up iCloud synchronization."
         item!.imageAsset!.image = UIImage(named: "Cloud_check")
         
-        item = tutorial.addItem(cat6, name: "3. Set up your Apple iCloud account...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat6, name: "3. Set up your Apple iCloud account...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...if you don't already have an iCloud account then set up now (it's free).  Tap the iCloud Settings button and enter your email address and a password for iCloud.  Apple gives you 5GB of data storage for free."
         item!.imageAsset!.image = UIImage(named: "Tutorial_iCloud_setup")
         
-        item = tutorial.addItem(cat6, name: "4. Turn on iCloud Drive...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat6, name: "4. Turn on iCloud Drive...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...below the iCloud setup, tap on iCloud Drive and turn it On then scroll down to verify that iCloud drive is turned on for realList.  Once iCloud Drive is set up then realList will send/receive list changes to/from your iCloud drive and will automatically share lists between all of your iOS devices that are set up with iCloud.  Tap 'Back to realList' in the upper left corner."
         item!.imageAsset!.image = UIImage(named: "Tutorial_iCloudDrive_setup")
         
-        item = tutorial.addItem(cat6, name: "5. Enable notifications...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat6, name: "5. Enable notifications...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "Notifications let realList synchronize between your iOS devices as you make changes to you lists.  Tap the Notification Settings button.  If you answered OK to notifications when realList first launched then this should already be set up.  If Notifications are off, then you can enable it here.  Tap Notifications and enable 'Allow Notifications' and realList is now set up for synchronization.  Be sure to do these steps on all of your iOS devices to share your list data between them."
         item!.imageAsset!.image = UIImage(named: "Tutorial_notifications")
         
-        item = tutorial.addItem(cat6, name: "Pull down to refresh...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat6, name: "Pull down to refresh...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "realList will now pull the latest list data from your iCloud account each time the app launches.  If you need to refresh your data after realList returns from the background just pull down on either the list view or the item view and the latest data from iCloud will be retrieved for all of your lists."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Data_Fetch")
         
         // About view...
         let cat7 = tutorial.addCategory("The About view...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         
-        item = tutorial.addItem(cat7, name: "The About view tells you...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat7, name: "The About view tells you...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...about the status of your app and lets you choose preferences."
         item!.imageAsset!.image = UIImage(named: "Tutorial_About_view")
         
-        item = tutorial.addItem(cat7, name: "You already saw...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat7, name: "You already saw...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...the iCloud Settings and Notification Settings buttons."
         item!.imageAsset!.image = UIImage(named: "Tutorial_iCloud_Notification_Settings_buttons")
         
-        item = tutorial.addItem(cat7, name: "App Settings...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat7, name: "App Settings...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...the App Settings let you control auto capitalization and spell checking behaviors of names and notes.  Also you can control if pictures are included with item notes when you AirPrint your lists."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AppSettings_button")
         
-        item = tutorial.addItem(cat7, name: "Upgrade...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat7, name: "Upgrade...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...the Upgrade view lets you purchase an upgrade that removes limits on lists and items.  Here you can also restore your purchase if you have already purchased the upgraded version.  After you have upgraded realList the white arrow in the Upgrade button turns to green."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Upgrade_button")
         
-        item = tutorial.addItem(cat7, name: "Tutorial...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat7, name: "Tutorial...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...the Tutorial button will either take you to the tutorial list or generate a new copy of the tutorial if you have deleted it."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Tutorial_button")
         
         // All done...
         let cat8 = tutorial.addCategory("All done!!", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
-        item = tutorial.addItem(cat8, name: "You can delete this turorial...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat8, name: "You can delete this turorial...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...from the Lists view at any time."
         
-        item = tutorial.addItem(cat8, name: "You can add it again...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat8, name: "You can add it again...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...from the About view if you wish."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Tutorial_button")
         
-        item = tutorial.addItem(cat8, name: "Now you can...", state: ItemState.Incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item = tutorial.addItem(cat8, name: "Now you can...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "... start making your own lists!  If you have any questions please send them to the email contacts in the About view."
         item!.imageAsset!.image = UIImage(named: "Tutorial_contacts")
         

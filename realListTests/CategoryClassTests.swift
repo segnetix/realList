@@ -136,9 +136,9 @@ class CategoryClassTests: ModelClassTests
         let cat = lists[0].categories[0]
         
         // given
-        cat.items[0].state = .Complete
-        cat.items[1].state = .Inactive
-        cat.items[2].state = .Incomplete
+        cat.items[0].state = .complete
+        cat.items[1].state = .inactive
+        cat.items[2].state = .incomplete
         
         // then
         XCTAssertTrue(cat.itemsComplete() == 1, "itemsComplete")
@@ -150,9 +150,9 @@ class CategoryClassTests: ModelClassTests
         let cat = lists[0].categories[0]
         
         // given
-        cat.items[0].state = .Complete
-        cat.items[1].state = .Inactive
-        cat.items[2].state = .Incomplete
+        cat.items[0].state = .complete
+        cat.items[1].state = .inactive
+        cat.items[2].state = .incomplete
         
         // then
         XCTAssertTrue(cat.itemsActive() == 2, "itemsActive")
@@ -164,9 +164,9 @@ class CategoryClassTests: ModelClassTests
         let cat = lists[0].categories[0]
         
         // given
-        cat.items[0].state = .Complete
-        cat.items[1].state = .Inactive
-        cat.items[2].state = .Incomplete
+        cat.items[0].state = .complete
+        cat.items[1].state = .inactive
+        cat.items[2].state = .incomplete
         
         // then
         XCTAssertTrue(cat.itemsInactive() == 1, "itemsInactive")
@@ -178,9 +178,9 @@ class CategoryClassTests: ModelClassTests
         let cat = lists[0].categories[0]
         
         // given
-        cat.items[0].state = .Complete
-        cat.items[1].state = .Inactive
-        cat.items[2].state = .Incomplete
+        cat.items[0].state = .complete
+        cat.items[1].state = .inactive
+        cat.items[2].state = .incomplete
         
         // then
         XCTAssertTrue(cat.itemsIncomplete() == 1, "itemsIncomplete")
@@ -188,7 +188,7 @@ class CategoryClassTests: ModelClassTests
     
     func DISABLE_testPerformanceExample() {
         // This is an example of a performance test case.
-        self.measureBlock {
+        self.measure {
             // Put the code you want to measure the time of here.
         }
     }
