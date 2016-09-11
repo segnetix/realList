@@ -676,9 +676,9 @@ class List: NSObject, NSCoding
     convenience required init?(coder decoder: NSCoder)
     {
         let name               = decoder.decodeObject(forKey: key_name)               as? String
-        let showCompletedItems = decoder.decodeObject(forKey: key_showCompletedItems) as? Bool
-        let showInactiveItems  = decoder.decodeObject(forKey: key_showInactiveItems)  as? Bool
-        let tutorial           = decoder.decodeObject(forKey: key_isTutorialList)     as? Bool
+        let showCompletedItems = decoder.decodeBool(forKey: key_showCompletedItems)
+        let showInactiveItems  = decoder.decodeBool(forKey: key_showInactiveItems)
+        let tutorial           = decoder.decodeBool(forKey: key_isTutorialList)
         let listColorName      = decoder.decodeObject(forKey: key_listColorName)      as? String
         let categories         = decoder.decodeObject(forKey: key_categories)         as? [Category]
         let listReference      = decoder.decodeObject(forKey: key_listReference)      as? CKReference
@@ -860,7 +860,7 @@ class List: NSObject, NSCoding
         var item: Item? = nil
         
         if indexForCat > -1 {
-            item = Item(name: name, state: state, createRecord: createRecord, tutorial: tutorial)
+            item = Item(name: name, state: state, createRecord: createRecord/*, tutorial: tutorial*/)
             category.items.append(item!)
         } else {
             print("ERROR: addItem given invalid category!")
@@ -1776,7 +1776,7 @@ class Category: ListObj, NSCoding
     {
         if let expanded          = expanded          { self.expanded           = expanded          } else { self.expanded           = true          }
         if let displayHeader     = displayHeader     { self.displayHeader      = displayHeader     } else { self.displayHeader      = true          }
-        if let modificationDate  = modificationDate  { self.modificationDate   = modificationDate  } else { self.modificationDate   = Date.init() }
+        if let modificationDate  = modificationDate  { self.modificationDate   = modificationDate  } else { self.modificationDate   = Date.init()   }
         if let tutorial          = tutorial          { self.isTutorialCategory = tutorial          } else { self.isTutorialCategory = false         }
         if let itemAddCount      = itemAddCount      { self.itemAddCount       = itemAddCount      } else { self.itemAddCount       = 0             }
         if let categoryReference = categoryReference { self.categoryReference  = categoryReference }
@@ -1790,10 +1790,10 @@ class Category: ListObj, NSCoding
     convenience required init?(coder decoder: NSCoder)
     {
         let name = decoder.decodeObject(forKey: key_name)                           as? String
-        let expanded          = decoder.decodeObject(forKey: key_expanded)          as? Bool
-        let displayHeader     = decoder.decodeObject(forKey: key_displayHeader)     as? Bool
-        let tutorial          = decoder.decodeObject(forKey: key_tutorial)          as? Bool
-        let itemAddCount      = decoder.decodeCInt(forKey: key_itemAddCount)         as  Int32
+        let expanded          = decoder.decodeBool(forKey: key_expanded)
+        let displayHeader     = decoder.decodeBool(forKey: key_displayHeader)
+        let tutorial          = decoder.decodeBool(forKey: key_tutorial)
+        let itemAddCount      = decoder.decodeCInt(forKey: key_itemAddCount)        as  Int32
         let modificationDate  = decoder.decodeObject(forKey: key_modificationDate)  as? Date
         let categoryReference = decoder.decodeObject(forKey: key_categoryReference) as? CKReference
         let categoryRecord    = decoder.decodeObject(forKey: key_categoryRecord)    as? CKRecord
@@ -1818,7 +1818,7 @@ class Category: ListObj, NSCoding
         coder.encode(self.expanded,           forKey: key_expanded)
         coder.encode(self.displayHeader,      forKey: key_displayHeader)
         coder.encode(self.isTutorialCategory, forKey: key_tutorial)
-        coder.encodeCInt(self.itemAddCount,          forKey: key_itemAddCount)
+        coder.encodeCInt(self.itemAddCount,   forKey: key_itemAddCount)
         coder.encode(self.modificationDate,   forKey: key_modificationDate)
         coder.encode(self.categoryReference,  forKey: key_categoryReference)
         coder.encode(self.categoryRecord,     forKey: key_categoryRecord)
@@ -2070,11 +2070,11 @@ class Item: ListObj, NSCoding
     var itemReference: CKReference?
     var itemRecord: CKRecord?
     var imageAsset: ImageAsset?
-    var isTutorialItem = false
+    //var isTutorialItem = false
     var createdBy: String           // established locally - saved to cloud
-    var createdDate: Date         // established locally - saved to cloud
+    var createdDate: Date           // established locally - saved to cloud
     var modifiedBy: String          // established locally - saved to cloud
-    var modifiedDate: Date   {    // established locally - saved to cloud
+    var modifiedDate: Date   {      // established locally - saved to cloud
         didSet {
             // also set modified by
             modifiedBy = UIDevice.current.name
@@ -2090,12 +2090,12 @@ class Item: ListObj, NSCoding
     }
     
     // Designated initializer - new item initializer
-    init(name: String, state: ItemState, createRecord: Bool, tutorial: Bool = false)
+    init(name: String, state: ItemState, createRecord: Bool/*, tutorial: Bool = false*/)
     {
         self.state = state
         self.note = ""
         self.imageAsset = nil
-        self.isTutorialItem = tutorial
+        //self.isTutorialItem = tutorial
         createdBy = UIDevice.current.name
         modifiedBy = UIDevice.current.name
         createdDate = Date.init(timeIntervalSince1970: 0)
@@ -2121,16 +2121,16 @@ class Item: ListObj, NSCoding
     }
 
     // Designated memberwise initializer
-    init(name: String?, note: String?, imageAsset: ImageAsset?, state: ItemState, tutorial: Bool?, itemRecord: CKRecord?, itemReference: CKReference?, createdBy: String?, createdDate: Date?, modifiedBy: String?, modifiedDate: Date?, imageModifiedDate: Date?)
+    init(name: String?, note: String?, imageAsset: ImageAsset?, state: ItemState, /*tutorial: Bool?,*/ itemRecord: CKRecord?, itemReference: CKReference?, createdBy: String?, createdDate: Date?, modifiedBy: String?, modifiedDate: Date?, imageModifiedDate: Date?)
     {
         if let note               = note              { self.note              = note              } else { self.note              = ""                                                                          }
-        if let tutorial           = tutorial          { self.isTutorialItem    = tutorial          } else { self.isTutorialItem    = false                                                                       }
+        //if let tutorial           = tutorial          { self.isTutorialItem    = tutorial          } else { self.isTutorialItem    = false                                                                       }
         if let itemRecord         = itemRecord        { self.itemRecord        = itemRecord        } else { self.itemRecord        = nil                                                                         }
-        if let createdBy          = createdBy         { self.createdBy         = createdBy         } else { self.createdBy         = UIDevice.current.name                                               }
-        if let createdDate        = createdDate       { self.createdDate       = createdDate       } else { self.createdDate       = Date.init(timeIntervalSince1970: 0)                                       }
-        if let modifiedBy         = modifiedBy        { self.modifiedBy        = modifiedBy        } else { self.modifiedBy        = UIDevice.current.name                                               }
-        if let modifiedDate       = modifiedDate      { self.modifiedDate      = modifiedDate      } else { self.modifiedDate      = Date.init(timeIntervalSince1970: 0)                                       }
-        if let imageModifiedDate  = imageModifiedDate { self.imageModifiedDate = imageModifiedDate } else { self.imageModifiedDate = Date.init(timeIntervalSince1970: 0)                                       }
+        if let createdBy          = createdBy         { self.createdBy         = createdBy         } else { self.createdBy         = UIDevice.current.name                                                       }
+        if let createdDate        = createdDate       { self.createdDate       = createdDate       } else { self.createdDate       = Date.init(timeIntervalSince1970: 0)                                         }
+        if let modifiedBy         = modifiedBy        { self.modifiedBy        = modifiedBy        } else { self.modifiedBy        = UIDevice.current.name                                                       }
+        if let modifiedDate       = modifiedDate      { self.modifiedDate      = modifiedDate      } else { self.modifiedDate      = Date.init(timeIntervalSince1970: 0)                                         }
+        if let imageModifiedDate  = imageModifiedDate { self.imageModifiedDate = imageModifiedDate } else { self.imageModifiedDate = Date.init(timeIntervalSince1970: 0)                                         }
         if let itemReference      = itemReference     { self.itemReference     = itemReference     } else { self.itemReference     = CKReference.init(record: itemRecord!, action: CKReferenceAction.deleteSelf) }
         if let imageAsset         = imageAsset {
             self.imageAsset = imageAsset
@@ -2152,7 +2152,6 @@ class Item: ListObj, NSCoding
         let name              = decoder.decodeObject(forKey: key_name)              as? String
         let note              = decoder.decodeObject(forKey: key_note)              as? String
         let imageAsset        = decoder.decodeObject(forKey: key_imageAsset)        as? ImageAsset
-        let tutorial          = decoder.decodeObject(forKey: key_tutorial)          as? Bool
         let createdBy         = decoder.decodeObject(forKey: key_createdBy)         as? String
         let createdDate       = decoder.decodeObject(forKey: key_createdDate)       as? Date
         let modifiedBy        = decoder.decodeObject(forKey: key_modifiedBy)        as? String
@@ -2167,7 +2166,7 @@ class Item: ListObj, NSCoding
                   note: note,
                   imageAsset: imageAsset,
                   state: itemState,
-                  tutorial: tutorial,
+                  //tutorial: tutorial,
                   itemRecord: itemRecord,
                   itemReference: itemReference,
                   createdBy: createdBy,
@@ -2196,9 +2195,9 @@ class Item: ListObj, NSCoding
     func saveToCloud(_ categoryReference: CKReference)
     {
         // don't save the tutorial to the cloud
-        if self.isTutorialItem {
-            return
-        }
+        // if self.isTutorialItem {
+        //    return
+        // }
         
         if let database = appDelegate.privateDatabase {
             if needToDelete {
@@ -2221,9 +2220,9 @@ class Item: ListObj, NSCoding
     func saveRecord(_ itemRecord: CKRecord, categoryReference: CKReference)
     {
         // don't save the tutorial to the cloud
-        if self.isTutorialItem {
-            return
-        }
+        // if self.isTutorialItem {
+        //    return
+        // }
         
         itemRecord[key_name] = self.name as CKRecordValue?
         itemRecord[key_note] = self.note as CKRecordValue?
@@ -2332,9 +2331,9 @@ class Item: ListObj, NSCoding
     func deleteRecord(_ itemRecord: CKRecord, database: CKDatabase)
     {
         // don't save the tutorial to the cloud
-        if self.isTutorialItem {
-            return
-        }
+        // if self.isTutorialItem {
+        //    return
+        // }
         
         database.delete(withRecordID: itemRecord.recordID, completionHandler: { returnRecord, error in
             if let err = error {

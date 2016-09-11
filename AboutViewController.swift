@@ -93,13 +93,17 @@ class AboutViewController: UIAppViewController
     
     @IBAction func goToiCloudSettings(_ sender: AnyObject)
     {
-        UIApplication.shared.openURL(URL(string:"prefs:root=CASTLE")!)
+        if let cloudSettings = URL(string:"prefs:root=CASTLE") {
+            let success = UIApplication.shared.openURL(cloudSettings)
+            print("goToiCloudSettings: \(success)")
+        }
     }
     
     @IBAction func goToNotificationSettings(_ sender: AnyObject)
     {
         if let appSettings = URL(string: UIApplicationOpenSettingsURLString) {
-            UIApplication.shared.openURL(appSettings)
+            let success = UIApplication.shared.openURL(appSettings)
+            print("goToNotificationSettings: \(success)")
         }
     }
     
