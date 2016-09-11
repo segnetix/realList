@@ -27,7 +27,7 @@ let kListViewCellHeight: CGFloat = 60.0
 
 class ListViewController: UITableViewController, UITextFieldDelegate
 {
-    var lists = [List]()
+    //var lists = [List]()
     var inEditMode = false
     var deleteListIndexPath: IndexPath? = nil
     var editModeRow = -1
@@ -186,7 +186,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
         // return the number of rows (plus 1 for the Add row)
-        return lists.count + 1
+        return ListData.listCount + 1
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
@@ -196,53 +196,53 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
     {
-        if (indexPath as NSIndexPath).row < lists.count {
+        if (indexPath as NSIndexPath).row < ListData.listCount {
             // set up a List row
             let cell = tableView.dequeueReusableCell(withIdentifier: listCellID, for: indexPath) as! ListCell
             
-            // Configure the cell...
-            let list = lists[(indexPath as NSIndexPath).row]
-            
-            cell.listName.isUserInteractionEnabled = false
-            cell.listName.delegate = self
-            cell.listName.addTarget(self, action: #selector(ListViewController.listNameDidChange(_:)), for: UIControlEvents.editingChanged)
-            cell.listName.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
-            cell.listName.text = list.name
-            cell.listName.autocapitalizationType = appDelegate.namesCapitalize ? .words : .none
-            cell.listName.spellCheckingType = appDelegate.namesSpellCheck ? .yes : .no
-            cell.listName.autocorrectionType = appDelegate.namesAutocorrection ? .yes : .no
-            cell.listName.tag = (indexPath as NSIndexPath).row
-            cell.contentView.tag = (indexPath as NSIndexPath).row
-            
-            // list background color
-            if (indexPath as NSIndexPath).row == selectionIndex {
-                cell.backgroundColor = selectedCellColor
-            } else {
-                cell.backgroundColor = UIColor.white
+            // get list object for this row
+            if let list = ListData.listForRow(at: indexPath) {
+                // Configure the cell...
+                cell.listName.isUserInteractionEnabled = false
+                cell.listName.delegate = self
+                cell.listName.addTarget(self, action: #selector(ListViewController.listNameDidChange(_:)), for: UIControlEvents.editingChanged)
+                cell.listName.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
+                cell.listName.text = list.name
+                cell.listName.autocapitalizationType = appDelegate.namesCapitalize ? .words : .none
+                cell.listName.spellCheckingType = appDelegate.namesSpellCheck ? .yes : .no
+                cell.listName.autocorrectionType = appDelegate.namesAutocorrection ? .yes : .no
+                cell.listName.tag = (indexPath as NSIndexPath).row
+                cell.contentView.tag = (indexPath as NSIndexPath).row
+                
+                // list background color
+                if (indexPath as NSIndexPath).row == selectionIndex {
+                    cell.backgroundColor = selectedCellColor
+                } else {
+                    cell.backgroundColor = UIColor.white
+                }
+                
+                // list color bar
+                let colorBar = UIImageView()
+                colorBar.frame = CGRect(x: 0, y: 0, width: 6, height: cell.contentView.frame.height)
+                colorBar.backgroundColor = list.listColor
+                cell.contentView.addSubview(colorBar)
+                
+                // set up single tap gesture recognizer in cat cell to enable expand/collapse
+                let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ListViewController.cellSingleTapAction(_:)))
+                singleTapGestureRecognizer.numberOfTapsRequired = 1
+                cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
+                
+                // set up double tap gesture recognizer in item cell to enable cell moving
+                let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ListViewController.cellDoubleTapAction(_:)))
+                doubleTapGestureRecognizer.numberOfTapsRequired = 2
+                singleTapGestureRecognizer.require(toFail: doubleTapGestureRecognizer)
+                cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
+                
+                // cell separator
+                cell.preservesSuperviewLayoutMargins = false
+                cell.separatorInset = UIEdgeInsets.zero
+                cell.layoutMargins = UIEdgeInsets.zero
             }
-            
-            // list color bar
-            let colorBar = UIImageView()
-            colorBar.frame = CGRect(x: 0, y: 0, width: 6, height: cell.contentView.frame.height)
-            colorBar.backgroundColor = list.listColor
-            cell.contentView.addSubview(colorBar)
-            
-            // set up single tap gesture recognizer in cat cell to enable expand/collapse
-            let singleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ListViewController.cellSingleTapAction(_:)))
-            singleTapGestureRecognizer.numberOfTapsRequired = 1
-            cell.contentView.addGestureRecognizer(singleTapGestureRecognizer)
-            
-            // set up double tap gesture recognizer in item cell to enable cell moving
-            let doubleTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(ListViewController.cellDoubleTapAction(_:)))
-            doubleTapGestureRecognizer.numberOfTapsRequired = 2
-            singleTapGestureRecognizer.require(toFail: doubleTapGestureRecognizer)
-            cell.contentView.addGestureRecognizer(doubleTapGestureRecognizer)
-            
-            // cell separator
-            cell.preservesSuperviewLayoutMargins = false
-            cell.separatorInset = UIEdgeInsets.zero
-            cell.layoutMargins = UIEdgeInsets.zero
-            
             return cell
         } else {
             // set up Add row
@@ -296,7 +296,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     // override to support conditional editing of the table view
     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
-        return (indexPath as NSIndexPath).row < lists.count
+        return indexPath.row < ListData.listCount
     }
     
     // override to support editing the table view
@@ -304,11 +304,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     {
         if editingStyle == .delete {
             deleteListIndexPath = indexPath
-            let deletedList = lists[(indexPath as NSIndexPath).row]
             
-            confirmDelete(deletedList.name)
-        }
-        else if editingStyle == .insert {
+            if let deletedList = ListData.listForRow(at: indexPath) {
+                confirmDelete(deletedList.name)
+            }
+        } else if editingStyle == .insert {
             // Create a new list instance, insert it into the array of lists, and add a new row to the table view
         }
     }
@@ -316,10 +316,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     // Override to support rearranging the table view.
     override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to toIndexPath: IndexPath)
     {
-        let list = lists[(fromIndexPath as NSIndexPath).row]
-        //lists.removeAtIndex(fromIndexPath.row)
-        lists.removeObject(list)
-        lists.insert(list, at: (toIndexPath as NSIndexPath).row)
+        if let list = ListData.listForRow(at: fromIndexPath) {
+            ListData.removeList(list)
+            ListData.insertList(list, at: toIndexPath)
+        }
+        
+        //let list = lists[(fromIndexPath as NSIndexPath).row]
+        //lists.removeObject(list)
+        //lists.insert(list, at: (toIndexPath as NSIndexPath).row)
         
         self.tableView.reloadData()
     }
@@ -403,7 +407,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     {
         // update list name data with new value
         let i = textField.tag
-        lists[i].name = textField.text!.trimmingCharacters(in: CharacterSet.whitespaces)
+        
+        ListData.list(i)?.name = textField.text!.trimmingCharacters(in: CharacterSet.whitespaces)
         
         // update ItemVC list name
         delegate?.listNameChanged(textField.text!)
@@ -423,29 +428,22 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             if textField.text!.trimmingCharacters(in: CharacterSet.whitespaces).isEmpty
             {
                 // delete from lists array
-                lists.removeLast()
+                ListData.removeLastList()
+                //lists.removeLast()
                 self.tableView.reloadData()
             }
         }
         
         editingNewListName = false
         
-        appDelegate.saveListData(true)
+        appDelegate.saveListData(asynch: true)
         
         return true
     }
     
     @IBAction func addListButtonTapped(_ sender: UIButton)
     {
-        var listCount = 0
-        
-        for list in lists {
-            if list.isTutorialList == false {
-                listCount += 1
-            }
-        }
-        
-        if appDelegate.appIsUpgraded == false && listCount >= kMaxListCount
+        if appDelegate.appIsUpgraded == false && ListData.nonTutorialListCount >= kMaxListCount
         {
             let listLimitTitle = NSLocalizedString("List_Limit", comment: "List Limit title for the list limit exceeded dialog in the free version.")
             let listLimitMsg = String(format: NSLocalizedString("List_Limit_Message", comment: "The free version of realList is limited to %i lists.  Please upgrade or restore your purchase for unlimited lists."), kMaxListCount)
@@ -467,15 +465,18 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // create a new list and append
         let newList = List(name: "", createRecord: true)
         newList.listColorName = r1_2
-        lists.append(newList)
-        resetListOrderByPosition()
+        ListData.appendList(newList)
+        ListData.resetListOrderByPosition()
+        
+        //lists.append(newList)
+        //resetListOrderByPosition()
         
         _ = newList.addCategory("", displayHeader: false, updateIndices: true, createRecord: true)
         
         self.tableView.reloadData()
         
         // set up editing mode for list name
-        let indexPath = IndexPath(row: lists.count - 1, section: 0)
+        let indexPath = IndexPath(row: ListData.listCount - 1, section: 0)
         let cell = tableView.cellForRow(at: indexPath) as! ListCell
         
         inEditMode = true
@@ -497,11 +498,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         let i = sender.view?.tag
         let indexPath = IndexPath(row: i!, section: 0)
         
-        let selectedList = self.lists[(indexPath as NSIndexPath).row]
-        self.delegate?.listSelected(selectedList)
-        
-        if let itemViewController = self.delegate as? ItemViewController {
-            splitViewController?.showDetailViewController(itemViewController.navigationController!, sender: nil)
+        //let selectedList = self.lists[(indexPath as NSIndexPath).row]
+        if let selectedList = ListData.listForRow(at: indexPath) {
+            self.delegate?.listSelected(selectedList)
+            
+            if let itemViewController = self.delegate as? ItemViewController {
+                splitViewController?.showDetailViewController(itemViewController.navigationController!, sender: nil)
+            }
         }
     }
     
@@ -534,7 +537,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             {
                 // we got a long press on the AddList cell... cancel the action
                 if longPressActive {
-                    indexPath = IndexPath(row: lists.count - 1, section: 0)
+                    indexPath = IndexPath(row: ListData.listCount - 1, section: 0)
                     longPressEnded(indexPath, location: location)
                 }
                 return
@@ -682,8 +685,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 tableView.beginUpdates()
                 
                 // remove the item from its original location
-                let removedList = lists.remove(at: (sourceIndexPath! as NSIndexPath).row)
-                lists.insert(removedList, at: (indexPath as NSIndexPath).row)
+                let removedList = ListData.removeListAt(sourceIndexPath!)
+                if removedList != nil {
+                    ListData.insertList(removedList!, at: indexPath)
+                }
+                
+                //let removedList = lists.remove(at: (sourceIndexPath! as NSIndexPath).row)
+                //lists.insert(removedList, at: (indexPath as NSIndexPath).row)
 
                 tableView.endUpdates()
             }
@@ -716,14 +724,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.displayLink = nil
         
         // need to reset the list order values
-        var i = 0
-        for list in lists {
-            list.order = i
-            i += 1
-        }
+        ListData.resetListOrderValues()
         
         // and save data changes locally and to the cloud
-        appDelegate.saveListData(true)
+        appDelegate.saveListData(asynch: true)
     }
     
     // handle the gesture from the itemVC when moving an item to another list
@@ -775,65 +779,71 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 tempHighlightList(indexPath)
             } else if gesture.state == .ended && listObj != nil {
                 // move listObj to target list
-                if (indexPath as NSIndexPath).row >= 0 && (indexPath as NSIndexPath).row < lists.count {
-                    let destList = lists[(indexPath as NSIndexPath).row]
-                    
-                    if let srcList = appDelegate.getListForListObj(listObj!) {
-                        if listObj is Item {
-                            let item = listObj as! Item
-                            let destCategory = destList.categories[destList.categories.count-1]
-                            
-                            // delete the moving item from source list
-                            _ = srcList.removeItem(item, updateIndices: false)
-                            
-                            // add moving item to dest list
-                            destCategory.items.append(item)
-                            
-                            // reset item order based on position in dest list
-                            item.order = destCategory.items.count - 1
-                            
-                            // save the moving item to the cloud with updated owning category
-                            if let destCatRef = destCategory.categoryReference {
-                                item.saveToCloud(destCatRef)
-                            }
-                            
-                            print("removing item \(item.name) from \(srcList.name) and adding to \(destList.name)")
-                        } else if listObj is Category {
-                            let movingCategory = listObj as! Category
-                            
-                            // delete moving category from the source list
-                            _ = srcList.removeCategory(movingCategory, updateIndices: false)
-                            
-                            // check if we've moved the only category from source list, if so create a new one
-                            if srcList.categories.count == 0 {
-                                _ = srcList.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
-                            }
-                            
-                            // check if moving to a list with only a hidden category
-                            // if so, then delete if no items, otherwise
-                            // make the hidden category unhidden (it will likely have no name)
-                            if (destList.categories.count == 1) && (destList.categories[0].displayHeader == false) {
-                                let hiddenCategory = destList.categories[0]
+                if indexPath.row >= 0 && indexPath.row < ListData.listCount {
+                    if let destList = ListData.list(indexPath.row) {   // lists[(indexPath as NSIndexPath).row]
+                        if let srcList = ListData.getListForListObj(listObj!) {
+                            if listObj is Item {
+                                let item = listObj as! Item
                                 
-                                if hiddenCategory.items.count == 0 {
-                                    // only existing category is hidden and empty, so delete it
-                                    hiddenCategory.deleteFromCloud()
-                                    _ = destList.removeCategory(hiddenCategory, updateIndices: false)
-                                } else {
-                                    hiddenCategory.displayHeader = true
+                                //
+                                //  should this following code be moved to ListData???????
+                                //
+                                
+                                //let destCategory = destList.categories[destList.categories.count-1]
+                                if let destCategory = ListData.lastCategoryInList(destList) {
+                                    // delete the moving item from source list
+                                    _ = srcList.removeItem(item, updateIndices: false)
+                                    
+                                    // add moving item to dest list
+                                    destCategory.items.append(item)
+                                    
+                                    // reset item order based on position in dest list
+                                    item.order = destCategory.items.count - 1
+                                    
+                                    // save the moving item to the cloud with updated owning category
+                                    if let destCatRef = destCategory.categoryReference {
+                                        item.saveToCloud(destCatRef)
+                                    }
+                                    
+                                    print("removing item \(item.name) from \(srcList.name) and adding to \(destList.name)")
                                 }
+                            } else if listObj is Category {
+                                let movingCategory = listObj as! Category
+                                
+                                // delete moving category from the source list
+                                _ = srcList.removeCategory(movingCategory, updateIndices: false)
+                                
+                                // check if we've moved the only category from source list, if so create a new one
+                                if srcList.categories.count == 0 {
+                                    _ = srcList.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
+                                }
+                                
+                                // check if moving to a list with only a hidden category
+                                // if so, then delete if no items, otherwise
+                                // make the hidden category unhidden (it will likely have no name)
+                                if (destList.categories.count == 1) && (destList.categories[0].displayHeader == false) {
+                                    let hiddenCategory = destList.categories[0]
+                                    
+                                    if hiddenCategory.items.count == 0 {
+                                        // only existing category is hidden and empty, so delete it
+                                        hiddenCategory.deleteFromCloud()
+                                        _ = destList.removeCategory(hiddenCategory, updateIndices: false)
+                                    } else {
+                                        hiddenCategory.displayHeader = true
+                                    }
+                                }
+                                
+                                // append the moving category to the destination list and set order
+                                destList.categories.append(movingCategory)
+                                movingCategory.order = destList.categories.count - 1
+                                
+                                // save the moving list to the cloud with updated owning list
+                                if let destListRef = destList.listReference {
+                                    movingCategory.saveToCloud(destListRef)
+                                }
+                                
+                                print("moving category \(movingCategory.name) from \(srcList.name) to \(destList.name)")
                             }
-                            
-                            // append the moving category to the destination list and set order
-                            destList.categories.append(movingCategory)
-                            movingCategory.order = destList.categories.count - 1
-                            
-                            // save the moving list to the cloud with updated owning list
-                            if let destListRef = destList.listReference {
-                                movingCategory.saveToCloud(destListRef)
-                            }
-                            
-                            print("moving category \(movingCategory.name) from \(srcList.name) to \(destList.name)")
                         }
                     }
                     
@@ -863,7 +873,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     func scrollDownLoop()
     {
         let currentOffset = tableView.contentOffset
-        let lastCellIndex = IndexPath(row: lists.count - 1, section: 0)
+        let lastCellIndex = IndexPath(row: ListData.listCount - 1, section: 0)
         let lastCell = tableView.cellForRow(at: lastCellIndex)
         
         if lastCell == nil {
@@ -921,21 +931,23 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             tableView.beginUpdates()
             
             // notify the ItemViewController that a list is being deleted
-            let deletedList = lists[(indexPath as NSIndexPath).row]
-            self.delegate?.listDeleted(deletedList)
-            
-            // delete the list from cloud storage
-            let list = lists[(indexPath as NSIndexPath).row]
-            list.deleteFromCloud()
-            
-            // delete the list from the data source
-            //lists.removeAtIndex(indexPath.row)
-            lists.removeObject(deletedList)
-            
-            // delete list index path from the table view
-            tableView.deleteRows(at: [indexPath], with: .fade)
-            self.tableView.reloadData()
-            deleteListIndexPath = nil
+            //let deletedList = lists[(indexPath as NSIndexPath).row]
+            if let deletedList = ListData.listForRow(at: indexPath) {
+                self.delegate?.listDeleted(deletedList)
+                
+                // delete the list from cloud storage
+                //if let list = ListData.listForRow(at: indexPath)
+                deletedList.deleteFromCloud()
+                
+                // delete the list from the data source
+                //lists.removeAtIndex(indexPath.row)
+                ListData.removeList(deletedList)
+                
+                // delete list index path from the table view
+                tableView.deleteRows(at: [indexPath], with: .fade)
+                self.tableView.reloadData()
+                deleteListIndexPath = nil
+            }
             
             tableView.endUpdates()
         }
@@ -957,9 +969,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     {
         selectionIndex = index
         
-        if lists.count > selectionIndex && selectionIndex >= 0 {
-            let selectedList = lists[selectionIndex]
-            delegate?.listSelected(selectedList)
+        if ListData.listCount > selectionIndex && selectionIndex >= 0 {
+            let selectedList = ListData.list(selectionIndex)
+            delegate?.listSelected(selectedList!)
             
             highlightList(index)
             
@@ -970,12 +982,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     func highlightList(_ index: Int)
     {
         // deselect all cells
-        var i = 0
-        for list in lists {
-            list.order = i
+        ListData.resetListOrderValues()
+        for i in 0..<ListData.listCount {
             let cell = tableView.cellForRow(at: IndexPath(row: i, section: 0))
             cell?.backgroundColor = UIColor.white
-            i += 1
         }
         
         // then select the current cell
@@ -1051,6 +1061,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return snapshot
     }
     
+    /*
     func countNeedToSave() -> Int {
         var count = 0
         
@@ -1113,12 +1124,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             list.resetCategoryAndItemOrderByPosition()
         }
     }
-        
+    */
+    
 ////////////////////////////////////////////////////////////////
     
     func generateTutorial()
     {
         // do we already have a tutorial loaded?
+        /*
         var i = 0
         for list in lists {
             if list.isTutorialList {
@@ -1127,12 +1140,20 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             }
             i += 1
         }
+        */
+        
+        if let tutorialIndex = ListData.tutorialListIndex {
+            self.selectionIndex = tutorialIndex
+            return
+        }
         
         // list1
         let tutorial = List(name: "realList Tutorial", createRecord: true, tutorial: true)
         tutorial.listColorName = r1_2
-        lists.append(tutorial)
-        resetListOrderByPosition()
+        ListData.appendList(tutorial)
+        ListData.resetListOrderByPosition()
+        //lists.append(tutorial)
+        //resetListOrderByPosition()
         
         var item: Item?
         
@@ -1335,7 +1356,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         item!.imageAsset!.image = UIImage(named: "Tutorial_contacts")
         
         // select the newly added tutorial
-        self.selectionIndex = self.lists.count-1
+        self.selectionIndex = ListData.listCount-1
         
         // housekeeping
         tutorial.updateIndices()

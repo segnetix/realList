@@ -622,7 +622,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             self.layoutAnimated(true)
         }
         
-        appDelegate.saveListData(true)
+        appDelegate.saveListData(asynch: true)
         
         return true
     }
@@ -858,7 +858,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 }
                 
                 // save expanded state change to the clould
-                appDelegate.saveListData(true)
+                appDelegate.saveListData(asynch: true)
             } else if obj is Item {
                 if !inEditMode {
                     // not in edit mode so can present item detail view
@@ -1269,7 +1269,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             listVC.highlightList(listVC.selectionIndex)
         }
         
-        appDelegate.saveListData(true)
+        appDelegate.saveListData(asynch: true)
     }
     
     func scrollUpLoop()
@@ -1798,7 +1798,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             item.state.next()
             
             // call saveListData - cloudOnly mode
-            appDelegate.saveListData(true)
+            appDelegate.saveListData(asynch: true)
             
             // set item name text color
             if indexPath != nil {

@@ -146,13 +146,449 @@ enum ItemState: Int {
 //  MARK: - ListData (singleton)
 //
 ////////////////////////////////////////////////////////////////
-/*
-class ListData {
-    static let default: ListData = {
+
+class ListData
+{
+    private init() {}   // prevent use of default initializer
+    private static var lists = [List]()
+    
+    // computed values
+    static var listCount: Int {
+        get {
+            return lists.count
+        }
+    }
+    
+    static var nonTutorialListCount: Int {
+        get {
+            var tempListCount = 0
+            for list in lists {
+                if list.isTutorialList == false {
+                    tempListCount += 1
+                }
+            }
+            return tempListCount
+        }
+    }
+
+    static var tutorialListIndex: Int? {
+        var i = 0
+        for list in lists {
+            if list.isTutorialList {
+                return i
+            }
+            i += 1
+        }
+        return nil
+    }
+    
+    // class functions
+    static func loadLocal(filePath: String) -> Bool {
+        if let archivedListData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) as? [List] {
+            lists = archivedListData
+            return true
+        }
+        return false
+    }
+    
+    static func saveLocal(filePath: String) -> Bool {
+         return NSKeyedArchiver.archiveRootObject(ListData.lists, toFile: filePath)
+    }
+    
+    static func listForRow(at indexPath: IndexPath) -> List? {
+        if indexPath.row >= 0 && indexPath.row < lists.count {
+            return lists[indexPath.row]
+        }
+        return nil
+    }
+    
+    static func list(_ index: Int) -> List? {
+        if index >= 0 && index < lists.count {
+            return lists[index]
+        }
+        return nil
+    }
+    
+    static func listIndex(of list: List) -> Int? {
+        if let index = lists.index(of: list) {
+            return index
+        }
+        return nil
+    }
+    
+    static func removeList(_ list: List) {
+        lists.removeObject(list)
+    }
+    
+    static func removeListAt(_ indexPath: IndexPath) -> List? {
+        return self.removeListAt(indexPath.row)
+    }
+    
+    static func removeListAt(_ index: Int) -> List? {
+        if index >= 0 && index < lists.count {
+            let list = lists[index]
+            lists.remove(at: index)
+            return list
+        }
+        return nil
+    }
+    
+    static func removeLastList() {
+        lists.removeLast()
+    }
+    
+    static func appendList(_ list: List) {
+        lists.append(list)
+    }
+    
+    static func insertList(_ list: List, at indexPath: IndexPath) {
+        lists.insert(list, at: indexPath.row)
+    }
+    
+    static func saveToCloud() {
+        for list in lists {
+            list.saveToCloud()
+        }
+    }
+    
+    static func updateIndices() {
+        for list in lists {
+            list.updateIndices()
+        }
+    }
+    
+    static func clearNeedToSave() {
+        for list in lists {
+            list.clearNeedToSave()
+        }
+    }
+    
+    static func resetListOrderValues() {
+        var i = 0
+        for list in lists {
+            list.order = i
+            i += 1
+        }
+    }
+    
+    static func lastCategoryInList(_ list: List) -> Category? {
+        return list.categories.last
+    }
+    
+    static func deleteObjects(listDeleteRecordIDs: [String], categoryDeleteRecordIDs: [String], itemDeleteRecordIDs: [String]) {
+        var listsToDelete = [List]()
         
-    }()
+        for list in lists {
+            let listRecordName = list.listRecord?.recordID.recordName
+            if let listRecordName = listRecordName {
+                if listDeleteRecordIDs.contains(listRecordName) {
+                    listsToDelete.append(list)
+                }
+            }
+            
+            var categoriesToDelete = [Category]()
+            for category in list.categories {
+                let categoryRecordName = category.categoryRecord?.recordID.recordName
+                if let categoryRecordName = categoryRecordName {
+                    if categoryDeleteRecordIDs.contains(categoryRecordName) {
+                        categoriesToDelete.append(category)
+                    }
+                }
+                
+                var itemsToDelete = [Item]()
+                for item in category.items {
+                    let itemRecordName = item.itemRecord?.recordID.recordName
+                    if let itemRecordName = itemRecordName {
+                        if itemDeleteRecordIDs.contains(itemRecordName) {
+                            itemsToDelete.append(item)
+                        }
+                    }
+                }
+                
+                // remove the deleted items in this category
+                category.items.removeObjectsInArray(itemsToDelete)
+                //print("*** processDeleteObjects - deleted \(itemsToDelete.count) items in \(list.name): \(category.name)")
+            }
+            
+            // remove the deleted categories in this list
+            list.categories.removeObjectsInArray(categoriesToDelete)
+            //print("*** processDeleteObjects - deleted \(categoriesToDelete.count) categories in \(list.name)")
+        }
+        
+        // remove the deleted lists
+        lists.removeObjectsInArray(listsToDelete)
+        //print("*** processDeleteObjects - deleted \(listsToDelete.count) lists")
+    }
+    
+    static func countNeedToSave() -> Int {
+        var count = 0
+        
+        for list in lists {
+            if list.needToSave {
+                count += 1
+            }
+            
+            for category in list.categories {
+                if category.needToSave {
+                    count += 1
+                }
+                
+                for item in category.items {
+                    if item.needToSave {
+                        count += 1
+                    }
+                }
+            }
+        }
+        
+        return count
+    }
+    
+    // reorder lists, categories and items according to order number
+    static func reorderListObjects()
+    {
+        // sort lists
+        lists.sort { $0.order < $1.order }
+        
+        for list in lists {
+            list.categories.sort { $0.order < $1.order }
+            
+            //print("sort list \(list.name))")
+            
+            for category in list.categories {
+                category.items.sort { $0.order < $1.order }
+            }
+            
+            list.updateIndices()
+        }
+    }
+    
+    // reset the order field for each list based on current position in the list array
+    static func resetListOrderByPosition() {
+        var pos = 0
+        for list in lists {
+            list.order = pos
+            pos += 1
+        }
+    }
+    
+    // reset the order field for each list
+    static func resetListCategoryAndItemOrderByPosition() {
+        var listPos = 0
+        for list in lists {
+            list.order = listPos
+            listPos += 1
+            
+            list.resetCategoryAndItemOrderByPosition()
+        }
+    }
+
+    
+    // returns a ListData object from the given recordName
+    static func getLocalObject(_ recordIDName: String) -> AnyObject?
+    {
+        for list in lists {
+            if list.listRecord != nil {
+                if list.listRecord!.recordID.recordName == recordIDName {
+                    return list
+                }
+                
+                for category in list.categories {
+                    if category.categoryRecord != nil {
+                        if category.categoryRecord!.recordID.recordName == recordIDName {
+                            return category
+                        }
+                        
+                        for item in category.items {
+                            if item.itemRecord != nil {
+                                if item.itemRecord!.recordID.recordName == recordIDName {
+                                    return item
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns a List object matching the given CKRecordID
+    static func getLocalList(_ recordIDName: String) -> List?
+    {
+        for list in lists {
+            if list.listRecord != nil {
+                if list.listRecord!.recordID.recordName == recordIDName {
+                    return list
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns a Category object matching the given CKRecordID
+    static func getLocalCategory(_ recordIDName: String) -> Category?
+    {
+        for list in lists {
+            for category in list.categories {
+                if category.categoryRecord?.recordID.recordName == recordIDName {
+                    return category
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns an Item object matching the given CKRecordID
+    static func getLocalItem(_ recordIDName: String) -> Item?
+    {
+        for list in lists {
+            for category in list.categories {
+                for item in category.items {
+                    if item.itemRecord?.recordID.recordName == recordIDName {
+                        return item
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns the list that contains the given category
+    static func getListForCategory(_ searchCategory: Category) -> List?
+    {
+        for list in lists {
+            for category in list.categories {
+                if category === searchCategory {
+                    return list
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns the list that contains the given item
+    static func getListForItem(_ searchItem: Item) -> List?
+    {
+        for list in lists {
+            for category in list.categories {
+                for item in category.items {
+                    if item === searchItem {
+                        return list
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns the list that contains the given list object
+    static func getListForListObj(_ searchObj: ListObj) -> List?
+    {
+        for list in lists {
+            for category in list.categories {
+                if category == searchObj {
+                    return list
+                }
+                for item in category.items {
+                    if item === searchObj {
+                        return list
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns the category that contains the given item
+    static func getCategoryForItem(_ searchItem: Item) -> Category?
+    {
+        for list in lists {
+            for category in list.categories {
+                for item in category.items {
+                    if item === searchItem {
+                        return category
+                    }
+                }
+            }
+        }
+        
+        return nil
+    }
+    
+    // returns the category that contains the given item in the given list
+    static func getCategoryForItem(_ searchItem: Item, inList: List) -> Category?
+    {
+        for category in inList.categories {
+            for item in category.items {
+                if item === searchItem {
+                    return category
+                }
+            }
+        }
+        
+        return nil
+    }
+
 }
-*/
+
+////////////////////////////////////////////////////////////////
+//
+//  MARK: - List Utility methods
+//
+////////////////////////////////////////////////////////////////
+
+func getListFromReference(_ categoryRecord: CKRecord) -> List?
+{
+    if let listReference = categoryRecord[key_owningList] as? CKReference {
+        return ListData.getLocalList(listReference.recordID.recordName)
+    }
+    
+    return nil
+}
+
+func getCategoryFromReference(_ itemRecord: CKRecord) -> Category?
+{
+    if let categoryReference = itemRecord[key_owningCategory] as? CKReference {
+        return ListData.getLocalCategory(categoryReference.recordID.recordName)
+    }
+    
+    return nil
+}
+
+func getItemFromReference(_ imageRecord: CKRecord) -> Item? {
+    if let itemReference = imageRecord[key_owningItem] as? CKReference {
+        return ListData.getLocalItem(itemReference.recordID.recordName)
+    }
+    
+    return nil
+}
+
+// create a Delete record for this list delete and save to cloud
+func createDeleteRecord(_ database: CKDatabase, recordName: String, objectType: String, objectName: String)
+{
+    let deleteRecord = CKRecord(recordType: DeletesRecordType)
+    deleteRecord[key_objectRecordID] = recordName as CKRecordValue?
+    deleteRecord[key_objectType] = objectType as CKRecordValue?
+    deleteRecord[key_objectName] = objectName as CKRecordValue?
+    deleteRecord[key_deletedDate] = Date.init() as CKRecordValue?
+    
+    database.save(deleteRecord, completionHandler: { returnRecord, error in
+        if let err = error {
+            print("Save deleteRecord Error for '\(objectName)': \(err.localizedDescription)")
+        } else {
+            print("Success: delete record saved successfully for '\(objectName)' recordID: \(recordName)")
+        }
+    })
+}
+
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - List class
@@ -210,7 +646,7 @@ class List: NSObject, NSCoding
         
         self.modificationDate = Date.init()
     }
-    
+
 ///////////////////////////////////////////////////////
 //
 //  MARK: List data I/O methods
@@ -343,7 +779,7 @@ class List: NSObject, NSCoding
     
     func deleteFromCloud() {
         self.needToDelete = true
-        appDelegate.saveListData(true)
+        appDelegate.saveListData(asynch: true)
     }
     
     // deletes this list from the cloud
@@ -466,7 +902,7 @@ class List: NSObject, NSCoding
     
 ///////////////////////////////////////////////////////
 //
-//  MARK: New remove and insert methods for List objects
+//  MARK: Remove and insert methods for List objects
 //
 ///////////////////////////////////////////////////////
     
@@ -483,7 +919,7 @@ class List: NSObject, NSCoding
             //self.categories[catIdx].items.removeAtIndex(itmIdx)
             
             // locate this item in list data and delete it
-            if let cat = appDelegate.getCategoryForItem(item, inList: self) {
+            if let cat = ListData.getCategoryForItem(item, inList: self) {
                 cat.items.removeObject(item)
                 cat.resetItemOrderByPosition()
                 removedPaths.append(indexPath!)
@@ -615,7 +1051,7 @@ class List: NSObject, NSCoding
                 // locate this item in list data and delete it
                 let item = obj as! Item
                 
-                if let cat = appDelegate.getCategoryForItem(item, inList: self) {
+                if let cat = ListData.getCategoryForItem(item, inList: self) {
                     cat.items.removeObject(item)
                     cat.resetItemOrderByPosition()
                     removedPaths.append(indexPath)
@@ -1454,8 +1890,8 @@ class Category: ListObj, NSCoding
                 print("category needs to change lists...!!!")
                 
                 // get references to source and destination list objects
-                let srcList = appDelegate.getLocalList(currentOwningListRef.recordID.recordName)
-                let destList = appDelegate.getLocalList(newOwningListRef.recordID.recordName)
+                let srcList = ListData.getLocalList(currentOwningListRef.recordID.recordName)
+                let destList = ListData.getLocalList(newOwningListRef.recordID.recordName)
                 
                 if let srcList = srcList, let destList = destList {
                     // remove this category from the old list
@@ -1506,7 +1942,7 @@ class Category: ListObj, NSCoding
     func deleteFromCloud()
     {
         self.needToDelete = true
-        appDelegate.saveListData(true)
+        appDelegate.saveListData(asynch: true)
     }
     
     // deletes this category from the cloud
@@ -1534,7 +1970,7 @@ class Category: ListObj, NSCoding
         for item in items {
             item.needToDelete = true
         }
-        appDelegate.saveListData(true)
+        appDelegate.saveListData(asynch: true)
     }
     
     func deleteItems()
@@ -1862,8 +2298,8 @@ class Item: ListObj, NSCoding
         // reset modifiedBy after changes
         if let modifiedBy = record[key_modifiedBy] { self.modifiedBy = modifiedBy as! String }
         
-        let currentCategory = appDelegate.getCategoryForItem(self)   // current category by doing a category item search in the list data
-        let updateCategory = getCategoryFromReference(record)        // destination category from the update record
+        let currentCategory = ListData.getCategoryForItem(self)     // current category by doing a category item search in the list data
+        let updateCategory = getCategoryFromReference(record)       // destination category from the update record
         
         if currentCategory != updateCategory {
             // delete item from current category
@@ -1915,7 +2351,7 @@ class Item: ListObj, NSCoding
     func deleteFromCloud()
     {
         self.needToDelete = true
-        appDelegate.saveListData(true)
+        appDelegate.saveListData(asynch: true)
     }
     
     func clearNeedToSave() {
@@ -2183,7 +2619,7 @@ class ImageAsset: NSObject, NSCoding
     func deleteFromCloud()
     {
         self.needToDelete = true
-        appDelegate.saveListData(true)
+        appDelegate.saveListData(asynch: true)
     }
     
     // writes the image to local file for uploading to cloud
@@ -2350,53 +2786,3 @@ extension UIColor
 }
 */
 
-////////////////////////////////////////////////////////////////
-//
-//  MARK: - Utility methods
-//
-////////////////////////////////////////////////////////////////
-
-
-func getListFromReference(_ categoryRecord: CKRecord) -> List?
-{
-    if let listReference = categoryRecord[key_owningList] as? CKReference {
-        return appDelegate.getLocalList(listReference.recordID.recordName)
-    }
-    
-    return nil
-}
-
-func getCategoryFromReference(_ itemRecord: CKRecord) -> Category?
-{
-    if let categoryReference = itemRecord[key_owningCategory] as? CKReference {
-        return appDelegate.getLocalCategory(categoryReference.recordID.recordName)
-    }
-    
-    return nil
-}
-
-func getItemFromReference(_ imageRecord: CKRecord) -> Item? {
-    if let itemReference = imageRecord[key_owningItem] as? CKReference {
-        return appDelegate.getLocalItem(itemReference.recordID.recordName)
-    }
-    
-    return nil
-}
-
-// create a Delete record for this list delete and save to cloud
-func createDeleteRecord(_ database: CKDatabase, recordName: String, objectType: String, objectName: String)
-{
-    let deleteRecord = CKRecord(recordType: DeletesRecordType)
-    deleteRecord[key_objectRecordID] = recordName as CKRecordValue?
-    deleteRecord[key_objectType] = objectType as CKRecordValue?
-    deleteRecord[key_objectName] = objectName as CKRecordValue?
-    deleteRecord[key_deletedDate] = Date.init() as CKRecordValue?
-    
-    database.save(deleteRecord, completionHandler: { returnRecord, error in
-        if let err = error {
-            print("Save deleteRecord Error for '\(objectName)': \(err.localizedDescription)")
-        } else {
-            print("Success: delete record saved successfully for '\(objectName)' recordID: \(recordName)")
-        }
-    })
-}

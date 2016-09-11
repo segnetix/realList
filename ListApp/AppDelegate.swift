@@ -156,13 +156,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         guard let archiveURL = archiveURL else { return }
         
         // restore the list data from local storage
-        if let archivedListData = NSKeyedUnarchiver.unarchiveObject(withFile: archiveURL.path) as? [List] {
-            listViewController!.lists = archivedListData
-            
-            // restore the selected list
+        if ListData.loadLocal(filePath: archiveURL.path) {
             if let initialListIndex = UserDefaults.standard.object(forKey: key_selectionIndex) as? Int {
-                if initialListIndex >= 0 && initialListIndex < listViewController!.lists.count {
-                    itemViewController!.list = listViewController!.lists[initialListIndex]
+                if initialListIndex >= 0 && initialListIndex < ListData.listCount {
+                    itemViewController!.list = ListData.list(initialListIndex)
                     listViewController!.selectionIndex = initialListIndex
                 } else {
                     listViewController!.selectionIndex = -1
@@ -316,7 +313,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         print("applicationWillTerminate...")
         
         // save state and data synchronously
-        saveAll(false)
+        saveAll(asynch: false)
     }
     
 ////////////////////////////////////////////////////////////////
@@ -470,11 +467,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // this part must be run on the main thread to ensure that
         // we have gathered any records to be deleted before the
         // list data for the object is deleted
+        ListData.saveToCloud()
+        /*
         if let listVC = self.listViewController {
             for list in listVC.lists {
                 list.saveToCloud()
             }
         }
+        */
         
         if asynchronously {
             DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async {
@@ -486,19 +486,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // writes the complete object graph locally
-    func saveListDataLocal(_ asynchronously: Bool)
+    func saveListDataLocal(asynch asynchronously: Bool)
     {
         func save() {
-            if let listVC = self.listViewController {
-                guard let archiveURL = archiveURL else { return }
-                
-                let successfulSave = NSKeyedArchiver.archiveRootObject(listVC.lists, toFile: archiveURL.path)
-                
-                if !successfulSave {
-                    print("ERROR: Failed to save list data locally...")
-                } else {
-                    //print("SAVE LOCAL DATA worked...!!!")
-                }
+            guard let archiveURL = archiveURL else { return }
+            
+            //let successfulSave = NSKeyedArchiver.archiveRootObject(ListData.lists, toFile: archiveURL.path)
+            let successfulSave = ListData.saveLocal(filePath: archiveURL.path)
+            
+            if !successfulSave {
+                print("ERROR: Failed to save list data locally...")
             }
         }
         
@@ -512,15 +509,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // Writes list data locally and to the cloud
-    func saveListData(_ asynchronously: Bool) {
+    func saveListData(asynch asynchronously: Bool) {
         saveListDataCloud(asynchronously)
-        saveListDataLocal(asynchronously)
+        saveListDataLocal(asynch: asynchronously)
     }
     
     // Saves all app data.  If asynchronous then the save is put on a background thread.
-    func saveAll(_ asynchronously: Bool) {
+    func saveAll(asynch asynchronously: Bool) {
         saveState(asynchronously)
-        saveListData(asynchronously)
+        saveListData(asynch: asynchronously)
         print("all list data saved locally...")
     }
     
@@ -532,7 +529,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         var item: Item?
         var imageAsset: ImageAsset?
         var update: Bool = forceUpdate
-        let localObj = getLocalObject(record.recordID.recordName)
+        let localObj = ListData.getLocalObject(record.recordID.recordName)
         
         // compare the cloud version with local version
         var cloudDataTime: Date = Date.init(timeIntervalSince1970: TimeInterval.init())
@@ -597,10 +594,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 let newList = List(name: "", createRecord: false)
                 newList.updateFromRecord(record)
                 
-                if let listVC = listViewController {
-                    listVC.lists.append(newList)
-                    print("added new list: \(newList.name)")
-                }
+                //if let listVC = listViewController {
+                ListData.appendList(newList)
+                print("added new list: \(newList.name)")
+                //}
             case CategoriesRecordType:
                 if let list = getListFromReference(record) {
                     let newCategory = list.addCategory("", displayHeader: true, updateIndices: false, createRecord: false)
@@ -644,17 +641,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func deleteRecordLocal(_ recordName: String)
     {
         guard let listVC = listViewController else { return }
-        guard let obj = getLocalObject(recordName) else { print("deleteRecord: recordName not found...!"); return }
+        guard let obj = ListData.getLocalObject(recordName) else { print("deleteRecord: recordName not found...!"); return }
         
         if obj is List {
             let list = obj as! List
-            if let i = listVC.lists.index(of: list) {
-                listVC.lists.remove(at: i)
+            if let i = ListData.listIndex(of: list) {
+                _ = ListData.removeListAt(i)
                 
-                if listVC.lists.count > 0 {
+                if ListData.listCount > 0 {
                     var selectRow = 0
                     
-                    if i-1 < listVC.lists.count {
+                    if i-1 < ListData.listCount {
                         // select the previous row before deleting
                         selectRow = i-1
                     }
@@ -665,13 +662,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             }
         } else if obj is Category {
             let category = obj as! Category
-            let list = getListForCategory(category)
+            let list = ListData.getListForCategory(category)
             if  let list = list {
                 list.categories.removeObject(category)
             }
         } else if obj is Item {
             let item = obj as! Item
-            let category = getCategoryForItem(item)
+            let category = ListData.getCategoryForItem(item)
             if category != nil {
                 category!.items.removeObject(item)
             }
@@ -1280,15 +1277,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             listVC.tableView.reloadData()
         }
         
-        resetListCategoryAndItemOrderByPosition()
+        ListData.resetListCategoryAndItemOrderByPosition()
         
         // clear needToSave on all objects as we are clean from local load
+        /*
         if let listVC = listViewController {
             for list in listVC.lists {
                 list.updateIndices()
                 list.clearNeedToSave()
             }
         }
+        */
+        ListData.updateIndices()
+        ListData.clearNeedToSave()
         
         // shows the completed HUD then dismisses itself
         isUpdating = false
@@ -1339,7 +1340,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
         
         // populate delete object arrays where local objects are in the cloud delete arrays
-        guard let listVC = listViewController else { return }
+        ListData.deleteObjects(listDeleteRecordIDs: listDeleteRecordIDs, categoryDeleteRecordIDs: categoryDeleteRecordIDs, itemDeleteRecordIDs: itemDeleteRecordIDs)
+        
+        /*
+        //guard let listVC = listViewController else { return }
         var listsToDelete = [List]()
         
         for list in listVC.lists {
@@ -1382,6 +1386,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // remove the deleted lists
         listVC.lists.removeObjectsInArray(listsToDelete)
         //print("*** processDeleteObjects - deleted \(listsToDelete.count) lists")
+        */
     }
     
     // purge any delete records older than one month
@@ -1493,7 +1498,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     func refreshListData()
     {
         if let listVC = listViewController {
-            listVC.reorderListObjects()         // reorders all lists, categories and items according to order number
+            ListData.reorderListObjects()         // reorders all lists, categories and items according to order number
             listVC.tableView.reloadData()
         }
         
@@ -1508,20 +1513,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
+    /*
     func resetListCategoryAndItemOrderByPosition() {
-        if let listVC = listViewController {
-            listVC.resetListCategoryAndItemOrderByPosition()
-        }
+        //if let listVC = listViewController {
+            ListData.resetListCategoryAndItemOrderByPosition()
+        //}
     }
     
     func countNeedToSave() -> Int? {
-        if let listVC = listViewController {
-            return listVC.countNeedToSave()
-        }
+        //if let listVC = listViewController {
+            return ListData.countNeedToSave()
+        //}
         
         return nil
     }
     
+
     // returns a ListData object from the given recordName
     func getLocalObject(_ recordIDName: String) -> AnyObject?
     {
@@ -1690,7 +1697,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         return nil
     }
-    
+    */
 }
 
 ////////////////////////////////////////////////////////////////

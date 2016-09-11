@@ -468,7 +468,7 @@ class SettingsViewController: UIAppViewController
         // update the list color bar
         if let listVC = appDelegate.listViewController?.tableView {
             listVC.reloadData()
-            itemVC?.appDelegate.saveListData(true)
+            itemVC?.appDelegate.saveListData(asynch: true)
         }
     }
     
@@ -507,7 +507,7 @@ class SettingsViewController: UIAppViewController
     
     func close()
     {
-        itemVC?.appDelegate.saveListData(true)
+        itemVC?.appDelegate.saveListData(asynch: true)
         presentingViewController!.dismiss(animated: true, completion: nil)
     }
 }
