@@ -94,35 +94,10 @@ let color3_3 = UIColor(colorLiteralRed: 0.988, green: 0.314, blue: 0.773, alpha:
 let color4_1 = UIColor(colorLiteralRed: 0.996, green: 1.000, blue: 0.337, alpha: alpha)     // yellow
 let color4_2 = UIColor(colorLiteralRed: 0.984, green: 0.420, blue: 0.043, alpha: alpha)     // orange
 let color4_3 = UIColor(colorLiteralRed: 0.420, green: 0.000, blue: 1.000, alpha: alpha)     // purple
-//let color4_3 = UIColor(colorLiteralRed: 0.259, green: 0.000, blue: 0.365, alpha: alpha)     // rockies purple
+//let color4_3 = UIColor(colorLiteralRed: 0.259, green: 0.000, blue: 0.365, alpha: alpha)   // rockies purple
 
 // alt yellow (for checkbox and button contrast)
-//let color4_1_alt = UIColor(colorLiteralRed: 0.996, green: 1.000, blue: 0.337, alpha: alpha) // orig yellow
 let color4_1_alt = UIColor.darkGray
-//let color4_1_alt = UIColor(colorLiteralRed: 0.004, green: 0.0, blue: 0.663, alpha: alpha) // opposite (blue)
-//let color4_1_alt = UIColor(colorLiteralRed: 0.498, green: 0.5, blue: 0.169, alpha: alpha) // shaded yellow
-
-/*  ORIGINAL COLORS
-// row 1
-var color1_1 = UIColor(colorLiteralRed: 0.00, green: 0.478, blue: 1.00, alpha: 0.85 )         // system blue (default)
-let color1_2 = UIColor(colorLiteralRed: 0.47, green: 0.62,  blue: 0.75, alpha: alpha)         // icon blue
-let color1_3 = UIColor(colorLiteralRed: 0.50, green: 0.75,  blue: 1.00, alpha: alpha)         // lt blue
- 
-// row 2
-let color2_1 = UIColor(colorLiteralRed: 0.25, green: 0.95,  blue: 0.25, alpha: alpha)         // green
-let color2_2 = UIColor(colorLiteralRed: 0.50, green: 0.80,  blue: 0.50, alpha: alpha)         // dusty green
-let color2_3 = UIColor(colorLiteralRed: 0.70, green: 0.55,  blue: 0.40, alpha: alpha)         // brown
-
-// row 3
-let color3_1 = UIColor(colorLiteralRed: 1.00, green: 0.30,  blue: 0.30, alpha: alpha)         // red
-let color3_2 = UIColor(colorLiteralRed: 0.60, green: 0.40,  blue: 1.00, alpha: alpha)         // purple
-let color3_3 = UIColor(colorLiteralRed: 1.00, green: 0.50,  blue: 0.25, alpha: alpha)         // orange
-
-// row 4
-let color4_1 = UIColor(colorLiteralRed: 0.90, green: 0.90,  blue: 0.10, alpha: alpha)         // yellow
-let color4_2 = UIColor(colorLiteralRed: 0.75, green: 0.75,  blue: 0.50, alpha: alpha)         // tan
-let color4_3 = UIColor(colorLiteralRed: 0.70, green: 0.70,  blue: 0.70, alpha: alpha)         // lt gray
-*/
 
 let appDelegate = UIApplication.shared.delegate as! AppDelegate
 
@@ -779,7 +754,7 @@ class List: NSObject, NSCoding
     
     func deleteFromCloud() {
         self.needToDelete = true
-        appDelegate.saveListData(asynch: true)
+        appDelegate.saveListData(async: true)
     }
     
     // deletes this list from the cloud
@@ -1942,7 +1917,7 @@ class Category: ListObj, NSCoding
     func deleteFromCloud()
     {
         self.needToDelete = true
-        appDelegate.saveListData(asynch: true)
+        appDelegate.saveListData(async: true)
     }
     
     // deletes this category from the cloud
@@ -1970,7 +1945,7 @@ class Category: ListObj, NSCoding
         for item in items {
             item.needToDelete = true
         }
-        appDelegate.saveListData(asynch: true)
+        appDelegate.saveListData(async: true)
     }
     
     func deleteItems()
@@ -2350,7 +2325,7 @@ class Item: ListObj, NSCoding
     func deleteFromCloud()
     {
         self.needToDelete = true
-        appDelegate.saveListData(asynch: true)
+        appDelegate.saveListData(async: true)
     }
     
     func clearNeedToSave() {
@@ -2618,7 +2593,7 @@ class ImageAsset: NSObject, NSCoding
     func deleteFromCloud()
     {
         self.needToDelete = true
-        appDelegate.saveListData(asynch: true)
+        appDelegate.saveListData(async: true)
     }
     
     // writes the image to local file for uploading to cloud

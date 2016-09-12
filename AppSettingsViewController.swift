@@ -19,7 +19,6 @@ class AppSettingsViewController: UIAppViewController
     @IBOutlet weak var notesSpellCheckSwitch: UISwitch!
     @IBOutlet weak var notesAutocorrectionSwitch: UISwitch!
     @IBOutlet weak var picsInPrintAndEmailSwitch: UISwitch!
-    //@IBOutlet weak var syncCloudOnLaunch: UISwitch!
 
     override func viewDidLoad()
     {
@@ -34,7 +33,6 @@ class AppSettingsViewController: UIAppViewController
         self.notesSpellCheckSwitch.isOn     = appDelegate.notesSpellCheck
         self.notesAutocorrectionSwitch.isOn = appDelegate.notesAutocorrection
         self.picsInPrintAndEmailSwitch.isOn = appDelegate.picsInPrintAndEmail
-        //self.syncCloudOnLaunch.on         = appDelegate.syncCloudOnLaunch
     }
 
     override func didReceiveMemoryWarning() {
@@ -52,9 +50,8 @@ class AppSettingsViewController: UIAppViewController
         appDelegate.notesSpellCheck      = self.notesSpellCheckSwitch.isOn
         appDelegate.notesAutocorrection  = self.notesAutocorrectionSwitch.isOn
         appDelegate.picsInPrintAndEmail  = self.picsInPrintAndEmailSwitch.isOn
-        //appDelegate.syncCloudOnLaunch    = self.syncCloudOnLaunch.on
         
-        appDelegate.saveState(true)
+        appDelegate.saveState(async: true)
         
         presentingViewController!.dismiss(animated: true, completion: nil)
     }

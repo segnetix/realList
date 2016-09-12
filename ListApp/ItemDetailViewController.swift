@@ -473,7 +473,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         self.itemVC.tableView.reloadData()
         
         if item.needToSave {
-            self.itemVC.appDelegate.saveListData(asynch: true)
+            self.itemVC.appDelegate.saveListData(async: true)
         }
         
         // handles resizing in case the keyboard was presented in the item detail view controller

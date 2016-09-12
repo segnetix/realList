@@ -91,17 +91,6 @@ class UpgradeViewController: UIAppViewController
     {
         appDelegate.appIsUpgraded = true
         
-        /*
-        let alertVC = UIAlertController(
-            title: "Thank You",
-            message: "Your purchase is confirmed.",
-            preferredStyle: .Alert)
-        let okAction = UIAlertAction(title: "OK", style: .Default, handler: nil )
-        alertVC.addAction(okAction)
-        
-        presentViewController(alertVC, animated: true, completion: nil)
-        */
-        
         reload()
     }
     

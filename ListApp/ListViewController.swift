@@ -27,7 +27,6 @@ let kListViewCellHeight: CGFloat = 60.0
 
 class ListViewController: UITableViewController, UITextFieldDelegate
 {
-    //var lists = [List]()
     var inEditMode = false
     var deleteListIndexPath: IndexPath? = nil
     var editModeRow = -1
@@ -127,7 +126,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size, with: coordinator)
         //print("viewWillTransitionToSize... \(size)")
-        //refreshView.frame = CGRectMake(0, 0, self.tableView.bounds.width, refreshView.frame.height)
     }
     
     override func viewDidLayoutSubviews() {
@@ -175,13 +173,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
     
-    /*
     // we always will have one section only so just let it default to 1
-    override func numberOfSectionsInTableView(tableView: UITableView) -> Int
-    {
+    override func numberOfSections(in tableView: UITableView) -> Int {
         return 1
     }
-    */
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
     {
@@ -321,10 +316,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             ListData.insertList(list, at: toIndexPath)
         }
         
-        //let list = lists[(fromIndexPath as NSIndexPath).row]
-        //lists.removeObject(list)
-        //lists.insert(list, at: (toIndexPath as NSIndexPath).row)
-        
         self.tableView.reloadData()
     }
     
@@ -335,54 +326,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return true
     }
     
-    /*
-    override func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
-        if let refreshControl = refreshControl {
-            if refreshControl.refreshing {
-                if !appDelegate.isUpdating {
-                    appDelegate.fetchCloudData(refreshControl)
-                }
-            }
-        }
-    }
-    */
-    
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - TextField methods
 //
 ////////////////////////////////////////////////////////////////
-    
-    /*
-    func keyboardWillShow(notification: NSNotification)
-    {
-        var info = notification.userInfo!
-        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).CGRectValue()
-        let keyboardHeight = keyboardFrame.height
-        //let topBarHeight = getTopBarHeight()
-        
-        // need to shrink the tableView height so it shows above the keyboard
-        tableView.frame.size.height = self.view.frame.height - keyboardHeight// + topBarHeight
-        
-        // while the keyboard is visible
-        UIView.animateWithDuration(0.3, animations: { () -> Void in
-            self.view.layoutIfNeeded()
-        })
-    }
-    
-    func keyboardWillHide(notification: NSNotification)
-    {
-        //let topBarHeight = getTopBarHeight()
-        
-        // need to expand the tableView height so it fills the screen
-        tableView.frame.size.height = self.view.frame.height
-        
-        // while the keyboard is visible
-        UIView.animateWithDuration(0.3, animations: { () -> Void in
-            self.view.layoutIfNeeded()
-        })
-    }
-    */
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool
     {
@@ -436,7 +384,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         editingNewListName = false
         
-        appDelegate.saveListData(asynch: true)
+        appDelegate.saveListData(async: true)
         
         return true
     }
@@ -727,7 +675,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         ListData.resetListOrderValues()
         
         // and save data changes locally and to the cloud
-        appDelegate.saveListData(asynch: true)
+        appDelegate.saveListData(async: true)
     }
     
     // handle the gesture from the itemVC when moving an item to another list
@@ -975,7 +923,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             
             highlightList(index)
             
-            appDelegate.saveState(true)
+            appDelegate.saveState(async: true)
         }
     }
     
@@ -1060,71 +1008,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
         return snapshot
     }
-    
-    /*
-    func countNeedToSave() -> Int {
-        var count = 0
-        
-        for list in lists {
-            if list.needToSave {
-                count += 1
-            }
-            
-            for category in list.categories {
-                if category.needToSave {
-                    count += 1
-                }
-                
-                for item in category.items {
-                    if item.needToSave {
-                        count += 1
-                    }
-                }
-            }
-        }
-        
-        return count
-    }
-    
-    // reorder lists, categories and items according to order number
-    func reorderListObjects()
-    {
-        // sort lists
-        lists.sort { $0.order < $1.order }
-        
-        for list in lists {
-            list.categories.sort { $0.order < $1.order }
-            
-            //print("sort list \(list.name))")
-            
-            for category in list.categories {
-                category.items.sort { $0.order < $1.order }
-            }
-            
-            list.updateIndices()
-        }
-    }
-    
-    // reset the order field for each list based on current position in the list array
-    func resetListOrderByPosition() {
-        var pos = 0
-        for list in lists {
-            list.order = pos
-            pos += 1
-        }
-    }
-    
-    // reset the order field for each list
-    func resetListCategoryAndItemOrderByPosition() {
-        var listPos = 0
-        for list in lists {
-            list.order = listPos
-            listPos += 1
-            
-            list.resetCategoryAndItemOrderByPosition()
-        }
-    }
-    */
     
 ////////////////////////////////////////////////////////////////
     

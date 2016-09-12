@@ -452,24 +452,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    /*
-    override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-        if list.cellIsItem(indexPath) {
-            return kItemCellHeight
-        } else {
-            return kItemCellHeight
-        }
-        //return UITableViewAutomaticDimension
-    }
-    */
-    
-    /*
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath)
-    {
-        print("didSelectRowAtIndexPath...!!!")
-    }
-    */
-    
     // override to support conditional editing of the table view
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the specified item to be editable.
@@ -622,7 +604,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             self.layoutAnimated(true)
         }
         
-        appDelegate.saveListData(asynch: true)
+        appDelegate.saveListData(async: true)
         
         return true
     }
@@ -858,7 +840,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 }
                 
                 // save expanded state change to the clould
-                appDelegate.saveListData(asynch: true)
+                appDelegate.saveListData(async: true)
             } else if obj is Item {
                 if !inEditMode {
                     // not in edit mode so can present item detail view
@@ -914,6 +896,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 // if it is the last AddItem cell, then we are moving down past the bottom of the tableView, so end the long press
                 if list.indexPathIsLastRowDisplayed(indexPath!) && longPressActive {
                     longPressEnded(movingFromIndexPath, location: location)
+                    // the following is needed to reset the gesture
                     gesture.isEnabled = false
                     gesture.isEnabled = true
                     return
@@ -1082,23 +1065,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                         indexPath = IndexPath(row: (indexPath as NSIndexPath).row - 1, section: 0)
                     }
                 } else if longPressCellType == .category {
-                    /*
                     // a category is moving over another category
-                    let moveDirection = location.y < prevLocation!.y ? MoveDirection.Up : MoveDirection.Down
-                    let catRowCount = categoryTotalRowCount(indexPath)
-                    
-                    if moveDirection == .Down {
-                        let rowCount = list.totalDisplayCount()
-                        // this is to prevent dragging past the last row
-                        if indexPath.row >= rowCount-1 {
-                            indexPath = NSIndexPath(forRow: indexPath.row, inSection: 0)
-                        } else {
-                            indexPath = NSIndexPath(forRow: indexPath.row + catRowCount, inSection: 0)
-                        }
-                    } else {
-                        indexPath = NSIndexPath(forRow: indexPath.row - catRowCount, inSection: 0)
-                    }
-                    */
                 }
                 
                 // ... move the rows
@@ -1269,7 +1236,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             listVC.highlightList(listVC.selectionIndex)
         }
         
-        appDelegate.saveListData(asynch: true)
+        appDelegate.saveListData(async: true)
     }
     
     func scrollUpLoop()
@@ -1279,10 +1246,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         let newOffsetY = max(currentOffset.y - kItemViewScrollRate, -topBarHeight)
         let location: CGPoint = longPressGestureRecognizer!.location(in: tableView)
         let indexPath: IndexPath? = tableView.indexPathForRow(at: location)
-        
-        //if !appDelegate.appIsUpgraded && newOffsetY < 0 {
-        //    newOffsetY = 0
-        //}
         
         self.tableView.setContentOffset(CGPoint(x: currentOffset.x, y: newOffsetY), animated: false)
         
@@ -1432,6 +1395,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     {
         return UIColor.white
         /*
+        // gradient
         let itemCount = list.totalDisplayCount() - 1
         let val = (CGFloat(index) / CGFloat(itemCount)) * 0.99
         return UIColor(red: 0.0, green: val, blue: 1.0, alpha: 0.5)
@@ -1798,7 +1762,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             item.state.next()
             
             // call saveListData - cloudOnly mode
-            appDelegate.saveListData(asynch: true)
+            appDelegate.saveListData(async: true)
             
             // set item name text color
             if indexPath != nil {
@@ -1883,12 +1847,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                     }
                 }
             }
-            
-            // update the row after changes
-            //if indexPath != nil {
-            //    print("reloadRowsAtIndexPaths: \(indexPath!.row)")
-            //    tableView.reloadRowsAtIndexPaths([indexPath!], withRowAnimation: UITableViewRowAnimation.Automatic)
-            //}
         } else {
             print("ERROR: checkButtonTapped received an index path that points to a non-item object!")
         }
@@ -1976,43 +1934,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     // resize the frame /* and move the adBanner on and off the screen */
     func layoutAnimated(_ animated: Bool)
     {
-        //var topBarHeight = getTopBarHeight()
-        //var bannerHeight: CGFloat = 0.0
-        //var bannerLoaded = false
-        //let bannerXpos   = self.view.frame.size.height
-        //let showAdBanner = !appDelegate.appIsUpgraded
-        //let oldFrameHeight = tableView.frame.size.height
-        
-        //if appDelegate.appIsUpgraded {
-        //    topBarHeight = 0.0
-        //}
-        
-        //tableView.frame.origin.y = 0//getTopBarHeight()
-        //tableView.frame.size.height = self.view.frame.height - topBarHeight
-        
-        //if adBanner != nil {
-        //    bannerHeight = adBanner!.frame.size.height
-        //    bannerLoaded = adBanner!.bannerLoaded
-        //}
-        
-        //if showAdBanner && bannerLoaded {
-        //    // show the ad banner
-        //    adBanner.hidden = false
-        //    adBanner.frame.origin.y = bannerXpos - bannerHeight
-        //    tableView.frame.size.height = self.view.frame.height - bannerHeight - topBarHeight
-        //    tableView.frame.origin.y = topBarHeight
-        //} else {
-            // hide the ad banner
-            //if adBanner != nil {
-            //    adBanner.hidden = true
-            //    adBanner.frame.origin.y = bannerXpos
-            //}
-            //tableView.frame.origin.y = topBarHeight
-            //tableView.frame.size.height = self.view.frame.height - topBarHeight
-        //}
-        
-        tableView.frame.size.height = self.view.frame.height// + topBarHeight
-        //tableView.frame.origin.y = topBarHeight
+        tableView.frame.size.height = self.view.frame.height
         
         //print("layoutAnimated - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
         UIView.animate(withDuration: animated ? 0.5 : 0.0, animations: {

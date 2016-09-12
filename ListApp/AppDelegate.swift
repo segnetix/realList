@@ -425,7 +425,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         return iCloudDriveOn && netReachable
     }
     
-    func saveState(_ asynchronously: Bool)
+    func saveState(async asynchronously: Bool)
     {
         func save() {
             // save current selection
@@ -454,7 +454,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // writes any dirty objects to the cloud in a batch operation
-    func saveListDataCloud(_ asynchronously: Bool)
+    func saveListDataCloud(async asynchronously: Bool)
     {
         updateRecords.removeAll()   // empty the updateRecords array
         guard iCloudIsAvailable() else { print("saveListDataCloud - iCloud is not available..."); return }
@@ -464,17 +464,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             self.batchRecordUpdate()
         }
         
-        // this part must be run on the main thread to ensure that
+        // ListData.saveToCloud() must be run on the main thread to ensure that
         // we have gathered any records to be deleted before the
         // list data for the object is deleted
         ListData.saveToCloud()
-        /*
-        if let listVC = self.listViewController {
-            for list in listVC.lists {
-                list.saveToCloud()
-            }
-        }
-        */
         
         if asynchronously {
             DispatchQueue.global(qos: DispatchQoS.QoSClass.userInitiated).async {
@@ -486,7 +479,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // writes the complete object graph locally
-    func saveListDataLocal(asynch asynchronously: Bool)
+    func saveListDataLocal(async asynchronously: Bool)
     {
         func save() {
             guard let archiveURL = archiveURL else { return }
@@ -509,15 +502,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // Writes list data locally and to the cloud
-    func saveListData(asynch asynchronously: Bool) {
-        saveListDataCloud(asynchronously)
-        saveListDataLocal(asynch: asynchronously)
+    func saveListData(async asynchronously: Bool) {
+        saveListDataCloud(async: asynchronously)
+        saveListDataLocal(async: asynchronously)
     }
     
     // Saves all app data.  If asynchronous then the save is put on a background thread.
     func saveAll(asynch asynchronously: Bool) {
-        saveState(asynchronously)
-        saveListData(asynch: asynchronously)
+        saveState(async: asynchronously)
+        saveListData(async: asynchronously)
         print("all list data saved locally...")
     }
     
@@ -593,11 +586,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             case ListsRecordType:
                 let newList = List(name: "", createRecord: false)
                 newList.updateFromRecord(record)
-                
-                //if let listVC = listViewController {
                 ListData.appendList(newList)
                 print("added new list: \(newList.name)")
-                //}
             case CategoriesRecordType:
                 if let list = getListFromReference(record) {
                     let newCategory = list.addCategory("", displayHeader: true, updateIndices: false, createRecord: false)
@@ -1279,15 +1269,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         
         ListData.resetListCategoryAndItemOrderByPosition()
         
-        // clear needToSave on all objects as we are clean from local load
-        /*
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                list.updateIndices()
-                list.clearNeedToSave()
-            }
-        }
-        */
+        // update indices and clear needToSave on all objects as we are clean from local load
         ListData.updateIndices()
         ListData.clearNeedToSave()
         
@@ -1513,191 +1495,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         }
     }
     
-    /*
-    func resetListCategoryAndItemOrderByPosition() {
-        //if let listVC = listViewController {
-            ListData.resetListCategoryAndItemOrderByPosition()
-        //}
-    }
-    
-    func countNeedToSave() -> Int? {
-        //if let listVC = listViewController {
-            return ListData.countNeedToSave()
-        //}
-        
-        return nil
-    }
-    
-
-    // returns a ListData object from the given recordName
-    func getLocalObject(_ recordIDName: String) -> AnyObject?
-    {
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                if list.listRecord != nil {
-                    if list.listRecord!.recordID.recordName == recordIDName {
-                        return list
-                    }
-                    
-                    for category in list.categories {
-                        if category.categoryRecord != nil {
-                            if category.categoryRecord!.recordID.recordName == recordIDName {
-                                return category
-                            }
-                            
-                            for item in category.items {
-                                if item.itemRecord != nil {
-                                    if item.itemRecord!.recordID.recordName == recordIDName {
-                                        return item
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-    
-    // returns a List object matching the given CKRecordID
-    func getLocalList(_ recordIDName: String) -> List?
-    {
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                if list.listRecord != nil {
-                    if list.listRecord!.recordID.recordName == recordIDName {
-                        return list
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-    
-    // returns a Category object matching the given CKRecordID
-    func getLocalCategory(_ recordIDName: String) -> Category?
-    {
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                for category in list.categories {
-                    if category.categoryRecord?.recordID.recordName == recordIDName {
-                        return category
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-
-    // returns an Item object matching the given CKRecordID
-    func getLocalItem(_ recordIDName: String) -> Item?
-    {
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                for category in list.categories {
-                    for item in category.items {
-                        if item.itemRecord?.recordID.recordName == recordIDName {
-                            return item
-                        }
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-    
-    // returns the list that contains the given category
-    func getListForCategory(_ searchCategory: Category) -> List?
-    {
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                for category in list.categories {
-                    if category === searchCategory {
-                        return list
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-    
-    // returns the list that contains the given item
-    func getListForItem(_ searchItem: Item) -> List?
-    {
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                for category in list.categories {
-                    for item in category.items {
-                        if item === searchItem {
-                            return list
-                        }
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-    
-    // returns the list that contains the given list object
-    func getListForListObj(_ searchObj: ListObj) -> List?
-    {
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                for category in list.categories {
-                    if category == searchObj {
-                        return list
-                    }
-                    for item in category.items {
-                        if item === searchObj {
-                            return list
-                        }
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-    
-    // returns the category that contains the given item
-    func getCategoryForItem(_ searchItem: Item) -> Category?
-    {
-        if let listVC = listViewController {
-            for list in listVC.lists {
-                for category in list.categories {
-                    for item in category.items {
-                        if item === searchItem {
-                            return category
-                        }
-                    }
-                }
-            }
-        }
-        
-        return nil
-    }
-    
-    // returns the category that contains the given item in the given list
-    func getCategoryForItem(_ searchItem: Item, inList: List) -> Category?
-    {
-        for category in inList.categories {
-            for item in category.items {
-                if item === searchItem {
-                    return category
-                }
-            }
-        }
-        
-        return nil
-    }
-    */
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1721,26 +1518,6 @@ extension Array where Element: Equatable
         }
     }
 }
-
-// Date extension and methods for comparisons
-/*
-public func ==(lhs: Date, rhs: Date) -> Bool
-{
-    return lhs === rhs || lhs.compare(rhs) == .orderedSame
-}
-
-public func <(lhs: Date, rhs: Date) -> Bool
-{
-    return lhs.compare(rhs) == .orderedAscending
-}
-
-public func >(lhs: Date, rhs: Date) -> Bool
-{
-    return lhs.compare(rhs) == .orderedDescending
-}
-
-extension Date: Comparable { }
-*/
 
 // print wrapper - will remove print statements from the release version
 func print(_ items: Any..., separator: String = " ", terminator: String = "\n")
