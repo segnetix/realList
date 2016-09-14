@@ -45,7 +45,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var documentsDirectory: URL?
     var archiveURL: URL?
     var cloudUploadStatusRecord: CKRecord?
-    var updateRecords = [CKRecord: AnyObject]()
+    var updateRecords = [CKRecord: AnyObject?]()
     
     // holds references to items that have outdated image assets
     var itemReferences = [CKReference]()
@@ -186,9 +186,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     
     func restoreUpgradeStatus() {
         #if DEBUG
-            //testing only...
-            //self.appIsUpgraded = true
-            //return
+//            testing only...
+//            self.appIsUpgraded = true
+//            return
         #endif
         
         // restore upgrade status from user defaults
@@ -720,7 +720,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         //NSLog("*** processNotificationRecords - finished")
     }
     
-    func addToUpdateRecords(_ record: CKRecord, obj: AnyObject) {
+    func addToUpdateRecords(_ record: CKRecord, obj: AnyObject?) {
         updateRecords[record] = obj
     }
     

@@ -84,7 +84,7 @@ class ItemClassTests: ModelClassTests
         item.imageAsset = nil
         
         // then
-        item.addImageAsset()
+        _ = item.addImageAsset()
         XCTAssertNotNil(item.imageAsset, "addImage assert not nil image asset")
     }
     

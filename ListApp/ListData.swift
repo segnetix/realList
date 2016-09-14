@@ -26,6 +26,7 @@ let key_categories          = "categories"
 let key_modificationDate    = "modificationDate"
 let key_listReference       = "listReference"
 let key_listRecord          = "listRecord"
+let key_shareRecord         = "shareRecord"
 let key_order               = "order"
 let key_expanded            = "expanded"
 let key_displayHeader       = "displayHeader"
@@ -147,18 +148,20 @@ class ListData
     }
 
     static var tutorialListIndex: Int? {
-        var i = 0
-        for list in lists {
-            if list.isTutorialList {
-                return i
+        get {
+            var i = 0
+            for list in lists {
+                if list.isTutorialList {
+                    return i
+                }
+                i += 1
             }
-            i += 1
+            return nil
         }
-        return nil
     }
     
     // class functions
-    static func loadLocal(filePath: String) -> Bool {
+    class func loadLocal(filePath: String) -> Bool {
         if let archivedListData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) as? [List] {
             lists = archivedListData
             return true
@@ -166,40 +169,40 @@ class ListData
         return false
     }
     
-    static func saveLocal(filePath: String) -> Bool {
+    class func saveLocal(filePath: String) -> Bool {
          return NSKeyedArchiver.archiveRootObject(ListData.lists, toFile: filePath)
     }
     
-    static func listForRow(at indexPath: IndexPath) -> List? {
+    class func listForRow(at indexPath: IndexPath) -> List? {
         if indexPath.row >= 0 && indexPath.row < lists.count {
             return lists[indexPath.row]
         }
         return nil
     }
     
-    static func list(_ index: Int) -> List? {
+    class func list(_ index: Int) -> List? {
         if index >= 0 && index < lists.count {
             return lists[index]
         }
         return nil
     }
     
-    static func listIndex(of list: List) -> Int? {
+    class func listIndex(of list: List) -> Int? {
         if let index = lists.index(of: list) {
             return index
         }
         return nil
     }
     
-    static func removeList(_ list: List) {
+    class func removeList(_ list: List) {
         lists.removeObject(list)
     }
     
-    static func removeListAt(_ indexPath: IndexPath) -> List? {
+    class func removeListAt(_ indexPath: IndexPath) -> List? {
         return self.removeListAt(indexPath.row)
     }
     
-    static func removeListAt(_ index: Int) -> List? {
+    class func removeListAt(_ index: Int) -> List? {
         if index >= 0 && index < lists.count {
             let list = lists[index]
             lists.remove(at: index)
@@ -208,37 +211,37 @@ class ListData
         return nil
     }
     
-    static func removeLastList() {
+    class func removeLastList() {
         lists.removeLast()
     }
     
-    static func appendList(_ list: List) {
+    class func appendList(_ list: List) {
         lists.append(list)
     }
     
-    static func insertList(_ list: List, at indexPath: IndexPath) {
+    class func insertList(_ list: List, at indexPath: IndexPath) {
         lists.insert(list, at: indexPath.row)
     }
     
-    static func saveToCloud() {
+    class func saveToCloud() {
         for list in lists {
             list.saveToCloud()
         }
     }
     
-    static func updateIndices() {
+    class func updateIndices() {
         for list in lists {
             list.updateIndices()
         }
     }
     
-    static func clearNeedToSave() {
+    class func clearNeedToSave() {
         for list in lists {
             list.clearNeedToSave()
         }
     }
     
-    static func resetListOrderValues() {
+    class func resetListOrderValues() {
         var i = 0
         for list in lists {
             list.order = i
@@ -246,11 +249,11 @@ class ListData
         }
     }
     
-    static func lastCategoryInList(_ list: List) -> Category? {
+    class func lastCategoryInList(_ list: List) -> Category? {
         return list.categories.last
     }
     
-    static func deleteObjects(listDeleteRecordIDs: [String], categoryDeleteRecordIDs: [String], itemDeleteRecordIDs: [String]) {
+    class func deleteObjects(listDeleteRecordIDs: [String], categoryDeleteRecordIDs: [String], itemDeleteRecordIDs: [String]) {
         var listsToDelete = [List]()
         
         for list in lists {
@@ -295,7 +298,7 @@ class ListData
         //print("*** processDeleteObjects - deleted \(listsToDelete.count) lists")
     }
     
-    static func countNeedToSave() -> Int {
+    class func countNeedToSave() -> Int {
         var count = 0
         
         for list in lists {
@@ -320,7 +323,7 @@ class ListData
     }
     
     // reorder lists, categories and items according to order number
-    static func reorderListObjects()
+    class func reorderListObjects()
     {
         // sort lists
         lists.sort { $0.order < $1.order }
@@ -339,7 +342,7 @@ class ListData
     }
     
     // reset the order field for each list based on current position in the list array
-    static func resetListOrderByPosition() {
+    class func resetListOrderByPosition() {
         var pos = 0
         for list in lists {
             list.order = pos
@@ -348,7 +351,7 @@ class ListData
     }
     
     // reset the order field for each list
-    static func resetListCategoryAndItemOrderByPosition() {
+    class func resetListCategoryAndItemOrderByPosition() {
         var listPos = 0
         for list in lists {
             list.order = listPos
@@ -360,7 +363,7 @@ class ListData
 
     
     // returns a ListData object from the given recordName
-    static func getLocalObject(_ recordIDName: String) -> AnyObject?
+    class func getLocalObject(_ recordIDName: String) -> AnyObject?
     {
         for list in lists {
             if list.listRecord != nil {
@@ -390,7 +393,7 @@ class ListData
     }
     
     // returns a List object matching the given CKRecordID
-    static func getLocalList(_ recordIDName: String) -> List?
+    class func getLocalList(_ recordIDName: String) -> List?
     {
         for list in lists {
             if list.listRecord != nil {
@@ -404,7 +407,7 @@ class ListData
     }
     
     // returns a Category object matching the given CKRecordID
-    static func getLocalCategory(_ recordIDName: String) -> Category?
+    class func getLocalCategory(_ recordIDName: String) -> Category?
     {
         for list in lists {
             for category in list.categories {
@@ -418,7 +421,7 @@ class ListData
     }
     
     // returns an Item object matching the given CKRecordID
-    static func getLocalItem(_ recordIDName: String) -> Item?
+    class func getLocalItem(_ recordIDName: String) -> Item?
     {
         for list in lists {
             for category in list.categories {
@@ -434,7 +437,7 @@ class ListData
     }
     
     // returns the list that contains the given category
-    static func getListForCategory(_ searchCategory: Category) -> List?
+    class func getListForCategory(_ searchCategory: Category) -> List?
     {
         for list in lists {
             for category in list.categories {
@@ -448,7 +451,7 @@ class ListData
     }
     
     // returns the list that contains the given item
-    static func getListForItem(_ searchItem: Item) -> List?
+    class func getListForItem(_ searchItem: Item) -> List?
     {
         for list in lists {
             for category in list.categories {
@@ -464,7 +467,7 @@ class ListData
     }
     
     // returns the list that contains the given list object
-    static func getListForListObj(_ searchObj: ListObj) -> List?
+    class func getListForListObj(_ searchObj: ListObj) -> List?
     {
         for list in lists {
             for category in list.categories {
@@ -483,7 +486,7 @@ class ListData
     }
     
     // returns the category that contains the given item
-    static func getCategoryForItem(_ searchItem: Item) -> Category?
+    class func getCategoryForItem(_ searchItem: Item) -> Category?
     {
         for list in lists {
             for category in list.categories {
@@ -499,7 +502,7 @@ class ListData
     }
     
     // returns the category that contains the given item in the given list
-    static func getCategoryForItem(_ searchItem: Item, inList: List) -> Category?
+    class func getCategoryForItem(_ searchItem: Item, inList: List) -> Category?
     {
         for category in inList.categories {
             for item in category.items {
@@ -589,13 +592,14 @@ class List: NSObject, NSCoding
     var needToSave: Bool = false
     var needToDelete: Bool = false
     var modificationDate: Date?
-    var listRecord: CKRecord?
-    var listReference: CKReference?
+    var listRecord: CKRecord!
+    var listReference: CKReference!
+    var share: CKShare!
     var order: Int = 0 { didSet { if order != oldValue { needToSave = true } } }
     var showCompletedItems:  Bool = true { didSet { self.updateIndices(); needToSave = true } }
     var showInactiveItems:   Bool = true { didSet { self.updateIndices(); needToSave = true } }
     var isTutorialList = false
-    
+
     var expandAllCategories: Bool = true {
         didSet {
             for category in categories {
@@ -616,7 +620,8 @@ class List: NSObject, NSCoding
         if createRecord {
             // new list needs a new record and reference
             self.listRecord = CKRecord.init(recordType: ListsRecordType)
-            self.listReference = CKReference.init(record: listRecord!, action: CKReferenceAction.deleteSelf)
+            self.listReference = CKReference.init(record: listRecord, action: CKReferenceAction.deleteSelf)
+            self.share = CKShare.init(rootRecord: self.listRecord)
         }
         
         self.modificationDate = Date.init()
@@ -629,16 +634,17 @@ class List: NSObject, NSCoding
 ///////////////////////////////////////////////////////
     
     // Designated memberwise initializer - called when restoring from local storage on launch
-    init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, tutorial: Bool?, listColorName: String?, modificationDate: Date?, listReference: CKReference?, listRecord: CKRecord?, categories: [Category]?)
+    init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, tutorial: Bool?, listColorName: String?, modificationDate: Date?, listReference: CKReference?, listRecord: CKRecord?, share: CKShare?, categories: [Category]?)
     {
-        if let name               = name                 { self.name                = name               } else { self.name = ""                        }
-        if let showCompletedItems = showCompletedItems   { self.showCompletedItems  = showCompletedItems } else { self.showCompletedItems = true        }
-        if let showInactiveItems  = showInactiveItems    { self.showInactiveItems   = showInactiveItems  } else { self.showInactiveItems  = true        }
-        if let tutorial           = tutorial             { self.isTutorialList      = tutorial           } else { self.isTutorialList = false           }
-        if let modificationDate   = modificationDate     { self.modificationDate    = modificationDate   } else { self.modificationDate = Date.init() }
+        if let name               = name                 { self.name                = name               } else { self.name = ""                                     }
+        if let showCompletedItems = showCompletedItems   { self.showCompletedItems  = showCompletedItems } else { self.showCompletedItems = true                     }
+        if let showInactiveItems  = showInactiveItems    { self.showInactiveItems   = showInactiveItems  } else { self.showInactiveItems  = true                     }
+        if let tutorial           = tutorial             { self.isTutorialList      = tutorial           } else { self.isTutorialList = false                        }
+        if let modificationDate   = modificationDate     { self.modificationDate    = modificationDate   } else { self.modificationDate = Date.init()                }
         if let listColorName      = listColorName        { self.listColorName       = listColorName      }
         if let listReference      = listReference        { self.listReference       = listReference      }
         if let listRecord         = listRecord           { self.listRecord          = listRecord         }
+        if let share              = share                { self.share               = share              } else { self.share = CKShare.init(rootRecord: listRecord!) }
         if let categories         = categories           { self.categories          = categories         }
         
         super.init()
@@ -658,6 +664,7 @@ class List: NSObject, NSCoding
         let categories         = decoder.decodeObject(forKey: key_categories)         as? [Category]
         let listReference      = decoder.decodeObject(forKey: key_listReference)      as? CKReference
         let listRecord         = decoder.decodeObject(forKey: key_listRecord)         as? CKRecord
+        let share              = decoder.decodeObject(forKey: key_shareRecord)        as? CKShare
         let modificationDate   = decoder.decodeObject(forKey: key_modificationDate)   as? Date
         
         self.init(name: name,
@@ -668,6 +675,7 @@ class List: NSObject, NSCoding
                   modificationDate: modificationDate,
                   listReference: listReference,
                   listRecord: listRecord,
+                  share: share,
                   categories: categories)
     }
     
@@ -684,6 +692,7 @@ class List: NSObject, NSCoding
         coder.encode(self.categories,         forKey: key_categories)
         coder.encode(self.listReference,      forKey: key_listReference)
         coder.encode(self.listRecord,         forKey: key_listRecord)
+        coder.encode(self.share,              forKey: key_shareRecord)
         coder.encode(self.modificationDate,   forKey: key_modificationDate)
     }
     
@@ -730,8 +739,16 @@ class List: NSObject, NSCoding
         listRecord.setObject(self.showInactiveItems as CKRecordValue?,  forKey: key_showInactiveItems)
         listRecord.setObject(self.order as CKRecordValue?,              forKey: key_order)
         
+        // does the share need to store any key values???
+        //share.setObject(<#T##object: CKRecordValue?##CKRecordValue?#>, forKey: <#T##String#>)
+        share[CKShareTitleKey] = self.name as CKRecordValue?
+        share[CKShareThumbnailImageDataKey] = UIImage.init(named: "AppIcon") as! CKRecordValue?
+        
         // add this record to the batch record array for updating
         appDelegate.addToUpdateRecords(listRecord, obj: self)
+        
+        // and also upload the share record at the same time
+        appDelegate.addToUpdateRecords(share, obj: nil)
     }
     
     // update this list from cloud storage
@@ -745,6 +762,7 @@ class List: NSObject, NSCoding
         
         self.listRecord = record
         self.listReference = CKReference.init(record: record, action: CKReferenceAction.deleteSelf)
+        //self.share = listRecord.share
         
         // list record is now updated
         needToSave = false
@@ -1808,6 +1826,9 @@ class Category: ListObj, NSCoding
             return
         }
         
+        // enable the sharing hierarchy
+        self.categoryRecord?.parent = listReference
+        
         if let database = appDelegate.privateDatabase {
             if categoryRecord != nil {
                 // commit change to cloud
@@ -2174,6 +2195,9 @@ class Item: ListObj, NSCoding
         //    return
         // }
         
+        // enable the sharing hierarchy
+        self.itemRecord?.parent = categoryReference
+        
         if let database = appDelegate.privateDatabase {
             if needToDelete {
                 deleteRecord(itemRecord!, database: database)
@@ -2525,6 +2549,9 @@ class ImageAsset: NSObject, NSCoding
     // commits the image to cloud storage (if needed)
     func saveToCloud(_ itemReference: CKReference)
     {
+        // enable the sharing hierarchy
+        self.imageRecord.parent = itemReference
+        
         if needToSave {
             saveRecord(imageRecord, itemReference: itemReference)
         } else if needToDelete {

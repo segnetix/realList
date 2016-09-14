@@ -8,7 +8,7 @@
 
 import UIKit
 
-class SettingsViewController: UIAppViewController
+class SettingsViewController: UIAppViewController, UICloudSharingControllerDelegate
 {
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     let containerView: UIView = UIView()
@@ -23,6 +23,7 @@ class SettingsViewController: UIAppViewController
     let printButton: UIButton = UIButton()
     let emailButton: UIButton = UIButton()
     let noteButton: UIButton = UIButton()
+    let shareButton: UIButton = UIButton()
     let vertLineImage: UIImageView = UIImageView()
     var itemVC: ItemViewController?
     
@@ -182,9 +183,10 @@ class SettingsViewController: UIAppViewController
             "printButton": printButton,
             "emailButton": emailButton,
             "noteButton": noteButton,
+            "shareButton": shareButton,
             "vertLine": vertLineImage]
         
-        closeButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:[closeButton]-10-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        closeButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-10-[shareButton]-(>=20)-[closeButton(==shareButton)]-10-|", options: [.alignAllCenterY], metrics: nil, views: views)
         showHideHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-[showHideCompletedButton]-[showHideInactiveButton(==showHideCompletedButton)]-|", options: [.alignAllCenterY], metrics: nil, views: views)
         categoryHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-[collapseAllCategoriesButton(==newCatButton)]-[expandAllCategoriesButton(==newCatButton)]-[newCatButton]-|", options: [.alignAllCenterY], metrics: nil, views: views)
         printCloseButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-(>=4,<=8)-[printButton]-[emailButton(==printButton)]-[vertLine]-[noteButton]-(>=4,<=8)-|", options: [.alignAllCenterY], metrics: nil, views: views)
@@ -226,6 +228,7 @@ class SettingsViewController: UIAppViewController
             printButton.transform = CGAffineTransform(scaleX: 0.75, y: 0.75)
             emailButton.transform = CGAffineTransform(scaleX: 0.75, y: 0.75)
             noteButton.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            shareButton.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             vertLineImage.transform = CGAffineTransform(scaleX: 0.65, y: 0.65)
         } else if size.height <= 568 {
             // medium small
@@ -245,6 +248,7 @@ class SettingsViewController: UIAppViewController
             printButton.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
             emailButton.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
             noteButton.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
+            shareButton.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             vertLineImage.transform = CGAffineTransform(scaleX: 0.75, y: 0.75)
         } else if size.height <= 667 {
             // medium large
@@ -264,6 +268,7 @@ class SettingsViewController: UIAppViewController
             printButton.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             emailButton.transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
             noteButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+            shareButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             vertLineImage.transform = CGAffineTransform(scaleX: 0.8, y: 0.8)
         } else {
             // large
@@ -283,6 +288,7 @@ class SettingsViewController: UIAppViewController
             printButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             emailButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             noteButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+            shareButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             vertLineImage.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
         }
         
@@ -355,6 +361,15 @@ class SettingsViewController: UIAppViewController
         closeButton.setImage(UIImage(named: "Close Window"), for: UIControlState())
         closeButton.addTarget(self, action: #selector(SettingsViewController.close), for: UIControlEvents.touchUpInside)
         containerView.addSubview(closeButton)
+        
+        shareButton.translatesAutoresizingMaskIntoConstraints = false
+        if let origImage = UIImage(named: "Share") {
+            let tintedImage = origImage.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
+            shareButton.setImage(tintedImage, for: UIControlState())
+            shareButton.tintColor = UIColor.white
+        }
+        shareButton.addTarget(self, action: #selector(SettingsViewController.share), for: UIControlEvents.touchUpInside)
+        containerView.addSubview(shareButton)
         
         noteButton.translatesAutoresizingMaskIntoConstraints = false
         if showNotes {
@@ -472,8 +487,7 @@ class SettingsViewController: UIAppViewController
         }
     }
     
-    func highlightSelectedColorBox(_ selectedButton: UIButton)
-    {
+    func highlightSelectedColorBox(_ selectedButton: UIButton) {
         // erase any current borders
         for (button, _) in colorButtons {
             button.layer.borderColor = UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 1.0).cgColor
@@ -487,8 +501,7 @@ class SettingsViewController: UIAppViewController
         showNotes = !showNotes
     }
     
-    func print()
-    {
+    func print() {
         // present the print dialog
         itemVC?.presentPrintDialog()
         
@@ -496,8 +509,7 @@ class SettingsViewController: UIAppViewController
         close()
     }
     
-    func email()
-    {
+    func email() {
         // schedule the email dialog
         itemVC?.scheduleEmailDialog()
         
@@ -505,8 +517,42 @@ class SettingsViewController: UIAppViewController
         close()
     }
     
-    func close()
-    {
+    func share() {
+        NSLog("share...")
+        
+        if itemVC != nil && itemVC!.list != nil {
+            if let share = itemVC!.list!.share {
+                let container = appDelegate.container
+                
+                let cloudSharingController: UICloudSharingController = UICloudSharingController(share: share, container: container)
+                cloudSharingController.delegate = self
+                
+                // Set sharing permissions
+                cloudSharingController.availablePermissions = [.allowReadWrite]
+                
+                // Show cloud shareing dialog
+                self.present(cloudSharingController, animated: true, completion: nil)
+            }
+        }
+    }
+    
+    @available(iOS 10.0, *)
+    public func cloudSharingController(_ csc: UICloudSharingController, failedToSaveShareWithError error: Error) {
+        NSLog("failedToSaveShareWithError: \(error.localizedDescription)")
+    }
+    
+    @available(iOS 10.0, *)
+    public func itemTitle(for csc: UICloudSharingController) -> String? {
+        if itemVC != nil {
+            if let list = itemVC!.list {
+                NSLog("itemTitle: \(list.name))")
+                return list.name
+            }
+        }
+        return "Error... list not available!"
+    }
+    
+    func close() {
         itemVC?.appDelegate.saveListData(async: true)
         presentingViewController!.dismiss(animated: true, completion: nil)
     }

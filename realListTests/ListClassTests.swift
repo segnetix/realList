@@ -190,7 +190,7 @@ class ListClassTests: ModelClassTests
         let newItem = Item.init(name: "Added Item", state: .complete, createRecord: true)
         
         // given
-        list.insertItem(newItem, beforeObj: targetItem, updateIndices: true)
+        _ = list.insertItem(newItem, beforeObj: targetItem, updateIndices: true)
         
         // then
         let testItem1 = cat.items[1]
