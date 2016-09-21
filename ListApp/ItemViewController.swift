@@ -925,14 +925,14 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             // need to scroll down
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ItemViewController.scrollDownLoop))
-                displayLink!.frameInterval = 1
+                displayLink!.preferredFramesPerSecond = kFramesPerSecond
                 displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ItemViewController.scrollUpLoop))
-                displayLink!.frameInterval = 1
+                displayLink!.preferredFramesPerSecond = kFramesPerSecond
                 displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if displayLink != nil {
@@ -1574,7 +1574,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         printFormatter.contentInsets = UIEdgeInsets(top: 0, left: 72, bottom: 72, right: 60)    // page margins (72 = 1") - bottom is ignored, top only used on first page
         printController.printFormatter = printFormatter
         printController.delegate = self
-        printController.showsPageRange = true
+        //printController.showsPageRange = true     // iOS 10 deprecation
         printController.showsNumberOfCopies = true
         
         printController.present(animated: true, completionHandler: nil)

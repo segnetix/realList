@@ -513,14 +513,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             // need to scroll down
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
-                displayLink!.frameInterval = 1
+                displayLink!.preferredFramesPerSecond = kFramesPerSecond
                 displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
-                displayLink!.frameInterval = 1
+                displayLink!.preferredFramesPerSecond = kFramesPerSecond
                 displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if displayLink != nil {
@@ -691,14 +691,14 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             // need to scroll down
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
-                displayLink!.frameInterval = 1
+                displayLink!.preferredFramesPerSecond = kFramesPerSecond
                 displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
-                displayLink!.frameInterval = 1
+                displayLink!.preferredFramesPerSecond = kFramesPerSecond
                 displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
             }
         } else if displayLink != nil {

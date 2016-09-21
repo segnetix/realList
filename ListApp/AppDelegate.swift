@@ -24,6 +24,9 @@ private let key_picsInPrintAndEmail  = "picsInPrintAndEmail"
 let kMaxListCount            =  2
 let kMaxItemCount            = 12
 
+// display link scroll loop updates per second
+let kFramesPerSecond         = 60
+
 // price formatter function
 let priceFormatter: NumberFormatter = {
     let formatter = NumberFormatter()

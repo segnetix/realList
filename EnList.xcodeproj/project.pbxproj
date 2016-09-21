@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B02174D21C6D57110087D5A3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B02174D41C6D57110087D5A3 /* Localizable.strings */; };
 		B02597281CE242E100615138 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = B02597271CE242E100615138 /* MBProgressHUD.m */; };
 		B02BBCEE1CA7069F00030822 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B02BBCED1CA7069F00030822 /* StoreKit.framework */; };
 		B03C467B1C66F21400B66CBD /* ItemDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */; };
@@ -17,6 +16,7 @@
 		B041E8521CDA4CC6005C4D16 /* Reachability.swift in Sources */ = {isa = PBXBuildFile; fileRef = B041E8511CDA4CC6005C4D16 /* Reachability.swift */; };
 		B041E8541CDA4D62005C4D16 /* AppManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B041E8531CDA4D62005C4D16 /* AppManager.swift */; };
 		B041E8561CDA4DC7005C4D16 /* UIAppViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B041E8551CDA4DC7005C4D16 /* UIAppViewController.swift */; };
+		B04C95AB1D933FCA00DF886E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B02174D41C6D57110087D5A3 /* Localizable.strings */; };
 		B05B23571CD12D2E00595569 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = B05B23561CD12D2E00595569 /* Default-568h@2x.png */; };
 		B06836A21CAB1A7200422742 /* AddButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06836A11CAB1A7200422742 /* AddButton.swift */; };
 		B06A74171D86E1D1002AC147 /* ListDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B06A74161D86E1D1002AC147 /* ListDataTests.swift */; };
@@ -97,6 +97,7 @@
 		B041E8511CDA4CC6005C4D16 /* Reachability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Reachability.swift; path = ../Reachability.swift; sourceTree = "<group>"; };
 		B041E8531CDA4D62005C4D16 /* AppManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppManager.swift; sourceTree = "<group>"; };
 		B041E8551CDA4DC7005C4D16 /* UIAppViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIAppViewController.swift; sourceTree = "<group>"; };
+		B04C95AC1D93409B00DF886E /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Main.strings; sourceTree = "<group>"; };
 		B05B23561CD12D2E00595569 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		B06836A11CAB1A7200422742 /* AddButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AddButton.swift; path = ../AddButton.swift; sourceTree = "<group>"; };
 		B06A74161D86E1D1002AC147 /* ListDataTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListDataTests.swift; sourceTree = "<group>"; };
@@ -439,8 +440,8 @@
 				B0A1BCE01CC4142700F4F0B1 /* UpgradeViewController.xib in Resources */,
 				B0A302761C349F7A00F6FB44 /* LaunchScreen.storyboard in Resources */,
 				B0FA02E01D3FE14000B9A4EF /* RefreshContents.xib in Resources */,
-				B02174D21C6D57110087D5A3 /* Localizable.strings in Resources */,
 				B0A302731C349F7A00F6FB44 /* Assets.xcassets in Resources */,
+				B04C95AB1D933FCA00DF886E /* Localizable.strings in Resources */,
 				B0A1BCDC1CC2C6C700F4F0B1 /* AppSettingsViewController.xib in Resources */,
 				B05B23571CD12D2E00595569 /* Default-568h@2x.png in Resources */,
 				B0A302711C349F7A00F6FB44 /* Main.storyboard in Resources */,
@@ -548,6 +549,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				B0A302701C349F7A00F6FB44 /* Base */,
+				B04C95AC1D93409B00DF886E /* en */,
 			);
 			name = Main.storyboard;
 			sourceTree = "<group>";
