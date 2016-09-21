@@ -150,6 +150,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         let notificationSettings = UIUserNotificationSettings(types: UIUserNotificationType(), categories: nil)
         application.registerUserNotificationSettings(notificationSettings)
         application.registerForRemoteNotifications()
+        
+        
+        // new iOS 10 method
+//        let center = UNUserNotificationCenter.current()
+//        center.requestAuthorization(options: [.alert, .sound]) { (granted, error) in
+//            // Enable or disable features based on authorization.
+//        }
     }
     
     func restoreListDataFromLocalStorage() {
