@@ -16,8 +16,8 @@ class CheckBox: UIButton
     let inactiveImage = UIImage(named: "checkBox_inactive")
     
     // image colors
-    let inactiveColor = UIColor(colorLiteralRed: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
-    let defaultColor = UIColor(colorLiteralRed: 0.0, green: 0.478, blue: 1.0, alpha: 1.0)
+    let inactiveColor = UIColor(red: 0.7, green: 0.7, blue: 0.7, alpha: 1.0)
+    let defaultColor = UIColor(red: 0.0, green: 0.478, blue: 1.0, alpha: 1.0)
     
     // external links
     var item: Item?

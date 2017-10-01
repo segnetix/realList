@@ -12,7 +12,7 @@ import QuartzCore
 let listCellID = "ListCell"
 let addListCellId = "AddListCell"
 let kScrollZoneHeight: CGFloat = 50.0
-let selectedCellColor: UIColor = UIColor(colorLiteralRed: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
+let selectedCellColor: UIColor = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
 
 // ListSelectionDelegate protocol
 protocol ListSelectionDelegate: class
@@ -513,23 +513,31 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             // need to scroll down
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
-                displayLink!.frameInterval = 1
-                displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                if let displayLink = displayLink {
+                    displayLink.preferredFramesPerSecond = kFramesPerSecond
+                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                }
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
-                displayLink!.frameInterval = 1
-                displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                if let displayLink = displayLink {
+                    displayLink.preferredFramesPerSecond = kFramesPerSecond
+                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                }
             }
         } else if displayLink != nil {
             // check if we need to cancel a current scroll update because the touch moved out of scroll area
             if touchLocation.y < (tableView.bounds.height - kScrollZoneHeight) {
-                displayLink!.invalidate()
+                if let displayLink = displayLink {
+                    displayLink.invalidate()
+                }
                 displayLink = nil
             } else if touchLocation.y > (topBarHeight + kScrollZoneHeight) {
-                displayLink!.invalidate()
+                if let displayLink = displayLink {
+                    displayLink.invalidate()
+                }
                 displayLink = nil
             }
         }
@@ -691,23 +699,31 @@ class ListViewController: UITableViewController, UITextFieldDelegate
             // need to scroll down
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
-                displayLink!.frameInterval = 1
-                displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                if let displayLink = displayLink {
+                    displayLink.preferredFramesPerSecond = kFramesPerSecond
+                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                }
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
             // need to scroll up
             if displayLink == nil {
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
-                displayLink!.frameInterval = 1
-                displayLink!.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                if let displayLink = displayLink {
+                    displayLink.preferredFramesPerSecond = kFramesPerSecond
+                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                }
             }
         } else if displayLink != nil {
             // check if we need to cancel a current scroll update because the touch moved out of scroll area
             if touchLocation.y < (tableView.bounds.height - kScrollZoneHeight) {
-                displayLink!.invalidate()
+                if let displayLink = displayLink {
+                    displayLink.invalidate()
+                }
                 displayLink = nil
             } else if touchLocation.y > (topBarHeight + kScrollZoneHeight) {
-                displayLink!.invalidate()
+                if let displayLink = displayLink {
+                    displayLink.invalidate()
+                }
                 displayLink = nil
             }
         }

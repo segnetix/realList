@@ -24,6 +24,9 @@ private let key_picsInPrintAndEmail  = "picsInPrintAndEmail"
 let kMaxListCount            =  2
 let kMaxItemCount            = 12
 
+// display link scroll loop updates per second
+let kFramesPerSecond         = 60
+
 // price formatter function
 let priceFormatter: NumberFormatter = {
     let formatter = NumberFormatter()
@@ -46,7 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     var archiveURL: URL?
     var cloudUploadStatusRecord: CKRecord?
     var updateRecords = [CKRecord: AnyObject?]()
-    
+
     // holds references to items that have outdated image assets
     var itemReferences = [CKReference]()
     
@@ -252,7 +255,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 database.fetch(withRecordID: queryNotification.recordID!) { (record: CKRecord?, error: Error?) -> Void in
                     if error != nil {
                         // Handle the error here
-                        print("Notification error: \(error?.localizedDescription)")
+                        print("Notification error: \(String(describing: error?.localizedDescription))")
                         return
                     }
                     if record != nil {
@@ -595,7 +598,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                     
                     print("added new category: \(newCategory.name)")
                 } else {
-                    print("*** ERROR: category \(record[key_name]) can't find list \(record[key_owningList])")
+                    print("*** ERROR: category \(String(describing: record[key_name])) can't find list \(String(describing: record[key_owningList]))")
                 }
             case ItemsRecordType:
                 if let category = getCategoryFromReference(record) {
@@ -610,7 +613,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                         }
                     }
                 } else {
-                    print("*** ERROR: item \(record[key_name]) can't find category \(record[key_owningCategory])")
+                    print("*** ERROR: item \(String(describing: record[key_name])) can't find category \(String(describing: record[key_owningCategory]))")
                 }
             case ImagesRecordType:
                 if let item = getItemFromReference(record) {
@@ -619,7 +622,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                         print("added new image to item: '\(item.name)' imageGUID: \(image.imageGUID)")
                     }
                 } else {
-                    print("*** ERROR: image \(record[key_imageGUID]) can't find item \(record[key_owningItem])")
+                    print("*** ERROR: image \(String(describing: record[key_imageGUID])) can't find item \(String(describing: record[key_owningItem]))")
                 }
             default:
                 break
@@ -720,7 +723,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         //NSLog("*** processNotificationRecords - finished")
     }
     
-    func addToUpdateRecords(_ record: CKRecord, obj: AnyObject?) {
+    func addToUpdateRecords(_ record: CKRecord, obj: AnyObject) {
         updateRecords[record] = obj
     }
     
@@ -772,9 +775,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
             saveRecordsOperation.perRecordCompletionBlock = { record, error in
                 // deal with conflicts
                 // set completionHandler of wrapper operation if it's the case
-                if error == nil && record != nil {
+                if error == nil {
                     //print("batch save: \(record![key_name])")
-                    let obj = self.updateRecords[record!]
+                    let obj = self.updateRecords[record]
                     if obj is List {
                         let list = obj as! List
                         list.needToSave = false
@@ -789,9 +792,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                         image.needToDelete = false
                         image.deleteImageFile()
                     }
-                } else if error != nil {
+                } else {
                     // NOTE: This should be able to handle a CKErrorLimitExceeded error.
-                    let obj = self.updateRecords[record!]
+                    let obj = self.updateRecords[record]
                     if obj is List {
                         let list = obj as! List
                         print("batch update error: list \(list.name) \(error!.localizedDescription)")
@@ -814,7 +817,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 } else if error != nil {
                     // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
                     print("*** ERROR: batchRecordUpdate - \(error!.localizedDescription)")
-                    print("The following records had problems: \((error as? NSError)!.userInfo[CKPartialErrorsByItemIDKey])")
+                    print("The following records had problems: \(String(describing: (error as? NSError)!.userInfo[CKPartialErrorsByItemIDKey]))")
                 }
             }
             
@@ -840,18 +843,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         deleteRecordsOperation.recordsToSave = nil
         deleteRecordsOperation.recordIDsToDelete = deleteRecordIDs
         deleteRecordsOperation.perRecordCompletionBlock = { record, error in
-            if error == nil && record != nil {
-                print("batchRecordDelete: deleted \(record![key_objectName])")
+            if error == nil {
+                print("batchRecordDelete: deleted \(String(describing: record[key_objectName]))")
             } else if error != nil {
                 print("*** ERROR: batchRecordDelete: \(error!.localizedDescription)")
             }
         }
         deleteRecordsOperation.modifyRecordsCompletionBlock = { savedRecords, deletedRecordIDs, error in
             if error == nil {
-                print("batch delete operation complete - \(savedRecords?.count) deleted.")
+                print("batch delete operation complete - \(String(describing: savedRecords?.count)) deleted.")
             } else {
                 // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
-                print("*** ERROR: batchRecordDelete. The following records had problems: \((error as? NSError)!.userInfo[CKPartialErrorsByItemIDKey])")
+                print("*** ERROR: batchRecordDelete. The following records had problems: \(String(describing: (error as? NSError)!.userInfo[CKPartialErrorsByItemIDKey]))")
             }
         }
         
@@ -956,7 +959,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // listFetch
         listFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : Error?) in
             if error != nil {
-                print("listFetch error: \(error?.localizedDescription)")
+                print("listFetch error: \(String(describing: error?.localizedDescription))")
             }
             
             if cursor != nil {
@@ -986,7 +989,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // categoryFetch
         categoryFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : Error?) in
             if error != nil {
-                print("categoryFetch error: \(error?.localizedDescription)")
+                print("categoryFetch error: \(String(describing: error?.localizedDescription))")
             }
             
             if cursor != nil {
@@ -1013,7 +1016,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // deleteFetch
         deleteFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : Error?) in
             if error != nil {
-                print("deleteFetch error: \(error?.localizedDescription)")
+                print("deleteFetch error: \(String(describing: error?.localizedDescription))")
             }
             
             if cursor != nil {
@@ -1039,7 +1042,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
         // itemFetch - passes on to mergeCloudData when complete
         itemFetch.queryCompletionBlock = { (cursor : CKQueryCursor?, error : Error?) in
             if error != nil {
-                print("itemFetch error: \(error?.localizedDescription)")
+                print("itemFetch error: \(String(describing: error?.localizedDescription))")
             }
             
             // update HUD
@@ -1207,7 +1210,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
                 }
                 
                 if error != nil {
-                    print("imageFetch error: \(error?.localizedDescription)")
+                    print("imageFetch error: \(String(describing: error?.localizedDescription) )")
                 }
                 
                 print("image record fetch operation for loop \(loop) is complete... \(startIndex+1) to \(stopIndex+1)")

@@ -153,7 +153,7 @@ extension IAPHelper: SKPaymentTransactionObserver
     {
         print("failedTransaction...")
         if transaction.error!._code != SKError.paymentCancelled.rawValue {
-            print("Transaction Error: \(transaction.error?.localizedDescription)")
+            print("Transaction Error: \(String(describing: transaction.error?.localizedDescription))")
             NotificationCenter.default.post(name: Notification.Name(rawValue: IAPHelper.IAPHelperFailedTransaction), object: transaction.error?.localizedDescription)
         }
         

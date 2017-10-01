@@ -26,7 +26,6 @@ let key_categories          = "categories"
 let key_modificationDate    = "modificationDate"
 let key_listReference       = "listReference"
 let key_listRecord          = "listRecord"
-let key_shareRecord         = "shareRecord"
 let key_order               = "order"
 let key_expanded            = "expanded"
 let key_displayHeader       = "displayHeader"
@@ -73,29 +72,29 @@ let r4_3                    = "r4_3"
 
 let jpegCompressionQuality  = CGFloat(0.6)      // JPEG quality range is 0.0 (low) to 1.0 (high)
 
-let alpha: Float = 1.0
+let alpha: CGFloat = 1.0
 
 // SUSAN'S COLORS
 // row 1
-var color1_1 = UIColor(colorLiteralRed: 0.000, green: 0.478, blue: 1.000, alpha: 0.850)     // system blue
-let color1_2 = UIColor(colorLiteralRed: 0.470, green: 0.620, blue: 0.750, alpha: alpha)     // icon blue (default)
-let color1_3 = UIColor(colorLiteralRed: 0.337, green: 0.753, blue: 0.996, alpha: alpha)     // lt blue
+var color1_1 = UIColor(red: 0.000, green: 0.478, blue: 1.000, alpha: 0.850)     // system blue
+let color1_2 = UIColor(red: 0.470, green: 0.620, blue: 0.750, alpha: alpha)     // icon blue (default)
+let color1_3 = UIColor(red: 0.337, green: 0.753, blue: 0.996, alpha: alpha)     // lt blue
 
 // row 2
-let color2_1 = UIColor(colorLiteralRed: 0.059, green: 0.439, blue: 0.004, alpha: alpha)     // green
-let color2_2 = UIColor(colorLiteralRed: 0.055, green: 0.431, blue: 0.425, alpha: alpha)     // teal
-let color2_3 = UIColor(colorLiteralRed: 0.137, green: 1.000, blue: 0.020, alpha: alpha)     // bright green
+let color2_1 = UIColor(red: 0.059, green: 0.439, blue: 0.004, alpha: alpha)     // green
+let color2_2 = UIColor(red: 0.055, green: 0.431, blue: 0.425, alpha: alpha)     // teal
+let color2_3 = UIColor(red: 0.137, green: 1.000, blue: 0.020, alpha: alpha)     // bright green
 
 // row 3
-let color3_1 = UIColor(colorLiteralRed: 0.984, green: 0.000, blue: 0.059, alpha: alpha)     // red
-let color3_2 = UIColor(colorLiteralRed: 0.463, green: 0.000, blue: 0.118, alpha: alpha)     // burgandy
-let color3_3 = UIColor(colorLiteralRed: 0.988, green: 0.314, blue: 0.773, alpha: alpha)     // pink
+let color3_1 = UIColor(red: 0.984, green: 0.000, blue: 0.059, alpha: alpha)     // red
+let color3_2 = UIColor(red: 0.463, green: 0.000, blue: 0.118, alpha: alpha)     // burgandy
+let color3_3 = UIColor(red: 0.988, green: 0.314, blue: 0.773, alpha: alpha)     // pink
 
 // row 4
-let color4_1 = UIColor(colorLiteralRed: 0.996, green: 1.000, blue: 0.337, alpha: alpha)     // yellow
-let color4_2 = UIColor(colorLiteralRed: 0.984, green: 0.420, blue: 0.043, alpha: alpha)     // orange
-let color4_3 = UIColor(colorLiteralRed: 0.420, green: 0.000, blue: 1.000, alpha: alpha)     // purple
-//let color4_3 = UIColor(colorLiteralRed: 0.259, green: 0.000, blue: 0.365, alpha: alpha)   // rockies purple
+let color4_1 = UIColor(red: 0.996, green: 1.000, blue: 0.337, alpha: alpha)     // yellow
+let color4_2 = UIColor(red: 0.984, green: 0.420, blue: 0.043, alpha: alpha)     // orange
+let color4_3 = UIColor(red: 0.420, green: 0.000, blue: 1.000, alpha: alpha)     // purple
+//let color4_3 = UIColor(red: 0.259, green: 0.000, blue: 0.365, alpha: alpha)   // rockies purple
 
 // alt yellow (for checkbox and button contrast)
 let color4_1_alt = UIColor.darkGray
@@ -594,7 +593,6 @@ class List: NSObject, NSCoding
     var modificationDate: Date?
     var listRecord: CKRecord!
     var listReference: CKReference!
-    var share: CKShare!
     var order: Int = 0 { didSet { if order != oldValue { needToSave = true } } }
     var showCompletedItems:  Bool = true { didSet { self.updateIndices(); needToSave = true } }
     var showInactiveItems:   Bool = true { didSet { self.updateIndices(); needToSave = true } }
@@ -621,7 +619,6 @@ class List: NSObject, NSCoding
             // new list needs a new record and reference
             self.listRecord = CKRecord.init(recordType: ListsRecordType)
             self.listReference = CKReference.init(record: listRecord, action: CKReferenceAction.deleteSelf)
-            self.share = CKShare.init(rootRecord: self.listRecord)
         }
         
         self.modificationDate = Date.init()
@@ -634,17 +631,16 @@ class List: NSObject, NSCoding
 ///////////////////////////////////////////////////////
     
     // Designated memberwise initializer - called when restoring from local storage on launch
-    init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, tutorial: Bool?, listColorName: String?, modificationDate: Date?, listReference: CKReference?, listRecord: CKRecord?, share: CKShare?, categories: [Category]?)
+    init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, tutorial: Bool?, listColorName: String?, modificationDate: Date?, listReference: CKReference?, listRecord: CKRecord?, categories: [Category]?)
     {
-        if let name               = name                 { self.name                = name               } else { self.name = ""                                     }
-        if let showCompletedItems = showCompletedItems   { self.showCompletedItems  = showCompletedItems } else { self.showCompletedItems = true                     }
-        if let showInactiveItems  = showInactiveItems    { self.showInactiveItems   = showInactiveItems  } else { self.showInactiveItems  = true                     }
-        if let tutorial           = tutorial             { self.isTutorialList      = tutorial           } else { self.isTutorialList = false                        }
-        if let modificationDate   = modificationDate     { self.modificationDate    = modificationDate   } else { self.modificationDate = Date.init()                }
+        if let name               = name                 { self.name                = name               } else { self.name = ""                        }
+        if let showCompletedItems = showCompletedItems   { self.showCompletedItems  = showCompletedItems } else { self.showCompletedItems = true        }
+        if let showInactiveItems  = showInactiveItems    { self.showInactiveItems   = showInactiveItems  } else { self.showInactiveItems  = true        }
+        if let tutorial           = tutorial             { self.isTutorialList      = tutorial           } else { self.isTutorialList = false           }
+        if let modificationDate   = modificationDate     { self.modificationDate    = modificationDate   } else { self.modificationDate = Date.init()   }
         if let listColorName      = listColorName        { self.listColorName       = listColorName      }
         if let listReference      = listReference        { self.listReference       = listReference      }
         if let listRecord         = listRecord           { self.listRecord          = listRecord         }
-        if let share              = share                { self.share               = share              } else { self.share = CKShare.init(rootRecord: listRecord!) }
         if let categories         = categories           { self.categories          = categories         }
         
         super.init()
@@ -664,7 +660,6 @@ class List: NSObject, NSCoding
         let categories         = decoder.decodeObject(forKey: key_categories)         as? [Category]
         let listReference      = decoder.decodeObject(forKey: key_listReference)      as? CKReference
         let listRecord         = decoder.decodeObject(forKey: key_listRecord)         as? CKRecord
-        let share              = decoder.decodeObject(forKey: key_shareRecord)        as? CKShare
         let modificationDate   = decoder.decodeObject(forKey: key_modificationDate)   as? Date
         
         self.init(name: name,
@@ -675,7 +670,6 @@ class List: NSObject, NSCoding
                   modificationDate: modificationDate,
                   listReference: listReference,
                   listRecord: listRecord,
-                  share: share,
                   categories: categories)
     }
     
@@ -692,7 +686,6 @@ class List: NSObject, NSCoding
         coder.encode(self.categories,         forKey: key_categories)
         coder.encode(self.listReference,      forKey: key_listReference)
         coder.encode(self.listRecord,         forKey: key_listRecord)
-        coder.encode(self.share,              forKey: key_shareRecord)
         coder.encode(self.modificationDate,   forKey: key_modificationDate)
     }
     
@@ -739,16 +732,8 @@ class List: NSObject, NSCoding
         listRecord.setObject(self.showInactiveItems as CKRecordValue?,  forKey: key_showInactiveItems)
         listRecord.setObject(self.order as CKRecordValue?,              forKey: key_order)
         
-        // does the share need to store any key values???
-        //share.setObject(<#T##object: CKRecordValue?##CKRecordValue?#>, forKey: <#T##String#>)
-        share[CKShareTitleKey] = self.name as CKRecordValue?
-        share[CKShareThumbnailImageDataKey] = UIImage.init(named: "AppIcon") as! CKRecordValue?
-        
         // add this record to the batch record array for updating
         appDelegate.addToUpdateRecords(listRecord, obj: self)
-        
-        // and also upload the share record at the same time
-        appDelegate.addToUpdateRecords(share, obj: nil)
     }
     
     // update this list from cloud storage
@@ -762,7 +747,6 @@ class List: NSObject, NSCoding
         
         self.listRecord = record
         self.listReference = CKReference.init(record: record, action: CKReferenceAction.deleteSelf)
-        //self.share = listRecord.share
         
         // list record is now updated
         needToSave = false
@@ -1826,9 +1810,6 @@ class Category: ListObj, NSCoding
             return
         }
         
-        // enable the sharing hierarchy
-        self.categoryRecord?.parent = listReference
-        
         if let database = appDelegate.privateDatabase {
             if categoryRecord != nil {
                 // commit change to cloud
@@ -2190,14 +2171,6 @@ class Item: ListObj, NSCoding
     // commits this item change to cloud storage
     func saveToCloud(_ categoryReference: CKReference)
     {
-        // don't save the tutorial to the cloud
-        // if self.isTutorialItem {
-        //    return
-        // }
-        
-        // enable the sharing hierarchy
-        self.itemRecord?.parent = categoryReference
-        
         if let database = appDelegate.privateDatabase {
             if needToDelete {
                 deleteRecord(itemRecord!, database: database)
@@ -2338,7 +2311,7 @@ class Item: ListObj, NSCoding
             if let err = error {
                 print("Delete Item Error for '\(self.name)': \(err.localizedDescription)")
             } else {
-                print("Success: Item record deleted successfully '\(self.name)' recordID: \(self.itemRecord?.recordID.recordName)")
+                print("Success: Item record deleted successfully '\(self.name)' recordID: \(String(describing: self.itemRecord?.recordID.recordName))")
             }
         })
         
@@ -2549,9 +2522,6 @@ class ImageAsset: NSObject, NSCoding
     // commits the image to cloud storage (if needed)
     func saveToCloud(_ itemReference: CKReference)
     {
-        // enable the sharing hierarchy
-        self.imageRecord.parent = itemReference
-        
         if needToSave {
             saveRecord(imageRecord, itemReference: itemReference)
         } else if needToDelete {
