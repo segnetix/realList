@@ -8,6 +8,7 @@
 import UIKit
 import CloudKit
 import StoreKit
+import UserNotifications
 
 private let key_listData             = "listData"
 private let key_selectionIndex       = "selectionIndex"
@@ -36,7 +37,7 @@ let priceFormatter: NumberFormatter = {
 }()
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate
 {
     var window: UIWindow?
     var splitViewController: UISplitViewController?
@@ -150,6 +151,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
 
     func pushNotificationSetup(_ application: UIApplication) {
+        
+        //create the notificationCenter
+        let center  = UNUserNotificationCenter.current()
+        center.delegate = self
+        
+        /*
+        // set the type as sound or badge
+        center.requestAuthorization(options: [.sound,.alert,.badge]) { (granted, error) in
+            // Enable or disable features based on authorization
+            
+        }
+        application.registerForRemoteNotifications()
+         */
+        
         let notificationSettings = UIUserNotificationSettings(types: UIUserNotificationType(), categories: nil)
         application.registerUserNotificationSettings(notificationSettings)
         application.registerForRemoteNotifications()
@@ -669,7 +684,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // process the notification records
-    func processNotificationRecords()
+    @objc func processNotificationRecords()
     {
         //NSLog("*** processNotificationRecords - update records: \(notificationArray.count)  delete records: \(deleteNotificationArray.count)")
         
@@ -1110,7 +1125,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate
     }
     
     // must be called on main thread
-    func cancelCloudDataFetch()
+    @objc func cancelCloudDataFetch()
     {
         print("*** cancelCloudDataFetch ***")
         var canceled = false

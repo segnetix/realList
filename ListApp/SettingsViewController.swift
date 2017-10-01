@@ -408,38 +408,38 @@ class SettingsViewController: UIAppViewController
         adjustConstraints(view.frame.size)
     }
     
-    func newCategory(_ sender: UIButton) {
+    @objc func newCategory(_ sender: UIButton) {
         itemVC?.addNewCategory()
         close()
     }
     
-    func collapseAllCategories(_ send: UIButton) {
+    @objc func collapseAllCategories(_ send: UIButton) {
         itemVC?.collapseAllCategories()
     }
     
-    func expandAllCategories(_ send: UIButton) {
+    @objc func expandAllCategories(_ send: UIButton) {
         itemVC?.expandAllCategories()
     }
     
-    func showHideCompletedItems(_ sender: UIButton) {
+    @objc func showHideCompletedItems(_ sender: UIButton) {
         showCompletedItems = !showCompletedItems
         itemVC?.showHideCompletedRows()
     }
     
-    func showHideInactiveItems(_ sender: UIButton) {
+    @objc func showHideInactiveItems(_ sender: UIButton) {
         showInactiveItems = !showInactiveItems
         itemVC?.showHideInactiveRows()
     }
     
-    func setAllItemsIncomplete(_ sender: UIButton) {
+    @objc func setAllItemsIncomplete(_ sender: UIButton) {
         itemVC?.setAllItemsIncomplete()
     }
     
-    func setAllItemsInactive(_ sender: UIButton) {
+    @objc func setAllItemsInactive(_ sender: UIButton) {
         itemVC?.setAllItemsInactive()
     }
     
-    func colorButton(_ sender: UIButton) {
+    @objc func colorButton(_ sender: UIButton) {
         var color = "r1_2"
         var selectedButton: UIButton?
         
@@ -482,11 +482,11 @@ class SettingsViewController: UIAppViewController
         selectedButton.layer.borderColor = UIColor(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0).cgColor
     }
     
-    func noteButtonChanged() {
+    @objc func noteButtonChanged() {
         showNotes = !showNotes
     }
     
-    func print() {
+    @objc func print() {
         // present the print dialog
         itemVC?.presentPrintDialog()
         
@@ -494,7 +494,7 @@ class SettingsViewController: UIAppViewController
         close()
     }
     
-    func email() {
+    @objc func email() {
         // schedule the email dialog
         itemVC?.scheduleEmailDialog()
         
@@ -502,7 +502,7 @@ class SettingsViewController: UIAppViewController
         close()
     }
     
-    func close() {
+    @objc func close() {
         itemVC?.appDelegate.saveListData(async: true)
         presentingViewController!.dismiss(animated: true, completion: nil)
     }

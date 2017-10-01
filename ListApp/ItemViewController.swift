@@ -209,7 +209,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         super.init(coder: aDecoder)!
     }
     
-    func updateListData(_ refreshControl: UIRefreshControl)
+    @objc func updateListData(_ refreshControl: UIRefreshControl)
     {
         refreshAnimation.startAnimating()
         refreshCancelButton.isEnabled = true
@@ -218,7 +218,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         appDelegate.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
     }
     
-    func cancelFetch(_ button: UIButton) {
+    @objc func cancelFetch(_ button: UIButton) {
         refreshLabel.text = "Canceled"
         appDelegate.cancelCloudDataFetch()
     }
@@ -490,7 +490,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 ////////////////////////////////////////////////////////////////
     
     
-    func keyboardWillShow(_ notification: Notification)
+    @objc func keyboardWillShow(_ notification: Notification)
     {
         //print("keyboardWillShow")
         inEditMode = true
@@ -529,7 +529,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         return false
     }
     
-    func keyboardWillHide(_ notification: Notification)
+    @objc func keyboardWillHide(_ notification: Notification)
     {
         //print("keyboardWillHide")
         
@@ -545,11 +545,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         resetCellViewTags()
     }
     
-    func keyboardDidShow(_ notification: Notification) {
+    @objc func keyboardDidShow(_ notification: Notification) {
         //print("keyboardDidShow")
     }
     
-    func keyboardDidHide(_ notification: Notification) {
+    @objc func keyboardDidHide(_ notification: Notification) {
         //print("keyboardDidHide")
     }
     
@@ -609,7 +609,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         return true
     }
     
-    func itemNameDidChange(_ textField: UITextField)
+    @objc func itemNameDidChange(_ textField: UITextField)
     {
         // update item name data with new value
         let newName = textField.text!.trimmingCharacters(in: CharacterSet.whitespaces)
@@ -758,7 +758,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         tableView.reloadData()
     }
     
-    func scrollToCategoryEnded(_ scrollView: UIScrollView)
+    @objc func scrollToCategoryEnded(_ scrollView: UIScrollView)
     {
         NSObject.cancelPreviousPerformRequests(withTarget: self)
         
@@ -801,7 +801,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 ////////////////////////////////////////////////////////////////
     
     /// Respond to a single tap (toggle expand/collapse state of category).
-    func cellSingleTapAction(_ sender: UITapGestureRecognizer)
+    @objc func cellSingleTapAction(_ sender: UITapGestureRecognizer)
     {
         if sender.view != nil
         {
@@ -857,7 +857,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
 
     /// Respond to a double tap (cell name edit).
-    func cellDoubleTapAction(_ sender: UITapGestureRecognizer)
+    @objc func cellDoubleTapAction(_ sender: UITapGestureRecognizer)
     {
         if sender.view != nil {
             let obj = list.objectForTag(sender.view!.tag)
@@ -879,7 +879,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
 
     /// Handle long press gesture (cell move).
-    func longPressAction(_ gesture: UILongPressGestureRecognizer)
+    @objc func longPressAction(_ gesture: UILongPressGestureRecognizer)
     {
         let state: UIGestureRecognizerState = gesture.state
         let location: CGPoint = gesture.location(in: tableView)
@@ -1247,7 +1247,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         appDelegate.saveListData(async: true)
     }
     
-    func scrollUpLoop()
+    @objc func scrollUpLoop()
     {
         let currentOffset = tableView.contentOffset
         let topBarHeight = getTopBarHeight()
@@ -1263,7 +1263,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func scrollDownLoop()
+    @objc func scrollDownLoop()
     {
         let currentOffset = tableView.contentOffset
         let lastCellIndex = IndexPath(row: list.totalDisplayCount() - 1, section: 0)
@@ -1550,7 +1550,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         return statusBarHeight + navBarHeight
     }
 
-    func settingsButtonTapped()
+    @objc func settingsButtonTapped()
     {
         print("settings button tapped...")
         

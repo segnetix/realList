@@ -32,7 +32,7 @@ class AddButton: UIButton
         setImage()
     }
     
-    func buttonTapped(_ sender: UIButton) {
+    @objc func buttonTapped(_ sender: UIButton) {
         if sender == self && itemVC != nil {
             itemVC!.addNewItem(self)
         }

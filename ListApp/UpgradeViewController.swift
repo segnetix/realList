@@ -87,14 +87,14 @@ class UpgradeViewController: UIAppViewController
         }
     }
     
-    func handlePurchaseNotification(_ notification: Notification)
+    @objc func handlePurchaseNotification(_ notification: Notification)
     {
         appDelegate.appIsUpgraded = true
         
         reload()
     }
     
-    func handleRestoreNotification(_ notification: Notification)
+    @objc func handleRestoreNotification(_ notification: Notification)
     {
         appDelegate.appIsUpgraded = true
         
@@ -113,7 +113,7 @@ class UpgradeViewController: UIAppViewController
         reload()
     }
     
-    func handleFailedTransaction(_ notification: Notification)
+    @objc func handleFailedTransaction(_ notification: Notification)
     {
         if let message = notification.object as? String {
             let alertVC = UIAlertController(

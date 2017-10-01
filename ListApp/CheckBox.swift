@@ -37,7 +37,7 @@ class CheckBox: UIButton
     }
     
     // cycle the button image on tap
-    func buttonTapped(_ sender: UIButton) {
+    @objc func buttonTapped(_ sender: UIButton) {
         if sender == self && CheckBox.itemVC != nil {
             CheckBox.itemVC!.checkButtonTapped(self)
             self.setImage()

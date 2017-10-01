@@ -144,7 +144,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         super.init(coder: aDecoder)!
     }
     
-    func updateListData(_ refreshControl: UIRefreshControl)
+    @objc func updateListData(_ refreshControl: UIRefreshControl)
     {
         refreshAnimation.startAnimating()
         refreshCancelButton.isEnabled = true
@@ -153,7 +153,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         appDelegate.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
     }
     
-    func cancelFetch(_ button: UIButton) {
+    @objc func cancelFetch(_ button: UIButton) {
         refreshLabel.text = "Canceled"
         appDelegate.cancelCloudDataFetch()
     }
@@ -351,7 +351,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
 
     
-    func listNameDidChange(_ textField: UITextField)
+    @objc func listNameDidChange(_ textField: UITextField)
     {
         // update list name data with new value
         let i = textField.tag
@@ -441,7 +441,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 ////////////////////////////////////////////////////////////////
     
     // respond to a single tap (display the selected list in the ItemListViewController)
-    func cellSingleTapAction(_ sender: UITapGestureRecognizer)
+    @objc func cellSingleTapAction(_ sender: UITapGestureRecognizer)
     {
         let i = sender.view?.tag
         let indexPath = IndexPath(row: i!, section: 0)
@@ -457,7 +457,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // respond to a double tap (list name edit)
-    func cellDoubleTapAction(_ sender: UITapGestureRecognizer)
+    @objc func cellDoubleTapAction(_ sender: UITapGestureRecognizer)
     {
         if sender.view != nil {
             let indexPath = IndexPath(row: (sender.view?.tag)!, section: 0)
@@ -470,7 +470,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // handle cell move on long press (move)
-    func longPressAction(_ gesture: UILongPressGestureRecognizer)
+    @objc func longPressAction(_ gesture: UILongPressGestureRecognizer)
     {
         let state: UIGestureRecognizerState = gesture.state
         let location: CGPoint = gesture.location(in: tableView)
@@ -818,7 +818,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    func scrollUpLoop()
+    @objc func scrollUpLoop()
     {
         let currentOffset = tableView.contentOffset
         let topBarHeight = getTopBarHeight()
@@ -834,7 +834,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    func scrollDownLoop()
+    @objc func scrollDownLoop()
     {
         let currentOffset = tableView.contentOffset
         let lastCellIndex = IndexPath(row: ListData.listCount - 1, section: 0)
@@ -862,7 +862,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 ////////////////////////////////////////////////////////////////
     
     // presents the about window
-    func infoButtonTapped()
+    @objc func infoButtonTapped()
     {
         let aboutVC = AboutViewController()
         aboutVC.listVC = self

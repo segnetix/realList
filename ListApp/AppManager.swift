@@ -100,7 +100,7 @@ class AppManager: NSObject
         NotificationCenter.default.addObserver(self, selector: #selector(AppManager.reachabilityChanged(_:)), name: NSNotification.Name(rawValue: ReachabilityChangedNotification), object: reachability)
     }
     
-    func reachabilityChanged(_ note: Notification) {
+    @objc func reachabilityChanged(_ note: Notification) {
         let reachability = note.object as! Reachability
         notifyReachability(reachability)
         

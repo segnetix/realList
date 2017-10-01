@@ -350,7 +350,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
 //
 ////////////////////////////////////////////////////////////////
     
-    func addPhoto(_ sender: UIButton)
+    @objc func addPhoto(_ sender: UIButton)
     {
         var photoAction: UIAlertAction?
         let photoLibrary   = NSLocalizedString("Photo_Library", comment: "Photo Library title in the photo import dialog.")
@@ -391,7 +391,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         present(alertVC, animated: true, completion: nil)
     }
     
-    func deletePhoto(_ sender: UIButton)
+    @objc func deletePhoto(_ sender: UIButton)
     {
         let deletePhotoTitle = NSLocalizedString("Delete_Photo", comment: "Delete Photo title for the delete photo dialog.")
         let deletePhotoMsg   = NSLocalizedString("Delete_Photo_Msg", comment: "Delete Photo question for the delete photo button.")
@@ -466,7 +466,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
 //
 ////////////////////////////////////////////////////////////////
     
-    func close(_ sender: UIButton)
+    @objc func close(_ sender: UIButton)
     {
         //self.item.note = noteTextView.text
         //self.item.setImage(imageView.image)
