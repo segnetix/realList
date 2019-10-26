@@ -156,18 +156,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let center  = UNUserNotificationCenter.current()
         center.delegate = self
         
-        /*
+        // iOS 10 code...
         // set the type as sound or badge
         center.requestAuthorization(options: [.sound,.alert,.badge]) { (granted, error) in
             // Enable or disable features based on authorization
-            
+            print("******* requestAuthorization - granted: \(granted)")
+            print("******* requestAuthorization - error: \(String(describing: error?.localizedDescription))")
         }
         application.registerForRemoteNotifications()
-         */
         
+        /*
+         // pre-iOS 10 code
         let notificationSettings = UIUserNotificationSettings(types: UIUserNotificationType(), categories: nil)
         application.registerUserNotificationSettings(notificationSettings)
         application.registerForRemoteNotifications()
+         */
     }
     
     func restoreListDataFromLocalStorage() {
@@ -365,7 +368,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                     } else {
                         print("ERROR: saveSubscription error for \(recordType): \(error!.localizedDescription)")
                     }
-                } as! (CKSubscription?, Error?) -> Void) 
+                } as! (CKSubscription?, Error?) -> Void)
             }
         }
         
