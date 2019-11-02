@@ -36,8 +36,7 @@ let kItemCellHeight:     CGFloat = 56.0
 let kCategoryCellHeight: CGFloat = 44.0
 let kAddItemCellHeight:  CGFloat = 44.0
 
-class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, /*ADBannerViewDelegate,*/ UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate
-{
+class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, /*ADBannerViewDelegate,*/ UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate {
     @IBOutlet weak var tableView: UITableView!
     //@IBOutlet weak var adBanner: ADBannerView!
     
@@ -84,8 +83,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 //
 ////////////////////////////////////////////////////////////////
     
-    override func viewDidLoad()
-    {
+    override func viewDidLoad() {
         super.viewDidLoad()
         manager.delegate = self
         
@@ -112,12 +110,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
 
         // settings button
-        let settingsButton: UIButton = UIButton(type: UIButtonType.custom)
+        let settingsButton: UIButton = UIButton(type: UIButton.ButtonType.custom)
         let settingsImage = UIImage(named: "Settings")
         settingsButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
         if let settingsImage = settingsImage {
-            let tintedImage = settingsImage.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
-            settingsButton.setImage(tintedImage, for: UIControlState())
+            let tintedImage = settingsImage.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+            settingsButton.setImage(tintedImage, for: UIControl.State())
             settingsButton.tintColor = color1_1
         }
         settingsButton.addTarget(self, action: #selector(ItemViewController.settingsButtonTapped), for: .touchUpInside)
@@ -135,44 +133,43 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         refreshControl = UIRefreshControl()
         refreshControl!.backgroundColor = UIColor.clear
         refreshControl!.tintColor = UIColor.clear
-        refreshControl!.addTarget(self, action: #selector(self.updateListData(_:)), for: UIControlEvents.valueChanged)
+        refreshControl!.addTarget(self, action: #selector(self.updateListData(_:)), for: UIControl.Event.valueChanged)
         self.tableView.addSubview(refreshControl!)
         
         loadCustomRefreshContents()
         
         // set up keyboard show/hide notifications
-        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardWillShow(_:)), name: NSNotification.Name.UIKeyboardWillShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardWillHide(_:)), name: NSNotification.Name.UIKeyboardWillHide, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardDidShow(_:)), name: NSNotification.Name.UIKeyboardDidShow, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardDidHide(_:)), name: NSNotification.Name.UIKeyboardDidHide, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardDidShow(_:)), name: UIResponder.keyboardDidShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardDidHide(_:)), name: UIResponder.keyboardDidHideNotification, object: nil)
         
         refreshItems()
     }
     
-    func loadCustomRefreshContents()
-    {
+    func loadCustomRefreshContents() {
         let refreshContents = Bundle.main.loadNibNamed("RefreshContents", owner: self, options: nil)
         
         // refresh view
-        refreshView = refreshContents?[0] as! UIView
+        refreshView = refreshContents?[0] as? UIView
         refreshView.frame = refreshControl!.bounds
         
         // refresh activity indicator
-        refreshAnimation = refreshView.viewWithTag(1) as! UIActivityIndicatorView
+        refreshAnimation = refreshView.viewWithTag(1) as? UIActivityIndicatorView
         refreshAnimation.alpha = 0.0
         
         // refresh label
-        refreshLabel = refreshView.viewWithTag(2) as! UILabel
+        refreshLabel = refreshView.viewWithTag(2) as? UILabel
         refreshLabel.text = ""
         
         // refresh cancel button
-        refreshCancelButton = refreshView.viewWithTag(3) as! UIButton
+        refreshCancelButton = refreshView.viewWithTag(3) as? UIButton
         refreshCancelButton.backgroundColor = UIColor.clear
         refreshCancelButton.layer.cornerRadius = 16
         refreshCancelButton.layer.borderWidth = 1
         refreshCancelButton.layer.borderColor = UIColor.black.cgColor
-        refreshCancelButton.addTarget(self, action: #selector(self.cancelFetch(_:)), for: UIControlEvents.touchUpInside)
+        refreshCancelButton.addTarget(self, action: #selector(self.cancelFetch(_:)), for: UIControl.Event.touchUpInside)
         refreshCancelButton.isEnabled = false
         refreshCancelButton.alpha = 0.3
         
@@ -209,8 +206,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         super.init(coder: aDecoder)!
     }
     
-    @objc func updateListData(_ refreshControl: UIRefreshControl)
-    {
+    @objc func updateListData(_ refreshControl: UIRefreshControl) {
         refreshAnimation.startAnimating()
         refreshCancelButton.isEnabled = true
         refreshCancelButton.alpha = 1.0
@@ -238,8 +234,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 //
 ////////////////////////////////////////////////////////////////
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
-    {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // return the total number of rows in our item table view (categories + items)
         if let list = list {
             let displayCount = list.totalDisplayCount()
@@ -250,8 +245,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
-    {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let obj = list.objectForIndexPath(indexPath)
         let tag = obj != nil ? obj!.tag() : -1
         
@@ -274,8 +268,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             //cell.accessoryType = UITableViewCellAccessoryType.DisclosureIndicator
             cell.itemName.isUserInteractionEnabled = false
             cell.itemName.delegate = self
-            cell.itemName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), for: UIControlEvents.editingChanged)
-            cell.itemName.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
+            cell.itemName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), for: UIControl.Event.editingChanged)
+            cell.itemName.font = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body)
             cell.itemName.autocapitalizationType = appDelegate.namesCapitalize     ? .words : .none
             cell.itemName.spellCheckingType      = appDelegate.namesSpellCheck     ? .yes   : .no
             cell.itemName.autocorrectionType     = appDelegate.namesAutocorrection ? .yes   : .no
@@ -290,7 +284,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 
                 if let origImage = origImage {
                     // set picture indicator color from list color
-                    let tintedImage = origImage.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
+                    let tintedImage = origImage.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
                     cell.pictureIndicator.image = tintedImage
                     
                     if list!.listColorName == r4_1 {
@@ -355,8 +349,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             // Configure the cell...
             cell.categoryName.isUserInteractionEnabled = false
             cell.categoryName.delegate = self
-            cell.categoryName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), for: UIControlEvents.editingChanged)
-            cell.categoryName.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
+            cell.categoryName.addTarget(self, action: #selector(ItemViewController.itemNameDidChange(_:)), for: UIControl.Event.editingChanged)
+            cell.categoryName.font = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.headline)
             cell.categoryName.autocapitalizationType = appDelegate.namesCapitalize ? .words : .none
             cell.categoryName.spellCheckingType = appDelegate.namesSpellCheck ? .yes : .no
             cell.categoryName.autocorrectionType = appDelegate.namesAutocorrection ? .yes : .no
@@ -461,8 +455,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     // override to support editing the table view
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath)
-    {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             deleteItemIndexPath = indexPath
             let deletedItem = list.objectForIndexPath(indexPath)
@@ -475,8 +468,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func scrollViewWillBeginDragging(_ scrollView: UIScrollView)
-    {
+    func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
         // this is needed
         if inEditMode {
             layoutAnimated(true)
@@ -490,13 +482,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 ////////////////////////////////////////////////////////////////
     
     
-    @objc func keyboardWillShow(_ notification: Notification)
-    {
+    @objc func keyboardWillShow(_ notification: Notification) {
         //print("keyboardWillShow")
         inEditMode = true
         
-        var info = (notification as NSNotification).userInfo!
-        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        let info = (notification as NSNotification).userInfo!
+        let keyboardFrame: CGRect = (info[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         var keyboardHeight = keyboardFrame.height
         let toolbarHeight = self.view.frame.size.height - keyboardFrame.origin.y
         let bHasHardwareKeyboard = hasHardwareKeyboard(notification)
@@ -517,8 +508,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     func hasHardwareKeyboard(_ notification: Notification) -> Bool {
-        var info = (notification as NSNotification).userInfo!
-        let keyboardFrame: CGRect = (info[UIKeyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
+        let info = (notification as NSNotification).userInfo!
+        let keyboardFrame: CGRect = (info[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
         let keyboard = self.view.convert(keyboardFrame, to: self.view.window)
         let height = self.view.frame.size.height
         
@@ -529,8 +520,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         return false
     }
     
-    @objc func keyboardWillHide(_ notification: Notification)
-    {
+    @objc func keyboardWillHide(_ notification: Notification) {
         //print("keyboardWillHide")
         
         if !inAddNewItemLoop || !editingNewItemName {
@@ -553,8 +543,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         //print("keyboardDidHide")
     }
     
-    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool
-    {
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         //print("textFieldShouldBeginEditing")
         // this clears an initial space in a new cell name
         if textField.text == " " {
@@ -568,8 +557,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         //print("textFieldDidEndEditing")
     }
     
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool
-    {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         //print("textFieldShouldReturn")
         textField.isUserInteractionEnabled = false
         textField.resignFirstResponder()
@@ -609,15 +597,13 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         return true
     }
     
-    @objc func itemNameDidChange(_ textField: UITextField)
-    {
+    @objc func itemNameDidChange(_ textField: UITextField) {
         // update item name data with new value
         let newName = textField.text!.trimmingCharacters(in: CharacterSet.whitespaces)
         list.updateObjNameAtTag(textField.tag, name: newName)
     }
 
-    func addNewItem(_ sender: UIButton)
-    {
+    func addNewItem(_ sender: UIButton) {
         // create a new item and append to the category of the add button
         guard let category = list.categoryForTag(sender.tag) else { return }
         
@@ -679,7 +665,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             //print("*** addItem indexPath row is \(indexPath!.row)")
             if self.tableView.indexPathsForVisibleRows?.contains(indexPath!) == false {
                 //print("*** addItem is not visible...")
-                self.tableView.scrollToRow(at: indexPath!, at: UITableViewScrollPosition.bottom, animated: true)
+                self.tableView.scrollToRow(at: indexPath!, at: UITableView.ScrollPosition.bottom, animated: true)
             } else {
                 //print("*** addItem is visible...")
             }
@@ -688,8 +674,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         inAddNewItemLoop = false
     }
     
-    func addNewCategory()
-    {
+    func addNewCategory() {
         guard list.categories.count > 0 else { print("*** ERROR: addNewCategory - list \(list.name) has no categories"); return }
         var newCategory: Category
         
@@ -707,12 +692,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         list.updateIndices()
         self.tableView.reloadData()
         
-        if let indexPath = newCatIndexPath
-        {
+        if let indexPath = newCatIndexPath {
             // need to scroll the target cell into view so the tags can be updated
             if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false
             {
-                self.tableView.scrollToRow(at: IndexPath(row: (indexPath as NSIndexPath).row, section: 0), at: UITableViewScrollPosition.bottom, animated: false)
+                self.tableView.scrollToRow(at: IndexPath(row: (indexPath as NSIndexPath).row, section: 0), at: UITableView.ScrollPosition.bottom, animated: false)
                 self.resetCellViewTags()
                 
                 // set up a selector event to fire when the new cell has scrolled into place
@@ -758,8 +742,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         tableView.reloadData()
     }
     
-    @objc func scrollToCategoryEnded(_ scrollView: UIScrollView)
-    {
+    @objc func scrollToCategoryEnded(_ scrollView: UIScrollView) {
         NSObject.cancelPreviousPerformRequests(withTarget: self)
         
         if let cell = tableView.cellForRow(at: newCatIndexPath!) as? CategoryCell {
@@ -773,23 +756,21 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func categoryCountString(_ category: Category) -> String
-    {
+    func categoryCountString(_ category: Category) -> String {
         return "\(category.itemsComplete())/\(category.itemsActive())"
     }
 
-    func handleCategoryCollapseExpand(_ category: Category)
-    {
+    func handleCategoryCollapseExpand(_ category: Category) {
         // get display index paths for this category
         let indexPaths = list.displayIndexPathsForCategory(category, includeAddItemIndexPath: true)    // includes AddItem cell path
         
         self.tableView.beginUpdates()
         if category.expanded {
             // insert the expanded rows into the table view
-            self.tableView.insertRows(at: indexPaths, with: UITableViewRowAnimation.automatic)
+            self.tableView.insertRows(at: indexPaths, with: UITableView.RowAnimation.automatic)
         } else {
             // remove the collapsed rows from the table view
-            self.tableView.deleteRows(at: indexPaths, with: UITableViewRowAnimation.automatic)
+            self.tableView.deleteRows(at: indexPaths, with: UITableView.RowAnimation.automatic)
         }
         self.tableView.endUpdates()
     }
@@ -801,8 +782,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 ////////////////////////////////////////////////////////////////
     
     /// Respond to a single tap (toggle expand/collapse state of category).
-    @objc func cellSingleTapAction(_ sender: UITapGestureRecognizer)
-    {
+    @objc func cellSingleTapAction(_ sender: UITapGestureRecognizer) {
         if sender.view != nil
         {
             let tag = sender.view!.tag
@@ -826,7 +806,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                         
                         if category.expanded {
                             // scroll the newly expanded header to the top so items can be seen
-                            self.tableView.scrollToRow(at: indexPath!, at: UITableViewScrollPosition.top, animated: true)
+                            self.tableView.scrollToRow(at: indexPath!, at: UITableView.ScrollPosition.top, animated: true)
                         }
                     }
                     
@@ -857,8 +837,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
 
     /// Respond to a double tap (cell name edit).
-    @objc func cellDoubleTapAction(_ sender: UITapGestureRecognizer)
-    {
+    @objc func cellDoubleTapAction(_ sender: UITapGestureRecognizer) {
         if sender.view != nil {
             let obj = list.objectForTag(sender.view!.tag)
             let pathResult = list.displayIndexPathForObj(obj!)
@@ -879,9 +858,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
 
     /// Handle long press gesture (cell move).
-    @objc func longPressAction(_ gesture: UILongPressGestureRecognizer)
-    {
-        let state: UIGestureRecognizerState = gesture.state
+    @objc func longPressAction(_ gesture: UILongPressGestureRecognizer) {
+        let state: UIGestureRecognizer.State = gesture.state
         let location: CGPoint = gesture.location(in: tableView)
         let topBarHeight = getTopBarHeight()
         var indexPath: IndexPath? = tableView.indexPathForRow(at: location)
@@ -927,7 +905,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 displayLink = CADisplayLink(target: self, selector: #selector(ItemViewController.scrollDownLoop))
                 if let displayLink = displayLink {
                     displayLink.preferredFramesPerSecond = kFramesPerSecond
-                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                    displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.default)
                 }
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
@@ -936,7 +914,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 displayLink = CADisplayLink(target: self, selector: #selector(ItemViewController.scrollUpLoop))
                 if let displayLink = displayLink {
                     displayLink.preferredFramesPerSecond = kFramesPerSecond
-                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                    displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.default)
                 }
             }
         } else if displayLink != nil {
@@ -993,8 +971,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         
     }
     
-    func longPressBegan(_ indexPath: IndexPath, location: CGPoint)
-    {
+    func longPressBegan(_ indexPath: IndexPath, location: CGPoint) {
         longPressActive = true
         sourceIndexPath = indexPath
         movingFromIndexPath = indexPath
@@ -1039,8 +1016,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func longPressMoved(_ idxPath: IndexPath?, location: CGPoint)
-    {
+    func longPressMoved(_ idxPath: IndexPath?, location: CGPoint) {
         guard var indexPath = idxPath else { return }
         guard prevLocation != nil else { return }
         guard longPressCellType != .addItem else { return }
@@ -1086,8 +1062,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     /// Clean up after a long press gesture.
-    func longPressEnded(_ indexPath: IndexPath?, location: CGPoint)
-    {
+    func longPressEnded(_ indexPath: IndexPath?, location: CGPoint) {
         longPressActive = false
         
         // cancel any scroll loop
@@ -1144,7 +1119,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                         
                         // if moving to a collapsed category, then need to remove the row from the table as it will no longer be displayed
                         if destCat.expanded == false {
-                            tableView.deleteRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
+                            tableView.deleteRows(at: [indexPath!], with: UITableView.RowAnimation.automatic)
                         }
                     } else if destDataObj is AddItem {
                         let addItem = destDataObj as! AddItem
@@ -1247,8 +1222,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         appDelegate.saveListData(async: true)
     }
     
-    @objc func scrollUpLoop()
-    {
+    @objc func scrollUpLoop() {
         let currentOffset = tableView.contentOffset
         let topBarHeight = getTopBarHeight()
         let newOffsetY = max(currentOffset.y - kItemViewScrollRate, -topBarHeight)
@@ -1263,8 +1237,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    @objc func scrollDownLoop()
-    {
+    @objc func scrollDownLoop() {
         let currentOffset = tableView.contentOffset
         let lastCellIndex = IndexPath(row: list.totalDisplayCount() - 1, section: 0)
         let lastCell = tableView.cellForRow(at: lastCellIndex)
@@ -1290,8 +1263,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 //
 ////////////////////////////////////////////////////////////////
     
-    func confirmDelete(_ objName: String, isItem: Bool)
-    {
+    func confirmDelete(_ objName: String, isItem: Bool) {
         let DeleteItemTitle = NSLocalizedString("Delete_Item_Title", comment: "A title in an alert asking if the user wants to delete an item.")
         let DeleteItemMessage = String(format: NSLocalizedString("Delete_Item_Message", comment: "Are you sure you want to permanently delete the item %@?"), objName)
         let DeleteCategoryTitle = NSLocalizedString("Delete_Category_Title", comment: "A title in an alert asking if the user wants to delete a category.")
@@ -1312,8 +1284,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     // deletes an item or a category and all of the items in it
-    func handleDeleteItem(_ alertAction: UIAlertAction!) -> Void
-    {
+    func handleDeleteItem(_ alertAction: UIAlertAction!) -> Void {
         if let indexPath = deleteItemIndexPath, let currentList = list {
             tableView.beginUpdates()
             
@@ -1376,8 +1347,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func cancelDeleteItem(_ alertAction: UIAlertAction!) 
-    {
+    func cancelDeleteItem(_ alertAction: UIAlertAction!) {
         deleteItemIndexPath = nil
         self.tableView.setEditing(false, animated: true)
     }
@@ -1388,8 +1358,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 //
 ////////////////////////////////////////////////////////////////
     
-    func refreshItems()
-    {
+    func refreshItems() {
         if list != nil {
             self.title = list!.name
         } else {
@@ -1399,8 +1368,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         tableView.reloadData()
     }
     
-    func colorForIndex(_ index: Int) -> UIColor
-    {
+    func colorForIndex(_ index: Int) -> UIColor {
         return UIColor.white
         /*
         // gradient
@@ -1410,8 +1378,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         */
     }
 
-    func snapshotFromView(_ inputView: UIView) -> UIView
-    {
+    func snapshotFromView(_ inputView: UIView) -> UIView {
         // Make an image from the input view.
         UIGraphicsBeginImageContextWithOptions(inputView.bounds.size, false, 0)
         if let context = UIGraphicsGetCurrentContext()
@@ -1435,8 +1402,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     // resets the cell's tags after a collapse/expand event
     // NOTE: this only updates the tags for visible cells
-    func resetCellViewTags()
-    {
+    func resetCellViewTags() {
         if list != nil {
             var cell: UITableViewCell? = nil
             var index = -1
@@ -1466,8 +1432,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func rowAtIndexPathIsVisible(_ indexPath: IndexPath) -> Bool
-    {
+    func rowAtIndexPathIsVisible(_ indexPath: IndexPath) -> Bool {
         let indicies = self.tableView.indexPathsForVisibleRows
         
         if indicies != nil {
@@ -1477,8 +1442,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         return false
     }
     
-    func adjustIndexPathIfItemMovingAboveTopRow(_ idxPath: IndexPath) -> IndexPath
-    {
+    func adjustIndexPathIfItemMovingAboveTopRow(_ idxPath: IndexPath) -> IndexPath {
         var indexPath = idxPath
         
         if sourceIndexPath != nil {
@@ -1497,8 +1461,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     /// Returns true if the cell at the given index path is part of an AddCell/Category pair.
-    func cellAtIndexPathIsAddCellCategoryPair(_ indexPath: IndexPath) -> Bool
-    {
+    func cellAtIndexPathIsAddCellCategoryPair(_ indexPath: IndexPath) -> Bool {
         let row = (indexPath as NSIndexPath).row
         let nextRow = row + 1
         let prevRow = row - 1
@@ -1522,8 +1485,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
 
     // Returns the row count (cat header, items, add item row) of the category at the given index path.
-    func categoryTotalRowCount(_ indexPath: IndexPath) -> Int
-    {
+    func categoryTotalRowCount(_ indexPath: IndexPath) -> Int {
         var rowCount = 0
         let category = list.categoryForIndexPath(indexPath)
         
@@ -1542,16 +1504,14 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     // calculates the top bar height, inlcuding the status bar and nav bar (if present)
-    func getTopBarHeight() -> CGFloat
-    {
+    func getTopBarHeight() -> CGFloat {
         let statusBarHeight = UIApplication.shared.statusBarFrame.size.height
         let navBarHeight = self.navigationController!.navigationBar.frame.size.height
         
         return statusBarHeight + navBarHeight
     }
 
-    @objc func settingsButtonTapped()
-    {
+    @objc func settingsButtonTapped() {
         print("settings button tapped...")
         
         if let list = list {
@@ -1562,8 +1522,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func loadItemDetailView(_ item: Item)
-    {
+    func loadItemDetailView(_ item: Item) {
         transitioningDelegate = itemDetailTransitionDelegate
         
         let vc = ItemDetailViewController(item: item, list: list, itemVC: self)      // pass item by reference to
@@ -1573,8 +1532,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     // called from the dismissing settings view controller
-    func presentPrintDialog()
-    {
+    func presentPrintDialog() {
         let html = self.getHTMLforPrinting(appDelegate.picsInPrintAndEmail)
         let printController = UIPrintInteractionController.shared
         let printFormatter = UIMarkupTextPrintFormatter(markupText: html)
@@ -1596,10 +1554,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     // called from the dismissing settings view controller
-    func presentEmailDialog()
-    {
-        if MFMailComposeViewController.canSendMail()
-        {
+    func presentEmailDialog() {
+        if MFMailComposeViewController.canSendMail() {
             // init the mail view controller
             let mailViewController = MFMailComposeViewController.init()
             mailViewController.mailComposeDelegate = self
@@ -1625,9 +1581,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             mailViewController.setMessageBody(html, isHTML: true)
             
             self.present(mailViewController, animated: true, completion: nil)
-        }
-        else
-        {
+        } else {
             let alertController = UIAlertController(title: "Can't Send Email", message: "Your device could not send e-mail.  Please check e-mail configuration and try again.", preferredStyle: .alert)
             let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
                 print("email not configued... alert controller OKAction...")
@@ -1639,8 +1593,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     // Dismisses the email composition interface when users tap Cancel or Send. Proceeds to update the message field with the result of the operation.
-    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?)
-    {
+    func mailComposeController(_ controller: MFMailComposeViewController, didFinishWith result: MFMailComposeResult, error: Error?) {
         var message = ""
         
         switch result {
@@ -1654,6 +1607,8 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             if let err = error {
                 message = "Email Failure: \(err.localizedDescription)"
             }
+        @unknown default:
+            break
         }
         
         if (result != MFMailComposeResult.cancelled) {
@@ -1669,8 +1624,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func getHTMLforPrinting(_ includePics: Bool) -> String
-    {
+    func getHTMLforPrinting(_ includePics: Bool) -> String {
         return list.htmlForPrinting(includePics)
     }
     
@@ -1697,8 +1651,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 ////////////////////////////////////////////////////////////////
     
     /// Refreshes the ItemVC item rows with animation after a change to showHideCompleted
-    func showHideCompletedRows()
-    {
+    func showHideCompletedRows() {
         // gets array of paths
         let indexPaths = list.indexPathsForCompletedRows()
         
@@ -1706,14 +1659,14 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         {
             // remove the completed rows
             self.tableView.beginUpdates()
-            self.tableView.deleteRows(at: indexPaths as [IndexPath], with: UITableViewRowAnimation.automatic)
+            self.tableView.deleteRows(at: indexPaths as [IndexPath], with: UITableView.RowAnimation.automatic)
             self.tableView.endUpdates()
         }
         else
         {
             // insert the complete rows
             self.tableView.beginUpdates()
-            self.tableView.insertRows(at: indexPaths as [IndexPath], with: UITableViewRowAnimation.automatic)
+            self.tableView.insertRows(at: indexPaths as [IndexPath], with: UITableView.RowAnimation.automatic)
             self.tableView.endUpdates()
         }
    
@@ -1722,22 +1675,18 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     /// Refreshes the ItemVC item rows with animation after a change to showHideInactive
-    func showHideInactiveRows()
-    {
+    func showHideInactiveRows() {
         let indexPaths = list.indexPathsForInactiveRows()
         
-        if list.showInactiveItems == false
-        {
+        if list.showInactiveItems == false {
             // remove the inactive rows
             self.tableView.beginUpdates()
-            self.tableView.deleteRows(at: indexPaths as [IndexPath], with: UITableViewRowAnimation.automatic)
+            self.tableView.deleteRows(at: indexPaths as [IndexPath], with: UITableView.RowAnimation.automatic)
             self.tableView.endUpdates()
-        }
-        else
-        {
+        } else {
             // insert the inactive rows
             self.tableView.beginUpdates()
-            self.tableView.insertRows(at: indexPaths as [IndexPath], with: UITableViewRowAnimation.automatic)
+            self.tableView.insertRows(at: indexPaths as [IndexPath], with: UITableView.RowAnimation.automatic)
             self.tableView.endUpdates()
         }
         
@@ -1784,14 +1733,14 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             // remove a newly completed row if we are hiding completed items
             if list.showCompletedItems == false && item.state == ItemState.complete {
                 if indexPath != nil {
-                    self.tableView.deleteRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
+                    self.tableView.deleteRows(at: [indexPath!], with: UITableView.RowAnimation.automatic)
                 }
             }
             
             // remove a newly inactive row if we are hiding inactive items
             if list.showInactiveItems == false && item.state == ItemState.inactive {
                 if indexPath != nil {
-                    self.tableView.deleteRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
+                    self.tableView.deleteRows(at: [indexPath!], with: UITableView.RowAnimation.automatic)
                 }
             }
             
@@ -1811,8 +1760,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     // called after the item state has changed
-    func checkButtonTapped_postStateChange(_ checkBox: CheckBox)
-    {
+    func checkButtonTapped_postStateChange(_ checkBox: CheckBox) {
         print("checkButtonTapped: \(checkBox.tag)")
         let senderItem = list.objectForTag(checkBox.tag)
         var indexPath: IndexPath? = nil
@@ -1834,14 +1782,14 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             // remove a newly completed row if we are hiding completed items
             if list.showCompletedItems == false && item.state == ItemState.complete {
                 if indexPath != nil {
-                    self.tableView.deleteRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
+                    self.tableView.deleteRows(at: [indexPath!], with: UITableView.RowAnimation.automatic)
                 }
             }
             
             // remove a newly inactive row if we are hiding inactive items
             if list.showInactiveItems == false && item.state == ItemState.inactive {
                 if indexPath != nil {
-                    self.tableView.deleteRows(at: [indexPath!], with: UITableViewRowAnimation.automatic)
+                    self.tableView.deleteRows(at: [indexPath!], with: UITableView.RowAnimation.automatic)
                 }
             }
             
@@ -1860,13 +1808,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     }
     
     // item array helper methods
-    func arrayContainsItem(_ itemArray: [Item], item: Item) -> Bool
-    {
+    func arrayContainsItem(_ itemArray: [Item], item: Item) -> Bool {
         return indexOfItemInArray(itemArray, item: item) > -1
     }
     
-    func indexOfItemInArray(_ itemArray: [Item], item: Item) -> Int
-    {
+    func indexOfItemInArray(_ itemArray: [Item], item: Item) -> Int {
         var i = -1
         
         for obj in itemArray {
@@ -1939,8 +1885,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     */
     
     // resize the frame /* and move the adBanner on and off the screen */
-    func layoutAnimated(_ animated: Bool)
-    {
+    func layoutAnimated(_ animated: Bool) {
         tableView.frame.size.height = self.view.frame.height
         
         //print("layoutAnimated - frame height - old: \(oldFrameHeight) new: \(tableView.frame.size.height)")
@@ -1958,8 +1903,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 ////////////////////////////////////////////////////////////////
 
 // ListSelectionDelegate methods
-extension ItemViewController: ListSelectionDelegate
-{
+extension ItemViewController: ListSelectionDelegate {
     // called when the ListController changes the selected list
     func listSelected(_ newList: List) {
         list = newList
@@ -1982,8 +1926,7 @@ extension ItemViewController: ListSelectionDelegate
 }
 
 // ItemCellDelegate methods
-extension ItemViewController: ItemCellDelegate
-{
+extension ItemViewController: ItemCellDelegate {
     // gesture action methods called from the item cell
     /*
     func itemSingleTapAction(sender: UIGestureRecognizer)
@@ -2002,8 +1945,7 @@ extension ItemViewController: ItemCellDelegate
 }
 
 // CategoryCellDelegate methods
-extension ItemViewController: CategoryCellDelegate
-{
+extension ItemViewController: CategoryCellDelegate {
     // gesture action methods called from the category cell
     
     /*

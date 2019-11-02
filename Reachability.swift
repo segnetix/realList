@@ -45,8 +45,7 @@ public let ReachabilityChangedNotification = "ReachabilityChangedNotification"
 
 //typealias SCNetworkReachabilityCallBack = (SCNetworkReachability, SCNetworkReachabilityFlags, UnsafeMutableRawPointer?) -> Void
 
-func callback(_ reachability:SCNetworkReachability, flags: SCNetworkReachabilityFlags, info: UnsafeMutableRawPointer?)
-{
+func callback(_ reachability:SCNetworkReachability, flags: SCNetworkReachabilityFlags, info: UnsafeMutableRawPointer?) {
     guard info != nil else { return }
     
     let reachability = Unmanaged<Reachability>.fromOpaque(info!).takeUnretainedValue()
@@ -56,8 +55,7 @@ func callback(_ reachability:SCNetworkReachability, flags: SCNetworkReachability
     }
 }
 
-open class Reachability: NSObject
-{    
+open class Reachability: NSObject {    
     public typealias NetworkReachable = (Reachability) -> ()
     public typealias NetworkUnreachable = (Reachability) -> ()
     
@@ -219,7 +217,7 @@ open class Reachability: NSObject
     
     // MARK: - *** Private methods ***
     fileprivate var isRunningOnDevice: Bool = {
-        #if (arch(i386) || arch(x86_64)) && os(iOS)
+        #if targetEnvironment(simulator)
             return false
         #else
             return true

@@ -8,8 +8,7 @@
 
 import UIKit
 
-class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate
-{
+class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     var containerView: UIView = UIView()
     var titleLabel: UILabel = UILabel()
     var createdLabel: UILabel = UILabel()
@@ -38,8 +37,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
 //
 ////////////////////////////////////////////////////////////////
     
-    init(item: Item, list: List, itemVC: ItemViewController)
-    {
+    init(item: Item, list: List, itemVC: ItemViewController) {
         super.init(nibName: nil, bundle: nil)
         
         modalPresentationStyle = UIModalPresentationStyle.custom
@@ -53,8 +51,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         createUI()
     }
     
-    override func viewDidLoad()
-    {
+    override func viewDidLoad() {
         super.viewDidLoad()
         imagePicker.delegate = self
         manager.delegate = self
@@ -65,8 +62,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
     }
     
     
-    func createUI()
-    {
+    func createUI() {
         let wideDisplay = view.frame.width >= 768
         let shortDisplay = view.frame.height < 568
         
@@ -80,7 +76,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
 
         // title label
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
-        titleLabel.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
+        titleLabel.font = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.headline)
         if item.state != ItemState.inactive {
             titleLabel.textColor = UIColor.black
         } else {
@@ -101,7 +97,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         }
         noteTextView.layer.borderWidth = 3.0
         noteTextView.layer.cornerRadius = 8.0
-        noteTextView.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.body)
+        noteTextView.font = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.body)
         noteTextView.textAlignment = NSTextAlignment.left
         noteTextView.returnKeyType = UIReturnKeyType.done
         noteTextView.autocapitalizationType = appDelegate.namesCapitalize     ? .sentences : .none
@@ -131,7 +127,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         containerView.addSubview(imageView)
         
         // info text
-        let infoTextFont: UIFont = UIFont.preferredFont(forTextStyle: UIFontTextStyle.footnote)
+        let infoTextFont: UIFont = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.footnote)
         
         //if wideDisplay {
         //    infoTextFont = UIFont.preferredFontForTextStyle(UIFontTextStyleBody)
@@ -190,7 +186,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         
         // photo button
         addPhotoButton.translatesAutoresizingMaskIntoConstraints = false
-        addPhotoButton.addTarget(self, action: #selector(ItemDetailViewController.addPhoto(_:)), for: UIControlEvents.touchUpInside)
+        addPhotoButton.addTarget(self, action: #selector(ItemDetailViewController.addPhoto(_:)), for: UIControl.Event.touchUpInside)
         if item.imageAsset?.image == nil {
             setPhotoButton(true)
         } else {
@@ -203,16 +199,16 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         let origImage = UIImage(named: "Close Window_blue")
         if let origImage = origImage {
             // set close button color from list color
-            let tintedImage = origImage.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
-            closeButton.setImage(tintedImage, for: UIControlState())
+            let tintedImage = origImage.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+            closeButton.setImage(tintedImage, for: UIControl.State())
             
             if list!.listColor != nil {
                 closeButton.tintColor = list!.listColor
             }
         } else {
-            closeButton.setImage(UIImage(named: "Close Window_blue"), for: UIControlState())
+            closeButton.setImage(UIImage(named: "Close Window_blue"), for: UIControl.State())
         }
-        closeButton.addTarget(self, action: #selector(ItemDetailViewController.close(_:)), for: UIControlEvents.touchUpInside)
+        closeButton.addTarget(self, action: #selector(ItemDetailViewController.close(_:)), for: UIControl.Event.touchUpInside)
         containerView.addSubview(closeButton)
         
         let views: [String : AnyObject] = [
@@ -227,28 +223,28 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         view.addConstraints(
             NSLayoutConstraint.constraints(
                 withVisualFormat: "H:|[containerView]|",
-                options: NSLayoutFormatOptions(rawValue: 0),
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                 metrics: nil,
                 views: views))
         
         view.addConstraints(
             NSLayoutConstraint.constraints(
                 withVisualFormat: "V:|[containerView]|",
-                options: NSLayoutFormatOptions(rawValue: 0),
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                 metrics: nil,
                 views: views))
         
         containerView.addConstraints(
             NSLayoutConstraint.constraints(
                 withVisualFormat: "H:|-20-[titleLabel]-20-|",
-                options: NSLayoutFormatOptions(rawValue: 0),
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                 metrics: nil,
                 views: views))
         
         containerView.addConstraints(
             NSLayoutConstraint.constraints(
                 withVisualFormat: "H:|-20-[noteTextView]-20-|",
-                options: NSLayoutFormatOptions(rawValue: 0),
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                 metrics: nil,
                 views: views))
         
@@ -263,7 +259,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
                     withVisualFormat: "V:[infoVertStackView(180)]",
-                    options: NSLayoutFormatOptions(rawValue: 0),
+                    options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
             
@@ -278,7 +274,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
                     withVisualFormat: "H:|-20-[infoVertStackView]",
-                    options: NSLayoutFormatOptions(rawValue: 0),
+                    options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else {
@@ -292,7 +288,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
                     withVisualFormat: "H:|-20-[infoVertStackView]",
-                    options: NSLayoutFormatOptions(rawValue: 0),
+                    options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         }
@@ -300,7 +296,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         containerView.addConstraints(
             NSLayoutConstraint.constraints(
                 withVisualFormat: "H:|[closeButton]|",
-                options: NSLayoutFormatOptions(rawValue: 0),
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                 metrics: nil,
                 views: views))
         
@@ -308,28 +304,27 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
                     withVisualFormat: "V:|-32-[titleLabel]-[noteTextView(250)]-24-[imageView(270)]-(>=8)-[closeButton]-24-|",
-                    options: NSLayoutFormatOptions(rawValue: 0),
+                    options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else if !shortDisplay {
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
                     withVisualFormat: "V:|-20-[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView(135)]-(>=12)-[closeButton]-16-|",
-                    options: NSLayoutFormatOptions(rawValue: 0),
+                    options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else {
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
                     withVisualFormat: "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(100)]-(>=8)-[closeButton]-8-|",
-                    options: NSLayoutFormatOptions(rawValue: 0),
+                    options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         }
     }
     
-    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool
-    {
+    func textView(_ textView: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
         if (text == "\n") {
             if noteTextView.text != item.note {
                 item.note = noteTextView.text
@@ -350,8 +345,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
 //
 ////////////////////////////////////////////////////////////////
     
-    @objc func addPhoto(_ sender: UIButton)
-    {
+    @objc func addPhoto(_ sender: UIButton) {
         var photoAction: UIAlertAction?
         let photoLibrary   = NSLocalizedString("Photo_Library", comment: "Photo Library title in the photo import dialog.")
         let takePhotoTitle = NSLocalizedString("Take_Photo", comment: "Take Photo button label in photo import dialog.")
@@ -391,8 +385,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         present(alertVC, animated: true, completion: nil)
     }
     
-    @objc func deletePhoto(_ sender: UIButton)
-    {
+    @objc func deletePhoto(_ sender: UIButton) {
         let deletePhotoTitle = NSLocalizedString("Delete_Photo", comment: "Delete Photo title for the delete photo dialog.")
         let deletePhotoMsg   = NSLocalizedString("Delete_Photo_Msg", comment: "Delete Photo question for the delete photo button.")
         let deleteTitle      = NSLocalizedString("Delete", comment: "Delete button title on the photo delete dialog.")
@@ -414,9 +407,11 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         present(alertVC, animated: true, completion: nil)
     }
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any])
-    {
-        if let pickedImage = info[UIImagePickerControllerOriginalImage] as? UIImage {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+// Local variable inserted by Swift 4.2 migrator.
+let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
+
+        if let pickedImage = info[convertFromUIImagePickerControllerInfoKey(UIImagePickerController.InfoKey.originalImage)] as? UIImage {
             imageView.image = resizeImage(pickedImage, newWidth: 360)       // set to iPad image view dimensions
             setPhotoButton(false)
         }
@@ -424,14 +419,12 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         dismiss(animated: true, completion: nil)
     }
     
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController)
-    {
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         dismiss(animated: true, completion: nil)
         setPhotoButton(true)
     }
     
-    func setPhotoButton(_ add: Bool)
-    {
+    func setPhotoButton(_ add: Bool) {
         var cameraImage: UIImage?
         var tintedImage: UIImage?
         
@@ -439,19 +432,19 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         
         if add {
             cameraImage = UIImage(named: "Camera")
-            tintedImage = UIImage(named: "Camera")!.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
-            addPhotoButton.addTarget(self, action: #selector(ItemDetailViewController.addPhoto(_:)), for: UIControlEvents.touchUpInside)
+            tintedImage = UIImage(named: "Camera")!.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+            addPhotoButton.addTarget(self, action: #selector(ItemDetailViewController.addPhoto(_:)), for: UIControl.Event.touchUpInside)
         } else {
             cameraImage = UIImage(named: "Camera_delete")
-            tintedImage = UIImage(named: "Camera_delete")!.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
-            addPhotoButton.addTarget(self, action: #selector(ItemDetailViewController.deletePhoto(_:)), for: UIControlEvents.touchUpInside)
+            tintedImage = UIImage(named: "Camera_delete")!.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+            addPhotoButton.addTarget(self, action: #selector(ItemDetailViewController.deletePhoto(_:)), for: UIControl.Event.touchUpInside)
         }
         
         if list.listColor != nil {
-            addPhotoButton.setImage(tintedImage, for: UIControlState())
+            addPhotoButton.setImage(tintedImage, for: UIControl.State())
             addPhotoButton.tintColor = list.listColor!
         } else {
-            addPhotoButton.setImage(cameraImage, for: UIControlState())
+            addPhotoButton.setImage(cameraImage, for: UIControl.State())
         }
         
         // update the modified date
@@ -466,8 +459,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
 //
 ////////////////////////////////////////////////////////////////
     
-    @objc func close(_ sender: UIButton)
-    {
+    @objc func close(_ sender: UIButton) {
         //self.item.note = noteTextView.text
         //self.item.setImage(imageView.image)
         self.itemVC.tableView.reloadData()
@@ -491,8 +483,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
 //
 ////////////////////////////////////////////////////////////////
 
-func resizeImage(_ image: UIImage, newWidth: CGFloat) -> UIImage
-{
+func resizeImage(_ image: UIImage, newWidth: CGFloat) -> UIImage {
     // scale the image
     let scale = newWidth / image.size.width
     let newHeight = image.size.height * scale
@@ -502,4 +493,14 @@ func resizeImage(_ image: UIImage, newWidth: CGFloat) -> UIImage
     UIGraphicsEndImageContext()
     
     return newImage!
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIImagePickerControllerInfoKeyDictionary(_ input: [UIImagePickerController.InfoKey: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIImagePickerControllerInfoKey(_ input: UIImagePickerController.InfoKey) -> String {
+	return input.rawValue
 }

@@ -8,8 +8,7 @@
 
 import UIKit
 
-class CheckBox: UIButton
-{
+class CheckBox: UIButton {
     // images
     let completeImage = UIImage(named: "checkBox_complete")
     let incompleteImage = UIImage(named: "checkBox_incomplete")
@@ -30,7 +29,7 @@ class CheckBox: UIButton
         self.tag = tag
         
         // intercept button tap events
-        self.addTarget(self, action: #selector(CheckBox.buttonTapped(_:)), for: UIControlEvents.touchUpInside)
+        self.addTarget(self, action: #selector(CheckBox.buttonTapped(_:)), for: UIControl.Event.touchUpInside)
         
         // set the initial check box image
         setImage()
@@ -57,8 +56,8 @@ class CheckBox: UIButton
         }
         
         // set check box color from list color
-        let tintedImage = origImage?.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
-        self.setImage(tintedImage, for: UIControlState())
+        let tintedImage = origImage?.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+        self.setImage(tintedImage, for: UIControl.State())
         
         if item!.state != ItemState.inactive && list!.listColor != nil {
             self.tintColor = list!.listColor

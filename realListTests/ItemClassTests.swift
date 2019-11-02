@@ -41,8 +41,8 @@ class ItemClassTests: ModelClassTests
         let html = item.htmlForPrinting(false)
         
         // then
-        NSLog("html length = \(html.characters.count)")
-        XCTAssertTrue(html.characters.count > 0, "htmlForPrinting character count check")
+        NSLog("html length = \(html.count)")
+        XCTAssertTrue(html.count > 0, "htmlForPrinting character count check")
     }
     
     // func setImage(image: UIImage?)

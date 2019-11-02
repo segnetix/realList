@@ -37,6 +37,12 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>You can attach images from your photo library to items in realList.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

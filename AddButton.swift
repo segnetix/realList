@@ -8,8 +8,7 @@
 
 import UIKit
 
-class AddButton: UIButton
-{
+class AddButton: UIButton {
     // images
     let addButtonImage = UIImage(named: "Add")
     
@@ -26,7 +25,7 @@ class AddButton: UIButton
         self.itemVC = itemVC
         self.tag = tag
         
-        self.addTarget(self, action: #selector(AddButton.buttonTapped(_:)), for: UIControlEvents.touchUpInside)
+        self.addTarget(self, action: #selector(AddButton.buttonTapped(_:)), for: UIControl.Event.touchUpInside)
         
         // set the initial add button image
         setImage()
@@ -41,8 +40,8 @@ class AddButton: UIButton
     // set the image based on current list color
     func setImage() {
         // set add button color from list color
-        let tintedImage = addButtonImage!.withRenderingMode(UIImageRenderingMode.alwaysTemplate)
-        self.setImage(tintedImage, for: UIControlState())
+        let tintedImage = addButtonImage!.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+        self.setImage(tintedImage, for: UIControl.State())
         
         if list!.listColorName == r4_1 {
             self.tintColor = color4_1_alt

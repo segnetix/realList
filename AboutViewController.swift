@@ -21,8 +21,7 @@ enum PermissionStatus: Int, CustomStringConvertible {
     }
 }
 
-class AboutViewController: UIAppViewController
-{
+class AboutViewController: UIAppViewController {
     @IBOutlet weak var versionLabel: UILabel!
     @IBOutlet weak var cloudButton: UIButton!
     @IBOutlet weak var upgradeButton: UIButton!
@@ -58,17 +57,17 @@ class AboutViewController: UIAppViewController
     
     func updateCloudStatus() {
         if appDelegate.iCloudIsAvailable() {
-            cloudButton.setImage(UIImage(named: "Cloud_check"), for: UIControlState())
+            cloudButton.setImage(UIImage(named: "Cloud_check"), for: UIControl.State())
         } else {
-            cloudButton.setImage(UIImage(named: "Cloud"), for: UIControlState())
+            cloudButton.setImage(UIImage(named: "Cloud"), for: UIControl.State())
         }
     }
     
     func updateUpgradeStatus() {
         if appDelegate.appIsUpgraded {
-            upgradeButton.setImage(UIImage(named: "Upgraded"), for: UIControlState())
+            upgradeButton.setImage(UIImage(named: "Upgraded"), for: UIControl.State())
         } else {
-            upgradeButton.setImage(UIImage(named: "Upgrade"), for: UIControlState())
+            upgradeButton.setImage(UIImage(named: "Upgrade"), for: UIControl.State())
         }
     }
     
@@ -91,31 +90,28 @@ class AboutViewController: UIAppViewController
     //
     ///////////////////////////////////////////////////////
     
-    @IBAction func goToiCloudSettings(_ sender: AnyObject)
-    {
-        if let cloudSettings = URL(string:"prefs:root=CASTLE") {
-            let success = UIApplication.shared.openURL(cloudSettings)
-            print("goToiCloudSettings: \(success)")
+    @IBAction func goToiCloudSettings(_ sender: AnyObject) {
+        // NOTE: iOS no longer allows accessing iCould Settings via this method
+//        if let cloudSettings = URL(string:"prefs:root=CASTLE") {
+//            let success = UIApplication.shared.openURL(cloudSettings)
+//            UIApplication.shared.open(cloudSettings)
+//        }
+    }
+    
+    @IBAction func goToNotificationSettings(_ sender: AnyObject) {
+        if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+            //let success = UIApplication.shared.openURL(appSettings)
+            UIApplication.shared.open(appSettings)
         }
     }
     
-    @IBAction func goToNotificationSettings(_ sender: AnyObject)
-    {
-        if let appSettings = URL(string: UIApplicationOpenSettingsURLString) {
-            let success = UIApplication.shared.openURL(appSettings)
-            print("goToNotificationSettings: \(success)")
-        }
-    }
-    
-    @IBAction func appSettings(_ sender: UIButton)
-    {
+    @IBAction func appSettings(_ sender: UIButton) {
         print("app settings")
         let appSettingsVC = AppSettingsViewController()
         present(appSettingsVC, animated: true, completion: nil)
     }
     
-    @IBAction func addTutorial(_ sender: AnyObject)
-    {
+    @IBAction func addTutorial(_ sender: AnyObject) {
         if let listVC = listVC {
             // generates the tutorial and selects it
             listVC.generateTutorial()
@@ -134,16 +130,14 @@ class AboutViewController: UIAppViewController
         presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
-    @IBAction func upgrade(_ sender: UIButton)
-    {
+    @IBAction func upgrade(_ sender: UIButton) {
         print("upgrade...")
         let upgradeVC = UpgradeViewController()
         upgradeVC.aboutViewController = self
         present(upgradeVC, animated: true, completion: nil)
     }
     
-    @IBAction func close(_ sender: UIButton)
-    {
+    @IBAction func close(_ sender: UIButton) {
         appDelegate.aboutViewController = nil
         presentingViewController!.dismiss(animated: true, completion: nil)
     }

@@ -12,20 +12,17 @@ import UIKit
 import Foundation
 
 // AppManagerDelegate
-@objc protocol AppManagerDelegate: NSObjectProtocol
-{
+protocol AppManagerDelegate: NSObjectProtocol {
     func reachabilityStatusChangeHandler(_ reachability:Reachability)
 }
 
-enum CONNECTION_NETWORK_TYPE : String
-{
+enum CONNECTION_NETWORK_TYPE : String {
     case WIFI_NETWORK = "Wifi"
     case WWAN_NETWORK = "Cellular"
     case OTHER = "Other"
 }
 
-class AppManager: NSObject
-{
+class AppManager: NSObject {
     var delegate:AppManagerDelegate? = nil
     fileprivate var _useClosures: Bool = false
     fileprivate var reachability: Reachability?

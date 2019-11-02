@@ -39,7 +39,7 @@ class SettingsAnimatedTransitioning: NSObject, UIViewControllerAnimatedTransitio
         
         animatingView?.frame = initialFrame
         
-        UIView.animate(withDuration: transitionDuration(using: transitionContext), delay:0, usingSpringWithDamping:300.0, initialSpringVelocity:5.0, options:UIViewAnimationOptions.allowUserInteraction, animations:{
+        UIView.animate(withDuration: transitionDuration(using: transitionContext), delay:0, usingSpringWithDamping:300.0, initialSpringVelocity:5.0, options:UIView.AnimationOptions.allowUserInteraction, animations:{
             animatingView?.frame = finalFrame
             }, completion:{ (value: Bool) in
                 if !self.isPresentation {

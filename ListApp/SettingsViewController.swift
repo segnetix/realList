@@ -8,8 +8,7 @@
 
 import UIKit
 
-class SettingsViewController: UIAppViewController
-{
+class SettingsViewController: UIAppViewController {
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     let containerView: UIView = UIView()
     let newCategoryButton: UIButton = UIButton()
@@ -59,9 +58,9 @@ class SettingsViewController: UIAppViewController
     var showCompletedItems: Bool = true {
         didSet {
             if showCompletedItems {
-                showHideCompletedButton.setImage(UIImage(named: "Show Completed"), for: UIControlState())
+                showHideCompletedButton.setImage(UIImage(named: "Show Completed"), for: UIControl.State())
             } else {
-                showHideCompletedButton.setImage(UIImage(named: "Hide Completed"), for: UIControlState())
+                showHideCompletedButton.setImage(UIImage(named: "Hide Completed"), for: UIControl.State())
             }
             
             if itemVC != nil && itemVC!.list != nil {
@@ -73,9 +72,9 @@ class SettingsViewController: UIAppViewController
     var showInactiveItems: Bool = true {
         didSet {
             if showInactiveItems {
-                showHideInactiveButton.setImage(UIImage(named: "Show Inactive"), for: UIControlState())
+                showHideInactiveButton.setImage(UIImage(named: "Show Inactive"), for: UIControl.State())
             } else {
-                showHideInactiveButton.setImage(UIImage(named: "Hide Inactive"), for: UIControlState())
+                showHideInactiveButton.setImage(UIImage(named: "Hide Inactive"), for: UIControl.State())
             }
             
             if itemVC != nil && itemVC!.list != nil {
@@ -87,9 +86,9 @@ class SettingsViewController: UIAppViewController
     var showNotes: Bool = true {
         didSet {
             if showNotes {
-                noteButton.setImage(UIImage(named: "Notes On"), for: UIControlState())
+                noteButton.setImage(UIImage(named: "Notes On"), for: UIControl.State())
             } else {
-                noteButton.setImage(UIImage(named: "Notes Off"), for: UIControlState())
+                noteButton.setImage(UIImage(named: "Notes Off"), for: UIControl.State())
             }
             
             appDelegate.printNotes = self.showNotes
@@ -112,8 +111,7 @@ class SettingsViewController: UIAppViewController
         fatalError("init(coder:) has not been implemented")
     }
     
-    func selectInitialColorButton(_ colorName: String?)
-    {
+    func selectInitialColorButton(_ colorName: String?) {
         // initial color button selection
         var colorButton = cb1_2
         
@@ -143,8 +141,7 @@ class SettingsViewController: UIAppViewController
         adjustConstraints(size)
     }
     
-    func adjustConstraints(_ size: CGSize)
-    {
+    func adjustConstraints(_ size: CGSize) {
         // remove current constraints
         if closeButtonHorizConstraints      != nil { containerView.removeConstraints(closeButtonHorizConstraints!)      }
         if categoryHorizConstraints         != nil { containerView.removeConstraints(categoryHorizConstraints!)         }
@@ -184,7 +181,7 @@ class SettingsViewController: UIAppViewController
             "noteButton": noteButton,
             "vertLine": vertLineImage]
         
-        closeButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:[closeButton]-10-|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        closeButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:[closeButton]-10-|", options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
         showHideHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-[showHideCompletedButton]-[showHideInactiveButton(==showHideCompletedButton)]-|", options: [.alignAllCenterY], metrics: nil, views: views)
         categoryHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-[collapseAllCategoriesButton(==newCatButton)]-[expandAllCategoriesButton(==newCatButton)]-[newCatButton]-|", options: [.alignAllCenterY], metrics: nil, views: views)
         printCloseButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-(>=4,<=8)-[printButton]-[emailButton(==printButton)]-[vertLine]-[noteButton]-(>=4,<=8)-|", options: [.alignAllCenterY], metrics: nil, views: views)
@@ -212,7 +209,7 @@ class SettingsViewController: UIAppViewController
             // small
             verticalConstraints = NSLayoutConstraint.constraints(
                 withVisualFormat: "V:|-20-[closeButton]-16-[newCatButton]-16-[showHideCompletedButton]-16-[setAllItemsIncompleteButton]-16-[r1_1][r2_1][r3_1][r4_1]-(>=16)-[printButton]-16-|",
-                options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
             
             // scale buttons
             closeButton.transform = CGAffineTransform(scaleX: 0.75, y: 0.75)
@@ -231,7 +228,7 @@ class SettingsViewController: UIAppViewController
             // medium small
             verticalConstraints = NSLayoutConstraint.constraints(
                 withVisualFormat: "V:|-20-[closeButton]-20-[newCatButton]-20-[showHideCompletedButton]-20-[setAllItemsIncompleteButton]-32-[r1_1][r2_1][r3_1][r4_1]-(>=24)-[printButton]-20-|",
-                options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
             
             // scale buttons
             closeButton.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
@@ -250,7 +247,7 @@ class SettingsViewController: UIAppViewController
             // medium large
             verticalConstraints = NSLayoutConstraint.constraints(
                 withVisualFormat: "V:|-20-[closeButton]-32-[newCatButton]-32-[showHideCompletedButton]-32-[setAllItemsIncompleteButton]-48-[r1_1][r2_1][r3_1][r4_1]-(>=32)-[printButton]-32-|",
-                options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
             
             // scale buttons
             closeButton.transform = CGAffineTransform(scaleX: 0.85, y: 0.85)
@@ -269,7 +266,7 @@ class SettingsViewController: UIAppViewController
             // large
             verticalConstraints = NSLayoutConstraint.constraints(
                 withVisualFormat: "V:|-20-[closeButton]-60-[newCatButton]-48-[showHideCompletedButton]-48-[setAllItemsIncompleteButton]-60-[r1_1][r2_1][r3_1][r4_1]-(>=48)-[printButton]-32-|",
-                options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+                options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
             
             // scale buttons
             closeButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
@@ -302,8 +299,7 @@ class SettingsViewController: UIAppViewController
         self.view.layoutIfNeeded()
     }
 
-    func createUI()
-    {
+    func createUI() {
         // set the showNotes state
         self.showNotes = appDelegate.printNotes
         
@@ -315,52 +311,52 @@ class SettingsViewController: UIAppViewController
         view.addSubview(containerView)
         
         newCategoryButton.translatesAutoresizingMaskIntoConstraints = false
-        newCategoryButton.setImage(UIImage(named: "New Category"), for: UIControlState())
-        newCategoryButton.addTarget(self, action: #selector(SettingsViewController.newCategory(_:)), for: UIControlEvents.touchUpInside)
+        newCategoryButton.setImage(UIImage(named: "New Category"), for: UIControl.State())
+        newCategoryButton.addTarget(self, action: #selector(SettingsViewController.newCategory(_:)), for: UIControl.Event.touchUpInside)
         containerView.addSubview(newCategoryButton)
         
         collapseAllCategoriesButton.translatesAutoresizingMaskIntoConstraints = false
-        collapseAllCategoriesButton.setImage(UIImage(named: "Collapsed Categories"), for: UIControlState())
-        collapseAllCategoriesButton.addTarget(self, action: #selector(SettingsViewController.collapseAllCategories(_:)), for: UIControlEvents.touchUpInside)
+        collapseAllCategoriesButton.setImage(UIImage(named: "Collapsed Categories"), for: UIControl.State())
+        collapseAllCategoriesButton.addTarget(self, action: #selector(SettingsViewController.collapseAllCategories(_:)), for: UIControl.Event.touchUpInside)
         containerView.addSubview(collapseAllCategoriesButton)
         
         expandAllCategoriesButton.translatesAutoresizingMaskIntoConstraints = false
-        expandAllCategoriesButton.setImage(UIImage(named: "Expanded Categories"), for: UIControlState())
-        expandAllCategoriesButton.addTarget(self, action: #selector(SettingsViewController.expandAllCategories(_:)), for: UIControlEvents.touchUpInside)
+        expandAllCategoriesButton.setImage(UIImage(named: "Expanded Categories"), for: UIControl.State())
+        expandAllCategoriesButton.addTarget(self, action: #selector(SettingsViewController.expandAllCategories(_:)), for: UIControl.Event.touchUpInside)
         containerView.addSubview(expandAllCategoriesButton)
         
         showHideCompletedButton.translatesAutoresizingMaskIntoConstraints = false
-        showHideCompletedButton.setImage(UIImage(named: "Show Completed"), for: UIControlState())
-        showHideCompletedButton.addTarget(self, action: #selector(SettingsViewController.showHideCompletedItems(_:)), for: UIControlEvents.touchUpInside)
+        showHideCompletedButton.setImage(UIImage(named: "Show Completed"), for: UIControl.State())
+        showHideCompletedButton.addTarget(self, action: #selector(SettingsViewController.showHideCompletedItems(_:)), for: UIControl.Event.touchUpInside)
         showCompletedItems = itemVC != nil && itemVC!.list != nil ? itemVC!.list!.showCompletedItems : true
         containerView.addSubview(showHideCompletedButton)
         
         showHideInactiveButton.translatesAutoresizingMaskIntoConstraints = false
-        showHideInactiveButton.setImage(UIImage(named: "Show Inactive"), for: UIControlState())
-        showHideInactiveButton.addTarget(self, action: #selector(SettingsViewController.showHideInactiveItems(_:)), for: UIControlEvents.touchUpInside)
+        showHideInactiveButton.setImage(UIImage(named: "Show Inactive"), for: UIControl.State())
+        showHideInactiveButton.addTarget(self, action: #selector(SettingsViewController.showHideInactiveItems(_:)), for: UIControl.Event.touchUpInside)
         showInactiveItems = itemVC != nil && itemVC!.list != nil ? itemVC!.list!.showInactiveItems : true
         containerView.addSubview(showHideInactiveButton)
         
         setAllItemsIncompleteButton.translatesAutoresizingMaskIntoConstraints = false
-        setAllItemsIncompleteButton.setImage(UIImage(named: "Set Incomplete"), for: UIControlState())
-        setAllItemsIncompleteButton.addTarget(self, action: #selector(SettingsViewController.setAllItemsIncomplete(_:)), for: UIControlEvents.touchUpInside)
+        setAllItemsIncompleteButton.setImage(UIImage(named: "Set Incomplete"), for: UIControl.State())
+        setAllItemsIncompleteButton.addTarget(self, action: #selector(SettingsViewController.setAllItemsIncomplete(_:)), for: UIControl.Event.touchUpInside)
         containerView.addSubview(setAllItemsIncompleteButton)
         
         setAllItemsInactiveButton.translatesAutoresizingMaskIntoConstraints = false
-        setAllItemsInactiveButton.setImage(UIImage(named: "Set Inactive"), for: UIControlState())
-        setAllItemsInactiveButton.addTarget(self, action: #selector(SettingsViewController.setAllItemsInactive(_:)), for: UIControlEvents.touchUpInside)
+        setAllItemsInactiveButton.setImage(UIImage(named: "Set Inactive"), for: UIControl.State())
+        setAllItemsInactiveButton.addTarget(self, action: #selector(SettingsViewController.setAllItemsInactive(_:)), for: UIControl.Event.touchUpInside)
         containerView.addSubview(setAllItemsInactiveButton)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setImage(UIImage(named: "Close Window"), for: UIControlState())
-        closeButton.addTarget(self, action: #selector(SettingsViewController.close), for: UIControlEvents.touchUpInside)
+        closeButton.setImage(UIImage(named: "Close Window"), for: UIControl.State())
+        closeButton.addTarget(self, action: #selector(SettingsViewController.close), for: UIControl.Event.touchUpInside)
         containerView.addSubview(closeButton)
         
         noteButton.translatesAutoresizingMaskIntoConstraints = false
         if showNotes {
-            noteButton.setImage(UIImage(named: "Notes On"), for: UIControlState())
+            noteButton.setImage(UIImage(named: "Notes On"), for: UIControl.State())
         } else {
-            noteButton.setImage(UIImage(named: "Notes Off"), for: UIControlState())
+            noteButton.setImage(UIImage(named: "Notes Off"), for: UIControl.State())
         }
         noteButton.addTarget(self, action: #selector(SettingsViewController.noteButtonChanged), for: .touchUpInside)
         containerView.addSubview(noteButton)
@@ -370,14 +366,14 @@ class SettingsViewController: UIAppViewController
         containerView.addSubview(vertLineImage)
         
         printButton.translatesAutoresizingMaskIntoConstraints = false
-        printButton.setImage(UIImage(named: "Print"), for: UIControlState())
-        printButton.addTarget(self, action: #selector(SettingsViewController.print), for: UIControlEvents.touchUpInside)
+        printButton.setImage(UIImage(named: "Print"), for: UIControl.State())
+        printButton.addTarget(self, action: #selector(SettingsViewController.print), for: UIControl.Event.touchUpInside)
         printButton.isEnabled = UIPrintInteractionController.isPrintingAvailable
         containerView.addSubview(printButton)
         
         emailButton.translatesAutoresizingMaskIntoConstraints = false
-        emailButton.setImage(UIImage(named: "Email"), for: UIControlState())
-        emailButton.addTarget(self, action: #selector(SettingsViewController.email), for: UIControlEvents.touchUpInside)
+        emailButton.setImage(UIImage(named: "Email"), for: UIControl.State())
+        emailButton.addTarget(self, action: #selector(SettingsViewController.email), for: UIControl.Event.touchUpInside)
         emailButton.isEnabled = UIPrintInteractionController.isPrintingAvailable
         containerView.addSubview(emailButton)
         
@@ -385,7 +381,7 @@ class SettingsViewController: UIAppViewController
         for (button, color) in colorButtons {
             button.translatesAutoresizingMaskIntoConstraints = false
             button.backgroundColor = color
-            button.addTarget(self, action: #selector(SettingsViewController.colorButton(_:)), for: UIControlEvents.touchUpInside)
+            button.addTarget(self, action: #selector(SettingsViewController.colorButton(_:)), for: UIControl.Event.touchUpInside)
             button.tag = colorButtonIndex[button]!
             containerView.addSubview(button)
         }
@@ -399,8 +395,8 @@ class SettingsViewController: UIAppViewController
         
         // set up container view constraints
         let views: [String : AnyObject] = ["containerView": containerView]
-        containerViewHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|[containerView]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
-        containerViewVertConstraints  = NSLayoutConstraint.constraints(withVisualFormat: "V:|[containerView]|", options: NSLayoutFormatOptions(rawValue: 0), metrics: nil, views: views)
+        containerViewHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|[containerView]|", options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
+        containerViewVertConstraints  = NSLayoutConstraint.constraints(withVisualFormat: "V:|[containerView]|", options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
         
         view.addConstraints(containerViewHorizConstraints!)
         view.addConstraints(containerViewVertConstraints!)

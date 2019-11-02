@@ -8,8 +8,7 @@
 
 import UIKit
 
-class UpgradeViewController: UIAppViewController
-{
+class UpgradeViewController: UIAppViewController {
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
     @IBOutlet weak var buyButton: UIButton!
@@ -19,8 +18,7 @@ class UpgradeViewController: UIAppViewController
     
     var hud: MBProgressHUD?
     
-    override func viewDidLoad()
-    {
+    override func viewDidLoad() {
         super.viewDidLoad()
         manager.delegate = self
         
@@ -56,8 +54,7 @@ class UpgradeViewController: UIAppViewController
         }
     }
 
-    override func viewDidAppear(_ animated: Bool)
-    {
+    override func viewDidAppear(_ animated: Bool) {
         
     }
     
@@ -66,8 +63,7 @@ class UpgradeViewController: UIAppViewController
         // Dispose of any resources that can be recreated.
     }
 
-    func reload()
-    {
+    func reload() {
         if appDelegate.appIsUpgraded {
             // already purchased
             purchasedCheck.isHidden = false
@@ -77,25 +73,22 @@ class UpgradeViewController: UIAppViewController
             purchasedCheck.isHidden = true
             buyButton.isHidden = false
             buyButton.isEnabled = true
-            buyButton.setTitle(appDelegate.upgradePriceString, for: UIControlState())
+            buyButton.setTitle(appDelegate.upgradePriceString, for: UIControl.State())
         } else {
             // purchases not allowed
             purchasedCheck.isHidden = true
             buyButton.isHidden = false
             buyButton.isEnabled = false
-            buyButton.setTitle("N/A", for: UIControlState())
+            buyButton.setTitle("N/A", for: UIControl.State())
         }
     }
     
-    @objc func handlePurchaseNotification(_ notification: Notification)
-    {
+    @objc func handlePurchaseNotification(_ notification: Notification) {
         appDelegate.appIsUpgraded = true
-        
         reload()
     }
     
-    @objc func handleRestoreNotification(_ notification: Notification)
-    {
+    @objc func handleRestoreNotification(_ notification: Notification) {
         appDelegate.appIsUpgraded = true
         
         let alertVC = UIAlertController(
@@ -113,8 +106,7 @@ class UpgradeViewController: UIAppViewController
         reload()
     }
     
-    @objc func handleFailedTransaction(_ notification: Notification)
-    {
+    @objc func handleFailedTransaction(_ notification: Notification) {
         if let message = notification.object as? String {
             let alertVC = UIAlertController(
                 title: "Transaction Error",
@@ -127,8 +119,7 @@ class UpgradeViewController: UIAppViewController
         }
     }
     
-    @IBAction func buyButtonTapped(_ sender: UIButton)
-    {
+    @IBAction func buyButtonTapped(_ sender: UIButton) {
         guard let product = appDelegate.upgradeProduct else {
             print("ERROR: buyButtonTapped --- product is nil...")
             return
@@ -139,15 +130,13 @@ class UpgradeViewController: UIAppViewController
         RealListProducts.store.buyProduct(product)
     }
     
-    @IBAction func restorePurchases(_ sender: UIButton)
-    {
+    @IBAction func restorePurchases(_ sender: UIButton) {
         //startHUD(NSLocalizedString("Restoring_purchase", comment: ""), subtitle: "")
         
         RealListProducts.store.restorePurchases()
     }
     
-    @IBAction func close(_ sender: AnyObject)
-    {
+    @IBAction func close(_ sender: AnyObject) {
         if let aboutVC = aboutViewController {
             aboutVC.updateUpgradeStatus()
         }

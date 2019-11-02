@@ -127,7 +127,7 @@ class CategoryClassTests: ModelClassTests
         
         // then
         NSLog("html length = \(html.characters.count)")
-        XCTAssertTrue(html.characters.count > 0, "htmlForPrinting character count check")
+        XCTAssertTrue(html.count > 0, "htmlForPrinting character count check")
     }
     
     // func itemsComplete() -> Int

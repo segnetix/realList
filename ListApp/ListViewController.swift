@@ -15,8 +15,7 @@ let kScrollZoneHeight: CGFloat = 50.0
 let selectedCellColor: UIColor = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1.0)
 
 // ListSelectionDelegate protocol
-protocol ListSelectionDelegate: class
-{
+protocol ListSelectionDelegate: class {
     func listSelected(_ newList: List)
     func listNameChanged(_ newName: String)
     func listDeleted(_ deletedList: List)
@@ -25,8 +24,7 @@ protocol ListSelectionDelegate: class
 let kListViewScrollRate: CGFloat =  6.0
 let kListViewCellHeight: CGFloat = 60.0
 
-class ListViewController: UITableViewController, UITextFieldDelegate
-{
+class ListViewController: UITableViewController, UITextFieldDelegate {
     var inEditMode = false
     var deleteListIndexPath: IndexPath? = nil
     var editModeRow = -1
@@ -50,8 +48,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
     weak var delegate: ListSelectionDelegate?
     
-    override func viewDidLoad()
-    {
+    override func viewDidLoad() {
         super.viewDidLoad()
 
         // Uncomment the following line to preserve selection between presentations
@@ -65,9 +62,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.tableView.addGestureRecognizer(longPressGestureRecognizer!)
         
         // About button
-        let button: UIButton = UIButton(type: UIButtonType.custom)
-        button.setImage(UIImage(named: "EnListIcon"), for: UIControlState())
-        button.addTarget(self, action: #selector(ListViewController.infoButtonTapped), for: UIControlEvents.touchUpInside)
+        let button: UIButton = UIButton(type: UIButton.ButtonType.custom)
+        button.setImage(UIImage(named: "EnListIcon"), for: UIControl.State())
+        button.addTarget(self, action: #selector(ListViewController.infoButtonTapped), for: UIControl.Event.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.leftBarButtonItem = barButton
@@ -79,35 +76,34 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         refreshControl = UIRefreshControl()
         refreshControl!.backgroundColor = UIColor.clear
         refreshControl!.tintColor = UIColor.clear
-        refreshControl!.addTarget(self, action: #selector(self.updateListData(_:)), for: UIControlEvents.valueChanged)
+        refreshControl!.addTarget(self, action: #selector(self.updateListData(_:)), for: UIControl.Event.valueChanged)
         self.tableView.addSubview(refreshControl!)
         
         loadCustomRefreshContents()
     }
     
-    func loadCustomRefreshContents()
-    {
+    func loadCustomRefreshContents() {
         let refreshContents = Bundle.main.loadNibNamed("RefreshContents", owner: self, options: nil)
         
         // refresh view
-        refreshView = refreshContents?[0] as! UIView
+        refreshView = refreshContents?[0] as? UIView
         refreshView.frame = refreshControl!.bounds
         
         // refresh activity indicator
-        refreshAnimation = refreshView.viewWithTag(1) as! UIActivityIndicatorView
+        refreshAnimation = refreshView.viewWithTag(1) as? UIActivityIndicatorView
         refreshAnimation.alpha = 0.0
         
         // refresh label
-        refreshLabel = refreshView.viewWithTag(2) as! UILabel
+        refreshLabel = refreshView.viewWithTag(2) as? UILabel
         refreshLabel.text = ""
         
         // refresh cancel button
-        refreshCancelButton = refreshView.viewWithTag(3) as! UIButton
+        refreshCancelButton = refreshView.viewWithTag(3) as? UIButton
         refreshCancelButton.backgroundColor = UIColor.clear
         refreshCancelButton.layer.cornerRadius = 16
         refreshCancelButton.layer.borderWidth = 1
         refreshCancelButton.layer.borderColor = UIColor.black.cgColor
-        refreshCancelButton.addTarget(self, action: #selector(self.cancelFetch(_:)), for: UIControlEvents.touchUpInside)
+        refreshCancelButton.addTarget(self, action: #selector(self.cancelFetch(_:)), for: UIControl.Event.touchUpInside)
         refreshCancelButton.isEnabled = false
         refreshCancelButton.alpha = 0.3
         
@@ -139,13 +135,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         // Dispose of any resources that can be recreated.
     }
 
-    required init(coder aDecoder: NSCoder)
-    {
+    required init(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)!
     }
     
-    @objc func updateListData(_ refreshControl: UIRefreshControl)
-    {
+    @objc func updateListData(_ refreshControl: UIRefreshControl) {
         refreshAnimation.startAnimating()
         refreshCancelButton.isEnabled = true
         refreshCancelButton.alpha = 1.0
@@ -178,19 +172,17 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return 1
     }
     
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int
-    {
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // return the number of rows (plus 1 for the Add row)
         return ListData.listCount + 1
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableViewAutomaticDimension
+        return UITableView.automaticDimension
         //return kListViewCellHeight
     }
     
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
-    {
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if (indexPath as NSIndexPath).row < ListData.listCount {
             // set up a List row
             let cell = tableView.dequeueReusableCell(withIdentifier: listCellID, for: indexPath) as! ListCell
@@ -200,8 +192,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 // Configure the cell...
                 cell.listName.isUserInteractionEnabled = false
                 cell.listName.delegate = self
-                cell.listName.addTarget(self, action: #selector(ListViewController.listNameDidChange(_:)), for: UIControlEvents.editingChanged)
-                cell.listName.font = UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline)
+                cell.listName.addTarget(self, action: #selector(ListViewController.listNameDidChange(_:)), for: UIControl.Event.editingChanged)
+                cell.listName.font = UIFont.preferredFont(forTextStyle: UIFont.TextStyle.headline)
                 cell.listName.text = list.name
                 cell.listName.autocapitalizationType = appDelegate.namesCapitalize ? .words : .none
                 cell.listName.spellCheckingType = appDelegate.namesSpellCheck ? .yes : .no
@@ -266,8 +258,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     */
     
-    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath)
-    {
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.selectList((indexPath as NSIndexPath).row)
     }
     
@@ -295,8 +286,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // override to support editing the table view
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath)
-    {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             deleteListIndexPath = indexPath
             
@@ -309,8 +299,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // Override to support rearranging the table view.
-    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to toIndexPath: IndexPath)
-    {
+    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to toIndexPath: IndexPath) {
         if let list = ListData.listForRow(at: fromIndexPath) {
             ListData.removeList(list)
             ListData.insertList(list, at: toIndexPath)
@@ -320,8 +309,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // Override to support conditional rearranging of the table view.
-    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool
-    {
+    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
         // Return false if you do not want the item to be re-orderable.
         return true
     }
@@ -332,14 +320,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
     
-    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool
-    {
+    func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
         // scroll the editing cell into view if necessary
         let indexPath = IndexPath(row: textField.tag, section: 0)
         
         if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false
         {
-            tableView.scrollToRow(at: indexPath, at: UITableViewScrollPosition.bottom, animated: false)
+            tableView.scrollToRow(at: indexPath, at: UITableView.ScrollPosition.bottom, animated: false)
         }
         
         // this clears an initial space in a new cell name
@@ -351,8 +338,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
 
     
-    @objc func listNameDidChange(_ textField: UITextField)
-    {
+    @objc func listNameDidChange(_ textField: UITextField) {
         // update list name data with new value
         let i = textField.tag
         
@@ -363,8 +349,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
 
     
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool
-    {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         inEditMode = false
         textField.isUserInteractionEnabled = false
         textField.resignFirstResponder()
@@ -389,8 +374,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return true
     }
     
-    @IBAction func addListButtonTapped(_ sender: UIButton)
-    {
+    @IBAction func addListButtonTapped(_ sender: UIButton) {
         if appDelegate.appIsUpgraded == false && ListData.nonTutorialListCount >= kMaxListCount
         {
             let listLimitTitle = NSLocalizedString("List_Limit", comment: "List Limit title for the list limit exceeded dialog in the free version.")
@@ -441,8 +425,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 ////////////////////////////////////////////////////////////////
     
     // respond to a single tap (display the selected list in the ItemListViewController)
-    @objc func cellSingleTapAction(_ sender: UITapGestureRecognizer)
-    {
+    @objc func cellSingleTapAction(_ sender: UITapGestureRecognizer) {
         let i = sender.view?.tag
         let indexPath = IndexPath(row: i!, section: 0)
         
@@ -457,8 +440,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // respond to a double tap (list name edit)
-    @objc func cellDoubleTapAction(_ sender: UITapGestureRecognizer)
-    {
+    @objc func cellDoubleTapAction(_ sender: UITapGestureRecognizer) {
         if sender.view != nil {
             let indexPath = IndexPath(row: (sender.view?.tag)!, section: 0)
             let cell = tableView.cellForRow(at: indexPath) as! ListCell
@@ -470,9 +452,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // handle cell move on long press (move)
-    @objc func longPressAction(_ gesture: UILongPressGestureRecognizer)
-    {
-        let state: UIGestureRecognizerState = gesture.state
+    @objc func longPressAction(_ gesture: UILongPressGestureRecognizer) {
+        let state: UIGestureRecognizer.State = gesture.state
         let location: CGPoint = gesture.location(in: tableView)
         let topBarHeight = getTopBarHeight()
         var indexPath: IndexPath? = tableView.indexPathForRow(at: location)
@@ -515,7 +496,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
                 if let displayLink = displayLink {
                     displayLink.preferredFramesPerSecond = kFramesPerSecond
-                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                    displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.default)
                 }
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
@@ -524,7 +505,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
                 if let displayLink = displayLink {
                     displayLink.preferredFramesPerSecond = kFramesPerSecond
-                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                    displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.default)
                 }
             }
         } else if displayLink != nil {
@@ -590,8 +571,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         
     }
     
-    func longPressMoved(_ indexPath: IndexPath?, location: CGPoint)
-    {
+    func longPressMoved(_ indexPath: IndexPath?, location: CGPoint) {
         if snapshot != nil {
             var center: CGPoint = snapshot!.center
             center.y = location.y
@@ -612,8 +592,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // clean up after a long press gesture
-    func longPressEnded(_ idxPath: IndexPath?, location: CGPoint)
-    {
+    func longPressEnded(_ idxPath: IndexPath?, location: CGPoint) {
         longPressActive = false
         
         // cancel any scroll loop
@@ -687,8 +666,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // handle the gesture from the itemVC when moving an item to another list
-    func processGestureFromItemVC(_ gesture: UILongPressGestureRecognizer, listObj: ListObj?)
-    {
+    func processGestureFromItemVC(_ gesture: UILongPressGestureRecognizer, listObj: ListObj?) {
         let location = gesture.location(ofTouch: 0, in: self.view)
         
         // check if we need to scroll tableView
@@ -701,7 +679,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollDownLoop))
                 if let displayLink = displayLink {
                     displayLink.preferredFramesPerSecond = kFramesPerSecond
-                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                    displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.default)
                 }
             }
         } else if touchLocation.y < (topBarHeight + kScrollZoneHeight) {
@@ -710,7 +688,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
                 displayLink = CADisplayLink(target: self, selector: #selector(ListViewController.scrollUpLoop))
                 if let displayLink = displayLink {
                     displayLink.preferredFramesPerSecond = kFramesPerSecond
-                    displayLink.add(to: RunLoop.main, forMode: RunLoopMode.defaultRunLoopMode)
+                    displayLink.add(to: RunLoop.main, forMode: RunLoop.Mode.default)
                 }
             }
         } else if displayLink != nil {
@@ -818,8 +796,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    @objc func scrollUpLoop()
-    {
+    @objc func scrollUpLoop() {
         let currentOffset = tableView.contentOffset
         let topBarHeight = getTopBarHeight()
         let newOffsetY = max(currentOffset.y - kListViewScrollRate, -topBarHeight)
@@ -834,8 +811,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    @objc func scrollDownLoop()
-    {
+    @objc func scrollDownLoop() {
         let currentOffset = tableView.contentOffset
         let lastCellIndex = IndexPath(row: ListData.listCount - 1, section: 0)
         let lastCell = tableView.cellForRow(at: lastCellIndex)
@@ -862,15 +838,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 ////////////////////////////////////////////////////////////////
     
     // presents the about window
-    @objc func infoButtonTapped()
-    {
+    @objc func infoButtonTapped() {
         let aboutVC = AboutViewController()
         aboutVC.listVC = self
         present(aboutVC, animated: true, completion: nil)
     }
     
-    func confirmDelete(_ listName: String)
-    {
+    func confirmDelete(_ listName: String) {
         let DeleteListTitle = NSLocalizedString("Delete_List_Title", comment: "A title in an alert asking if the user wants to delete a list.")
         let DeleteListMessage = String(format: NSLocalizedString("Delete_List_Message", comment: "Are you sure you want to permanently delete the list %@?"), listName)
         
@@ -888,10 +862,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         self.present(alert, animated: true, completion: nil)
     }
     
-    func handleDeleteList(_ alertAction: UIAlertAction!) -> Void
-    {
-        if let indexPath = deleteListIndexPath
-        {
+    func handleDeleteList(_ alertAction: UIAlertAction!) -> Void {
+        if let indexPath = deleteListIndexPath {
             tableView.beginUpdates()
             
             // notify the ItemViewController that a list is being deleted
@@ -917,8 +889,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    func cancelDeleteList(_ alertAction: UIAlertAction!)
-    {
+    func cancelDeleteList(_ alertAction: UIAlertAction!) {
         deleteListIndexPath = nil
         self.setEditing(false, animated: true)
     }
@@ -929,8 +900,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
 //
 ////////////////////////////////////////////////////////////////
 
-    func selectList(_ index: Int)
-    {
+    func selectList(_ index: Int) {
         selectionIndex = index
         
         if ListData.listCount > selectionIndex && selectionIndex >= 0 {
@@ -943,8 +913,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         }
     }
     
-    func highlightList(_ index: Int)
-    {
+    func highlightList(_ index: Int) {
         // deselect all cells
         ListData.resetListOrderValues()
         for i in 0..<ListData.listCount {
@@ -958,8 +927,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     }
     
     // used to highlight list cells when moving an item to another list
-    func tempHighlightList(_ newHighlightedIndexPath: IndexPath)
-    {
+    func tempHighlightList(_ newHighlightedIndexPath: IndexPath) {
         var oldHighlightedIndexPath: IndexPath?
         var updateIndexPathArray = [IndexPath]()
         
@@ -1003,8 +971,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
         return statusBarHeight + navBarHeight
     }
     
-    func snapshotFromView(_ inputView: UIView) -> UIView
-    {
+    func snapshotFromView(_ inputView: UIView) -> UIView {
         // Make an image from the input view.
         UIGraphicsBeginImageContextWithOptions(inputView.bounds.size, false, 0)
         if let context = UIGraphicsGetCurrentContext()
@@ -1027,8 +994,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate
     
 ////////////////////////////////////////////////////////////////
     
-    func generateTutorial()
-    {
+    func generateTutorial() {
         // do we already have a tutorial loaded?
         /*
         var i = 0

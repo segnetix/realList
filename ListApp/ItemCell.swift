@@ -9,16 +9,14 @@
 import UIKit
 
 // A protocol that the TableViewCell uses to inform its delegate of state change
-protocol ItemCellDelegate: class
-{
+protocol ItemCellDelegate: class {
     // gesture action methods for delegates
     //func itemSingleTapAction(sender: UIGestureRecognizer)
     //func itemDoubleTapAction(textField: UITextField)
     //func itemLongPressAction(sender: UILongPressGestureRecognizer)
 }
 
-class ItemCell: UITableViewCell
-{
+class ItemCell: UITableViewCell {
     @IBOutlet weak var checkBox: CheckBox!
     @IBOutlet weak var itemName: UITextField!
     @IBOutlet weak var itemNote: UILabel!
@@ -28,8 +26,7 @@ class ItemCell: UITableViewCell
     weak var delegate: ItemCellDelegate?
     //let gradientLayer = CAGradientLayer()
     
-    override func awakeFromNib()
-    {
+    override func awakeFromNib() {
         super.awakeFromNib()
 
         // Initialization code
@@ -56,8 +53,7 @@ class ItemCell: UITableViewCell
         
     }
     
-    override func layoutSubviews()
-    {
+    override func layoutSubviews() {
         super.layoutSubviews()
         //gradientLayer.frame = bounds
     }
@@ -66,8 +62,7 @@ class ItemCell: UITableViewCell
         super.init(coder: aDecoder)!
     }
     
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?)
-    {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         /*
@@ -83,8 +78,7 @@ class ItemCell: UITableViewCell
          */
     }
     
-    override func setSelected(_ selected: Bool, animated: Bool)
-    {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
         // Configure the view for the selected state
     }
@@ -96,34 +90,30 @@ class ItemCell: UITableViewCell
 ////////////////////////////////////////////////////////////////
     
     /*
-    func cellSingleTappedAction(sender: UIGestureRecognizer)
-    {
+    func cellSingleTappedAction(sender: UIGestureRecognizer) {
         print("cellSingleTappedAction for \(itemName.text)")
         self.delegate?.itemSingleTapAction(sender)
     }
     */
     
     /*
-    func cellDoubleTappedAction(sender: UITapGestureRecognizer)
-    {
+    func cellDoubleTappedAction(sender: UITapGestureRecognizer) {
         print("cellDoubleTappedAction for \(itemName.text)")
         self.delegate?.itemDoubleTapAction(itemName)
     }
     */
     
     /*
-    func longPressAction(sender: UILongPressGestureRecognizer)
-    {
-    print("longPressAction for \(categoryName.text)")
-    self.delegate?.categoryLongPressAction(sender)
+    func longPressAction(sender: UILongPressGestureRecognizer) {
+        print("longPressAction for \(categoryName.text)")
+        self.delegate?.categoryLongPressAction(sender)
     }
     
-    override func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool
-    {
-    if let _ = gestureRecognizer as? UILongPressGestureRecognizer {
-    return true
-    }
-    return false
+    override func gestureRecognizerShouldBegin(gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if let _ = gestureRecognizer as? UILongPressGestureRecognizer {
+            return true
+        }
+        return false
     }
     */
     

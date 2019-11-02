@@ -10,8 +10,7 @@
 
 import UIKit
 
-class UIAppViewController: UIViewController, AppManagerDelegate
-{
+class UIAppViewController: UIViewController, AppManagerDelegate {
     var manager:AppManager = AppManager.sharedInstance
     
     override func viewDidLoad() {

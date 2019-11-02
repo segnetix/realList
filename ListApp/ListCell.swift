@@ -8,8 +8,7 @@
 
 import UIKit
 
-class ListCell: UITableViewCell
-{
+class ListCell: UITableViewCell {
     @IBOutlet weak var listName: UITextField!
     
     override func awakeFromNib() {
@@ -21,7 +20,7 @@ class ListCell: UITableViewCell
         super.init(coder: aDecoder)!
     }
     
-    override init(style: UITableViewCellStyle, reuseIdentifier: String!) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String!) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
     

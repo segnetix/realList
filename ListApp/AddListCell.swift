@@ -8,8 +8,7 @@
 
 import UIKit
 
-class AddListCell: UITableViewCell
-{
+class AddListCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
@@ -19,7 +18,7 @@ class AddListCell: UITableViewCell
         super.init(coder: aDecoder)!
     }
     
-    override init(style: UITableViewCellStyle, reuseIdentifier: String!) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String!) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
     

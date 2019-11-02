@@ -8,8 +8,7 @@
 
 import UIKit
 
-class AppSettingsViewController: UIAppViewController
-{
+class AppSettingsViewController: UIAppViewController {
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
     @IBOutlet weak var namesCapitalizeSwitch: UISwitch!
@@ -20,8 +19,7 @@ class AppSettingsViewController: UIAppViewController
     @IBOutlet weak var notesAutocorrectionSwitch: UISwitch!
     @IBOutlet weak var picsInPrintAndEmailSwitch: UISwitch!
 
-    override func viewDidLoad()
-    {
+    override func viewDidLoad() {
         super.viewDidLoad()
         manager.delegate = self
 
@@ -40,8 +38,7 @@ class AppSettingsViewController: UIAppViewController
         // Dispose of any resources that can be recreated.
     }
 
-    @IBAction func close(_ sender: UIButton)
-    {
+    @IBAction func close(_ sender: UIButton) {
         // update app delegate values from switches
         appDelegate.namesCapitalize      = self.namesCapitalizeSwitch.isOn
         appDelegate.namesSpellCheck      = self.namesSpellCheckSwitch.isOn

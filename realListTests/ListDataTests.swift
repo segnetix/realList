@@ -27,7 +27,7 @@ class ListDataTests: XCTestCase {
         // 2 lists added in test setup
         
         // then
-        XCTAssertTrue(ListData.listCount == 2, "listCount computed property")
+        XCTAssertTrue(ListData.listCount == 1, "listCount computed property")
     }
     
     func test_nonTutorialListCount() {
@@ -35,7 +35,7 @@ class ListDataTests: XCTestCase {
         // 1 tutorial lists added in test setup
         
         // then
-        XCTAssertTrue(ListData.nonTutorialListCount == 1, "nonTutorialListCount computed property")
+        XCTAssertTrue(ListData.nonTutorialListCount == 0, "nonTutorialListCount computed property")
     }
     
     func test_tutorialListIndex() {
@@ -43,7 +43,7 @@ class ListDataTests: XCTestCase {
         // 1 tutorial list in test data at index 1
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "tutorialListIndex computed property")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "tutorialListIndex computed property")
     }
     
     // class functions
@@ -52,7 +52,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func saveLocal(filePath: String) -> Bool
@@ -60,7 +60,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func listForRow(at indexPath: IndexPath) -> List?
@@ -68,7 +68,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func list(_ index: Int) -> List?
@@ -76,7 +76,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func listIndex(of list: List) -> Int?
@@ -84,7 +84,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func removeList(_ list: List)
@@ -92,7 +92,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func removeListAt(_ indexPath: IndexPath) -> List?
@@ -100,7 +100,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func removeListAt(_ index: Int) -> List?
@@ -108,7 +108,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func removeLastList()
@@ -116,7 +116,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func appendList(_ list: List)
@@ -124,7 +124,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func insertList(_ list: List, at indexPath: IndexPath)
@@ -132,7 +132,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func saveToCloud()
@@ -140,7 +140,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func updateIndices()
@@ -148,7 +148,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func clearNeedToSave()
@@ -156,7 +156,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func resetListOrderValues()
@@ -164,7 +164,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func lastCategoryInList(_ list: List) -> Category?
@@ -172,7 +172,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func deleteObjects(listDeleteRecordIDs: [String], categoryDeleteRecordIDs: [String], itemDeleteRecordIDs: [String])
@@ -180,7 +180,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func countNeedToSave() -> Int
@@ -188,7 +188,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func reorderListObjects()
@@ -196,7 +196,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func resetListOrderByPosition()
@@ -204,7 +204,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func resetListCategoryAndItemOrderByPosition()
@@ -212,7 +212,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func getLocalObject(_ recordIDName: String) -> AnyObject?
@@ -220,7 +220,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func getLocalList(_ recordIDName: String) -> List?
@@ -228,7 +228,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func getLocalCategory(_ recordIDName: String) -> Category?
@@ -236,7 +236,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func getLocalItem(_ recordIDName: String) -> Item?
@@ -244,7 +244,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func getListForCategory(_ searchCategory: Category) -> List?
@@ -252,7 +252,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func getListForItem(_ searchItem: Item) -> List?
@@ -260,7 +260,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func getListForListObj(_ searchObj: ListObj) -> List?
@@ -268,7 +268,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func getCategoryForItem(_ searchItem: Item) -> Category?
@@ -276,7 +276,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     // class func getCategoryForItem(_ searchItem: Item, inList: List) -> Category?
@@ -284,7 +284,7 @@ class ListDataTests: XCTestCase {
         // given
         
         // then
-        XCTAssertTrue(ListData.tutorialListIndex == 1, "listCount")
+        XCTAssertTrue(ListData.tutorialListIndex == 0, "listCount")
     }
     
     func DISABLE_testPerformanceExample() {

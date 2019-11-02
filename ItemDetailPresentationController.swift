@@ -22,7 +22,7 @@ class ItemDetailPresentationController: UIPresentationController, UIAdaptivePres
     }
     
     @objc func chromeViewTapped(_ gesture: UIGestureRecognizer) {
-        if (gesture.state == UIGestureRecognizerState.ended) {
+        if (gesture.state == UIGestureRecognizer.State.ended) {
             presentingViewController.dismiss(animated: true, completion: nil)
         }
     }
@@ -36,8 +36,7 @@ class ItemDetailPresentationController: UIPresentationController, UIAdaptivePres
         return presentedViewFrame
     }
     
-    override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize
-    {
+    override func size(forChildContentContainer container: UIContentContainer, withParentContainerSize parentSize: CGSize) -> CGSize {
         // adaptive sizing width, min 100, max 200
         //let parentWidth = parentSize.width
         //let childWidth = min(max(parentWidth/3.0, 120), 200)

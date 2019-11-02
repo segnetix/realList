@@ -8,8 +8,7 @@
 
 import Foundation
 
-public struct RealListProducts
-{
+public struct RealListProducts {
     fileprivate static let Prefix = "com.segnetix.realList."
     
     public static let FullVersion = Prefix + "FullVersion"
@@ -19,7 +18,6 @@ public struct RealListProducts
     public static let store = IAPHelper(productIds: RealListProducts.productIdentifiers)
 }
 
-func resourceNameForProductIdentifier(_ productIdentifier: String) -> String?
-{
+func resourceNameForProductIdentifier(_ productIdentifier: String) -> String? {
     return productIdentifier.components(separatedBy: ".").last
 }

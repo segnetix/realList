@@ -9,16 +9,14 @@
 import UIKit
 
 // A protocol that the TableViewCell uses to inform its delegate of state change
-protocol CategoryCellDelegate: class
-{
+protocol CategoryCellDelegate: class {
     // gesture action methods for delegates
     //func categorySingleTapAction(sender: UIGestureRecognizer)
     //func categoryDoubleTapAction(textField: UITextField)
     //func categoryLongPressAction(sender: UILongPressGestureRecognizer)
 }
 
-class CategoryCell: UITableViewCell
-{
+class CategoryCell: UITableViewCell {
     @IBOutlet weak var categoryName: UITextField!
     @IBOutlet weak var catCountLabel: UILabel!
     //weak var delegate: CategoryCellDelegate?
@@ -34,7 +32,7 @@ class CategoryCell: UITableViewCell
         super.init(coder: aDecoder)!
     }
     
-    override init(style: UITableViewCellStyle, reuseIdentifier: String!) {
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String!) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
     }
     

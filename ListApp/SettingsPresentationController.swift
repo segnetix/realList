@@ -22,7 +22,7 @@ class SettingsPresentationController: UIPresentationController, UIAdaptivePresen
     }
     
     @objc func chromeViewTapped(_ gesture: UIGestureRecognizer) {
-        if (gesture.state == UIGestureRecognizerState.ended) {
+        if (gesture.state == UIGestureRecognizer.State.ended) {
             presentingViewController.dismiss(animated: true, completion: nil)
         }
     }

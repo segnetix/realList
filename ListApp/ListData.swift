@@ -122,8 +122,7 @@ enum ItemState: Int {
 //
 ////////////////////////////////////////////////////////////////
 
-class ListData
-{
+class ListData {
     private init() {}   // prevent use of default initializer
     private static var lists = [List]()
     
@@ -187,7 +186,7 @@ class ListData
     }
     
     class func listIndex(of list: List) -> Int? {
-        if let index = lists.index(of: list) {
+        if let index = lists.firstIndex(of: list) {
             return index
         }
         return nil
@@ -322,8 +321,7 @@ class ListData
     }
     
     // reorder lists, categories and items according to order number
-    class func reorderListObjects()
-    {
+    class func reorderListObjects() {
         // sort lists
         lists.sort { $0.order < $1.order }
         
@@ -362,8 +360,7 @@ class ListData
 
     
     // returns a ListData object from the given recordName
-    class func getLocalObject(_ recordIDName: String) -> AnyObject?
-    {
+    class func getLocalObject(_ recordIDName: String) -> AnyObject? {
         for list in lists {
             if list.listRecord != nil {
                 if list.listRecord!.recordID.recordName == recordIDName {
@@ -392,8 +389,7 @@ class ListData
     }
     
     // returns a List object matching the given CKRecordID
-    class func getLocalList(_ recordIDName: String) -> List?
-    {
+    class func getLocalList(_ recordIDName: String) -> List? {
         for list in lists {
             if list.listRecord != nil {
                 if list.listRecord!.recordID.recordName == recordIDName {
@@ -406,8 +402,7 @@ class ListData
     }
     
     // returns a Category object matching the given CKRecordID
-    class func getLocalCategory(_ recordIDName: String) -> Category?
-    {
+    class func getLocalCategory(_ recordIDName: String) -> Category? {
         for list in lists {
             for category in list.categories {
                 if category.categoryRecord?.recordID.recordName == recordIDName {
@@ -420,8 +415,7 @@ class ListData
     }
     
     // returns an Item object matching the given CKRecordID
-    class func getLocalItem(_ recordIDName: String) -> Item?
-    {
+    class func getLocalItem(_ recordIDName: String) -> Item? {
         for list in lists {
             for category in list.categories {
                 for item in category.items {
@@ -436,8 +430,7 @@ class ListData
     }
     
     // returns the list that contains the given category
-    class func getListForCategory(_ searchCategory: Category) -> List?
-    {
+    class func getListForCategory(_ searchCategory: Category) -> List? {
         for list in lists {
             for category in list.categories {
                 if category === searchCategory {
@@ -450,8 +443,7 @@ class ListData
     }
     
     // returns the list that contains the given item
-    class func getListForItem(_ searchItem: Item) -> List?
-    {
+    class func getListForItem(_ searchItem: Item) -> List? {
         for list in lists {
             for category in list.categories {
                 for item in category.items {
@@ -466,8 +458,7 @@ class ListData
     }
     
     // returns the list that contains the given list object
-    class func getListForListObj(_ searchObj: ListObj) -> List?
-    {
+    class func getListForListObj(_ searchObj: ListObj) -> List? {
         for list in lists {
             for category in list.categories {
                 if category == searchObj {
@@ -485,8 +476,7 @@ class ListData
     }
     
     // returns the category that contains the given item
-    class func getCategoryForItem(_ searchItem: Item) -> Category?
-    {
+    class func getCategoryForItem(_ searchItem: Item) -> Category? {
         for list in lists {
             for category in list.categories {
                 for item in category.items {
@@ -501,8 +491,7 @@ class ListData
     }
     
     // returns the category that contains the given item in the given list
-    class func getCategoryForItem(_ searchItem: Item, inList: List) -> Category?
-    {
+    class func getCategoryForItem(_ searchItem: Item, inList: List) -> Category? {
         for category in inList.categories {
             for item in category.items {
                 if item === searchItem {
@@ -522,18 +511,16 @@ class ListData
 //
 ////////////////////////////////////////////////////////////////
 
-func getListFromReference(_ categoryRecord: CKRecord) -> List?
-{
-    if let listReference = categoryRecord[key_owningList] as? CKReference {
+func getListFromReference(_ categoryRecord: CKRecord) -> List? {
+    if let listReference = categoryRecord[key_owningList] as? CKRecord.Reference {
         return ListData.getLocalList(listReference.recordID.recordName)
     }
     
     return nil
 }
 
-func getCategoryFromReference(_ itemRecord: CKRecord) -> Category?
-{
-    if let categoryReference = itemRecord[key_owningCategory] as? CKReference {
+func getCategoryFromReference(_ itemRecord: CKRecord) -> Category? {
+    if let categoryReference = itemRecord[key_owningCategory] as? CKRecord.Reference {
         return ListData.getLocalCategory(categoryReference.recordID.recordName)
     }
     
@@ -541,7 +528,7 @@ func getCategoryFromReference(_ itemRecord: CKRecord) -> Category?
 }
 
 func getItemFromReference(_ imageRecord: CKRecord) -> Item? {
-    if let itemReference = imageRecord[key_owningItem] as? CKReference {
+    if let itemReference = imageRecord[key_owningItem] as? CKRecord.Reference {
         return ListData.getLocalItem(itemReference.recordID.recordName)
     }
     
@@ -549,8 +536,7 @@ func getItemFromReference(_ imageRecord: CKRecord) -> Item? {
 }
 
 // create a Delete record for this list delete and save to cloud
-func createDeleteRecord(_ database: CKDatabase, recordName: String, objectType: String, objectName: String)
-{
+func createDeleteRecord(_ database: CKDatabase, recordName: String, objectType: String, objectName: String) {
     let deleteRecord = CKRecord(recordType: DeletesRecordType)
     deleteRecord[key_objectRecordID] = recordName as CKRecordValue?
     deleteRecord[key_objectType] = objectType as CKRecordValue?
@@ -577,8 +563,7 @@ func createDeleteRecord(_ database: CKDatabase, recordName: String, objectType: 
 // 3. if the user adds a category with an empty name then the data model will set the name to a single space char
 // 4. if the user deletes the last category then the last category is not deleted but the name is set to a single space char
 
-class List: NSObject, NSCoding
-{
+class List: NSObject, NSCoding {
     var name: String { didSet { needToSave = true } }
     var categories = [Category]()
     var listColor: UIColor?
@@ -592,7 +577,7 @@ class List: NSObject, NSCoding
     var needToDelete: Bool = false
     var modificationDate: Date?
     var listRecord: CKRecord!
-    var listReference: CKReference!
+    var listReference: CKRecord.Reference!
     var order: Int = 0 { didSet { if order != oldValue { needToSave = true } } }
     var showCompletedItems:  Bool = true { didSet { self.updateIndices(); needToSave = true } }
     var showInactiveItems:   Bool = true { didSet { self.updateIndices(); needToSave = true } }
@@ -609,8 +594,7 @@ class List: NSObject, NSCoding
     }
     
     // Designated initializer - new list initializer
-    init(name: String, createRecord: Bool, tutorial: Bool = false)
-    {
+    init(name: String, createRecord: Bool, tutorial: Bool = false) {
         self.name = name
         self.isTutorialList = tutorial
         super.init()
@@ -618,7 +602,7 @@ class List: NSObject, NSCoding
         if createRecord {
             // new list needs a new record and reference
             self.listRecord = CKRecord.init(recordType: ListsRecordType)
-            self.listReference = CKReference.init(record: listRecord, action: CKReferenceAction.deleteSelf)
+            self.listReference = CKRecord.Reference.init(record: listRecord, action: CKRecord.Reference.Action.deleteSelf)
         }
         
         self.modificationDate = Date.init()
@@ -631,8 +615,7 @@ class List: NSObject, NSCoding
 ///////////////////////////////////////////////////////
     
     // Designated memberwise initializer - called when restoring from local storage on launch
-    init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, tutorial: Bool?, listColorName: String?, modificationDate: Date?, listReference: CKReference?, listRecord: CKRecord?, categories: [Category]?)
-    {
+    init(name: String?, showCompletedItems: Bool?, showInactiveItems: Bool?, tutorial: Bool?, listColorName: String?, modificationDate: Date?, listReference: CKRecord.Reference?, listRecord: CKRecord?, categories: [Category]?) {
         if let name               = name                 { self.name                = name               } else { self.name = ""                        }
         if let showCompletedItems = showCompletedItems   { self.showCompletedItems  = showCompletedItems } else { self.showCompletedItems = true        }
         if let showInactiveItems  = showInactiveItems    { self.showInactiveItems   = showInactiveItems  } else { self.showInactiveItems  = true        }
@@ -650,15 +633,14 @@ class List: NSObject, NSCoding
     }
     
     // Secondary initializer - for unarchiving a list object
-    convenience required init?(coder decoder: NSCoder)
-    {
+    convenience required init?(coder decoder: NSCoder) {
         let name               = decoder.decodeObject(forKey: key_name)               as? String
         let showCompletedItems = decoder.decodeBool(forKey: key_showCompletedItems)
         let showInactiveItems  = decoder.decodeBool(forKey: key_showInactiveItems)
         let tutorial           = decoder.decodeBool(forKey: key_isTutorialList)
         let listColorName      = decoder.decodeObject(forKey: key_listColorName)      as? String
         let categories         = decoder.decodeObject(forKey: key_categories)         as? [Category]
-        let listReference      = decoder.decodeObject(forKey: key_listReference)      as? CKReference
+        let listReference      = decoder.decodeObject(forKey: key_listReference)      as? CKRecord.Reference
         let listRecord         = decoder.decodeObject(forKey: key_listRecord)         as? CKRecord
         let modificationDate   = decoder.decodeObject(forKey: key_modificationDate)   as? Date
         
@@ -674,8 +656,7 @@ class List: NSObject, NSCoding
     }
     
     // to local storage
-    func encode(with coder: NSCoder)
-    {
+    func encode(with coder: NSCoder) {
         self.modificationDate = Date.init()
         
         coder.encode(self.name,               forKey: key_name)
@@ -690,8 +671,7 @@ class List: NSObject, NSCoding
     }
     
     // to cloud storage
-    func saveToCloud()
-    {
+    func saveToCloud() {
         // don't save tutorial records to the cloud
         if self.isTutorialList {
             return
@@ -719,8 +699,7 @@ class List: NSObject, NSCoding
     }
     
     // saves this list record to the cloud
-    func saveRecord(_ listRecord: CKRecord)
-    {
+    func saveRecord(_ listRecord: CKRecord) {
         // don't save tutorial records to the cloud
         if self.isTutorialList {
             return
@@ -737,8 +716,7 @@ class List: NSObject, NSCoding
     }
     
     // update this list from cloud storage
-    func updateFromRecord(_ record: CKRecord)
-    {
+    func updateFromRecord(_ record: CKRecord) {
         if let name               = record[key_name]               { self.name               = name as! String             }
         if let showCompletedItems = record[key_showCompletedItems] { self.showCompletedItems = showCompletedItems as! Bool }
         if let showInactiveItems  = record[key_showInactiveItems]  { self.showInactiveItems  = showInactiveItems as! Bool  }
@@ -746,7 +724,7 @@ class List: NSObject, NSCoding
         if let order              = record[key_order]              { self.order              = order  as! Int              }
         
         self.listRecord = record
-        self.listReference = CKReference.init(record: record, action: CKReferenceAction.deleteSelf)
+        self.listReference = CKRecord.Reference.init(record: record, action: CKRecord.Reference.Action.deleteSelf)
         
         // list record is now updated
         needToSave = false
@@ -760,8 +738,7 @@ class List: NSObject, NSCoding
     }
     
     // deletes this list from the cloud
-    func deleteRecord(_ listRecord: CKRecord, database: CKDatabase)
-    {
+    func deleteRecord(_ listRecord: CKRecord, database: CKDatabase) {
         // don't save tutorial records to the cloud
         if self.isTutorialList {
             return
@@ -779,8 +756,7 @@ class List: NSObject, NSCoding
         createDeleteRecord(database, recordName: listRecord.recordID.recordName, objectType: ListsRecordType, objectName: self.name)
     }
     
-    func setListColor()
-    {
+    func setListColor() {
         switch listColorName {
         case r1_1: listColor = color1_1
         case r1_2: listColor = color1_2
@@ -804,8 +780,7 @@ class List: NSObject, NSCoding
 //
 ///////////////////////////////////////////////////////
     
-    func indexForCategory(_ category: Category) -> Int
-    {
+    func indexForCategory(_ category: Category) -> Int {
         var index = -1
         
         for cat in categories {
@@ -819,8 +794,7 @@ class List: NSObject, NSCoding
         return -1
     }
     
-    func addCategory(_ name: String, displayHeader: Bool, updateIndices: Bool, createRecord: Bool, tutorial: Bool = false) -> Category
-    {
+    func addCategory(_ name: String, displayHeader: Bool, updateIndices: Bool, createRecord: Bool, tutorial: Bool = false) -> Category {
         let category = Category(name: name, displayHeader: displayHeader, createRecord: createRecord, tutorial: tutorial)
         categories.append(category)
         
@@ -831,8 +805,7 @@ class List: NSObject, NSCoding
         return category
     }
     
-    func addItem(_ category: Category, name: String, state: ItemState, updateIndices: Bool, createRecord: Bool, tutorial: Bool = false) -> Item?
-    {
+    func addItem(_ category: Category, name: String, state: ItemState, updateIndices: Bool, createRecord: Bool, tutorial: Bool = false) -> Item? {
         let indexForCat = indexForCategory(category)
         var item: Item? = nil
         
@@ -884,8 +857,7 @@ class List: NSObject, NSCoding
 ///////////////////////////////////////////////////////
     
     /// Will remove the given item from the list data.
-    func removeItem(_ item: Item, updateIndices: Bool) -> [IndexPath]
-    {
+    func removeItem(_ item: Item, updateIndices: Bool) -> [IndexPath] {
         var removedPaths = [IndexPath]()
         let indexPath = displayIndexPathForItem(item)
         
@@ -911,8 +883,7 @@ class List: NSObject, NSCoding
     }
     
     /// Will remove the given category from the list data.
-    func removeCategory(_ category: Category, updateIndices: Bool) -> [IndexPath]
-    {
+    func removeCategory(_ category: Category, updateIndices: Bool) -> [IndexPath] {
         var removedPaths = [IndexPath]()
         let indexPath = displayIndexPathForCategory(category)
         
@@ -932,8 +903,7 @@ class List: NSObject, NSCoding
 
     
     /// Will insert item after afterObj.
-    func insertItem(_ item: Item, afterObj: ListObj, updateIndices: Bool)
-    {
+    func insertItem(_ item: Item, afterObj: ListObj, updateIndices: Bool) {
         let catIdx = afterObj.categoryIndex
         var itmIdx = afterObj.itemIndex - 1         // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
         let category = categories[catIdx]
@@ -958,8 +928,7 @@ class List: NSObject, NSCoding
     }
     
     /// Will insert item before beforeObj.
-    func insertItem(_ item: Item, beforeObj: ListObj, updateIndices: Bool) -> Category
-    {
+    func insertItem(_ item: Item, beforeObj: ListObj, updateIndices: Bool) -> Category {
         var catIdx = beforeObj.categoryIndex
         var itmIdx = beforeObj.itemIndex - 1            // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
         
@@ -983,8 +952,7 @@ class List: NSObject, NSCoding
     }
     
     /// Will insert item at either the beginning or the end of the category.
-    func insertItem(_ item: Item, inCategory: Category, atPosition: InsertPosition, updateIndices: Bool)
-    {
+    func insertItem(_ item: Item, inCategory: Category, atPosition: InsertPosition, updateIndices: Bool) {
         switch atPosition {
         case .beginning:
             inCategory.items.insert(item, at: 0)
@@ -1005,8 +973,7 @@ class List: NSObject, NSCoding
     /// Will remove the item at indexPath.
     /// If the path is to a category, will remove the entire category with items.
     /// Returns an array with the display index paths of any removed rows.
-    func removeListObjAtIndexPath(_ indexPath: IndexPath, preserveCategories: Bool, updateIndices: Bool) -> [IndexPath]
-    {
+    func removeListObjAtIndexPath(_ indexPath: IndexPath, preserveCategories: Bool, updateIndices: Bool) -> [IndexPath] {
         var removedPaths = [IndexPath]()
         let obj = objectForIndexPath(indexPath)
         
@@ -1082,8 +1049,7 @@ class List: NSObject, NSCoding
     
     /// Will insert the item at the indexPath.
     /// If the path is to a category, then will insert at beginning or end of category depending on move direction.
-    func insertItemAtIndexPath(_ item: Item, indexPath: IndexPath, atPosition: InsertPosition, updateIndices: Bool)
-    {
+    func insertItemAtIndexPath(_ item: Item, indexPath: IndexPath, atPosition: InsertPosition, updateIndices: Bool) {
         let tag = tagForIndexPath(indexPath)
         let catIndex = tag.catIdx
         let itemIndex = tag.itmIdx - 1          // we have to subtract 1 to convert from itemIndex to items index (cat is 0, 1st item is 1, etc.)
@@ -1118,10 +1084,9 @@ class List: NSObject, NSCoding
         }
     }
     
-    /// Removed the category (and associated items) at the given index.
+    /// Remove the category (and associated items) at the given index.
     /*
-    func removeCatetoryAtIndex(sourceCatIndex: Int)
-    {
+    func removeCatetoryAtIndex(sourceCatIndex: Int) {
         if sourceCatIndex < self.categories.count {
             categories.removeAtIndex(sourceCatIndex)
         }
@@ -1131,8 +1096,7 @@ class List: NSObject, NSCoding
     */
     
     /// Inserts the given category at the given index.
-    func insertCategory(_ category: Category, atIndex: Int)
-    {
+    func insertCategory(_ category: Category, atIndex: Int) {
         if atIndex >= self.categories.count {
             // append this category to the end
             self.categories.append(category)
@@ -1153,8 +1117,7 @@ class List: NSObject, NSCoding
 ///////////////////////////////////////////////////////
     
     /// Updates the indices for all objects in the list.
-    func updateIndices()
-    {
+    func updateIndices() {
         var i = -1
         for cat in categories {
             i += 1
@@ -1182,8 +1145,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns the total number of rows to display in the ItemVC
-    func totalDisplayCount() -> Int
-    {
+    func totalDisplayCount() -> Int {
         var count = 0
         
         for category in categories {
@@ -1205,8 +1167,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns the Category with the given tag.
-    func categoryForTag(_ tag: Int) -> Category?
-    {
+    func categoryForTag(_ tag: Int) -> Category? {
         let tag = Tag.indicesFromTag(tag)
         
         if tag.catIdx >= 0 && tag.catIdx < categories.count {
@@ -1218,8 +1179,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns the Item with the given tag.
-    func itemForTag(_ tag: Int) -> Item?
-    {
+    func itemForTag(_ tag: Int) -> Item? {
         let tag = Tag.indicesFromTag(tag)
         
         if tag.catIdx >= 0 && tag.catIdx < categories.count
@@ -1235,8 +1195,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns the object (Category or Item) with the given tag.
-    func objectForTag(_ tag: Int) -> ListObj?
-    {
+    func objectForTag(_ tag: Int) -> ListObj? {
         // get indices from tag
         let indices = Tag.indicesFromTag(tag)
         var obj: ListObj? = nil
@@ -1255,8 +1214,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns the Category for the given Item.
-    func categoryForObj(_ item: ListObj) -> Category?
-    {
+    func categoryForObj(_ item: ListObj) -> Category? {
         if item.categoryIndex >= 0 && item.categoryIndex < categories.count {
             return categories[item.categoryIndex]
         }
@@ -1266,8 +1224,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns a Category for the object at the given index path.
-    func categoryForIndexPath(_ indexPath: IndexPath) -> Category?
-    {
+    func categoryForIndexPath(_ indexPath: IndexPath) -> Category? {
         let obj = objectForIndexPath(indexPath)
         
         if obj is Category {
@@ -1278,8 +1235,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns an Item for the object at the given index path.
-    func itemForIndexPath(_ indexPath: IndexPath) -> Item?
-    {
+    func itemForIndexPath(_ indexPath: IndexPath) -> Item? {
         let obj = objectForIndexPath(indexPath)
         
         if obj is Item {
@@ -1290,8 +1246,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns the object for the given indexPath.
-    func objectForIndexPath(_ indexPath: IndexPath) -> ListObj?
-    {
+    func objectForIndexPath(_ indexPath: IndexPath) -> ListObj? {
         let row = (indexPath as NSIndexPath).row
         var index = -1
         
@@ -1313,6 +1268,7 @@ class List: NSObject, NSCoding
                         }
                     }
                 }
+                
                 index += 1
                 if index == row {
                     return category.addItem
@@ -1325,8 +1281,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns a display indexPath for a given tag.  The index path is calculated from the current category status plus ItemVC view status (show/hide status of completed/inactive items).
-    func displayIndexPathForTag(_ tag: Int) -> IndexPath?
-    {
+    func displayIndexPathForTag(_ tag: Int) -> IndexPath? {
         // get object from tag
         let obj = objectForTag(tag)
         
@@ -1340,8 +1295,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns the current index path for the given object.  The index path is calculated from the current category status plus ItemVC view status (show/hide status of completed/inactive items).
-    func displayIndexPathForObj(_ obj: ListObj) -> (indexPath: IndexPath?, isItem: Bool)
-    {
+    func displayIndexPathForObj(_ obj: ListObj) -> (indexPath: IndexPath?, isItem: Bool) {
         var index = -1
         
         for category in categories {
@@ -1375,8 +1329,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns a display indexPath to the given Category.
-    func displayIndexPathForCategory(_ category: Category) -> IndexPath?
-    {
+    func displayIndexPathForCategory(_ category: Category) -> IndexPath? {
         let result = displayIndexPathForObj(category)
         
         if result.isItem == false {
@@ -1388,8 +1341,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns a display indexPath to the given Item.
-    func displayIndexPathForItem(_ item: Item) -> IndexPath?
-    {
+    func displayIndexPathForItem(_ item: Item) -> IndexPath? {
         let result = displayIndexPathForObj(item)
         
         if result.isItem {
@@ -1401,8 +1353,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns a display indexPath for the AddItem cell in this category.
-    func displayIndexPathForAddItemInCategory(_ category: Category) -> IndexPath?
-    {
+    func displayIndexPathForAddItemInCategory(_ category: Category) -> IndexPath? {
         var lastItemInCat: ListObj? = nil
         
         if category.items.count > 0 {
@@ -1428,8 +1379,7 @@ class List: NSObject, NSCoding
     /// Returns the index paths for a Category at given index path, all of its Items and the AddItem row.
     /// If includeCategoryIndexPath is true, then the returned paths will also include the index path to category itself.
     /// Otherwise, the returned paths will consist of only the items and the AddItem row.
-    func displayIndexPathsForCategoryFromIndexPath(_ indexPath: IndexPath, includeCategoryAndAddItemIndexPaths: Bool) -> [IndexPath]
-    {
+    func displayIndexPathsForCategoryFromIndexPath(_ indexPath: IndexPath, includeCategoryAndAddItemIndexPaths: Bool) -> [IndexPath] {
         let category = categoryForIndexPath(indexPath)
         
         if category != nil {
@@ -1445,8 +1395,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns an array of display index paths for a category that is being expanded or collapsed.
-    func displayIndexPathsForCategory(_ category: Category, includeAddItemIndexPath: Bool) -> [IndexPath]
-    {
+    func displayIndexPathsForCategory(_ category: Category, includeAddItemIndexPath: Bool) -> [IndexPath] {
         var indexPaths = [IndexPath]()
         let catIndexPath = displayIndexPathForCategory(category)
         
@@ -1474,8 +1423,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns index paths for completed rows.
-    func indexPathsForCompletedRows() -> [IndexPath]
-    {
+    func indexPathsForCompletedRows() -> [IndexPath] {
         var indexPaths = [IndexPath]()
         var pos = -1
         
@@ -1501,8 +1449,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns index paths for inactive rows.
-    func indexPathsForInactiveRows() -> [IndexPath]
-    {
+    func indexPathsForInactiveRows() -> [IndexPath] {
         var indexPaths = [IndexPath]()
         var pos = -1
         
@@ -1531,8 +1478,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns the title of the object at the given index path.
-    func titleForObjectAtIndexPath(_ indexPath: IndexPath) -> String?
-    {
+    func titleForObjectAtIndexPath(_ indexPath: IndexPath) -> String? {
         let obj = objectForIndexPath(indexPath)
         
         if obj != nil {
@@ -1544,8 +1490,7 @@ class List: NSObject, NSCoding
     }
     
     /// Updates the category or item object's name.
-    func updateObjNameAtTag(_ tag: Int, name: String)
-    {
+    func updateObjNameAtTag(_ tag: Int, name: String) {
         let obj = objectForTag(tag)
         
         if obj != nil {
@@ -1555,16 +1500,14 @@ class List: NSObject, NSCoding
     }
     
     /// Determines if an Item should be displayed
-    func isDisplayedItem(_ item: Item) -> Bool
-    {
+    func isDisplayedItem(_ item: Item) -> Bool {
         return (item.state == .incomplete) ||
                (item.state == .complete && showCompletedItems) ||
                (item.state == .inactive && showInactiveItems)
     }
     
     /// Returns true if the given path is the last row displayed.
-    func indexPathIsLastRowDisplayed(_ indexPath: IndexPath) -> Bool
-    {
+    func indexPathIsLastRowDisplayed(_ indexPath: IndexPath) -> Bool {
         var lastObjRow: Int? = nil
         let lastCategory = categories[categories.count-1]
         
@@ -1583,8 +1526,7 @@ class List: NSObject, NSCoding
     }
     
     /// Returns the catagory and item indices for the given path.
-    func tagForIndexPath(_ indexPath: IndexPath) -> Tag
-    {
+    func tagForIndexPath(_ indexPath: IndexPath) -> Tag {
         let row = (indexPath as NSIndexPath).row
         var rowIndex = -1
         var catIndex = -1
@@ -1626,8 +1568,7 @@ class List: NSObject, NSCoding
     }
     
     /// Return the int tag for the object at the given index path.
-    func tagValueForIndexPath(_ indexPath: IndexPath) -> Int
-    {
+    func tagValueForIndexPath(_ indexPath: IndexPath) -> Int {
         let obj = objectForIndexPath(indexPath)
         
         if obj != nil {
@@ -1638,8 +1579,7 @@ class List: NSObject, NSCoding
     }
     
     // list
-    func htmlForPrinting(_ includePics: Bool) -> String
-    {
+    func htmlForPrinting(_ includePics: Bool) -> String {
         //let listLabel = NSLocalizedString("List", comment: "label for 'List:'")
         
         // header
@@ -1661,8 +1601,7 @@ class List: NSObject, NSCoding
     }
 
     // item count for this list
-    func itemCount() -> Int
-    {
+    func itemCount() -> Int {
         var count = 0
         
         for category in categories {
@@ -1679,8 +1618,7 @@ class List: NSObject, NSCoding
 //
 ////////////////////////////////////////////////////////////////
 
-class ListObj: NSObject
-{
+class ListObj: NSObject {
     var name: String { didSet { needToSave = true } }
     var categoryIndex: Int
     var itemIndex: Int
@@ -1695,8 +1633,7 @@ class ListObj: NSObject
     }
     
     // Designated initializer
-    init(name: String?)
-    {
+    init(name: String?) {
         if let name = name { self.name = name } else { self.name = "" }
         
         self.categoryIndex = 0
@@ -1707,8 +1644,7 @@ class ListObj: NSObject
         super.init()
     }
     
-    func tag() -> Int
-    {
+    func tag() -> Int {
         return Tag.tagFromIndices(categoryIndex, itmIdx: itemIndex)
     }
 }
@@ -1719,28 +1655,26 @@ class ListObj: NSObject
 //
 ////////////////////////////////////////////////////////////////
 
-class Category: ListObj, NSCoding
-{
+class Category: ListObj, NSCoding {
     var items = [Item]()
     var addItem = AddItem()
     var displayHeader: Bool = true { didSet { needToSave = true } }
     var expanded: Bool = true { didSet { needToSave = true } }
     var modificationDate: Date?
-    var categoryReference: CKReference?
+    var categoryReference: CKRecord.Reference?
     var categoryRecord: CKRecord?
     var isTutorialCategory = false
     var itemAddCount: Int32 = 0
     
     // Designated initializer - new category initializer
-    init(name: String, displayHeader: Bool, createRecord: Bool, tutorial: Bool = false)
-    {
+    init(name: String, displayHeader: Bool, createRecord: Bool, tutorial: Bool = false) {
         self.displayHeader = displayHeader
         self.isTutorialCategory = tutorial
         
         if createRecord {
             // new category needs a new record and reference
             categoryRecord = CKRecord.init(recordType: CategoriesRecordType)
-            categoryReference = CKReference.init(record: categoryRecord!, action: CKReferenceAction.deleteSelf)
+            categoryReference = CKRecord.Reference.init(record: categoryRecord!, action: CKRecord.Reference.Action.deleteSelf)
         }
         
         self.modificationDate = Date.init()
@@ -1749,8 +1683,7 @@ class Category: ListObj, NSCoding
     }
     
     // Designated initializer - memberwise initializer
-    init(name: String?, expanded: Bool?, displayHeader: Bool?, tutorial: Bool?, itemAddCount: Int32?, modificationDate: Date?, categoryReference: CKReference?, categoryRecord: CKRecord?, items: [Item]?)
-    {
+    init(name: String?, expanded: Bool?, displayHeader: Bool?, tutorial: Bool?, itemAddCount: Int32?, modificationDate: Date?, categoryReference: CKRecord.Reference?, categoryRecord: CKRecord?, items: [Item]?) {
         if let expanded          = expanded          { self.expanded           = expanded          } else { self.expanded           = true          }
         if let displayHeader     = displayHeader     { self.displayHeader      = displayHeader     } else { self.displayHeader      = true          }
         if let modificationDate  = modificationDate  { self.modificationDate   = modificationDate  } else { self.modificationDate   = Date.init()   }
@@ -1764,15 +1697,14 @@ class Category: ListObj, NSCoding
     }
     
     // Secondary initializer - for unarchiving a category object
-    convenience required init?(coder decoder: NSCoder)
-    {
+    convenience required init?(coder decoder: NSCoder) {
         let name = decoder.decodeObject(forKey: key_name)                           as? String
         let expanded          = decoder.decodeBool(forKey: key_expanded)
         let displayHeader     = decoder.decodeBool(forKey: key_displayHeader)
         let tutorial          = decoder.decodeBool(forKey: key_tutorial)
         let itemAddCount      = decoder.decodeCInt(forKey: key_itemAddCount)        as  Int32
         let modificationDate  = decoder.decodeObject(forKey: key_modificationDate)  as? Date
-        let categoryReference = decoder.decodeObject(forKey: key_categoryReference) as? CKReference
+        let categoryReference = decoder.decodeObject(forKey: key_categoryReference) as? CKRecord.Reference
         let categoryRecord    = decoder.decodeObject(forKey: key_categoryRecord)    as? CKRecord
         let items             = decoder.decodeObject(forKey: key_items)             as? [Item]
         
@@ -1787,8 +1719,7 @@ class Category: ListObj, NSCoding
                   items: items)
     }
     
-    func encode(with coder: NSCoder)
-    {
+    func encode(with coder: NSCoder) {
         self.modificationDate = Date.init()
         
         coder.encode(self.name,               forKey: key_name)
@@ -1803,8 +1734,7 @@ class Category: ListObj, NSCoding
     }
     
     // commits this category and its items to cloud storage
-    func saveToCloud(_ listReference: CKReference)
-    {
+    func saveToCloud(_ listReference: CKRecord.Reference) {
         // don't save the tutorial to the cloud
         if self.isTutorialCategory {
             return
@@ -1833,8 +1763,7 @@ class Category: ListObj, NSCoding
     }
     
     // commits just this category to cloud storage
-    func saveRecord(_ categoryRecord: CKRecord, listReference: CKReference)
-    {
+    func saveRecord(_ categoryRecord: CKRecord, listReference: CKRecord.Reference) {
         // don't save the tutorial to the cloud
         if self.isTutorialCategory {
             return
@@ -1851,16 +1780,15 @@ class Category: ListObj, NSCoding
     }
     
     // update this category from cloud storage
-    func updateFromRecord(_ record: CKRecord)
-    {
+    func updateFromRecord(_ record: CKRecord) {
         if let name          = record[key_name]          { self.name          = name as! String        }
         if let expanded      = record[key_expanded]      { self.expanded      = expanded as! Bool      }
         if let displayHeader = record[key_displayHeader] { self.displayHeader = displayHeader as! Bool }
         if let order         = record[key_order]         { self.order         = order as! Int          }
         
         if self.categoryRecord != nil {
-            let currentOwningListRef = self.categoryRecord!.object(forKey: key_owningList) as! CKReference
-            let newOwningListRef = record.object(forKey: key_owningList) as! CKReference
+            let currentOwningListRef = self.categoryRecord!.object(forKey: key_owningList) as! CKRecord.Reference
+            let newOwningListRef = record.object(forKey: key_owningList) as! CKRecord.Reference
             
             if currentOwningListRef.recordID.recordName != newOwningListRef.recordID.recordName {
                 // category has moved to another list, need to move the category in local list data
@@ -1907,7 +1835,7 @@ class Category: ListObj, NSCoding
         self.categoryRecord = record
         
         if self.categoryReference == nil {
-            self.categoryReference = CKReference.init(record: record, action: CKReferenceAction.deleteSelf)
+            self.categoryReference = CKRecord.Reference.init(record: record, action: CKRecord.Reference.Action.deleteSelf)
         }
         
         // category record is now updated
@@ -1916,15 +1844,13 @@ class Category: ListObj, NSCoding
         //print("updated category: \(category!.name)")
     }
     
-    func deleteFromCloud()
-    {
+    func deleteFromCloud() {
         self.needToDelete = true
         appDelegate.saveListData(async: true)
     }
     
     // deletes this category from the cloud
-    func deleteRecord(_ categoryRecord: CKRecord, database: CKDatabase)
-    {
+    func deleteRecord(_ categoryRecord: CKRecord, database: CKDatabase) {
         // don't save the tutorial to the cloud
         if self.isTutorialCategory {
             return
@@ -1942,16 +1868,14 @@ class Category: ListObj, NSCoding
         createDeleteRecord(database, recordName: categoryRecord.recordID.recordName, objectType: CategoriesRecordType, objectName: self.name)
     }
 
-    func deleteCategoryItemsFromCloudStorage()
-    {
+    func deleteCategoryItemsFromCloudStorage() {
         for item in items {
             item.needToDelete = true
         }
         appDelegate.saveListData(async: true)
     }
     
-    func deleteItems()
-    {
+    func deleteItems() {
         items.removeAll(keepingCapacity: true)
     }
     
@@ -1964,8 +1888,7 @@ class Category: ListObj, NSCoding
     }
     
     // updates the indices for all items in this category
-    func updateIndices(_ catIndex: Int)
-    {
+    func updateIndices(_ catIndex: Int) {
         self.categoryIndex = catIndex
         
         var i = 0
@@ -1990,8 +1913,7 @@ class Category: ListObj, NSCoding
     }
     
     // category
-    func htmlForPrinting(_ list: List, includePics: Bool) -> String
-    {
+    func htmlForPrinting(_ list: List, includePics: Bool) -> String {
         // header
         var html: String = ""
         
@@ -2030,8 +1952,7 @@ class Category: ListObj, NSCoding
 //
 ////////////////////////////////////////////////////////////////
 
-class Item: ListObj, NSCoding
-{
+class Item: ListObj, NSCoding {
     override var name: String {
         didSet {
             if name  != oldValue {
@@ -2042,9 +1963,10 @@ class Item: ListObj, NSCoding
             }
         }
     }
+    
     var state: ItemState        { didSet { if state != oldValue { needToSave = true; modifiedBy = UIDevice.current.name; modifiedDate = Date.init() } } }
     var note: String            { didSet { if note  != oldValue { needToSave = true; modifiedBy = UIDevice.current.name; modifiedDate = Date.init() } } }
-    var itemReference: CKReference?
+    var itemReference: CKRecord.Reference?
     var itemRecord: CKRecord?
     var imageAsset: ImageAsset?
     //var isTutorialItem = false
@@ -2067,8 +1989,7 @@ class Item: ListObj, NSCoding
     }
     
     // Designated initializer - new item initializer
-    init(name: String, state: ItemState, createRecord: Bool/*, tutorial: Bool = false*/)
-    {
+    init(name: String, state: ItemState, createRecord: Bool/*, tutorial: Bool = false*/) {
         self.state = state
         self.note = ""
         self.imageAsset = nil
@@ -2082,7 +2003,7 @@ class Item: ListObj, NSCoding
         if createRecord {
             // a new item needs a new cloud record
             itemRecord = CKRecord.init(recordType: ItemsRecordType)
-            itemReference = CKReference.init(record: itemRecord!, action: CKReferenceAction.deleteSelf)
+            itemReference = CKRecord.Reference.init(record: itemRecord!, action: CKRecord.Reference.Action.deleteSelf)
             imageAsset = ImageAsset(itemName: name, itemReference: itemReference!)
             createdBy = UIDevice.current.name
             modifiedBy = UIDevice.current.name
@@ -2098,8 +2019,7 @@ class Item: ListObj, NSCoding
     }
 
     // Designated memberwise initializer
-    init(name: String?, note: String?, imageAsset: ImageAsset?, state: ItemState, /*tutorial: Bool?,*/ itemRecord: CKRecord?, itemReference: CKReference?, createdBy: String?, createdDate: Date?, modifiedBy: String?, modifiedDate: Date?, imageModifiedDate: Date?)
-    {
+    init(name: String?, note: String?, imageAsset: ImageAsset?, state: ItemState, /*tutorial: Bool?,*/ itemRecord: CKRecord?, itemReference: CKRecord.Reference?, createdBy: String?, createdDate: Date?, modifiedBy: String?, modifiedDate: Date?, imageModifiedDate: Date?) {
         if let note               = note              { self.note              = note              } else { self.note              = ""                                                                          }
         //if let tutorial           = tutorial          { self.isTutorialItem    = tutorial          } else { self.isTutorialItem    = false                                                                       }
         if let itemRecord         = itemRecord        { self.itemRecord        = itemRecord        } else { self.itemRecord        = nil                                                                         }
@@ -2108,7 +2028,7 @@ class Item: ListObj, NSCoding
         if let modifiedBy         = modifiedBy        { self.modifiedBy        = modifiedBy        } else { self.modifiedBy        = UIDevice.current.name                                                       }
         if let modifiedDate       = modifiedDate      { self.modifiedDate      = modifiedDate      } else { self.modifiedDate      = Date.init(timeIntervalSince1970: 0)                                         }
         if let imageModifiedDate  = imageModifiedDate { self.imageModifiedDate = imageModifiedDate } else { self.imageModifiedDate = Date.init(timeIntervalSince1970: 0)                                         }
-        if let itemReference      = itemReference     { self.itemReference     = itemReference     } else { self.itemReference     = CKReference.init(record: itemRecord!, action: CKReferenceAction.deleteSelf) }
+        if let itemReference      = itemReference     { self.itemReference     = itemReference     } else { self.itemReference     = CKRecord.Reference.init(record: itemRecord!, action: CKRecord.Reference.Action.deleteSelf) }
         if let imageAsset         = imageAsset {
             self.imageAsset = imageAsset
             self.imageAsset!.itemName = name
@@ -2124,8 +2044,7 @@ class Item: ListObj, NSCoding
     }
     
     // Secondary initializer - for unarchiving an item object
-    convenience required init?(coder decoder: NSCoder)
-    {
+    convenience required init?(coder decoder: NSCoder) {
         let name              = decoder.decodeObject(forKey: key_name)              as? String
         let note              = decoder.decodeObject(forKey: key_note)              as? String
         let imageAsset        = decoder.decodeObject(forKey: key_imageAsset)        as? ImageAsset
@@ -2135,7 +2054,7 @@ class Item: ListObj, NSCoding
         let modifiedDate      = decoder.decodeObject(forKey: key_modifiedDate)      as? Date
         let imageModifiedDate = decoder.decodeObject(forKey: key_imageModifiedDate) as? Date
         let itemRecord        = decoder.decodeObject(forKey: key_itemRecord)        as? CKRecord
-        let itemReference     = decoder.decodeObject(forKey: key_itemReference)     as? CKReference
+        let itemReference     = decoder.decodeObject(forKey: key_itemReference)     as? CKRecord.Reference
         let state             = decoder.decodeCInt(forKey: key_state)
         let itemState         = state == 0 ? ItemState.inactive : state == 1 ? ItemState.incomplete : ItemState.complete
         
@@ -2153,8 +2072,7 @@ class Item: ListObj, NSCoding
                   imageModifiedDate: imageModifiedDate)
     }
     
-    func encode(with coder: NSCoder)
-    {
+    func encode(with coder: NSCoder) {
         coder.encode(self.name,              forKey: key_name)
         coder.encode(self.note,              forKey: key_note)
         coder.encode(self.imageAsset,        forKey: key_imageAsset)
@@ -2169,8 +2087,7 @@ class Item: ListObj, NSCoding
     }
     
     // commits this item change to cloud storage
-    func saveToCloud(_ categoryReference: CKReference)
-    {
+    func saveToCloud(_ categoryReference: CKRecord.Reference) {
         if let database = appDelegate.privateDatabase {
             if needToDelete {
                 deleteRecord(itemRecord!, database: database)
@@ -2189,8 +2106,7 @@ class Item: ListObj, NSCoding
     }
     
     // cloud storage method for this item
-    func saveRecord(_ itemRecord: CKRecord, categoryReference: CKReference)
-    {
+    func saveRecord(_ itemRecord: CKRecord, categoryReference: CKRecord.Reference) {
         // don't save the tutorial to the cloud
         // if self.isTutorialItem {
         //    return
@@ -2212,33 +2128,31 @@ class Item: ListObj, NSCoding
     }
     
     // update this item from cloud storage
-    func updateFromRecord(_ record: CKRecord)
-    {
+    func updateFromRecord(_ record: CKRecord) {
         if let itemState = record[key_state] as? Int {
             self.state = itemState == 0 ? ItemState.inactive : itemState == 1 ? ItemState.incomplete : ItemState.complete
         } else {
             self.state = ItemState.incomplete
         }
         
-        if let name              = record[key_name]              { self.name              = name as! String              }
-        if let note              = record[key_note]              { self.note              = note as! String              }
-        if let order             = record[key_order]             { self.order             = order as! Int                }
-        if let createdBy         = record[key_createdBy]         { self.createdBy         = createdBy as! String         }
+        if let name              = record[key_name]              { self.name              = name as! String            }
+        if let note              = record[key_note]              { self.note              = note as! String            }
+        if let order             = record[key_order]             { self.order             = order as! Int              }
+        if let createdBy         = record[key_createdBy]         { self.createdBy         = createdBy as! String       }
         if let createdDate       = record[key_createdDate]       { self.createdDate       = createdDate as! Date       }
         if let modifiedDate      = record[key_modifiedDate]      { self.modifiedDate      = modifiedDate as! Date      }
         // modifiedBy is handled later
         
         // update item record, reference, and image asset (if needed)
         self.itemRecord = record
-        self.itemReference = CKReference.init(record: record, action: CKReferenceAction.deleteSelf)
+        self.itemReference = CKRecord.Reference.init(record: record, action: CKRecord.Reference.Action.deleteSelf)
         
         if self.imageAsset == nil {
             self.imageAsset = ImageAsset(itemName: self.name, itemReference: itemReference!)
         }
         
         // if the cloud imageModifiedDate is newer than local then we need to schedule the imageAsset for this item to be pulled
-        if let imageModifiedDate = record[key_imageModifiedDate] as? Date
-        {
+        if let imageModifiedDate = record[key_imageModifiedDate] as? Date {
             if imageModifiedDate > self.imageModifiedDate || (imageModifiedDate == self.imageModifiedDate &&
                                                               imageModifiedDate != Date.init(timeIntervalSince1970: 0) &&
                                                               self.imageAsset?.image == nil) {
@@ -2276,7 +2190,7 @@ class Item: ListObj, NSCoding
             // delete item from current category
             if currentCategory != nil {
                 //currentCategory!.items.removeObject(self)
-                let index = currentCategory!.items.index(of: self)
+                let index = currentCategory!.items.firstIndex(of: self)
                 if index != nil {
                     currentCategory!.items.remove(at: index!)
                     print("Item Move: deleted \(self.name) from \(currentCategory!.name)")
@@ -2300,8 +2214,7 @@ class Item: ListObj, NSCoding
     }
     
     // deletes this item from the cloud (any attached imageAsset will also be deleted)
-    func deleteRecord(_ itemRecord: CKRecord, database: CKDatabase)
-    {
+    func deleteRecord(_ itemRecord: CKRecord, database: CKDatabase) {
         // don't save the tutorial to the cloud
         // if self.isTutorialItem {
         //    return
@@ -2319,8 +2232,7 @@ class Item: ListObj, NSCoding
         createDeleteRecord(database, recordName: itemRecord.recordID.recordName, objectType: ItemsRecordType, objectName: self.name)
     }
     
-    func deleteFromCloud()
-    {
+    func deleteFromCloud() {
         self.needToDelete = true
         appDelegate.saveListData(async: true)
     }
@@ -2331,8 +2243,7 @@ class Item: ListObj, NSCoding
     }
     
     // item
-    func htmlForPrinting(_ includePics: Bool) -> String
-    {
+    func htmlForPrinting(_ includePics: Bool) -> String {
         var html = ""
         
         // state
@@ -2352,7 +2263,7 @@ class Item: ListObj, NSCoding
         }
         
         // note
-        if appDelegate.printNotes && self.note.characters.count > 0 {
+        if appDelegate.printNotes && self.note.count > 0 {
             html += "<tr><td></td><td><div class='tab'><font size='2'; color='gray'>\(self.note)</font></div></td></tr>"
         }
         
@@ -2360,7 +2271,7 @@ class Item: ListObj, NSCoding
         if appDelegate.printNotes && includePics {
             if let image = imageAsset?.image {
                 let resizedImage = resizeImage(image, newWidth: 120)
-                let imageData = UIImageJPEGRepresentation(resizedImage, jpegCompressionQuality)
+                let imageData = resizedImage.jpegData(compressionQuality: jpegCompressionQuality)
                 if let imageData = imageData {
                     let base64String = imageData.base64EncodedString(options: .lineLength64Characters)
                     html += "<tr><td></td><td><b><img src='data:image/jpeg;base64,\(base64String)' width='120' height='90' align='left' border='0' alt='Item Image' ></b></td></tr>"
@@ -2371,8 +2282,7 @@ class Item: ListObj, NSCoding
         return html
     }
     
-    func setImage(_ image: UIImage?)
-    {
+    func setImage(_ image: UIImage?) {
         if imageAsset == nil {
             print("******* ERROR: imageAsset for \(self.name) is nil!!! *******")
             return
@@ -2386,13 +2296,11 @@ class Item: ListObj, NSCoding
         }
     }
     
-    func getImage() -> UIImage?
-    {
+    func getImage() -> UIImage? {
         return imageAsset?.getItemImage()
     }
     
-    func addImageAsset() -> ImageAsset?
-    {
+    func addImageAsset() -> ImageAsset? {
         var imageAsset: ImageAsset?
         
         if self.itemReference != nil {
@@ -2410,14 +2318,13 @@ class Item: ListObj, NSCoding
 //
 ////////////////////////////////////////////////////////////////
 
-class ImageAsset: NSObject, NSCoding
-{
+class ImageAsset: NSObject, NSCoding {
     var itemName: String!
     var image: UIImage?
     var imageData: Data?
     var imageGUID: String
     var imageFileURL: URL?
-    var itemReference: CKReference?
+    var itemReference: CKRecord.Reference?
     var imageAsset: CKAsset?
     var imageRecord: CKRecord
     var modifiedDate: Date   {    // established locally - saved to cloud
@@ -2432,8 +2339,7 @@ class ImageAsset: NSObject, NSCoding
     var needToDelete: Bool
     
     // Designated initializer - new item initializer
-    init(itemName: String?, itemReference: CKReference)
-    {
+    init(itemName: String?, itemReference: CKRecord.Reference) {
         var name = ""
         if itemName != nil {
             name = itemName!
@@ -2453,8 +2359,7 @@ class ImageAsset: NSObject, NSCoding
     }
     
     // Designated memberwise initializer
-    init(itemName: String?, imageData: Data?, imageGUID: String?, imageAsset: CKAsset?, itemReference: CKReference?, imageRecord: CKRecord?, modifiedDate: Date?)
-    {
+    init(itemName: String?, imageData: Data?, imageGUID: String?, imageAsset: CKAsset?, itemReference: CKRecord.Reference?, imageRecord: CKRecord?, modifiedDate: Date?) {
         if let itemName      = itemName      { self.itemName      = itemName      } else { self.itemName      = ""                                          }
         if let imageData     = imageData     { self.imageData     = imageData     } else { self.imageData     = nil                                         }
         if let imageGUID     = imageGUID     { self.imageGUID     = imageGUID     } else { self.imageGUID     = UUID().uuidString                         }
@@ -2480,8 +2385,7 @@ class ImageAsset: NSObject, NSCoding
     }
     
     // encoder
-    func encode(with coder: NSCoder)
-    {
+    func encode(with coder: NSCoder) {
         coder.encode(self.itemName,      forKey: key_itemName)
         coder.encode(self.imageGUID,     forKey: key_imageGUID)
         coder.encode(self.itemReference, forKey: key_itemReference)
@@ -2493,18 +2397,17 @@ class ImageAsset: NSObject, NSCoding
         if image != nil && imageData == nil {
             // if image came from cloud data then we have an image but no image data
             // so need a one-time conversion of image to JPEG NSData and encode
-            imageData = UIImageJPEGRepresentation(image!, jpegCompressionQuality)
-            print("imageAsset - converted image to image data for encoding: \(itemName)")
+            imageData = image!.jpegData(compressionQuality: jpegCompressionQuality)
+            print("imageAsset - converted image to image data for encoding: \(String(describing: itemName))")
         }
         coder.encode(self.imageData,     forKey: key_imageData)
     }
     
     // decoder - Secondary initializer - for unarchiving an ImageAsset object
-    convenience required init?(coder decoder: NSCoder)
-    {
+    convenience required init?(coder decoder: NSCoder) {
         let itemName      = decoder.decodeObject(forKey: key_name)          as? String
         let imageGUID     = decoder.decodeObject(forKey: key_imageGUID)     as? String
-        let itemReference = decoder.decodeObject(forKey: key_itemReference) as? CKReference
+        let itemReference = decoder.decodeObject(forKey: key_itemReference) as? CKRecord.Reference
         let imageAsset    = decoder.decodeObject(forKey: key_imageAsset)    as? CKAsset
         let imageRecord   = decoder.decodeObject(forKey: key_imageRecord)   as? CKRecord
         let modifiedDate  = decoder.decodeObject(forKey: key_modifiedDate)  as? Date
@@ -2520,8 +2423,7 @@ class ImageAsset: NSObject, NSCoding
     }
     
     // commits the image to cloud storage (if needed)
-    func saveToCloud(_ itemReference: CKReference)
-    {
+    func saveToCloud(_ itemReference: CKRecord.Reference) {
         if needToSave {
             saveRecord(imageRecord, itemReference: itemReference)
         } else if needToDelete {
@@ -2530,8 +2432,7 @@ class ImageAsset: NSObject, NSCoding
     }
     
     // cloud storage method for this image
-    func saveRecord(_ imageRecord: CKRecord, itemReference: CKReference)
-    {
+    func saveRecord(_ imageRecord: CKRecord, itemReference: CKRecord.Reference) {
         imageRecord[key_itemName]      = self.itemName as CKRecordValue?
         imageRecord[key_imageGUID]     = self.imageGUID as CKRecordValue?
         imageRecord[key_owningItem]    = itemReference
@@ -2544,8 +2445,7 @@ class ImageAsset: NSObject, NSCoding
     
     // deletes the image from the cloud by setting the
     // image asset to nil in the imageRecord and updating
-    func deleteRecord(_ imageRecord: CKRecord)
-    {
+    func deleteRecord(_ imageRecord: CKRecord) {
         imageRecord[key_modifiedDate]  = self.modifiedDate as CKRecordValue?
         imageRecord[key_imageAsset]    = nil
         
@@ -2554,8 +2454,7 @@ class ImageAsset: NSObject, NSCoding
     }
 
     // update this image from cloud storage
-    func updateFromRecord(_ record: CKRecord)
-    {
+    func updateFromRecord(_ record: CKRecord) {
         // does the item need to be notified when the imageAsset is updated???
         /*
         if let item = getItemFromReference(record) {
@@ -2563,11 +2462,11 @@ class ImageAsset: NSObject, NSCoding
         }
         */
         
-        if let itemName      = record[key_itemName]     { self.itemName      = itemName      as! String      }
+        if let itemName      = record[key_itemName]     { self.itemName      = (itemName      as! String)      }
         if let imageGUID     = record[key_imageGUID]    { self.imageGUID     = imageGUID     as! String      }
-        if let itemReference = record[key_owningItem]   { self.itemReference = itemReference as? CKReference }
+        if let itemReference = record[key_owningItem]   { self.itemReference = itemReference as? CKRecord.Reference }
         if let imageAsset    = record[key_imageAsset]   { self.imageAsset    = imageAsset    as? CKAsset     }
-        if let modifiedDate  = record[key_modifiedDate] { self.modifiedDate  = modifiedDate  as! Date      }
+        if let modifiedDate  = record[key_modifiedDate] { self.modifiedDate  = modifiedDate  as! Date        }
         
         // check date values after update from cloud record - reset if needed
         if self.modifiedDate.compare(Date.init(timeIntervalSince1970: 0)) == ComparisonResult.orderedSame {
@@ -2575,7 +2474,7 @@ class ImageAsset: NSObject, NSCoding
         }
         
         // unwrap the image from the asset
-        if let path = imageAsset?.fileURL.path {
+        if let path = imageAsset?.fileURL!.path {
             let image = UIImage(contentsOfFile: path)
             self.image = image
             print("ImageAsset.updateFromRecord: got image update for \(imageGUID)...")
@@ -2587,20 +2486,18 @@ class ImageAsset: NSObject, NSCoding
         needToSave = false
     }
     
-    func deleteFromCloud()
-    {
+    func deleteFromCloud() {
         self.needToDelete = true
         appDelegate.saveListData(async: true)
     }
     
     // writes the image to local file for uploading to cloud
-    func setItemImage(_ image: UIImage?) -> Bool
-    {
+    func setItemImage(_ image: UIImage?) -> Bool {
         var imageWasUpdated = false
         self.needToSave = false
         
         if self.image !== image {
-            print("setItemImage - new image is different than old: \(itemName)")
+            print("setItemImage - new image is different than old: \(String(describing: itemName))")
             self.image = image
             imageWasUpdated = true
             
@@ -2611,7 +2508,7 @@ class ImageAsset: NSObject, NSCoding
                     self.imageFileURL = URL(fileURLWithPath: docsDir.appendingPathComponent(self.imageGUID + ".png"))
                     
                     //try UIImagePNGRepresentation(image!)!.writeToURL(imageFileURL!, options: .AtomicWrite)        // without compression
-                    self.imageData = UIImageJPEGRepresentation(image!, jpegCompressionQuality)                      // compress to JPG - imageData is used for local storage
+                    self.imageData = image!.jpegData(compressionQuality: jpegCompressionQuality)                      // compress to JPG - imageData is used for local storage
                     try self.imageData!.write(to: imageFileURL!, options: .atomicWrite)                            // write compressed file
                     
                     self.imageAsset = CKAsset(fileURL: imageFileURL!)
@@ -2631,14 +2528,12 @@ class ImageAsset: NSObject, NSCoding
         return imageWasUpdated
     }
     
-    func getItemImage() -> UIImage?
-    {
+    func getItemImage() -> UIImage? {
         return self.image
     }
     
     // called after the image file is uploaded to cloud storage
-    func deleteImageFile()
-    {
+    func deleteImageFile() {
         if self.imageFileURL != nil {
             let fileManager = FileManager.default
             
@@ -2662,8 +2557,7 @@ class ImageAsset: NSObject, NSCoding
 //
 ////////////////////////////////////////////////////////////////
 
-class AddItem: ListObj
-{
+class AddItem: ListObj {
     // designated initializer for an AddItem
     init()
     {
@@ -2677,8 +2571,7 @@ class AddItem: ListObj
 //
 ////////////////////////////////////////////////////////////////
 
-struct Tag
-{
+struct Tag {
     var catIdx: Int
     var itmIdx: Int
     
@@ -2696,13 +2589,11 @@ struct Tag
         return Tag.tagFromIndices(self.catIdx, itmIdx: self.itmIdx)
     }
     
-    static func tagFromIndices(_ catIdx: Int, itmIdx: Int) -> Int
-    {
+    static func tagFromIndices(_ catIdx: Int, itmIdx: Int) -> Int {
         return catIdx * kItemIndexMax + itmIdx
     }
     
-    static func indicesFromTag(_ tag: Int) -> (catIdx: Int, itmIdx: Int)
-    {
+    static func indicesFromTag(_ tag: Int) -> (catIdx: Int, itmIdx: Int) {
         let cIdx = tag / kItemIndexMax
         return (cIdx, tag - (cIdx * kItemIndexMax))
     }
