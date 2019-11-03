@@ -11,6 +11,8 @@
 		B02174D21C6D57110087D5A3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B02174D41C6D57110087D5A3 /* Localizable.strings */; };
 		B02597281CE242E100615138 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = B02597271CE242E100615138 /* MBProgressHUD.m */; };
 		B02BBCEE1CA7069F00030822 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B02BBCED1CA7069F00030822 /* StoreKit.framework */; };
+		B02CEAE3236F2EC700989FB3 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02CEAE2236F2EC700989FB3 /* Utilities.swift */; };
+		B02CEAE5236F2F1400989FB3 /* HUDControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02CEAE4236F2F1400989FB3 /* HUDControl.swift */; };
 		B03C467B1C66F21400B66CBD /* ItemDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */; };
 		B03C467D1C66F34D00B66CBD /* ItemDetailPresentationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */; };
 		B03C467F1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */; };
@@ -49,6 +51,8 @@
 		B0B3E3E51D6CF7B3001D4395 /* ModelClassTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B3E3E41D6CF7B3001D4395 /* ModelClassTests.swift */; };
 		B0EC54D61CBFF5BD0017553B /* RealListProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */; };
 		B0EC54D81CBFF7100017553B /* IAPHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EC54D71CBFF7100017553B /* IAPHelper.swift */; };
+		B0EFB183236E663E00927598 /* CloudCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EFB182236E663E00927598 /* CloudCoordinator.swift */; };
+		B0EFB185236E66BE00927598 /* DataPersistenceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EFB184236E66BE00927598 /* DataPersistenceCoordinator.swift */; };
 		B0FA02E01D3FE14000B9A4EF /* RefreshContents.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0FA02DF1D3FE14000B9A4EF /* RefreshContents.xib */; };
 		B0FF8C351C4AE2B000C0A33C /* AddItemCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */; };
 		B0FF8C371C4AE58900C0A33C /* AddListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0FF8C361C4AE58900C0A33C /* AddListCell.swift */; };
@@ -92,6 +96,8 @@
 		B02597261CE242E100615138 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		B02597271CE242E100615138 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
 		B02BBCED1CA7069F00030822 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		B02CEAE2236F2EC700989FB3 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		B02CEAE4236F2F1400989FB3 /* HUDControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDControl.swift; sourceTree = "<group>"; };
 		B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemDetailViewController.swift; sourceTree = "<group>"; };
 		B03C467C1C66F34D00B66CBD /* ItemDetailPresentationController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailPresentationController.swift; path = ../ItemDetailPresentationController.swift; sourceTree = "<group>"; };
 		B03C467E1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = ItemDetailTransitioningDelegate.swift; path = ../ItemDetailTransitioningDelegate.swift; sourceTree = "<group>"; };
@@ -136,6 +142,8 @@
 		B0B3E3E41D6CF7B3001D4395 /* ModelClassTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelClassTests.swift; sourceTree = "<group>"; };
 		B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealListProducts.swift; sourceTree = "<group>"; };
 		B0EC54D71CBFF7100017553B /* IAPHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IAPHelper.swift; path = ../IAPHelper.swift; sourceTree = "<group>"; };
+		B0EFB182236E663E00927598 /* CloudCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCoordinator.swift; sourceTree = "<group>"; };
+		B0EFB184236E66BE00927598 /* DataPersistenceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPersistenceCoordinator.swift; sourceTree = "<group>"; };
 		B0FA02DF1D3FE14000B9A4EF /* RefreshContents.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RefreshContents.xib; sourceTree = "<group>"; };
 		B0FF8C341C4AE2B000C0A33C /* AddItemCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddItemCell.swift; sourceTree = "<group>"; };
 		B0FF8C361C4AE58900C0A33C /* AddListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddListCell.swift; sourceTree = "<group>"; };
@@ -304,6 +312,8 @@
 			isa = PBXGroup;
 			children = (
 				B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */,
+				B0EFB182236E663E00927598 /* CloudCoordinator.swift */,
+				B0EFB184236E66BE00927598 /* DataPersistenceCoordinator.swift */,
 				B0A302871C35915B00F6FB44 /* ListData.swift */,
 				B0A3027D1C34A1C800F6FB44 /* ListViewController.swift */,
 				B0A3027F1C34A31C00F6FB44 /* ItemViewController.swift */,
@@ -313,6 +323,8 @@
 				B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */,
 				B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */,
 				B01326DE236E1F4B004659F6 /* SubscriptionManager.swift */,
+				B02CEAE4236F2F1400989FB3 /* HUDControl.swift */,
+				B02CEAE2236F2EC700989FB3 /* Utilities.swift */,
 			);
 			name = "Main Source Files";
 			sourceTree = "<group>";
@@ -479,8 +491,10 @@
 				B03C467D1C66F34D00B66CBD /* ItemDetailPresentationController.swift in Sources */,
 				B0930D701C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift in Sources */,
 				B0930D6E1C652E16007EBAA0 /* SettingsAnimatedTransitioning.swift in Sources */,
+				B02CEAE3236F2EC700989FB3 /* Utilities.swift in Sources */,
 				B03C467B1C66F21400B66CBD /* ItemDetailViewController.swift in Sources */,
 				B07AB8A21C6BCF99001F8F81 /* CheckBox.swift in Sources */,
+				B0EFB183236E663E00927598 /* CloudCoordinator.swift in Sources */,
 				B0A302881C35915B00F6FB44 /* ListData.swift in Sources */,
 				B041E8561CDA4DC7005C4D16 /* UIAppViewController.swift in Sources */,
 				B0EC54D61CBFF5BD0017553B /* RealListProducts.swift in Sources */,
@@ -490,6 +504,7 @@
 				B07828981C36000B009D356F /* ListCell.swift in Sources */,
 				B0A1BCDF1CC4142700F4F0B1 /* UpgradeViewController.swift in Sources */,
 				B0A1BCDB1CC2C6C700F4F0B1 /* AppSettingsViewController.swift in Sources */,
+				B02CEAE5236F2F1400989FB3 /* HUDControl.swift in Sources */,
 				B078289A1C360020009D356F /* ItemCell.swift in Sources */,
 				B0EC54D81CBFF7100017553B /* IAPHelper.swift in Sources */,
 				B0FF8C351C4AE2B000C0A33C /* AddItemCell.swift in Sources */,
@@ -501,6 +516,7 @@
 				B07CCC7E1CA1A76500CBCFC1 /* AboutViewController.swift in Sources */,
 				B041E8521CDA4CC6005C4D16 /* Reachability.swift in Sources */,
 				B03C467F1C66F3BA00B66CBD /* ItemDetailTransitioningDelegate.swift in Sources */,
+				B0EFB185236E66BE00927598 /* DataPersistenceCoordinator.swift in Sources */,
 				B02597281CE242E100615138 /* MBProgressHUD.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -688,6 +704,7 @@
 				CODE_SIGN_ENTITLEMENTS = EnList.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 100;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
 				INFOPLIST_FILE = ListApp/Info.plist;
@@ -713,6 +730,7 @@
 				CODE_SIGN_ENTITLEMENTS = EnList.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 100;
 				DEFINES_MODULE = YES;
 				INFOPLIST_FILE = ListApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;

@@ -56,7 +56,7 @@ class AboutViewController: UIAppViewController {
     }
     
     func updateCloudStatus() {
-        if appDelegate.iCloudIsAvailable() {
+        if CloudCoordinator.iCloudIsAvailable() {
             cloudButton.setImage(UIImage(named: "Cloud_check"), for: UIControl.State())
         } else {
             cloudButton.setImage(UIImage(named: "Cloud"), for: UIControl.State())

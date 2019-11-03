@@ -712,7 +712,7 @@ class List: NSObject, NSCoding {
         listRecord.setObject(self.order as CKRecordValue?,              forKey: key_order)
         
         // add this record to the batch record array for updating
-        appDelegate.addToUpdateRecords(listRecord, obj: self)
+        DataPersistenceCoordinator.addToUpdateRecords(listRecord, obj: self)
     }
     
     // update this list from cloud storage
@@ -734,7 +734,7 @@ class List: NSObject, NSCoding {
     
     func deleteFromCloud() {
         self.needToDelete = true
-        appDelegate.saveListData(async: true)
+        DataPersistenceCoordinator.saveListData(async: true)
     }
     
     // deletes this list from the cloud
@@ -1769,14 +1769,14 @@ class Category: ListObj, NSCoding {
             return
         }
         
-        categoryRecord.setObject(self.name as CKRecordValue?,          forKey: key_name)
-        categoryRecord.setObject(self.displayHeader as CKRecordValue?, forKey: key_displayHeader)
-        categoryRecord.setObject(self.expanded as CKRecordValue?,      forKey: key_expanded)
-        categoryRecord.setObject(listReference,      forKey: key_owningList)
-        categoryRecord.setObject(self.order as CKRecordValue?,         forKey: key_order)
+        categoryRecord.setObject(self.name as CKRecordValue?,           forKey: key_name)
+        categoryRecord.setObject(self.displayHeader as CKRecordValue?,  forKey: key_displayHeader)
+        categoryRecord.setObject(self.expanded as CKRecordValue?,       forKey: key_expanded)
+        categoryRecord.setObject(listReference,                         forKey: key_owningList)
+        categoryRecord.setObject(self.order as CKRecordValue?,          forKey: key_order)
         
         // add this record to the batch record array for updating
-        appDelegate.addToUpdateRecords(categoryRecord, obj: self)
+        DataPersistenceCoordinator.addToUpdateRecords(categoryRecord, obj: self)
     }
     
     // update this category from cloud storage
@@ -1846,7 +1846,7 @@ class Category: ListObj, NSCoding {
     
     func deleteFromCloud() {
         self.needToDelete = true
-        appDelegate.saveListData(async: true)
+        DataPersistenceCoordinator.saveListData(async: true)
     }
     
     // deletes this category from the cloud
@@ -1872,7 +1872,7 @@ class Category: ListObj, NSCoding {
         for item in items {
             item.needToDelete = true
         }
-        appDelegate.saveListData(async: true)
+        DataPersistenceCoordinator.saveListData(async: true)
     }
     
     func deleteItems() {
@@ -2124,7 +2124,7 @@ class Item: ListObj, NSCoding {
         itemRecord[key_imageModifiedDate] = self.imageModifiedDate as CKRecordValue?
         
         // add this record to the batch record array for updating
-        appDelegate.addToUpdateRecords(itemRecord, obj: self)
+        DataPersistenceCoordinator.addToUpdateRecords(itemRecord, obj: self)
     }
     
     // update this item from cloud storage
@@ -2160,7 +2160,7 @@ class Item: ListObj, NSCoding {
                 // add this imageAsset to the array needing fetching
                 if imageAsset != nil {
                     //print("ImageAsset.updateFromRecord - itemRecordID for \(self.name) was added to the itemReferences for image update...")
-                    appDelegate.addToItemReferences(self.itemReference!)
+                    DataPersistenceCoordinator.addToItemReferences(self.itemReference!)
                     //appDelegate.itemRecordIDs.append(record.recordID.name)
                 } else {
                     print("******* ERROR in item updateFromRecord - the imageAsset for this item is nil...!!!")
@@ -2234,7 +2234,7 @@ class Item: ListObj, NSCoding {
     
     func deleteFromCloud() {
         self.needToDelete = true
-        appDelegate.saveListData(async: true)
+        DataPersistenceCoordinator.saveListData(async: true)
     }
     
     func clearNeedToSave() {
@@ -2440,7 +2440,7 @@ class ImageAsset: NSObject, NSCoding {
         imageRecord[key_imageAsset]    = self.imageAsset
         
         // add this record to the batch record array for updating
-        appDelegate.addToUpdateRecords(imageRecord, obj: self)
+        DataPersistenceCoordinator.addToUpdateRecords(imageRecord, obj: self)
     }
     
     // deletes the image from the cloud by setting the
@@ -2450,7 +2450,7 @@ class ImageAsset: NSObject, NSCoding {
         imageRecord[key_imageAsset]    = nil
         
         // add this record to the batch record array for updating
-        appDelegate.addToUpdateRecords(imageRecord, obj: self)
+        DataPersistenceCoordinator.addToUpdateRecords(imageRecord, obj: self)
     }
 
     // update this image from cloud storage
@@ -2488,7 +2488,7 @@ class ImageAsset: NSObject, NSCoding {
     
     func deleteFromCloud() {
         self.needToDelete = true
-        appDelegate.saveListData(async: true)
+        DataPersistenceCoordinator.saveListData(async: true)
     }
     
     // writes the image to local file for uploading to cloud

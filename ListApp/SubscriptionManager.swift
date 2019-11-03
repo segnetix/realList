@@ -19,11 +19,11 @@ class SubscriptionManager {
     private static let imageSubID: CKSubscription.ID = "ImageSubscription"
     private static let deleteSubID: CKSubscription.ID = "DeleteSubscription"
 
-    typealias SubscriptionInfo = (recordType: String, subscriptionId: String)
+    private typealias SubscriptionInfo = (recordType: String, subscriptionId: String)
 
     /// Creates a clean set of subscriptions on the iCloud server for the user.
+    // Runs the set up code fully if either device has no record of setup or sub count is other than five.
     static func manageSubscriptions() {
-        guard !UserDefaults.standard.bool(forKey: key_subscribedToPrivateData) else { return }
         guard let database = appDelegate.privateDatabase else { return }
         
         // fetch any current subscriptions
@@ -34,8 +34,19 @@ class SubscriptionManager {
             } else {
                 print("**** subscription fetch error: \(error.debugDescription)")
             }
+            
+            // create new subs if we haven't already created or if we currently don't have 5
+            guard !UserDefaults.standard.bool(forKey: key_subscribedToPrivateData) ||
+                deleteSubscriptionIDs.count != 5 ||
+                error != nil
+            else { return }
+            
+            createNewSubscriptions(on: database, deleteSubscriptionIDs: deleteSubscriptionIDs)
         }
-        
+    }
+    
+    // deletes any current subs and creates new ones
+    private static func createNewSubscriptions(on database: CKDatabase, deleteSubscriptionIDs: [String]) {
         // delete any current subscriptions
         var deleteOperation: CKModifySubscriptionsOperation?
         if !deleteSubscriptionIDs.isEmpty {
@@ -53,7 +64,7 @@ class SubscriptionManager {
                 database.add(deleteOperation)
             }
         }
-
+        
         // create new subscriptions
         var subscriptions = [CKQuerySubscription]()
         subscriptions.append(createSubscription(with: SubscriptionInfo(ListsRecordType, listSubID)))
@@ -72,7 +83,7 @@ class SubscriptionManager {
             }
         }
         
-        // set QoS and dependency
+        // set QoS and dependency so delete completes before create runs
         createOperation.qualityOfService = .utility
         if let deleteOperation = deleteOperation {
             createOperation.addDependency(deleteOperation)
@@ -89,7 +100,6 @@ class SubscriptionManager {
     
     private static func createSubscription(with subscriptionInfo: SubscriptionInfo) -> CKQuerySubscription {
         let predicate = NSPredicate(format: "TRUEPREDICATE")
-        
         let info = CKSubscription.NotificationInfo()
         info.shouldSendContentAvailable = true
         

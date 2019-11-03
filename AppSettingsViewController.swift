@@ -48,7 +48,7 @@ class AppSettingsViewController: UIAppViewController {
         appDelegate.notesAutocorrection  = self.notesAutocorrectionSwitch.isOn
         appDelegate.picsInPrintAndEmail  = self.picsInPrintAndEmailSwitch.isOn
         
-        appDelegate.saveState(async: true)
+        DataPersistenceCoordinator.saveState(async: true)
         
         presentingViewController!.dismiss(animated: true, completion: nil)
     }

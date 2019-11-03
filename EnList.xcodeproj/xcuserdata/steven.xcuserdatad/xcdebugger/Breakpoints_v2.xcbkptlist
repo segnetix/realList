@@ -7,16 +7,16 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "D44E1A03-75E4-4044-9461-7E66B698767C"
+            uuid = "C97D4A88-9F85-4E78-B435-2B041E74A1F2"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "ListApp/AppDelegate.swift"
+            filePath = "ListApp/SubscriptionManager.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "581"
-            endingLineNumber = "581"
-            landmarkName = "processNotificationRecords()"
+            startingLineNumber = "44"
+            endingLineNumber = "44"
+            landmarkName = "manageSubscriptions()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -460,12 +460,10 @@ let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
 ////////////////////////////////////////////////////////////////
     
     @objc func close(_ sender: UIButton) {
-        //self.item.note = noteTextView.text
-        //self.item.setImage(imageView.image)
         self.itemVC.tableView.reloadData()
         
         if item.needToSave {
-            self.itemVC.appDelegate.saveListData(async: true)
+            DataPersistenceCoordinator.saveListData(async: true)
         }
         
         // handles resizing in case the keyboard was presented in the item detail view controller

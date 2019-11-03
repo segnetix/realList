@@ -60,7 +60,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     var longPressCellType: ItemViewCellType = .item
     let settingsTransitionDelegate = SettingsTransitioningDelegate()
     let itemDetailTransitionDelegate = ItemDetailTransitioningDelegate()
-    let appDelegate = UIApplication.shared.delegate as! AppDelegate
     var refreshControl : UIRefreshControl!
     
     // refresh view
@@ -211,12 +210,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         refreshCancelButton.isEnabled = true
         refreshCancelButton.alpha = 1.0
         refreshAnimation.alpha = 1.0
-        appDelegate.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
+        CloudCoordinator.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
     }
     
     @objc func cancelFetch(_ button: UIButton) {
         refreshLabel.text = "Canceled"
-        appDelegate.cancelCloudDataFetch()
+        CloudCoordinator.cancelCloudDataFetch()
     }
     
     func refreshEnd() {
@@ -588,11 +587,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
         
         // always run layout
-        runAfterDelay(0.5) {
+        Utilities.runAfterDelay(0.5) {
             self.layoutAnimated(true)
         }
         
-        appDelegate.saveListData(async: true)
+        DataPersistenceCoordinator.saveListData(async: true)
         
         return true
     }
@@ -820,7 +819,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 }
                 
                 // save expanded state change to the clould
-                appDelegate.saveListData(async: true)
+                DataPersistenceCoordinator.saveListData(async: true)
             } else if obj is Item {
                 if !inEditMode {
                     // not in edit mode so can present item detail view
@@ -1219,7 +1218,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             listVC.highlightList(listVC.selectionIndex)
         }
         
-        appDelegate.saveListData(async: true)
+        DataPersistenceCoordinator.saveListData(async: true)
     }
     
     @objc func scrollUpLoop() {
@@ -1718,7 +1717,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             item.state.next()
             
             // call saveListData - cloudOnly mode
-            appDelegate.saveListData(async: true)
+            DataPersistenceCoordinator.saveListData(async: true)
             
             // set item name text color
             if indexPath != nil {

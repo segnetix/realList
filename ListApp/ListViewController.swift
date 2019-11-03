@@ -144,12 +144,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         refreshCancelButton.isEnabled = true
         refreshCancelButton.alpha = 1.0
         refreshAnimation.alpha = 1.0
-        appDelegate.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
+        CloudCoordinator.fetchCloudData(refreshLabel, refreshEnd: refreshEnd)
     }
     
     @objc func cancelFetch(_ button: UIButton) {
         refreshLabel.text = "Canceled"
-        appDelegate.cancelCloudDataFetch()
+        CloudCoordinator.cancelCloudDataFetch()
     }
     
     func refreshEnd() {
@@ -369,7 +369,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         
         editingNewListName = false
         
-        appDelegate.saveListData(async: true)
+        DataPersistenceCoordinator.saveListData(async: true)
         
         return true
     }
@@ -662,7 +662,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         ListData.resetListOrderValues()
         
         // and save data changes locally and to the cloud
-        appDelegate.saveListData(async: true)
+        DataPersistenceCoordinator.saveListData(async: true)
     }
     
     // handle the gesture from the itemVC when moving an item to another list
@@ -790,7 +790,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
                     }
                     
                     // refresh view controllers and update indices
-                    appDelegate.refreshListData()
+                    DataPersistenceCoordinator.refreshListData()
                 }
             }
         }
@@ -909,7 +909,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
             
             highlightList(index)
             
-            appDelegate.saveState(async: true)
+            DataPersistenceCoordinator.saveState(async: true)
         }
     }
     
