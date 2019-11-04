@@ -841,6 +841,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
     @objc func infoButtonTapped() {
         let aboutVC = AboutViewController()
         aboutVC.listVC = self
+        aboutVC.modalPresentationStyle = .fullScreen
         present(aboutVC, animated: true, completion: nil)
     }
     

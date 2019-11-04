@@ -45,6 +45,7 @@ class AboutViewController: UIAppViewController {
                 let bundle = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
                 if let bundle = bundle {
                     version += " (" + bundle + ")"
+                    versionLabel.font = versionLabel.font.withSize(6)
                 }
             #endif
             
@@ -96,6 +97,30 @@ class AboutViewController: UIAppViewController {
 //            let success = UIApplication.shared.openURL(cloudSettings)
 //            UIApplication.shared.open(cloudSettings)
 //        }
+        
+        // use this to add a handler to open to app settings
+        func openSettings(alert: UIAlertAction!) {
+            if let url = URL.init(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            }
+        }
+
+        var message = "Please enable iCloud to let realList save lists in your iCloud account and share lists between devices."
+        if CloudCoordinator.iCloudIsAvailable() {
+            message = "Your iCloud account is all set for realList to save and share lists between devices."
+        }
+        
+        let alert = UIAlertController(title: "iCloud Settings",
+                                      message: message,
+                                      preferredStyle: .alert)
+//        alert.addAction(UIAlertAction(title: "Open Settings",
+//                                      style: UIAlertAction.Style.default,
+//                                      handler: openSettings))
+        alert.addAction(UIAlertAction(title: "OK",
+                                      style: UIAlertAction.Style.default,
+                                      handler: nil))
+
+        self.present(alert, animated: true, completion: nil)
     }
     
     @IBAction func goToNotificationSettings(_ sender: AnyObject) {
