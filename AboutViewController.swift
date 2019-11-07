@@ -29,8 +29,7 @@ class AboutViewController: UIAppViewController {
     var listVC: ListViewController?
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     
-    override func viewDidLoad()
-    {
+    override func viewDidLoad() {
         super.viewDidLoad()
         manager.delegate = self
         appDelegate.aboutViewController = self
@@ -45,7 +44,7 @@ class AboutViewController: UIAppViewController {
                 let bundle = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
                 if let bundle = bundle {
                     version += " (" + bundle + ")"
-                    versionLabel.font = versionLabel.font.withSize(6)
+                    versionLabel.font = versionLabel.font.withSize(12)
                 }
             #endif
             
@@ -73,14 +72,12 @@ class AboutViewController: UIAppViewController {
     }
     
     // callback function for network status change
-    override func reachabilityStatusChangeHandler(_ reachability: Reachability)
-    {
+    override func reachabilityStatusChangeHandler(_ reachability: Reachability) {
         super.reachabilityStatusChangeHandler(reachability)
         updateCloudStatus()
     }
     
-    override func didReceiveMemoryWarning()
-    {
+    override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
@@ -123,16 +120,10 @@ class AboutViewController: UIAppViewController {
         self.present(alert, animated: true, completion: nil)
     }
     
-    @IBAction func goToNotificationSettings(_ sender: AnyObject) {
-        if let appSettings = URL(string: UIApplication.openSettingsURLString) {
-            //let success = UIApplication.shared.openURL(appSettings)
-            UIApplication.shared.open(appSettings)
-        }
-    }
-    
     @IBAction func appSettings(_ sender: UIButton) {
         print("app settings")
         let appSettingsVC = AppSettingsViewController()
+        appSettingsVC.modalPresentationStyle = .fullScreen
         present(appSettingsVC, animated: true, completion: nil)
     }
     
@@ -141,23 +132,21 @@ class AboutViewController: UIAppViewController {
             // generates the tutorial and selects it
             listVC.generateTutorial()
             
-            // delay presentation of the itemVC until after dismissal of the About view
-            let delay = 0.20 * Double(NSEC_PER_SEC)
-            let time = DispatchTime.now() + Double(Int64(delay)) / Double(NSEC_PER_SEC)
-            
-            DispatchQueue.main.asyncAfter(deadline: time, execute: {
+            // present the tutorial in the listVC after dismissing the aboutVC
+            presentingViewController!.dismiss(animated: true) {
                 if let itemVC = listVC.delegate as? ItemViewController {
-                    listVC.splitViewController?.showDetailViewController(itemVC.navigationController!, sender: nil)
+                   listVC.splitViewController?.showDetailViewController(itemVC.navigationController!, sender: nil)
                 }
-            })
+            }
+        } else {
+            presentingViewController!.dismiss(animated: true, completion: nil)
         }
-        
-        presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
     @IBAction func upgrade(_ sender: UIButton) {
         print("upgrade...")
         let upgradeVC = UpgradeViewController()
+        upgradeVC.modalPresentationStyle = .fullScreen
         upgradeVC.aboutViewController = self
         present(upgradeVC, animated: true, completion: nil)
     }
