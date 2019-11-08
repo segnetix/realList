@@ -926,7 +926,7 @@ class ListClassTests: ModelClassTests
         let html = list.htmlForPrinting(false)
         
         // then
-        NSLog("html length = \(html.characters.count)")
+        NSLog("html length = \(html.count)")
         XCTAssertTrue(html.count > 0, "htmlForPrinting character count check")
     }
     
