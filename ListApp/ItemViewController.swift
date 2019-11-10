@@ -76,6 +76,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
+    var newItem: Item?
+    var newCategory: Category?
+    
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - Table set up methods
@@ -87,16 +90,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         manager.delegate = self
         
         CheckBox.itemVC = self      // assign CheckBox type property
-        
-        /*
-        if appDelegate.appIsUpgraded {
-            adBanner.delegate = nil
-            adBanner.removeFromSuperview()
-            adBanner.hidden = true
-        } else {
-            adBanner.delegate = self
-        }
-        */
         
         // Uncomment the following line to preserve selection between presentations
         //self.clearsSelectionOnViewWillAppear = false
@@ -110,8 +103,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 
         // settings button
         let settingsButton: UIButton = UIButton(type: UIButton.ButtonType.custom)
-        let settingsImage = UIImage(named: "Settings")
+        let settingsImage = UIImage(named: "Collapse Arrows")
         settingsButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
+        settingsButton.transform = CGAffineTransform(scaleX: 2, y: 3)
         if let settingsImage = settingsImage {
             let tintedImage = settingsImage.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
             settingsButton.setImage(tintedImage, for: UIControl.State())
@@ -527,8 +521,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
         
         inEditMode = false
-        editingNewCategoryName = false
-        editingNewItemName = false
         editModeIndexPath = nil
         
         resetCellViewTags()
@@ -563,21 +555,18 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         self.tableView.setEditing(false, animated: true)
 
         // delete the newly added item if user didn't create a name
-        if editingNewItemName
-        {
-            if textField.text!.trimmingCharacters(in: CharacterSet.whitespaces).isEmpty
-            {
+        if editingNewItemName {
+            if textField.text!.trimmingCharacters(in: CharacterSet.whitespaces).isEmpty {
                 // remove last item from category
-                list.categories[list.categories.count-1].items.removeLast()
-                self.tableView.reloadData()
-                list.updateIndices()
+                if let item = newItem, let category = list.categoryForObj(item) {
+                    category.items.removeLast()
+                    self.tableView.reloadData()
+                    list.updateIndices()
+                }
             }
             editingNewItemName = false
-        }
-        else if editingNewCategoryName
-        {
-            if textField.text!.trimmingCharacters(in: CharacterSet.whitespaces).isEmpty
-            {
+        } else if editingNewCategoryName {
+            if textField.text!.trimmingCharacters(in: CharacterSet.whitespaces).isEmpty {
                 // remove last category from list
                 list.categories.removeLast()
                 self.tableView.reloadData()
@@ -590,6 +579,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         Utilities.runAfterDelay(0.5) {
             self.layoutAnimated(true)
         }
+        
+        editingNewCategoryName = false
+        editingNewItemName = false
         
         DataPersistenceCoordinator.saveListData(async: true)
         
@@ -611,30 +603,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         if !inEditMode {
             layoutAnimated(true)
         }
-        
-        if (appDelegate.appIsUpgraded == false && category.isTutorialCategory == false && list.itemCount() >= kMaxItemCount) ||
-           (appDelegate.appIsUpgraded == false && category.isTutorialCategory && category.itemAddCount > 0)
-        {
-            let itemLimitTitle = NSLocalizedString("Item_Limit", comment: "Item Limit dialog title.")
-            let itemLimitMsg = String(format: NSLocalizedString("Item_Limit_Message", comment: "The free version of realList is limited to %i items per list.  Please upgrade or restore your purchase for unlimited items."), kMaxItemCount)
-            let okTitle = NSLocalizedString("OK", comment: "OK - to commit the action or dismiss a dialog.")
-            
-            // max item count will be exceeded
-            let alertVC = UIAlertController(
-                title: itemLimitTitle,
-                message: itemLimitMsg,
-                preferredStyle: .alert)
-            let okAction = UIAlertAction(title: okTitle, style: .default, handler: nil)
-            alertVC.addAction(okAction)
-            
-            present(alertVC, animated: true, completion: nil)
-            
-            return
-        }
-        
-        var newItem: Item? = nil
-        
+                
         newItem = list.addItem(category, name: "", state: ItemState.incomplete, updateIndices: true, createRecord: true)
+        newCategory = category
         
         // keep track of items added to this category for item limits in non-upgraded version
         if category.isTutorialCategory {
@@ -652,7 +623,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 if let cell = tableView.cellForRow(at: indexPath) as? ItemCell {
                     cell.itemName.isUserInteractionEnabled = true
                     cell.itemName.becomeFirstResponder()
-                    editingNewItemName = true
                 }
             }
         }
@@ -660,42 +630,44 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // scroll the editing cell into view if necessary
         let indexPath = list.displayIndexPathForAddItemInCategory(category)
         
-        if indexPath != nil {
+        if let indexPath = indexPath {
             //print("*** addItem indexPath row is \(indexPath!.row)")
-            if self.tableView.indexPathsForVisibleRows?.contains(indexPath!) == false {
+            if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false {
                 //print("*** addItem is not visible...")
-                self.tableView.scrollToRow(at: indexPath!, at: UITableView.ScrollPosition.bottom, animated: true)
+                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
             } else {
                 //print("*** addItem is visible...")
             }
         }
         
         inAddNewItemLoop = false
+        editingNewItemName = true
+        editingNewCategoryName = false
     }
     
     func addNewCategory() {
         guard list.categories.count > 0 else { print("*** ERROR: addNewCategory - list \(list.name) has no categories"); return }
-        var newCategory: Category
         
         if list.categories[0].displayHeader == false {
             // we will use the existing (hidden) category header
             newCategory = list.categories[0]
-            newCategory.displayHeader = true
+            newCategory?.displayHeader = true
             newCatIndexPath = IndexPath(row: 0, section: 0)
         } else  {
             // we need a new category
             newCategory = list.addCategory("", displayHeader: true, updateIndices: true, createRecord: true)
-            newCatIndexPath = list.displayIndexPathForCategory(newCategory)
+            if let category = newCategory {
+                newCatIndexPath = list.displayIndexPathForCategory(category)
+            }
         }
-        
+                
         list.updateIndices()
         self.tableView.reloadData()
         
         if let indexPath = newCatIndexPath {
             // need to scroll the target cell into view so the tags can be updated
-            if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false
-            {
-                self.tableView.scrollToRow(at: IndexPath(row: (indexPath as NSIndexPath).row, section: 0), at: UITableView.ScrollPosition.bottom, animated: false)
+            if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false {
+                self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
                 self.resetCellViewTags()
                 
                 // set up a selector event to fire when the new cell has scrolled into place
@@ -708,11 +680,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 
                 cell.categoryName.isUserInteractionEnabled = true
                 cell.categoryName.becomeFirstResponder()
-                editingNewCategoryName = true
-                editingNewItemName = false
                 newCatIndexPath = nil
             }
         }
+        
+        editingNewCategoryName = true
+        editingNewItemName = false
     }
     
     func collapseAllCategories() {
@@ -800,12 +773,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                     handleCategoryCollapseExpand(category)
                     
                     // handle expand arrows
-                    if indexPath != nil {
-                        self.tableView.reloadRows(at: [indexPath!], with: .none)
+                    if let indexPath = indexPath {
+                        self.tableView.reloadRows(at: [indexPath], with: .none)
                         
                         if category.expanded {
                             // scroll the newly expanded header to the top so items can be seen
-                            self.tableView.scrollToRow(at: indexPath!, at: UITableView.ScrollPosition.top, animated: true)
+                            self.tableView.scrollToRow(at: indexPath, at: UITableView.ScrollPosition.top, animated: true)
                         }
                     }
                     
@@ -1822,66 +1795,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
         return -1
     }
-    
-////////////////////////////////////////////////////////////////
-//
-//  MARK: - AdBanner methods
-//
-////////////////////////////////////////////////////////////////
-    
-    /*
-    func bannerViewActionShouldBegin(banner: ADBannerView!, willLeaveApplication willLeave: Bool) -> Bool
-    {
-        print("Banner view is beginning an ad action")
-        let shouldExecuteAction = self.allowActionToRun()
-        
-        if !willLeave && shouldExecuteAction
-        {
-            // insert code here to suspend any services that might conflict with the advertisement
-        }
-        
-        return shouldExecuteAction
-    }
-    
-    func bannerViewActionDidFinish(banner: ADBannerView!)
-    {
-        // insert code here to resume any services paused by the ad banner action
-        // must execute quickly
-        print("bannerViewActionDidFinish")
-    }
-    
-    func bannerViewDidLoadAd(banner: ADBannerView!)
-    {
-        if self.allowActionToRun() {
-            self.adBanner.hidden = true
-            if !inEditMode {
-                self.layoutAnimated(false)
-            }
-        } else {
-            self.adBanner.hidden = false
-            if !inEditMode {
-                self.layoutAnimated(true)
-            }
-        }
-    }
-    
-    func bannerView(banner: ADBannerView!, didFailToReceiveAdWithError error: NSError!)
-    {
-        self.adBanner.hidden = true
-        if !inEditMode {
-            self.layoutAnimated(true)
-        }
-    }
-    
-    func allowActionToRun() -> Bool {
-        // determine if we will allow an add action to take over the screen
-        if appDelegate.appIsUpgraded {
-            return false
-        } else {
-            return true
-        }
-    }
-    */
     
     // resize the frame /* and move the adBanner on and off the screen */
     func layoutAnimated(_ animated: Bool) {

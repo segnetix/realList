@@ -181,7 +181,7 @@ class SettingsViewController: UIAppViewController {
             "noteButton": noteButton,
             "vertLine": vertLineImage]
         
-        closeButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:[closeButton]-10-|", options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
+        closeButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:[closeButton]-16-|", options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
         showHideHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-[showHideCompletedButton]-[showHideInactiveButton(==showHideCompletedButton)]-|", options: [.alignAllCenterY], metrics: nil, views: views)
         categoryHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-[collapseAllCategoriesButton(==newCatButton)]-[expandAllCategoriesButton(==newCatButton)]-[newCatButton]-|", options: [.alignAllCenterY], metrics: nil, views: views)
         printCloseButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-(>=4,<=8)-[printButton]-[emailButton(==printButton)]-[vertLine]-[noteButton]-(>=4,<=8)-|", options: [.alignAllCenterY], metrics: nil, views: views)
@@ -204,11 +204,16 @@ class SettingsViewController: UIAppViewController {
             withVisualFormat: "H:|-(<=6)-[r4_1(>=48)]-(<=6)-[r4_2(==r4_1@750)]-(<=6)-[r4_3(==r4_1@750)]-(<=6)-|",
             options: [.alignAllCenterY], metrics: nil, views: views)
         
+        // make sure close button and print button are in the safe area
+        let guide = view.safeAreaLayoutGuide
+        NSLayoutConstraint.activate([closeButton.topAnchor.constraint(equalTo: guide.topAnchor, constant: 1.0)])
+        NSLayoutConstraint.activate([printButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: 1.0)])
+        
         // set overall vertical constraints based on available height
         if size.height <= 480 {
             // small
             verticalConstraints = NSLayoutConstraint.constraints(
-                withVisualFormat: "V:|-20-[closeButton]-16-[newCatButton]-16-[showHideCompletedButton]-16-[setAllItemsIncompleteButton]-16-[r1_1][r2_1][r3_1][r4_1]-(>=16)-[printButton]-16-|",
+                withVisualFormat: "V:[closeButton]-16-[newCatButton]-16-[showHideCompletedButton]-16-[setAllItemsIncompleteButton]-16-[r1_1][r2_1][r3_1][r4_1]-(>=16)-[printButton]",
                 options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
             
             // scale buttons
@@ -227,7 +232,7 @@ class SettingsViewController: UIAppViewController {
         } else if size.height <= 568 {
             // medium small
             verticalConstraints = NSLayoutConstraint.constraints(
-                withVisualFormat: "V:|-20-[closeButton]-20-[newCatButton]-20-[showHideCompletedButton]-20-[setAllItemsIncompleteButton]-32-[r1_1][r2_1][r3_1][r4_1]-(>=24)-[printButton]-20-|",
+                withVisualFormat: "V:[closeButton]-20-[newCatButton]-20-[showHideCompletedButton]-20-[setAllItemsIncompleteButton]-32-[r1_1][r2_1][r3_1][r4_1]-(>=24)-[printButton]",
                 options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
             
             // scale buttons
@@ -246,7 +251,7 @@ class SettingsViewController: UIAppViewController {
         } else if size.height <= 667 {
             // medium large
             verticalConstraints = NSLayoutConstraint.constraints(
-                withVisualFormat: "V:|-20-[closeButton]-32-[newCatButton]-32-[showHideCompletedButton]-32-[setAllItemsIncompleteButton]-48-[r1_1][r2_1][r3_1][r4_1]-(>=32)-[printButton]-32-|",
+                withVisualFormat: "V:[closeButton]-32-[newCatButton]-32-[showHideCompletedButton]-32-[setAllItemsIncompleteButton]-48-[r1_1][r2_1][r3_1][r4_1]-(>=32)-[printButton]",
                 options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
             
             // scale buttons
@@ -265,7 +270,7 @@ class SettingsViewController: UIAppViewController {
         } else {
             // large
             verticalConstraints = NSLayoutConstraint.constraints(
-                withVisualFormat: "V:|-20-[closeButton]-60-[newCatButton]-48-[showHideCompletedButton]-48-[setAllItemsIncompleteButton]-60-[r1_1][r2_1][r3_1][r4_1]-(>=48)-[printButton]-32-|",
+                withVisualFormat: "V:[closeButton]-60-[newCatButton]-48-[showHideCompletedButton]-48-[setAllItemsIncompleteButton]-60-[r1_1][r2_1][r3_1][r4_1]-(>=48)-[printButton]",
                 options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
             
             // scale buttons
@@ -348,7 +353,15 @@ class SettingsViewController: UIAppViewController {
         containerView.addSubview(setAllItemsInactiveButton)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        closeButton.setImage(UIImage(named: "Close Window"), for: UIControl.State())
+        //closeButton.setImage(UIImage(named: "Close Window"), for: UIControl.State())
+        closeButton.setTitle("Done", for: .normal)
+        let vertSpacing: CGFloat = 4.0
+        let horizSpacing: CGFloat = 12.0
+        closeButton.contentEdgeInsets = UIEdgeInsets(top: vertSpacing, left: horizSpacing, bottom: 4, right: horizSpacing)
+        closeButton.titleLabel?.font =  UIFont.preferredFont(forTextStyle: UIFont.TextStyle.title3)
+        closeButton.layer.cornerRadius = 5
+        closeButton.layer.borderWidth = 1
+        closeButton.layer.borderColor = UIColor.white.cgColor
         closeButton.addTarget(self, action: #selector(SettingsViewController.close), for: UIControl.Event.touchUpInside)
         containerView.addSubview(closeButton)
         

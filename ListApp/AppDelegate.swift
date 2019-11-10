@@ -12,10 +12,6 @@ import UserNotifications
 
 private let key_listData = "listData"
 
-// list and item limits for free version
-let kMaxListCount            =  2
-let kMaxItemCount            = 12
-
 // display link scroll loop updates per second
 let kFramesPerSecond         = 60
 
@@ -59,9 +55,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     var notificationProcessingEventIsPending = false
     var printNotes = true
-    var upgradePriceString = ""
-    var upgradeProduct: SKProduct?
-    var appIsUpgraded: Bool = true
     
     // app settings
     var namesCapitalize = true
@@ -121,7 +114,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         application.registerForRemoteNotifications()    // register for silent notifications
         restoreListDataFromLocalStorage()               // gets list data from local storage
         restoreAppSettings()                            // restores the general app settings
-        restoreUpgradeStatus()                          // restores upgrade status from local storage otherwise gets data from app store regarding upgrade pricing
         CloudCoordinator.fetchCloudData(nil, refreshEnd: {} )            // gets cloud data and merges with local data including cloud deletes
         
         return true
@@ -168,46 +160,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         if let notesSpellCheck     = UserDefaults.standard.object(forKey: key_notesSpellCheck)     as? Bool { self.notesSpellCheck     = notesSpellCheck     }
         if let notesAutocorrection = UserDefaults.standard.object(forKey: key_notesAutocorrection) as? Bool { self.notesAutocorrection = notesAutocorrection }
         if let picsInPrintAndEmail = UserDefaults.standard.object(forKey: key_picsInPrintAndEmail) as? Bool { self.picsInPrintAndEmail = picsInPrintAndEmail }
-    }
-    
-    func restoreUpgradeStatus() {
-        //#if DEBUG
-            self.appIsUpgraded = true
-            return
-        //#endif
-        
-//        // restore upgrade status from user defaults
-//        if RealListProducts.store.isProductPurchased(RealListProducts.FullVersion) {
-//            self.appIsUpgraded = true
-//        } else {
-//            if (AppManager.sharedInstance.isReachable) {
-//                // check the product on the app store to get pricing
-//                self.appIsUpgraded = false
-//                RealListProducts.store.requestProducts { success, products in
-//                    if success {
-//                        if let products = products {
-//                            if products.count > 0 {
-//                                // we have only one product
-//                                let product = products[0]
-//                                self.upgradeProduct = product
-//
-//                                print("localizedTitle: \(product.localizedTitle)")
-//                                print("localizedDescription: \(product.localizedDescription)")
-//                                print("productIdentifier: \(product.productIdentifier)")
-//
-//                                if RealListProducts.store.isProductPurchased(product.productIdentifier) {
-//                                    self.appIsUpgraded = true
-//                                } else {
-//                                    self.appIsUpgraded = false
-//                                    priceFormatter.locale = product.priceLocale
-//                                    self.upgradePriceString = priceFormatter.string(from: product.price)!
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
     }
     
     // iCloud sent notification of a change

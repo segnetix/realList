@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15400" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="U9r-Jc-lyd">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15505" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="U9r-Jc-lyd">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15404"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15509"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -32,30 +32,30 @@
                                             <rect key="frame" x="0.0" y="0.0" width="383" height="32"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <view opaque="NO" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3mz-5D-bK6" userLabel="Tap View">
-                                                    <rect key="frame" x="52" y="0.0" width="515" height="31"/>
+                                                <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="3mz-5D-bK6" userLabel="Tap View">
+                                                    <rect key="frame" x="52" y="0.0" width="331" height="32"/>
                                                     <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 </view>
-                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="ek5-bB-UcJ" userLabel="Item Name">
-                                                    <rect key="frame" x="60" y="0.0" width="487" height="21"/>
+                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="ek5-bB-UcJ" userLabel="Item Name">
+                                                    <rect key="frame" x="60" y="0.0" width="299" height="21"/>
                                                     <attributedString key="attributedText"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done"/>
                                                 </textField>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" misplaced="YES" text="Item Notes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ug1-Vs-VEu">
-                                                    <rect key="frame" x="60" y="21" width="487" height="6"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" verticalCompressionResistancePriority="749" text="Item Notes" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ug1-Vs-VEu">
+                                                    <rect key="frame" x="60" y="21" width="299" height="7"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" image="Picture Indicator" translatesAutoresizingMaskIntoConstraints="NO" id="ZON-gC-1ce">
-                                                    <rect key="frame" x="547" y="15" width="24" height="24"/>
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="Picture Indicator" translatesAutoresizingMaskIntoConstraints="NO" id="ZON-gC-1ce">
+                                                    <rect key="frame" x="359" y="15" width="24" height="24"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="24" id="Tw2-PU-vSE"/>
                                                         <constraint firstAttribute="height" constant="24" id="wCG-kc-eNw"/>
                                                     </constraints>
                                                 </imageView>
-                                                <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="b3w-fy-jQC" customClass="CheckBox" customModule="EnList" customModuleProvider="target">
-                                                    <rect key="frame" x="8" y="-7" width="44" height="45"/>
+                                                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="b3w-fy-jQC" customClass="CheckBox" customModule="EnList" customModuleProvider="target">
+                                                    <rect key="frame" x="8" y="-6" width="44" height="44"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="44" id="DEO-tL-uYY"/>
                                                         <constraint firstAttribute="height" constant="44" id="DMT-DF-wyr"/>
@@ -74,7 +74,7 @@
                                                 <constraint firstItem="ZON-gC-1ce" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="top" constant="15" id="JkQ-HI-Cyj"/>
                                                 <constraint firstItem="ug1-Vs-VEu" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" id="Ut2-4b-DnH"/>
                                                 <constraint firstItem="b3w-fy-jQC" firstAttribute="centerY" secondItem="AZO-88-8cc" secondAttribute="centerY" id="cIZ-xb-PTX"/>
-                                                <constraint firstAttribute="trailing" secondItem="ZON-gC-1ce" secondAttribute="trailing" constant="-4" id="cKE-cN-oBf"/>
+                                                <constraint firstAttribute="trailing" secondItem="ZON-gC-1ce" secondAttribute="trailing" id="cKE-cN-oBf"/>
                                                 <constraint firstItem="ZON-gC-1ce" firstAttribute="top" secondItem="AZO-88-8cc" secondAttribute="topMargin" constant="-8" id="fep-0G-o1X"/>
                                                 <constraint firstAttribute="bottom" secondItem="ug1-Vs-VEu" secondAttribute="bottom" constant="4" id="i46-pq-z9n"/>
                                                 <constraint firstItem="ek5-bB-UcJ" firstAttribute="leading" secondItem="b3w-fy-jQC" secondAttribute="trailing" constant="8" symbolic="YES" id="jsU-Dy-dVn"/>
@@ -116,16 +116,13 @@
                                             <rect key="frame" x="0.0" y="0.0" width="414" height="32"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="nPQ-Yu-QYm" userLabel="Category Name">
-                                                    <rect key="frame" x="16" y="0.0" width="526" height="31"/>
+                                                <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="nPQ-Yu-QYm" userLabel="Category Name">
+                                                    <rect key="frame" x="16" y="0.0" width="370" height="32"/>
                                                     <attributedString key="attributedText"/>
                                                     <textInputTraits key="textInputTraits" autocorrectionType="no" spellCheckingType="no" returnKeyType="done"/>
                                                 </textField>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" usesAttributedText="YES" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="37Y-n0-dxM">
-                                                    <rect key="frame" x="550" y="8" width="42" height="15"/>
-                                                    <constraints>
-                                                        <constraint firstAttribute="width" priority="750" constant="42" id="nsZ-oM-jBZ"/>
-                                                    </constraints>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" usesAttributedText="YES" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="37Y-n0-dxM">
+                                                    <rect key="frame" x="394" y="11" width="0.0" height="10"/>
                                                     <attributedString key="attributedText"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
@@ -248,8 +245,8 @@
                                     <rect key="frame" x="0.0" y="0.0" width="383" height="60"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
-                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="KOg-sp-vFR">
-                                            <rect key="frame" x="12" y="0.0" width="555" height="59"/>
+                                        <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" usesAttributedText="YES" adjustsFontSizeToFit="NO" minimumFontSize="15" translatesAutoresizingMaskIntoConstraints="NO" id="KOg-sp-vFR">
+                                            <rect key="frame" x="12" y="0.0" width="371" height="60"/>
                                             <constraints>
                                                 <constraint firstAttribute="width" constant="483" id="jcx-sb-g8L"/>
                                             </constraints>

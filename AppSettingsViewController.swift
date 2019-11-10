@@ -18,7 +18,8 @@ class AppSettingsViewController: UIAppViewController {
     @IBOutlet weak var notesSpellCheckSwitch: UISwitch!
     @IBOutlet weak var notesAutocorrectionSwitch: UISwitch!
     @IBOutlet weak var picsInPrintAndEmailSwitch: UISwitch!
-
+    @IBOutlet weak var doneButton: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         manager.delegate = self
@@ -31,6 +32,11 @@ class AppSettingsViewController: UIAppViewController {
         self.notesSpellCheckSwitch.isOn     = appDelegate.notesSpellCheck
         self.notesAutocorrectionSwitch.isOn = appDelegate.notesAutocorrection
         self.picsInPrintAndEmailSwitch.isOn = appDelegate.picsInPrintAndEmail
+        
+        doneButton.backgroundColor = UIColor.clear
+        doneButton.layer.cornerRadius = 5
+        doneButton.layer.borderWidth = 1
+        doneButton.layer.borderColor = doneButton.tintColor.cgColor
     }
 
     override func didReceiveMemoryWarning() {

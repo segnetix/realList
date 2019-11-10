@@ -36,8 +36,6 @@
 		B0930D701C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0930D6F1C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift */; };
 		B0A1BCDB1CC2C6C700F4F0B1 /* AppSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */; };
 		B0A1BCDC1CC2C6C700F4F0B1 /* AppSettingsViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */; };
-		B0A1BCDF1CC4142700F4F0B1 /* UpgradeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */; };
-		B0A1BCE01CC4142700F4F0B1 /* UpgradeViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */; };
 		B0A3026C1C349F7A00F6FB44 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */; };
 		B0A302711C349F7A00F6FB44 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B0A3026F1C349F7A00F6FB44 /* Main.storyboard */; };
 		B0A302731C349F7A00F6FB44 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B0A302721C349F7A00F6FB44 /* Assets.xcassets */; };
@@ -49,8 +47,6 @@
 		B0B3E3E11D6CF701001D4395 /* CategoryClassTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B3E3E01D6CF701001D4395 /* CategoryClassTests.swift */; };
 		B0B3E3E31D6CF717001D4395 /* ItemClassTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B3E3E21D6CF717001D4395 /* ItemClassTests.swift */; };
 		B0B3E3E51D6CF7B3001D4395 /* ModelClassTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0B3E3E41D6CF7B3001D4395 /* ModelClassTests.swift */; };
-		B0EC54D61CBFF5BD0017553B /* RealListProducts.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */; };
-		B0EC54D81CBFF7100017553B /* IAPHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EC54D71CBFF7100017553B /* IAPHelper.swift */; };
 		B0EFB183236E663E00927598 /* CloudCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EFB182236E663E00927598 /* CloudCoordinator.swift */; };
 		B0EFB185236E66BE00927598 /* DataPersistenceCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0EFB184236E66BE00927598 /* DataPersistenceCoordinator.swift */; };
 		B0FA02E01D3FE14000B9A4EF /* RefreshContents.xib in Resources */ = {isa = PBXBuildFile; fileRef = B0FA02DF1D3FE14000B9A4EF /* RefreshContents.xib */; };
@@ -122,8 +118,6 @@
 		B0930D6F1C652E3E007EBAA0 /* SettingsTransitioningDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsTransitioningDelegate.swift; sourceTree = "<group>"; };
 		B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = AppSettingsViewController.swift; path = ../AppSettingsViewController.swift; sourceTree = "<group>"; };
 		B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = AppSettingsViewController.xib; path = ../AppSettingsViewController.xib; sourceTree = "<group>"; };
-		B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpgradeViewController.swift; sourceTree = "<group>"; };
-		B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = UpgradeViewController.xib; sourceTree = "<group>"; };
 		B0A302681C349F7A00F6FB44 /* EnList.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EnList.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B0A3026B1C349F7A00F6FB44 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B0A302701C349F7A00F6FB44 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -140,8 +134,6 @@
 		B0B3E3E01D6CF701001D4395 /* CategoryClassTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CategoryClassTests.swift; sourceTree = "<group>"; };
 		B0B3E3E21D6CF717001D4395 /* ItemClassTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemClassTests.swift; sourceTree = "<group>"; };
 		B0B3E3E41D6CF7B3001D4395 /* ModelClassTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelClassTests.swift; sourceTree = "<group>"; };
-		B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RealListProducts.swift; sourceTree = "<group>"; };
-		B0EC54D71CBFF7100017553B /* IAPHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = IAPHelper.swift; path = ../IAPHelper.swift; sourceTree = "<group>"; };
 		B0EFB182236E663E00927598 /* CloudCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudCoordinator.swift; sourceTree = "<group>"; };
 		B0EFB184236E66BE00927598 /* DataPersistenceCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataPersistenceCoordinator.swift; sourceTree = "<group>"; };
 		B0FA02DF1D3FE14000B9A4EF /* RefreshContents.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = RefreshContents.xib; sourceTree = "<group>"; };
@@ -202,7 +194,6 @@
 				B0A3026F1C349F7A00F6FB44 /* Main.storyboard */,
 				B07CCC7D1CA1A76500CBCFC1 /* AboutViewController.xib */,
 				B0A1BCDA1CC2C6C700F4F0B1 /* AppSettingsViewController.xib */,
-				B0A1BCDE1CC4142700F4F0B1 /* UpgradeViewController.xib */,
 				B0FA02DF1D3FE14000B9A4EF /* RefreshContents.xib */,
 				B0A302741C349F7A00F6FB44 /* LaunchScreen.storyboard */,
 			);
@@ -248,15 +239,6 @@
 			name = Resources;
 			sourceTree = "<group>";
 		};
-		B07C39F41CE62647006027AA /* IAP */ = {
-			isa = PBXGroup;
-			children = (
-				B0EC54D71CBFF7100017553B /* IAPHelper.swift */,
-				B0EC54D51CBFF5BD0017553B /* RealListProducts.swift */,
-			);
-			name = IAP;
-			sourceTree = "<group>";
-		};
 		B0A3025F1C349F7A00F6FB44 = {
 			isa = PBXGroup;
 			children = (
@@ -286,7 +268,6 @@
 				B07C39F21CE625C3006027AA /* Cell and UI Classes */,
 				B07C39F01CE624DE006027AA /* XIB */,
 				B07C39F11CE6257E006027AA /* Transition Controllers */,
-				B07C39F41CE62647006027AA /* IAP */,
 				B07C39EE1CE62451006027AA /* MBProgressHUD */,
 				B07C39ED1CE6240E006027AA /* Reachability */,
 				B07C39F31CE625EA006027AA /* Resources */,
@@ -321,7 +302,6 @@
 				B0930D691C652DA5007EBAA0 /* SettingsViewController.swift */,
 				B07CCC7C1CA1A76500CBCFC1 /* AboutViewController.swift */,
 				B0A1BCD91CC2C6C700F4F0B1 /* AppSettingsViewController.swift */,
-				B0A1BCDD1CC4142700F4F0B1 /* UpgradeViewController.swift */,
 				B01326DE236E1F4B004659F6 /* SubscriptionManager.swift */,
 				B02CEAE4236F2F1400989FB3 /* HUDControl.swift */,
 				B02CEAE2236F2EC700989FB3 /* Utilities.swift */,
@@ -451,7 +431,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B0A1BCE01CC4142700F4F0B1 /* UpgradeViewController.xib in Resources */,
 				B0A302761C349F7A00F6FB44 /* LaunchScreen.storyboard in Resources */,
 				B0FA02E01D3FE14000B9A4EF /* RefreshContents.xib in Resources */,
 				B02174D21C6D57110087D5A3 /* Localizable.strings in Resources */,
@@ -496,16 +475,13 @@
 				B0EFB183236E663E00927598 /* CloudCoordinator.swift in Sources */,
 				B0A302881C35915B00F6FB44 /* ListData.swift in Sources */,
 				B041E8561CDA4DC7005C4D16 /* UIAppViewController.swift in Sources */,
-				B0EC54D61CBFF5BD0017553B /* RealListProducts.swift in Sources */,
 				B03C46811C66F43800B66CBD /* ItemDetailAnimatedTransitioning.swift in Sources */,
 				B0A3026C1C349F7A00F6FB44 /* AppDelegate.swift in Sources */,
 				B0854A891C3895DA00B9D2F7 /* CategoryCell.swift in Sources */,
 				B07828981C36000B009D356F /* ListCell.swift in Sources */,
-				B0A1BCDF1CC4142700F4F0B1 /* UpgradeViewController.swift in Sources */,
 				B0A1BCDB1CC2C6C700F4F0B1 /* AppSettingsViewController.swift in Sources */,
 				B02CEAE5236F2F1400989FB3 /* HUDControl.swift in Sources */,
 				B078289A1C360020009D356F /* ItemCell.swift in Sources */,
-				B0EC54D81CBFF7100017553B /* IAPHelper.swift in Sources */,
 				B0FF8C351C4AE2B000C0A33C /* AddItemCell.swift in Sources */,
 				B06836A21CAB1A7200422742 /* AddButton.swift in Sources */,
 				B041E8541CDA4D62005C4D16 /* AppManager.swift in Sources */,
@@ -631,7 +607,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				"OTHER_SWIFT_FLAGS[arch=*]" = "-D DEBUG";
@@ -684,7 +660,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				ONLY_ACTIVE_ARCH = NO;
 				SDKROOT = iphoneos;
@@ -705,12 +681,13 @@
 				CODE_SIGN_ENTITLEMENTS = EnList.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 101;
+				CURRENT_PROJECT_VERSION = 103;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
 				INFOPLIST_FILE = ListApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.segnetix.realList;
 				PRODUCT_NAME = EnList;
 				PROVISIONING_PROFILE = "";
@@ -731,11 +708,12 @@
 				CODE_SIGN_ENTITLEMENTS = EnList.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 101;
+				CURRENT_PROJECT_VERSION = 103;
 				DEFINES_MODULE = YES;
 				INFOPLIST_FILE = ListApp/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.segnetix.realList;
 				PRODUCT_NAME = EnList;
 				PROVISIONING_PROFILE = "";
@@ -752,7 +730,7 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				INFOPLIST_FILE = realListTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = segnetix.realListTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -768,7 +746,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ANALYZER_NONNULL = YES;
 				INFOPLIST_FILE = realListTests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = segnetix.realListTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -784,7 +762,7 @@
 				CLANG_ANALYZER_NONNULL = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				INFOPLIST_FILE = realListUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = segnetix.realListUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -797,7 +775,7 @@
 			buildSettings = {
 				CLANG_ANALYZER_NONNULL = YES;
 				INFOPLIST_FILE = realListUITests/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = segnetix.realListUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";

@@ -22,7 +22,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
     var imageView = UIImageView()
     var spacerView = UIView()
     var infoVertStackView = UIStackView()
-    var closeButton: UIButton = UIButton()
+    var closeButton = UIButton(type: .system)
     var itemVC: ItemViewController!
     var item: Item!
     var list: List!
@@ -196,18 +196,17 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         
         // close button
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        let origImage = UIImage(named: "Close Window_blue")
-        if let origImage = origImage {
-            // set close button color from list color
-            let tintedImage = origImage.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
-            closeButton.setImage(tintedImage, for: UIControl.State())
-            
-            if list!.listColor != nil {
-                closeButton.tintColor = list!.listColor
-            }
-        } else {
-            closeButton.setImage(UIImage(named: "Close Window_blue"), for: UIControl.State())
+        closeButton.setTitle("Done", for: .normal)
+        closeButton.titleLabel?.font =  UIFont.preferredFont(forTextStyle: UIFont.TextStyle.title3)
+        var buttonColor = list!.listColor
+        if list!.listColor == color4_1 {
+            buttonColor = UIColor.black//color4_1_alt
         }
+        closeButton.tintColor = buttonColor
+        closeButton.backgroundColor = UIColor.clear
+        closeButton.layer.cornerRadius = 5
+        closeButton.layer.borderWidth = 1
+        closeButton.layer.borderColor = buttonColor?.cgColor
         closeButton.addTarget(self, action: #selector(ItemDetailViewController.close(_:)), for: UIControl.Event.touchUpInside)
         containerView.addSubview(closeButton)
         
@@ -219,6 +218,12 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
             "photoButton": addPhotoButton,
             "imageView": imageView,
             "closeButton": closeButton]
+        
+        // make sure title and close button are in the safe area and close button is centered
+        let guide = view.safeAreaLayoutGuide
+        titleLabel.topAnchor.constraint(equalTo: guide.topAnchor).isActive = true
+        closeButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor).isActive = true
+        closeButton.centerXAnchor.constraint(equalTo: guide.centerXAnchor).isActive = true
         
         view.addConstraints(
             NSLayoutConstraint.constraints(
@@ -293,31 +298,24 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
                     views: views))
         }
         
-        containerView.addConstraints(
-            NSLayoutConstraint.constraints(
-                withVisualFormat: "H:|[closeButton]|",
-                options: NSLayoutConstraint.FormatOptions(rawValue: 0),
-                metrics: nil,
-                views: views))
-        
         if wideDisplay {
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
-                    withVisualFormat: "V:|-32-[titleLabel]-[noteTextView(250)]-24-[imageView(270)]-(>=8)-[closeButton]-24-|",
+                    withVisualFormat: "V:[titleLabel]-[noteTextView(250)]-24-[imageView(270)]-(>=8)-[closeButton]",
                     options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else if !shortDisplay {
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
-                    withVisualFormat: "V:|-20-[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView(135)]-(>=12)-[closeButton]-16-|",
+                    withVisualFormat: "V:[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView(135)]-(>=12)-[closeButton]",
                     options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else {
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
-                    withVisualFormat: "V:|-16-[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(100)]-(>=8)-[closeButton]-8-|",
+                    withVisualFormat: "V:[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(100)]-(>=8)-[closeButton]",
                     options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))

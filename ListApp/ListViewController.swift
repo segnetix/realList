@@ -324,9 +324,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         // scroll the editing cell into view if necessary
         let indexPath = IndexPath(row: textField.tag, section: 0)
         
-        if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false
-        {
-            tableView.scrollToRow(at: indexPath, at: UITableView.ScrollPosition.bottom, animated: false)
+        if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false {
+            tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
         }
         
         // this clears an initial space in a new cell name
@@ -348,7 +347,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         delegate?.listNameChanged(textField.text!)
     }
 
-    
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         inEditMode = false
         textField.isUserInteractionEnabled = false
@@ -356,10 +354,8 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         self.tableView.setEditing(false, animated: true)
         
         // delete the newly added list if user didn't create a name
-        if editingNewListName
-        {
-            if textField.text!.trimmingCharacters(in: CharacterSet.whitespaces).isEmpty
-            {
+        if editingNewListName {
+            if textField.text!.trimmingCharacters(in: CharacterSet.whitespaces).isEmpty {
                 // delete from lists array
                 ListData.removeLastList()
                 //lists.removeLast()
@@ -375,33 +371,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
     }
     
     @IBAction func addListButtonTapped(_ sender: UIButton) {
-        if appDelegate.appIsUpgraded == false && ListData.nonTutorialListCount >= kMaxListCount
-        {
-            let listLimitTitle = NSLocalizedString("List_Limit", comment: "List Limit title for the list limit exceeded dialog in the free version.")
-            let listLimitMsg = String(format: NSLocalizedString("List_Limit_Message", comment: "The free version of realList is limited to %i lists.  Please upgrade or restore your purchase for unlimited lists."), kMaxListCount)
-            let okTitle = NSLocalizedString("OK", comment: "OK - to commit the action or dismiss a dialog.")
-            
-            // max list count (not including the tutorial) will be exceeded
-            let alertVC = UIAlertController(
-                title: listLimitTitle,
-                message: listLimitMsg,
-                preferredStyle: .alert)
-            let okAction = UIAlertAction(title: okTitle, style: .default, handler: nil)
-            alertVC.addAction(okAction)
-            
-            present(alertVC, animated: true, completion: nil)
-            
-            return
-        }
-        
         // create a new list and append
         let newList = List(name: "", createRecord: true)
         newList.listColorName = r1_2
         ListData.appendList(newList)
         ListData.resetListOrderByPosition()
-        
-        //lists.append(newList)
-        //resetListOrderByPosition()
         
         _ = newList.addCategory("", displayHeader: false, updateIndices: true, createRecord: true)
         
@@ -415,7 +389,6 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         editingNewListName = true
         cell.listName.isUserInteractionEnabled = true
         cell.listName.becomeFirstResponder()
-        editingNewListName = true
     }
     
 ////////////////////////////////////////////////////////////////

@@ -25,6 +25,7 @@ class AboutViewController: UIAppViewController {
     @IBOutlet weak var versionLabel: UILabel!
     @IBOutlet weak var cloudButton: UIButton!
     @IBOutlet weak var upgradeButton: UIButton!
+    @IBOutlet weak var doneButton: UIButton!
     
     var listVC: ListViewController?
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -51,8 +52,12 @@ class AboutViewController: UIAppViewController {
             versionLabel.text = version
         }
         
+        doneButton.backgroundColor = UIColor.clear
+        doneButton.layer.cornerRadius = 5
+        doneButton.layer.borderWidth = 1
+        doneButton.layer.borderColor = doneButton.tintColor.cgColor
+        
         updateCloudStatus()
-        updateUpgradeStatus()
     }
     
     func updateCloudStatus() {
@@ -60,14 +65,6 @@ class AboutViewController: UIAppViewController {
             cloudButton.setImage(UIImage(named: "Cloud_check"), for: UIControl.State())
         } else {
             cloudButton.setImage(UIImage(named: "Cloud"), for: UIControl.State())
-        }
-    }
-    
-    func updateUpgradeStatus() {
-        if appDelegate.appIsUpgraded {
-            upgradeButton.setImage(UIImage(named: "Upgraded"), for: UIControl.State())
-        } else {
-            upgradeButton.setImage(UIImage(named: "Upgrade"), for: UIControl.State())
         }
     }
     
@@ -141,14 +138,6 @@ class AboutViewController: UIAppViewController {
         } else {
             presentingViewController!.dismiss(animated: true, completion: nil)
         }
-    }
-    
-    @IBAction func upgrade(_ sender: UIButton) {
-        print("upgrade...")
-        let upgradeVC = UpgradeViewController()
-        upgradeVC.modalPresentationStyle = .fullScreen
-        upgradeVC.aboutViewController = self
-        present(upgradeVC, animated: true, completion: nil)
     }
     
     @IBAction func close(_ sender: UIButton) {
