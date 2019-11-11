@@ -63,9 +63,15 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         
         // About button
         let button: UIButton = UIButton(type: UIButton.ButtonType.custom)
-        button.setImage(UIImage(named: "EnListIcon"), for: UIControl.State())
+        let settingsImage = UIImage(named: "Settings")
+        if let settingsImage = settingsImage {
+           let tintedImage = settingsImage.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
+           button.setImage(tintedImage, for: UIControl.State())
+           button.tintColor = color1_1
+        }
         button.addTarget(self, action: #selector(ListViewController.infoButtonTapped), for: UIControl.Event.touchUpInside)
         button.frame = CGRect(x: 0, y: 0, width: 32, height: 32)
+        button.transform = CGAffineTransform(scaleX: 0.67, y: 0.67)
         let barButton = UIBarButtonItem(customView: button)
         self.navigationItem.leftBarButtonItem = barButton
         
@@ -127,7 +133,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        refreshView.frame = CGRect(x: 0, y: 0, width: self.tableView.bounds.width, height: refreshView.frame.height)
+        //refreshView.frame = CGRect(x: 0, y: 0, width: self.tableView.bounds.width, height: refreshView.frame.height)
     }
     
     override func didReceiveMemoryWarning() {

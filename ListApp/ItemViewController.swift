@@ -135,9 +135,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardDidShow(_:)), name: UIResponder.keyboardDidShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(ItemViewController.keyboardDidHide(_:)), name: UIResponder.keyboardDidHideNotification, object: nil)
-        
         refreshItems()
     }
     
@@ -476,45 +473,19 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     
     @objc func keyboardWillShow(_ notification: Notification) {
-        //print("keyboardWillShow")
         inEditMode = true
         
-        let info = (notification as NSNotification).userInfo!
-        let keyboardFrame: CGRect = (info[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
-        var keyboardHeight = keyboardFrame.height
-        let toolbarHeight = self.view.frame.size.height - keyboardFrame.origin.y
-        let bHasHardwareKeyboard = hasHardwareKeyboard(notification)
-        
-        if bHasHardwareKeyboard {
-            keyboardHeight = toolbarHeight
+        // resize the table view
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardSize.height, right: 0)
         }
-        
-        // shrink the tableView height so it shows above the keyboard
-        self.tableView.frame.size.height = self.view.frame.height - keyboardHeight
-        
-        // now make sure we have our edit cell in view
-        if let indexPath = editModeIndexPath {
-            if !bHasHardwareKeyboard {
-                tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
-            }
-        }
-    }
-    
-    func hasHardwareKeyboard(_ notification: Notification) -> Bool {
-        let info = (notification as NSNotification).userInfo!
-        let keyboardFrame: CGRect = (info[UIResponder.keyboardFrameEndUserInfoKey] as! NSValue).cgRectValue
-        let keyboard = self.view.convert(keyboardFrame, to: self.view.window)
-        let height = self.view.frame.size.height
-        
-        if (keyboard.origin.y + keyboard.size.height) > height {
-            return true
-        }
-        
-        return false
     }
     
     @objc func keyboardWillHide(_ notification: Notification) {
-        //print("keyboardWillHide")
+        // restore the table view size
+        if (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue != nil {
+            tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        }
         
         if !inAddNewItemLoop || !editingNewItemName {
             layoutAnimated(true)
@@ -524,14 +495,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         editModeIndexPath = nil
         
         resetCellViewTags()
-    }
-    
-    @objc func keyboardDidShow(_ notification: Notification) {
-        //print("keyboardDidShow")
-    }
-    
-    @objc func keyboardDidHide(_ notification: Notification) {
-        //print("keyboardDidHide")
     }
     
     func textFieldShouldBeginEditing(_ textField: UITextField) -> Bool {
@@ -633,10 +596,10 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         if let indexPath = indexPath {
             //print("*** addItem indexPath row is \(indexPath!.row)")
             if self.tableView.indexPathsForVisibleRows?.contains(indexPath) == false {
-                //print("*** addItem is not visible...")
+                print("*** addItem is not visible...")
                 self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
             } else {
-                //print("*** addItem is visible...")
+                print("*** addItem is visible...")
             }
         }
         
