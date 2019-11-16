@@ -197,29 +197,6 @@
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.SymbolicBreakpoint">
-         <BreakpointContent
-            uuid = "7E022B40-855D-4173-969E-B2D3027737B7"
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            symbolName = "UITableViewAlertForLayoutOutsideViewHierarchy"
-            moduleName = "">
-            <Locations>
-               <Location
-                  uuid = "7E022B40-855D-4173-969E-B2D3027737B7 - 620169ab4c7c265a"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "UITableViewAlertForLayoutOutsideViewHierarchy"
-                  moduleName = "UIKitCore"
-                  usesParentBreakpointCondition = "Yes"
-                  offsetFromSymbolStart = "0">
-               </Location>
-            </Locations>
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "860AB760-96E5-4AB8-8559-6E4C64356CAD"
