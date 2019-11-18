@@ -226,7 +226,6 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         let guide = view.safeAreaLayoutGuide
         titleLabel.topAnchor.constraint(equalTo: guide.topAnchor).isActive = true
         closeButton.centerXAnchor.constraint(equalTo: guide.centerXAnchor).isActive = true
-        closeButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -32).isActive = true
         
         view.addConstraints(
             NSLayoutConstraint.constraints(
@@ -257,6 +256,8 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
                 views: views))
         
         if wideDisplay {
+            closeButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -32).isActive = true
+
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
                     withVisualFormat: "H:|-20-[infoVertStackView]-(>=24)-[photoButton(40)]-24-[imageView(360)]-20-|",
@@ -272,6 +273,8 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
                     views: views))
             
         } else if !shortDisplay {
+            closeButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -20).isActive = true
+
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
                     withVisualFormat: "H:|-20-[photoButton]-(>=24)-[imageView(200)]-20-|",
@@ -286,6 +289,8 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
                     metrics: nil,
                     views: views))
         } else {
+            closeButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -8).isActive = true
+
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
                     withVisualFormat: "H:|-20-[photoButton]-(>=24)-[imageView(180)]-20-|",
