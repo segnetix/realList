@@ -199,7 +199,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         closeButton.setTitle("Done", for: .normal)
         let vertSpacing: CGFloat = 4.0
         let horizSpacing: CGFloat = 12.0
-        closeButton.contentEdgeInsets = UIEdgeInsets(top: vertSpacing, left: horizSpacing, bottom: 4, right: horizSpacing)
+        closeButton.contentEdgeInsets = UIEdgeInsets(top: vertSpacing, left: horizSpacing, bottom: vertSpacing, right: horizSpacing)
         closeButton.titleLabel?.font =  UIFont.preferredFont(forTextStyle: UIFont.TextStyle.title3)
         var buttonColor = list!.listColor
         if list!.listColor == color4_1 {
@@ -226,6 +226,7 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         let guide = view.safeAreaLayoutGuide
         titleLabel.topAnchor.constraint(equalTo: guide.topAnchor).isActive = true
         closeButton.centerXAnchor.constraint(equalTo: guide.centerXAnchor).isActive = true
+        closeButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -32).isActive = true
         
         view.addConstraints(
             NSLayoutConstraint.constraints(
@@ -303,25 +304,21 @@ class ItemDetailViewController: UIAppViewController, UITextViewDelegate, UINavig
         if wideDisplay {
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
-                    withVisualFormat: "V:[titleLabel]-[noteTextView(250)]-24-[imageView(270)]-(>=8)-[closeButton]-24-|",
+                    withVisualFormat: "V:[titleLabel]-[noteTextView(250)]-24-[imageView(270)]-(>=8)-[closeButton]",
                     options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else if !shortDisplay {
-            closeButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor).isActive = true
-
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
-                    withVisualFormat: "V:[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-(>=8)-[infoVertStackView(135)]-(>=12)-[closeButton]",
+                    withVisualFormat: "V:[titleLabel]-2-[noteTextView(150)]-[imageView(150)]-16-[infoVertStackView(135)]-(>=12)-[closeButton]",
                     options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))
         } else {
-            closeButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor).isActive = true
-
             containerView.addConstraints(
                 NSLayoutConstraint.constraints(
-                    withVisualFormat: "V:[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-(>=0)-[infoVertStackView(100)]-(>=8)-[closeButton]",
+                    withVisualFormat: "V:[titleLabel]-2-[noteTextView(120)]-[imageView(135)]-8-[infoVertStackView(100)]-(>=8)-[closeButton]",
                     options: NSLayoutConstraint.FormatOptions(rawValue: 0),
                     metrics: nil,
                     views: views))

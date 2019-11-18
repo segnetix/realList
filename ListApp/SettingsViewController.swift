@@ -206,8 +206,8 @@ class SettingsViewController: UIAppViewController {
         
         // make sure close button and print button are in the safe area
         let guide = view.safeAreaLayoutGuide
-        NSLayoutConstraint.activate([closeButton.topAnchor.constraint(equalTo: guide.topAnchor, constant: 1.0)])
-        NSLayoutConstraint.activate([printButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: 1.0)])
+        NSLayoutConstraint.activate([closeButton.topAnchor.constraint(equalTo: guide.topAnchor, constant: 12)])
+        NSLayoutConstraint.activate([printButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -12)])
         
         // set overall vertical constraints based on available height
         if size.height <= 480 {
@@ -357,7 +357,7 @@ class SettingsViewController: UIAppViewController {
         closeButton.setTitle("Done", for: .normal)
         let vertSpacing: CGFloat = 4.0
         let horizSpacing: CGFloat = 12.0
-        closeButton.contentEdgeInsets = UIEdgeInsets(top: vertSpacing, left: horizSpacing, bottom: 4, right: horizSpacing)
+        closeButton.contentEdgeInsets = UIEdgeInsets(top: vertSpacing, left: horizSpacing, bottom: vertSpacing, right: horizSpacing)
         closeButton.titleLabel?.font =  UIFont.preferredFont(forTextStyle: UIFont.TextStyle.title3)
         closeButton.layer.cornerRadius = 5
         closeButton.layer.borderWidth = 1
