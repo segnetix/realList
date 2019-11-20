@@ -464,7 +464,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             layoutAnimated(true)
         }
     }
-    
+        
 ////////////////////////////////////////////////////////////////
 //
 //  MARK: - TextField methods
@@ -821,8 +821,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         let touchLocationInWindow = tableView.convert(location, to: tableView.window)
         
         // we need to end the long press if we move above the top cell and into the top bar
-        if touchLocationInWindow.y <= topBarHeight && location.y <= 0
-        {
+        if touchLocationInWindow.y <= topBarHeight && location.y <= 0 {
             // if we moved above the table view then set the destination to the top cell and end the long press
             if longPressActive {
                 indexPath = IndexPath(row: 0, section: 0)
@@ -886,8 +885,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // this will effectively fix the top category to the top of the view
         indexPath = adjustIndexPathIfItemMovingAboveTopRow(indexPath!)
         
-        switch (state)
-        {
+        switch (state) {
         case UIGestureRecognizerState.began:
             self.longPressBegan(indexPath!, location: location)
             prevLocation = location
@@ -990,7 +988,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         
         // ... move the rows
         if fromPath.row != indexPath.row {
+            tableView.beginUpdates()
             tableView.moveRow(at: fromPath, to: indexPath)
+            tableView.endUpdates()
             print("longPressMoved - moveRow from \(fromPath.row) to \(indexPath.row)")
         }
 
@@ -1070,9 +1070,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                     }
                     
                     //print("moving row from \(sourceIndexPath?.row) to \(indexPath!.row)")
-                    
-                    tableView.endUpdates()
-                    
+                                        
                     // save item changes to cloud
                     srcItem.needToSave = true
                     
@@ -1592,15 +1590,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         // gets array of paths
         let indexPaths = list.indexPathsForCompletedRows()
         
-        if list.showCompletedItems == false
-        {
+        if list.showCompletedItems == false {
             // remove the completed rows
             self.tableView.beginUpdates()
             self.tableView.deleteRows(at: indexPaths as [IndexPath], with: UITableView.RowAnimation.automatic)
             self.tableView.endUpdates()
-        }
-        else
-        {
+        } else {
             // insert the complete rows
             self.tableView.beginUpdates()
             self.tableView.insertRows(at: indexPaths as [IndexPath], with: UITableView.RowAnimation.automatic)

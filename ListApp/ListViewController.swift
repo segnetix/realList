@@ -559,14 +559,13 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
             guard fromPath.row != toPath.row else { return }
             guard location.y > 0 else { return }
             
-            // check if destination is different from source and valid then move the cell in the tableView
-            if movingFromIndexPath != nil {
-                // ... move the rows
-                tableView.moveRow(at: movingFromIndexPath!, to: toPath)
-                
-                // ... and update movingFromIndexPath so it is in sync with UI changes
-                movingFromIndexPath = toPath
-            }
+            // move the cell in the tableView
+            tableView.beginUpdates()
+            tableView.moveRow(at: fromPath, to: toPath)
+            tableView.endUpdates()
+            
+            // ... and update movingFromIndexPath so it is in sync with UI changes
+            movingFromIndexPath = toPath
         }
     }
     
