@@ -951,49 +951,51 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         }
     }
     
-    func longPressMoved(_ idxPath: IndexPath?, location: CGPoint) {
-        guard var indexPath = idxPath else { return }
-        guard prevLocation != nil else { return }
-        guard longPressCellType != .addItem else { return }
+    func longPressMoved(_ indexPath: IndexPath?, location: CGPoint) {
+        guard var indexPath = indexPath else { print("longPressMoved - indexPath is not valid"); return }
+        guard prevLocation != nil else { print("longPressMoved - prevLocation is nil"); return }
+        guard longPressCellType != .addItem else { print("longPressMoved - longPressCellType is .addItem"); return }
+        guard let snapshot = snapshot else { return }
+        guard location.y > 0 else { return }
+        
+        var center: CGPoint = snapshot.center
+        center.y = location.y
+        snapshot.center = center
         
         // if an item, then adjust indexPath if necessary so we don't move above top-most category
         indexPath = adjustIndexPathIfItemMovingAboveTopRow(indexPath)
         
-        if snapshot != nil && location.y > 0 {
-            var center: CGPoint = snapshot!.center
-            center.y = location.y
-            snapshot?.center = center
+        guard let fromPath = movingFromIndexPath else { return }
+        
+        // move the cell in the tableView
+        // adjust dest index path for moves over groups being kept together
+        if longPressCellType == .item && cellAtIndexPathIsAddCellCategoryPair(indexPath) {
+            // an item is moving over an AddCell/Category pair
+            let moveDirection: MoveDirection = location.y < prevLocation!.y ? .up : .down
             
-            // check if destination is valid then move the cell in the tableView
-            if movingFromIndexPath != nil
-            {
-                // adjust dest index path for moves over groups being kept together
-                if longPressCellType == .item && cellAtIndexPathIsAddCellCategoryPair(indexPath) {
-                    // an item is moving over an AddCell/Category pair
-                    let moveDirection = location.y < prevLocation!.y ? MoveDirection.up : MoveDirection.down
-                    
-                    if moveDirection == .down {
-                        let rowCount = list.totalDisplayCount()
-                        // this is to prevent dragging past the last row
-                        if (indexPath as NSIndexPath).row >= rowCount-1 {
-                            indexPath = IndexPath(row: (indexPath as NSIndexPath).row, section: 0)
-                        } else {
-                            indexPath = IndexPath(row: (indexPath as NSIndexPath).row + 1, section: 0)
-                        }
-                    } else {
-                        indexPath = IndexPath(row: (indexPath as NSIndexPath).row - 1, section: 0)
-                    }
-                } else if longPressCellType == .category {
-                    // a category is moving over another category
+            if moveDirection == .down {
+                let rowCount = list.totalDisplayCount()
+                // this is to prevent dragging past the last row
+                if (indexPath as NSIndexPath).row >= rowCount-1 {
+                    indexPath = IndexPath(row: (indexPath as NSIndexPath).row, section: 0)
+                } else {
+                    indexPath = IndexPath(row: (indexPath as NSIndexPath).row + 1, section: 0)
                 }
-                
-                // ... move the rows
-                tableView.moveRow(at: movingFromIndexPath!, to: indexPath)
-
-                // ... and update movingFromIndexPath so it is in sync with UI changes
-                movingFromIndexPath = indexPath
+            } else {
+                indexPath = IndexPath(row: (indexPath as NSIndexPath).row - 1, section: 0)
             }
+        } else if longPressCellType == .category {
+            // a category is moving over another category
         }
+        
+        // ... move the rows
+        if fromPath.row != indexPath.row {
+            tableView.moveRow(at: fromPath, to: indexPath)
+            print("longPressMoved - moveRow from \(fromPath.row) to \(indexPath.row)")
+        }
+
+        // ... and update movingFromIndexPath so it is in sync with UI changes
+        movingFromIndexPath = indexPath
     }
     
     /// Clean up after a long press gesture.

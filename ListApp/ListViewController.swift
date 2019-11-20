@@ -441,8 +441,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         if indexPath != nil {
             let cell = tableView.cellForRow(at: indexPath!)
             
-            if cell is AddListCell
-            {
+            if cell is AddListCell {
                 // we got a long press on the AddList cell... cancel the action
                 if longPressActive {
                     indexPath = IndexPath(row: ListData.listCount - 1, section: 0)
@@ -456,8 +455,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         let touchLocationInWindow = tableView.convert(location, to: tableView.window)
         
         // we need to end the long press if we move above the top cell and into the top bar
-        if touchLocationInWindow.y <= topBarHeight && location.y <= 0
-        {
+        if touchLocationInWindow.y <= topBarHeight && location.y <= 0 {
             // if we moved above the table view then set the destination to the top cell and end the long press
             if longPressActive {
                 indexPath = IndexPath(row: 0, section: 0)
@@ -556,16 +554,18 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
             center.y = location.y
             snapshot?.center = center
             
-            if indexPath != nil && location.y > 0 {
-                // check if destination is different from source and valid then move the cell in the tableView
-                if movingFromIndexPath != nil
-                {
-                    // ... move the rows
-                    tableView.moveRow(at: movingFromIndexPath!, to: indexPath!)
-                    
-                    // ... and update movingFromIndexPath so it is in sync with UI changes
-                    movingFromIndexPath = indexPath
-                }
+            guard let fromPath = movingFromIndexPath else { return }
+            guard let toPath = indexPath else { return }
+            guard fromPath.row != toPath.row else { return }
+            guard location.y > 0 else { return }
+            
+            // check if destination is different from source and valid then move the cell in the tableView
+            if movingFromIndexPath != nil {
+                // ... move the rows
+                tableView.moveRow(at: movingFromIndexPath!, to: toPath)
+                
+                // ... and update movingFromIndexPath so it is in sync with UI changes
+                movingFromIndexPath = toPath
             }
         }
     }
@@ -842,31 +842,30 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         self.present(alert, animated: true, completion: nil)
     }
     
-    func handleDeleteList(_ alertAction: UIAlertAction!) -> Void {
-        if let indexPath = deleteListIndexPath {
-            tableView.beginUpdates()
-            
-            // notify the ItemViewController that a list is being deleted
-            //let deletedList = lists[(indexPath as NSIndexPath).row]
-            if let deletedList = ListData.listForRow(at: indexPath) {
-                self.delegate?.listDeleted(deletedList)
-                
-                // delete the list from cloud storage
-                //if let list = ListData.listForRow(at: indexPath)
-                deletedList.deleteFromCloud()
-                
-                // delete the list from the data source
-                //lists.removeAtIndex(indexPath.row)
-                ListData.removeList(deletedList)
-                
-                // delete list index path from the table view
-                tableView.deleteRows(at: [indexPath], with: .fade)
-                self.tableView.reloadData()
-                deleteListIndexPath = nil
-            }
-            
-            tableView.endUpdates()
-        }
+    func handleDeleteList(_ alertAction: UIAlertAction!) {
+        guard let indexPath = deleteListIndexPath, let deletedList = ListData.listForRow(at: indexPath) else { return }
+        
+        tableView.beginUpdates()
+        
+        // notify the ItemViewController that a list is being deleted
+        //let deletedList = lists[(indexPath as NSIndexPath).row]
+        
+        self.delegate?.listDeleted(deletedList)
+        
+        // delete the list from cloud storage
+        //if let list = ListData.listForRow(at: indexPath)
+        deletedList.deleteFromCloud()
+        
+        // delete the list from the data source
+        //lists.removeAtIndex(indexPath.row)
+        ListData.removeList(deletedList)
+        
+        // delete list index path from the table view
+        tableView.deleteRows(at: [indexPath], with: .fade)
+        self.tableView.reloadData()
+        deleteListIndexPath = nil
+        
+        tableView.endUpdates()
     }
     
     func cancelDeleteList(_ alertAction: UIAlertAction!) {
