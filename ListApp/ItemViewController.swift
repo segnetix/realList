@@ -216,6 +216,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
         refreshAnimation.alpha = 0.0
         refreshAnimation.stopAnimating()
         refreshControl?.endRefreshing()
+        appDelegate.isUpdating = false
     }
     
 ////////////////////////////////////////////////////////////////

@@ -8,7 +8,6 @@
 
 import Foundation
 
-
 class HUDControl {
     // these methods may be called from background threads
     static func startHUD(_ title: String, subtitle: String) {
@@ -23,13 +22,17 @@ class HUDControl {
                 appDelegate.hud!.mode = MBProgressHUDMode.indeterminate
                 appDelegate.hud!.minShowTime = TimeInterval(1.0)
                 appDelegate.hud!.button.setTitle("Cancel", for: UIControl.State())
-                appDelegate.hud!.button.addTarget(self, action: #selector(CloudCoordinator.cancelCloudDataFetch), for: .touchUpInside)
+                appDelegate.hud!.button.addTarget(self, action: #selector(cancelCloudDataFetch), for: .touchUpInside)
             }
             
             // dynamic elements
             appDelegate.hud!.label.text = title
             appDelegate.hud!.detailsLabel.text = subtitle
         }
+    }
+    
+    @objc static func cancelCloudDataFetch() {
+        CloudCoordinator.cancelCloudDataFetch()
     }
     
     // displays a done HUD for 0.8 seconds

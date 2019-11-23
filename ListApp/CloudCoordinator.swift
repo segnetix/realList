@@ -417,7 +417,11 @@ class CloudCoordinator {
     
     // must be called on main thread
     @objc static func cancelCloudDataFetch() {
-        guard Thread.isMainThread else { print("*** calling from other than main thread..."); return }
+        guard Thread.isMainThread else {
+            print("*** calling from other than main thread...")
+            appDelegate.isUpdating = false
+            return
+        }
         
         print("*** cancelCloudDataFetch ***")
         var canceled = false
