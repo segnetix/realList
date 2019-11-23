@@ -961,21 +961,9 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         return snapshot
     }
     
-////////////////////////////////////////////////////////////////
+// MARK:- Tutorial
     
     func generateTutorial() {
-        // do we already have a tutorial loaded?
-        /*
-        var i = 0
-        for list in lists {
-            if list.isTutorialList {
-                selectionIndex = i
-                return
-            }
-            i += 1
-        }
-        */
-        
         if let tutorialIndex = ListData.tutorialListIndex {
             selectionIndex = tutorialIndex
             return
@@ -1059,7 +1047,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         // List actions...
         let cat4 = tutorial.addCategory("List actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         item = tutorial.addItem(cat4, name: "Tap the 'Lists' button above...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...to go back to the lists view.  (Note: on an iPad the Lists will always be on the left so there is no Lists button.)"
+        item!.note = "...to go back to the lists view.  (Note: on an iPad the Lists will usually be on the left so there is no Lists button.)"
         item!.imageAsset!.image = UIImage(named: "Tutorial_Lists_button")
         
         item = tutorial.addItem(cat4, name: "Create a new list...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
@@ -1084,7 +1072,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         
         item = tutorial.addItem(cat5, name: "Tap the settings button...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...for general list item actions."
-        item!.imageAsset!.image = UIImage(named: "Tutorial_Settings")
+        item!.imageAsset!.image = UIImage(named: "Tutorial_Elipsis")
         
         item = tutorial.addItem(cat5, name: "These buttons let you...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...collapse all categories."
@@ -1131,26 +1119,22 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         
         item = tutorial.addItem(cat6, name: "1. Go to the About view...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...access from the realList icon at the top of the List view."
-        item!.imageAsset!.image = UIImage(named: "Tutorial_About_button")
+        item!.imageAsset!.image = UIImage(named: "Tutorial_Settings")
         
         item = tutorial.addItem(cat6, name: "2. Check if iCloud is enabled...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...if there is a green check mark in the cloud then realList is connected to iCloud.  If not, then go to the next steps to set up iCloud synchronization."
+        item!.note = "...if there is a green check mark in the cloud then realList is connected to iCloud and you are all set.  If not, then go to the next steps to set up iCloud synchronization."
         item!.imageAsset!.image = UIImage(named: "Cloud_check")
         
         item = tutorial.addItem(cat6, name: "3. Set up your Apple iCloud account...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...if you don't already have an iCloud account then set up now (it's free).  Tap the iCloud Settings button and enter your email address and a password for iCloud.  Apple gives you 5GB of data storage for free."
+        item!.note = "...if you don't already have an iCloud account then set up now (it's free).  Go to the iOS Settings app, tap where you see your name, tap iCloud, and enter your email address and a password for iCloud.  Apple gives you 5GB of data storage for free."
         item!.imageAsset!.image = UIImage(named: "Tutorial_iCloud_setup")
         
         item = tutorial.addItem(cat6, name: "4. Turn on iCloud Drive...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...below the iCloud setup, tap on iCloud Drive and turn it On then scroll down to verify that iCloud drive is turned on for realList.  Once iCloud Drive is set up then realList will send/receive list changes to/from your iCloud drive and will automatically share lists between all of your iOS devices that are set up with iCloud.  Tap 'Back to realList' in the upper left corner."
+        item!.note = "...go to Settings  > [your name] > iCloud, then turn on iCloud Drive.  Also make sure iCloud Drive is turned on for realList.  Once iCloud Drive is set up then realList will send/receive list changes to/from your iCloud drive and will automatically share lists between all of your iOS devices that are set up with iCloud.  Now you can go back to realList."
         item!.imageAsset!.image = UIImage(named: "Tutorial_iCloudDrive_setup")
         
-        item = tutorial.addItem(cat6, name: "5. Enable notifications...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "Notifications let realList synchronize between your iOS devices as you make changes to you lists.  Tap the Notification Settings button.  If you answered OK to notifications when realList first launched then this should already be set up.  If Notifications are off, then you can enable it here.  Tap Notifications and enable 'Allow Notifications' and realList is now set up for synchronization.  Be sure to do these steps on all of your iOS devices to share your list data between them."
-        item!.imageAsset!.image = UIImage(named: "Tutorial_notifications")
-        
         item = tutorial.addItem(cat6, name: "Pull down to refresh...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "realList will now pull the latest list data from your iCloud account each time the app launches.  If you need to refresh your data after realList returns from the background just pull down on either the list view or the item view and the latest data from iCloud will be retrieved for all of your lists."
+        item!.note = "realList pulls the latest list data from your iCloud account each time the app launches.  If you need to refresh your data after realList returns from the background just pull down on either the list view or the item view and the latest data from iCloud will be retrieved for all of your lists."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Data_Fetch")
         
         // About view...
@@ -1161,16 +1145,12 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         item!.imageAsset!.image = UIImage(named: "Tutorial_About_view")
         
         item = tutorial.addItem(cat7, name: "You already saw...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...the iCloud Settings and Notification Settings buttons."
-        item!.imageAsset!.image = UIImage(named: "Tutorial_iCloud_Notification_Settings_buttons")
+        item!.note = "...the iCloud Settings button."
+        item!.imageAsset!.image = UIImage(named: "Cloud_check")
         
         item = tutorial.addItem(cat7, name: "App Settings...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...the App Settings let you control auto capitalization and spell checking behaviors of names and notes.  Also you can control if pictures are included with item notes when you AirPrint your lists."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AppSettings_button")
-        
-        item = tutorial.addItem(cat7, name: "Upgrade...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...the Upgrade view lets you purchase an upgrade that removes limits on lists and items.  Here you can also restore your purchase if you have already purchased the upgraded version.  After you have upgraded realList the white arrow in the Upgrade button turns to green."
-        item!.imageAsset!.image = UIImage(named: "Tutorial_Upgrade_button")
         
         item = tutorial.addItem(cat7, name: "Tutorial...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...the Tutorial button will either take you to the tutorial list or generate a new copy of the tutorial if you have deleted it."

@@ -132,21 +132,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     func restoreListDataFromLocalStorage() {
         guard let archiveURL = archiveURL else { return }
+        guard let listViewController = listViewController else { return }
+        guard let itemViewController = itemViewController else { return }
         
         // restore the list data from local storage
         if ListData.loadLocal(filePath: archiveURL.path) {
             if let initialListIndex = UserDefaults.standard.object(forKey: key_selectionIndex) as? Int {
                 if initialListIndex >= 0 && initialListIndex < ListData.listCount {
-                    itemViewController!.list = ListData.list(initialListIndex)
-                    listViewController!.selectionIndex = initialListIndex
+                    itemViewController.list = ListData.list(initialListIndex)
+                    listViewController.selectionIndex = initialListIndex
                 } else {
-                    listViewController!.selectionIndex = -1
+                    listViewController.selectionIndex = -1
                 }
             }
         } else {
             // temp - comment out the tutorial generation line below for development
-            listViewController!.generateTutorial()
-            listViewController!.selectList(0)
+            listViewController.generateTutorial()
+            listViewController.selectList(0)
         }
     }
     

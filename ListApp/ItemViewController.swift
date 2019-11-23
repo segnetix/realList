@@ -103,9 +103,9 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
 
         // settings button
         let settingsButton: UIButton = UIButton(type: UIButton.ButtonType.custom)
-        let settingsImage = UIImage(named: "Collapse Arrows")
-        settingsButton.frame = CGRect(x: 0, y: 0, width: 30, height: 30)
-        settingsButton.transform = CGAffineTransform(scaleX: 2, y: 3)
+        let settingsImage = UIImage(named: "elipsis")
+        settingsButton.frame = CGRect(x: 0, y: 0, width: 50, height: 50)
+        settingsButton.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
         if let settingsImage = settingsImage {
             let tintedImage = settingsImage.withRenderingMode(UIImage.RenderingMode.alwaysTemplate)
             settingsButton.setImage(tintedImage, for: UIControl.State())
@@ -352,7 +352,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             if category.expanded {
                 cell.expandArrows.image = UIImage(named: "Expand Arrows")
             } else {
-                cell.expandArrows.image = UIImage(named: "Collapse Arrows")
+                cell.expandArrows.image = UIImage(named: "elipsis")
             }
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
