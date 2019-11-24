@@ -568,43 +568,41 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         displayLink?.invalidate()
         displayLink = nil
         
-        guard var indexPath = idxPath else { return }
+        guard var destIndexPath = idxPath else { return }
+        guard snapshot != nil else { return }
         
-        let destCell = tableView.cellForRow(at: indexPath)
+        let destCell = tableView.cellForRow(at: destIndexPath)
         
         // if we are dropping on the AddList cell then move dest to just above the AddList cell
         if destCell is AddListCell {
-            indexPath = IndexPath(row: (indexPath as NSIndexPath).row-1, section: 0)
+            destIndexPath = IndexPath(row: (destIndexPath as NSIndexPath).row-1, section: 0)
         }
         
         // finalize list data with new location for sourceIndexObj
-        if sourceIndexPath != nil {
+        if let sourceIndexPath = sourceIndexPath {
             var center: CGPoint = snapshot!.center
             center.y = location.y
             snapshot?.center = center
             
             // check if destination is different from source and valid
-            if indexPath != sourceIndexPath {
-                // we are moving an item
+            if destIndexPath != sourceIndexPath {
                 tableView.beginUpdates()
                 
                 // remove the item from its original location
-                let removedList = ListData.removeListAt(sourceIndexPath!)
-                if removedList != nil {
-                    ListData.insertList(removedList!, at: indexPath)
+                let removedList = ListData.removeListAt(sourceIndexPath)
+                if let removedList = removedList {
+                    ListData.insertList(removedList, at: destIndexPath)
+                    selectList(destIndexPath.row)
                 }
-                
-                //let removedList = lists.remove(at: (sourceIndexPath! as NSIndexPath).row)
-                //lists.insert(removedList, at: (indexPath as NSIndexPath).row)
 
                 tableView.endUpdates()
             }
         } else {
-            print("sourceIndexPath is nil...")
+            print("*** ERROR: sourceIndexPath is nil...")
         }
         
         // clean up any snapshot views or displayLink scrolls
-        let cell: UITableViewCell? = tableView.cellForRow(at: indexPath)
+        let cell: UITableViewCell? = tableView.cellForRow(at: destIndexPath)
         
         cell?.alpha = 0.0
         UIView.animate(withDuration: 0.25, animations: { () -> Void in

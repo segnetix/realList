@@ -10,7 +10,6 @@
 		B01326DF236E1F4B004659F6 /* SubscriptionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B01326DE236E1F4B004659F6 /* SubscriptionManager.swift */; };
 		B02174D21C6D57110087D5A3 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = B02174D41C6D57110087D5A3 /* Localizable.strings */; };
 		B02597281CE242E100615138 /* MBProgressHUD.m in Sources */ = {isa = PBXBuildFile; fileRef = B02597271CE242E100615138 /* MBProgressHUD.m */; };
-		B02BBCEE1CA7069F00030822 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B02BBCED1CA7069F00030822 /* StoreKit.framework */; };
 		B02CEAE3236F2EC700989FB3 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02CEAE2236F2EC700989FB3 /* Utilities.swift */; };
 		B02CEAE5236F2F1400989FB3 /* HUDControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = B02CEAE4236F2F1400989FB3 /* HUDControl.swift */; };
 		B03C467B1C66F21400B66CBD /* ItemDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */; };
@@ -91,7 +90,6 @@
 		B02597251CE242E100615138 /* EnList-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "EnList-Bridging-Header.h"; sourceTree = "<group>"; };
 		B02597261CE242E100615138 /* MBProgressHUD.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MBProgressHUD.h; sourceTree = "<group>"; };
 		B02597271CE242E100615138 /* MBProgressHUD.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MBProgressHUD.m; sourceTree = "<group>"; };
-		B02BBCED1CA7069F00030822 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		B02CEAE2236F2EC700989FB3 /* Utilities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		B02CEAE4236F2F1400989FB3 /* HUDControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HUDControl.swift; sourceTree = "<group>"; };
 		B03C467A1C66F21400B66CBD /* ItemDetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ItemDetailViewController.swift; sourceTree = "<group>"; };
@@ -146,7 +144,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B02BBCEE1CA7069F00030822 /* StoreKit.framework in Frameworks */,
 				B07CCC7B1CA1985A00CBCFC1 /* CloudKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -243,7 +240,6 @@
 			isa = PBXGroup;
 			children = (
 				B05B23561CD12D2E00595569 /* Default-568h@2x.png */,
-				B02BBCED1CA7069F00030822 /* StoreKit.framework */,
 				B07CCC7A1CA1985A00CBCFC1 /* CloudKit.framework */,
 				B0A3026A1C349F7A00F6FB44 /* EnList */,
 				B0B3E3C71D6CB546001D4395 /* realListTests */,
@@ -681,7 +677,7 @@
 				CODE_SIGN_ENTITLEMENTS = EnList.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 128;
+				CURRENT_PROJECT_VERSION = 129;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEFINES_MODULE = YES;
 				INFOPLIST_FILE = ListApp/Info.plist;
@@ -708,7 +704,7 @@
 				CODE_SIGN_ENTITLEMENTS = EnList.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 128;
+				CURRENT_PROJECT_VERSION = 129;
 				DEFINES_MODULE = YES;
 				INFOPLIST_FILE = ListApp/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
