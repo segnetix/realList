@@ -1021,7 +1021,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         let cat3 = tutorial.addCategory("Category actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         
         item = tutorial.addItem(cat3, name: "Create a new category...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...tap the settings icon (upper right) and then tap the icon with the green plus to make a new category."
+        item!.note = "...tap the list options icon (three dots in the upper right) and then tap the icon with the green plus to make a new category."
         item!.imageAsset!.image = UIImage(named: "Tutorial_AddCategory")
         
         item = tutorial.addItem(cat3, name: "Single tap a category...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
@@ -1065,11 +1065,11 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         item = tutorial.addItem(cat4, name: "Press, hold and drag a list...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
         item!.note = "...to move it."
         
-        // Settings actions...
-        let cat5 = tutorial.addCategory("Settings actions...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
+        // List options...
+        let cat5 = tutorial.addCategory("List Options...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         
-        item = tutorial.addItem(cat5, name: "Tap the settings button...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...for general list item actions."
+        item = tutorial.addItem(cat5, name: "Tap the list options button...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item!.note = "...(the three dots in the upper right of the items list) for general list item actions."
         item!.imageAsset!.image = UIImage(named: "Tutorial_Elipsis")
         
         item = tutorial.addItem(cat5, name: "These buttons let you...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
@@ -1136,10 +1136,10 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
         item!.imageAsset!.image = UIImage(named: "Tutorial_Data_Fetch")
         
         // About view...
-        let cat7 = tutorial.addCategory("The About view...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
+        let cat7 = tutorial.addCategory("About and App Settings...", displayHeader: true, updateIndices: false, createRecord: true, tutorial: true)
         
-        item = tutorial.addItem(cat7, name: "The About view tells you...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
-        item!.note = "...about the status of your app and lets you choose preferences."
+        item = tutorial.addItem(cat7, name: "App Settings...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
+        item!.note = "...is the gear icon in the upper left of the list view.  This page tells you about the status of your app and lets you choose preferences."
         item!.imageAsset!.image = UIImage(named: "Tutorial_About_view")
         
         item = tutorial.addItem(cat7, name: "You already saw...", state: ItemState.incomplete, updateIndices: false, createRecord: true, tutorial: true)
