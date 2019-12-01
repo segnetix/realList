@@ -135,6 +135,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         guard let listViewController = listViewController else { return }
         guard let itemViewController = itemViewController else { return }
         
+        // check for old local data which is no longer compatible with v1.2 local serialization
+        guard UserDefaults.standard.bool(forKey: SubscriptionManager.key_subscribedToPrivateData) else {
+            // this is a first load after upgrade to v1.2 so need to delete local data
+            do {
+                try FileManager.default.removeItem(atPath: archiveURL.path)
+            } catch {
+                print("file delete error")
+            }
+            return
+        }
+        
         // restore the list data from local storage
         if ListData.loadLocal(filePath: archiveURL.path) {
             if let initialListIndex = UserDefaults.standard.object(forKey: key_selectionIndex) as? Int {

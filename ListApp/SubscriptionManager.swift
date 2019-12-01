@@ -10,8 +10,9 @@ import Foundation
 import CloudKit
 
 class SubscriptionManager {
+    static let key_subscribedToPrivateData = "subscribedToPrivateData"
+
     private static let appDelegate = UIApplication.shared.delegate as! AppDelegate
-    private static let key_subscribedToPrivateData = "subscribedToPrivateData"
     
     private static let listSubID: CKSubscription.ID = "ListSubscription"
     private static let categorySubID: CKSubscription.ID = "CategorySubscription"

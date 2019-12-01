@@ -352,7 +352,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             if category.expanded {
                 cell.expandArrows.image = UIImage(named: "Expand Arrows")
             } else {
-                cell.expandArrows.image = UIImage(named: "elipsis")
+                cell.expandArrows.image = UIImage(named: "Collapse Arrows")
             }
             
             // set up single tap gesture recognizer in cat cell to enable expand/collapse
@@ -723,15 +723,12 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     
     /// Respond to a single tap (toggle expand/collapse state of category).
     @objc func cellSingleTapAction(_ sender: UITapGestureRecognizer) {
-        if sender.view != nil
-        {
+        if sender.view != nil {
             let tag = sender.view!.tag
             let obj = list.objectForTag(tag)
             
-            if obj is Category
-            {
-                if !inEditMode
-                {
+            if obj is Category {
+                if !inEditMode {
                     let category = obj as! Category
                     let indexPath = list.displayIndexPathForCategory(category)
                     
