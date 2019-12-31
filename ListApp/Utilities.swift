@@ -51,3 +51,10 @@ class Utilities {
 
 }
 
+class HighlightButton: UIButton {
+    override var isHighlighted: Bool {
+        didSet {
+            backgroundColor = isHighlighted ? UIColor.systemGray : UIColor.black
+        }
+    }
+}

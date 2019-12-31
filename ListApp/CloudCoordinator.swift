@@ -10,6 +10,21 @@ import Foundation
 import CloudKit
 
 class CloudCoordinator {
+    private static let container = CKContainer.default()
+    static let privateDatabase = container.privateCloudDatabase
+    static let sharedDatabase = container.sharedCloudDatabase
+    static let sharedZoneName = "SharedZone"
+    static let sharedZone = CKRecordZone(zoneName: sharedZoneName)
+    static let sharedZoneID = sharedZone.zoneID
+    
+    static var updateRecords = [CKRecord: AnyObject?]()
+    
+    // MARK:- Functions
+    
+    // adds the given record to the array of records to be saved to the cloud
+    static func addToUpdateRecords(_ record: CKRecord, obj: AnyObject) {
+        CloudCoordinator.updateRecords[record] = obj
+    }
     
     // checks if the user has logged into their iCloud account or not
     static func iCloudIsAvailable() -> Bool {
@@ -29,6 +44,7 @@ class CloudCoordinator {
         
         // determine network Type
         if netReachable {
+            
             if (AppManager.sharedInstance.reachabiltyNetworkType == "Wifi") {
                 networkType = ".Wifi"
             } else if (AppManager.sharedInstance.reachabiltyNetworkType == "Cellular") {
@@ -41,15 +57,76 @@ class CloudCoordinator {
         return iCloudDriveOn && netReachable
     }
     
-
-    // sends all records needing updating in batches to cloud storage
-    static func batchRecordUpdate() {
-        guard let database = appDelegate.privateDatabase else { return }
+    static func sharedZoneExists(completion: @escaping (Bool, Error?) -> Void) {
+        let fetchZonesOperation = CKFetchRecordZonesOperation.fetchAllRecordZonesOperation()
         
-        let batchSize = 250                                             // this number must be no greater than 400
-        let ckRecords = [CKRecord](appDelegate.updateRecords.keys)      // initializes an array of CKRecords with the keys from the updateRecords dictionary
-        var startIndex = 0                                              // start index for each loop
-        var stopIndex = -1                                              // stop index for each loop
+        fetchZonesOperation.fetchRecordZonesCompletionBlock = { (recordZones: [CKRecordZone.ID : CKRecordZone]?, error: Error?) -> Void in
+            guard error == nil else {
+                completion(false, error)
+                return
+            }
+                    
+            if let fetchedRecordZones = recordZones {
+                let hasSharedZone = fetchedRecordZones.contains(where: { $0.key.zoneName == CloudCoordinator.sharedZoneName } )
+                completion(hasSharedZone, nil)
+            } else {
+                completion(false, nil)
+            }
+        }
+        
+        fetchZonesOperation.qualityOfService = .utility
+        let container = CKContainer.default()
+        let db = container.privateCloudDatabase
+        db.add(fetchZonesOperation)
+    }
+    
+    // checks for a shared zone and creates one once if necessary
+    static func setupSharedZone(completion: @escaping (Bool, Error?) -> Void) {
+//        guard !UserDefaults.standard.bool(forKey: key_sharedZoneCreated) else {
+//            completion(false, nil)
+//            return
+//        }
+        
+        let operation = CKModifyRecordZonesOperation(recordZonesToSave: [sharedZone], recordZoneIDsToDelete: [])
+        operation.modifyRecordZonesCompletionBlock = { recordZones, recordZoneIDs, error in
+            guard error == nil else {
+                completion(false, error)
+                return
+            }
+            
+            // update the flag to note the shared zone has been created
+            //UserDefaults.standard.set(true, forKey: key_sharedZoneCreated)
+            
+            // set flag to note that we will need to save after data migration
+            DispatchQueue.main.async {
+                appDelegate.needsDataSaveOnMigration = true
+            }
+            
+            completion(true, nil)
+        }
+        
+        operation.qualityOfService = .utility
+        privateDatabase.add(operation)
+    }
+    
+// Development only
+//    static func deleteSharedZone() {
+//        let operation = CKModifyRecordZonesOperation(recordZonesToSave: [], recordZoneIDsToDelete: [sharedZone.zoneID])
+//        operation.modifyRecordZonesCompletionBlock = { recordZones, recordZoneIDs, error in
+//            print("deleted zone: \(recordZoneIDs)")
+//        }
+//
+//        operation.qualityOfService = .utility
+//        privateDatabase.add(operation)
+//    }
+
+    // sends all records needing updating in batches to cloud storage (shared zone)
+    static func batchRecordUpdate() {
+        let database = privateDatabase
+        let batchSize = 250                                                 // this number must be no greater than 400
+        let ckRecords = [CKRecord](CloudCoordinator.updateRecords.keys)     // initializes an array of CKRecords with the keys from the updateRecords dictionary
+        var startIndex = 0                                                  // start index for each loop
+        var stopIndex = -1                                                  // stop index for each loop
         
         if ckRecords.count == 0 {
             print("batchRecordUpdate - ckRecords.count == 0")
@@ -81,12 +158,13 @@ class CloudCoordinator {
             let saveRecordsOperation = CKModifyRecordsOperation()
             saveRecordsOperation.recordsToSave = batchRecords
             saveRecordsOperation.savePolicy = .changedKeys
+            
             saveRecordsOperation.perRecordCompletionBlock = { record, error in
                 // deal with conflicts
                 // set completionHandler of wrapper operation if it's the case
                 if error == nil {
                     //print("batch save: \(record![key_name])")
-                    let obj = appDelegate.updateRecords[record]
+                    let obj = CloudCoordinator.updateRecords[record]
                     if obj is List {
                         let list = obj as! List
                         list.needToSave = false
@@ -103,7 +181,7 @@ class CloudCoordinator {
                     }
                 } else {
                     // NOTE: This should be able to handle a CKErrorLimitExceeded error.
-                    let obj = appDelegate.updateRecords[record]
+                    let obj = CloudCoordinator.updateRecords[record]
                     if obj is List {
                         let list = obj as! List
                         print("batch update error: list \(list.name) \(error!.localizedDescription)")
@@ -122,7 +200,7 @@ class CloudCoordinator {
             
             saveRecordsOperation.modifyRecordsCompletionBlock = { savedRecords, deletedRecordIDs, error in
                 if error == nil && savedRecords != nil {
-                    print("batch save operation complete for \(savedRecords!.count) records")
+                    print("all list data saved to cloud for \(savedRecords!.count) records")
                 } else if error != nil {
                     // ******* NOTE: This should be able to handle a CKErrorLimitExceeded error. ******* //
                     print("*** ERROR: batchRecordUpdate - \(error!.localizedDescription)")
@@ -139,8 +217,8 @@ class CloudCoordinator {
     
     // deletes an array of records
     static func batchRecordDelete(_ deleteRecords: [CKRecord]) {
-        guard let database = appDelegate.privateDatabase else { return }
-        
+        let database = privateDatabase
+
         // generate the array of recordIDs to be deleted
         var deleteRecordIDs = [CKRecord.ID]()
         for record in deleteRecords {
@@ -170,8 +248,8 @@ class CloudCoordinator {
         database.add(deleteRecordsOperation)
     }
     
-    // pulls all list, category and item data from cloud storage
-    static func fetchCloudData(_ refreshLabel: UILabel?, refreshEnd:@escaping () -> Void) {
+    // pulls all list, category and item data from cloud storage and merges with local data
+    static func fetchCloudData(_ refreshLabel: UILabel?, refreshEnd: @escaping () -> Void) {
         //NSLog("fetchCloudData...")
         if appDelegate.isUpdating {
             // we only want one refresh running at a time
@@ -183,12 +261,14 @@ class CloudCoordinator {
         appDelegate.refreshLabel = refreshLabel
         appDelegate.refreshEnd = refreshEnd
         
-        guard let database = appDelegate.privateDatabase else { return }
+        let database = privateDatabase
+        
         guard iCloudIsAvailable() else {
             print("fetchCloudData - iCloud is not available...")
             if let refreshLabel = appDelegate.refreshLabel {
                 refreshLabel.text = NSLocalizedString("iCloud_not_available", comment: "iCloud not available.")
                 Utilities.runAfterDelay(1.5, block: {
+                    assert(Thread.isMainThread)
                     appDelegate.refreshEnd()
                     appDelegate.refreshLabel = nil
                     appDelegate.isUpdating = false
@@ -454,11 +534,9 @@ class CloudCoordinator {
     }
     
     // pulls image data in batches for items needing updating (itemReferences)
-    static func fetchImageData() {
+    static func fetchImageData(forceUpdate: Bool, completion: @escaping () -> Void) {
         //NSLog("fetchImageData - \(itemReferences.count) items need new images...")
-        
-        guard let database = appDelegate.privateDatabase else { return }
-        
+                
         let batchSize = 50          // size of the batch request block
         var imageFetchCount = 0     // holds count of fetched images
         
@@ -527,12 +605,12 @@ class CloudCoordinator {
                 
                 // send this batch of image records to the merge method on the main thread
                 DispatchQueue.main.async {
-                    CloudCoordinator.mergeImageCloudData(imageArray)
+                    CloudCoordinator.mergeImageCloudData(imageArray, forceUpdate: forceUpdate, completion: completion)
                 }
             }
             
             // execute the query operation
-            database.add(imageFetch)
+            privateDatabase.add(imageFetch)
             
         } while stopIndex < appDelegate.itemReferences.count - 1
     }
@@ -540,6 +618,7 @@ class CloudCoordinator {
     // after fetching cloud data, merge with local data
     // NOTE: this must be called from the main thread
     static func mergeCloudData() {
+        assert(Thread.isMainThread)
         //NSLog("mergeCloudData...")
         
         // the closing hud (1.0 sec) will prevent user interaction during the merge
@@ -565,7 +644,11 @@ class CloudCoordinator {
         
         // now that items are merged we can call fetchImageData to
         // retreive any images that need updating
-        CloudCoordinator.fetchImageData()
+        CloudCoordinator.fetchImageData(forceUpdate: appDelegate.needsDataSaveOnMigration) {
+            DispatchQueue.main.async {
+                appDelegate.imageDataMergeComplete = true
+            }
+        }
         
         // refreshListData
         DataPersistenceCoordinator.refreshListData()
@@ -590,16 +673,19 @@ class CloudCoordinator {
         appDelegate.refreshEnd()
         appDelegate.refreshLabel = nil
         appDelegate.refreshEnd = { }
+        appDelegate.listDataMergeComplete = true
     }
     
-    static func mergeImageCloudData(_ imageRecords: [CKRecord]) {
+    static func mergeImageCloudData(_ imageRecords: [CKRecord], forceUpdate: Bool, completion: @escaping () -> Void) {
         //NSLog("mergeImageCloudData...")
         
         //startHUD("iCloud", subtitle: NSLocalizedString("Merging_Images", comment: "Merging images message for the iCloud import HUD."))
         
         for cloudImage in imageRecords {
-            DataPersistenceCoordinator.updateFromRecord(cloudImage, forceUpdate: false)
+            DataPersistenceCoordinator.updateFromRecord(cloudImage, forceUpdate: forceUpdate)
         }
+        
+        completion()
     }
     
     // purge any delete records older than one month

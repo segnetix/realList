@@ -711,7 +711,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
                                     
                                     // save the moving item to the cloud with updated owning category
                                     if let destCatRef = destCategory.categoryReference {
-                                        item.saveToCloud(destCatRef)
+                                        item.saveToCloud(categoryReference: destCatRef)
                                     }
                                     
                                     print("removing item \(item.name) from \(srcList.name) and adding to \(destList.name)")
@@ -748,7 +748,7 @@ class ListViewController: UITableViewController, UITextFieldDelegate {
                                 
                                 // save the moving list to the cloud with updated owning list
                                 if let destListRef = destList.listReference {
-                                    movingCategory.saveToCloud(destListRef)
+                                    movingCategory.saveToCloud(listReference: destListRef)
                                 }
                                 
                                 print("moving category \(movingCategory.name) from \(srcList.name) to \(destList.name)")

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CloudKit
 
 class SettingsViewController: UIAppViewController {
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -18,7 +19,8 @@ class SettingsViewController: UIAppViewController {
     let showHideInactiveButton: UIButton = UIButton()
     let setAllItemsInactiveButton: UIButton = UIButton()
     let setAllItemsIncompleteButton: UIButton = UIButton()
-    let closeButton: UIButton = UIButton()
+    let closeButton: HighlightButton = HighlightButton()
+    let shareButton: HighlightButton = HighlightButton()
     let printButton: UIButton = UIButton()
     let emailButton: UIButton = UIButton()
     let noteButton: UIButton = UIButton()
@@ -46,6 +48,7 @@ class SettingsViewController: UIAppViewController {
     var containerViewHorizConstraints: [NSLayoutConstraint]?
     var containerViewVertConstraints: [NSLayoutConstraint]?
     var closeButtonHorizConstraints: [NSLayoutConstraint]?
+    var shareButtonHorizConstraints: [NSLayoutConstraint]?
     var categoryHorizConstraints: [NSLayoutConstraint]?
     var showHideHorizConstraints: [NSLayoutConstraint]?
     var setAllItemsHorizConstraints: [NSLayoutConstraint]?
@@ -55,6 +58,7 @@ class SettingsViewController: UIAppViewController {
     var row4ColorButtonHorizConstraints: [NSLayoutConstraint]?
     var printCloseButtonHorizConstraints: [NSLayoutConstraint]?
     
+    // MARK:- Computed vars
     var showCompletedItems: Bool = true {
         didSet {
             if showCompletedItems {
@@ -95,6 +99,7 @@ class SettingsViewController: UIAppViewController {
         }
     }
     
+    // MARK:- Init
     init(itemVC: ItemViewController, showCompletedItems: Bool, showInactiveItems: Bool) {
         super.init(nibName: nil, bundle: nil)
         
@@ -141,9 +146,11 @@ class SettingsViewController: UIAppViewController {
         adjustConstraints(size)
     }
     
+    // MARK:- Layout
     func adjustConstraints(_ size: CGSize) {
         // remove current constraints
         if closeButtonHorizConstraints      != nil { containerView.removeConstraints(closeButtonHorizConstraints!)      }
+        if shareButtonHorizConstraints      != nil { containerView.removeConstraints(shareButtonHorizConstraints!)      }
         if categoryHorizConstraints         != nil { containerView.removeConstraints(categoryHorizConstraints!)         }
         if showHideHorizConstraints         != nil { containerView.removeConstraints(showHideHorizConstraints!)         }
         if setAllItemsHorizConstraints      != nil { containerView.removeConstraints(setAllItemsHorizConstraints!)      }
@@ -176,12 +183,14 @@ class SettingsViewController: UIAppViewController {
             "r4_2": cb4_2,
             "r4_3": cb4_3,
             "closeButton": closeButton,
+            "shareButton": shareButton,
             "printButton": printButton,
             "emailButton": emailButton,
             "noteButton": noteButton,
             "vertLine": vertLineImage]
         
         closeButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:[closeButton]-16-|", options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
+        shareButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-(>=20)-[shareButton]-(>=20)-|", options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
         showHideHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-[showHideCompletedButton]-[showHideInactiveButton(==showHideCompletedButton)]-|", options: [.alignAllCenterY], metrics: nil, views: views)
         categoryHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-[collapseAllCategoriesButton(==newCatButton)]-[expandAllCategoriesButton(==newCatButton)]-[newCatButton]-|", options: [.alignAllCenterY], metrics: nil, views: views)
         printCloseButtonHorizConstraints = NSLayoutConstraint.constraints(withVisualFormat: "H:|-(>=4,<=8)-[printButton]-[emailButton(==printButton)]-[vertLine]-[noteButton]-(>=4,<=8)-|", options: [.alignAllCenterY], metrics: nil, views: views)
@@ -208,6 +217,9 @@ class SettingsViewController: UIAppViewController {
         let guide = view.safeAreaLayoutGuide
         NSLayoutConstraint.activate([closeButton.topAnchor.constraint(equalTo: guide.topAnchor, constant: 12)])
         NSLayoutConstraint.activate([printButton.bottomAnchor.constraint(equalTo: guide.bottomAnchor, constant: -12)])
+        
+        // center the share button
+        NSLayoutConstraint.activate([shareButton.centerXAnchor.constraint(equalTo: guide.centerXAnchor)])
         
         // set overall vertical constraints based on available height
         if size.height <= 480 {
@@ -270,11 +282,12 @@ class SettingsViewController: UIAppViewController {
         } else {
             // large
             verticalConstraints = NSLayoutConstraint.constraints(
-                withVisualFormat: "V:[closeButton]-60-[newCatButton]-48-[showHideCompletedButton]-48-[setAllItemsIncompleteButton]-60-[r1_1][r2_1][r3_1][r4_1]-(>=48)-[printButton]",
+                withVisualFormat: "V:[closeButton]-64-[shareButton]-64-[newCatButton]-32-[showHideCompletedButton]-32-[setAllItemsIncompleteButton]-64-[r1_1][r2_1][r3_1][r4_1]-(>=48)-[printButton]",
                 options: NSLayoutConstraint.FormatOptions(rawValue: 0), metrics: nil, views: views)
             
             // scale buttons
             closeButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
+            shareButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             newCategoryButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             collapseAllCategoriesButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
             expandAllCategoriesButton.transform = CGAffineTransform(scaleX: 1.0, y: 1.0)
@@ -290,6 +303,7 @@ class SettingsViewController: UIAppViewController {
         
         // add constraints to views
         containerView.addConstraints(closeButtonHorizConstraints!)
+        containerView.addConstraints(shareButtonHorizConstraints!)
         containerView.addConstraints(categoryHorizConstraints!)
         containerView.addConstraints(showHideHorizConstraints!)
         containerView.addConstraints(setAllItemsHorizConstraints!)
@@ -353,7 +367,6 @@ class SettingsViewController: UIAppViewController {
         containerView.addSubview(setAllItemsInactiveButton)
         
         closeButton.translatesAutoresizingMaskIntoConstraints = false
-        //closeButton.setImage(UIImage(named: "Close Window"), for: UIControl.State())
         closeButton.setTitle("Done", for: .normal)
         let vertSpacing: CGFloat = 4.0
         let horizSpacing: CGFloat = 12.0
@@ -364,6 +377,16 @@ class SettingsViewController: UIAppViewController {
         closeButton.layer.borderColor = UIColor.white.cgColor
         closeButton.addTarget(self, action: #selector(SettingsViewController.close), for: UIControl.Event.touchUpInside)
         containerView.addSubview(closeButton)
+        
+        shareButton.translatesAutoresizingMaskIntoConstraints = false
+        shareButton.setTitle("Share", for: .normal)
+        shareButton.contentEdgeInsets = UIEdgeInsets(top: vertSpacing, left: horizSpacing, bottom: vertSpacing, right: horizSpacing)
+        shareButton.titleLabel?.font =  UIFont.preferredFont(forTextStyle: UIFont.TextStyle.title3)
+        shareButton.layer.cornerRadius = 5
+        shareButton.layer.borderWidth = 1
+        shareButton.layer.borderColor = UIColor.white.cgColor
+        shareButton.addTarget(self, action: #selector(SettingsViewController.presentCloudSharingController), for: UIControl.Event.touchUpInside)
+        containerView.addSubview(shareButton)
         
         noteButton.translatesAutoresizingMaskIntoConstraints = false
         if showNotes {
@@ -380,7 +403,7 @@ class SettingsViewController: UIAppViewController {
         
         printButton.translatesAutoresizingMaskIntoConstraints = false
         printButton.setImage(UIImage(named: "Print"), for: UIControl.State())
-        printButton.addTarget(self, action: #selector(SettingsViewController.print), for: UIControl.Event.touchUpInside)
+        printButton.addTarget(self, action: #selector(SettingsViewController.printList), for: UIControl.Event.touchUpInside)
         printButton.isEnabled = UIPrintInteractionController.isPrintingAvailable
         containerView.addSubview(printButton)
         
@@ -417,6 +440,7 @@ class SettingsViewController: UIAppViewController {
         adjustConstraints(view.frame.size)
     }
     
+    // MARK:- Button Actions
     @objc func newCategory(_ sender: UIButton) {
         itemVC?.addNewCategory()
         close()
@@ -495,10 +519,10 @@ class SettingsViewController: UIAppViewController {
         showNotes = !showNotes
     }
     
-    @objc func print() {
+    @objc func printList() {
         // present the print dialog
         itemVC?.presentPrintDialog()
-        
+
         // dismiss settings view controller
         close()
     }
@@ -514,5 +538,43 @@ class SettingsViewController: UIAppViewController {
     @objc func close() {
         DataPersistenceCoordinator.saveListData(async: true)
         presentingViewController!.dismiss(animated: true, completion: nil)
+    }
+    
+    @objc func presentCloudSharingController () {
+        guard let listRecord = itemVC?.list.listRecord else {
+            print("SettingsViewController.share - listRecord not available")
+            return
+        }
+        
+        let cloudSharingController = UICloudSharingController { [weak self] (controller, completion: @escaping (CKShare?, CKContainer?, Error?) -> Void) in
+            guard let `self` = self else {
+              return
+            }
+            self.share(rootRecord: listRecord, completion: completion)
+        }
+        self.present(cloudSharingController, animated: true) {}
+    }
+    
+    func share(rootRecord: CKRecord, completion: @escaping (CKShare?, CKContainer?, Error?) -> Void) {
+      let shareRecord = CKShare(rootRecord: rootRecord)
+      let recordsToSave = [rootRecord, shareRecord];
+      let container = CKContainer.default()
+      let privateDatabase = container.privateCloudDatabase
+      let operation = CKModifyRecordsOperation(recordsToSave: recordsToSave, recordIDsToDelete: [])
+      operation.perRecordCompletionBlock = { (record, error) in
+        if let error = error {
+          print("CloudKit error: \(error.localizedDescription)")
+        }
+      }
+      
+      operation.modifyRecordsCompletionBlock = { (savedRecords, deletedRecordIDs, error) in
+        if let error = error {
+          completion(nil, nil, error)
+        } else {
+          completion(shareRecord, container, nil)
+        }
+      }
+     
+      privateDatabase.add(operation)
     }
 }

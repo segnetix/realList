@@ -17,6 +17,7 @@ let ImagesRecordType = "Images"
 let DeletesRecordType = "Deletes"
 
 // key strings for record access
+let key_listData = "listData"
 let key_name                = "name"
 let key_showCompletedItems  = "showCompletedItems"
 let key_showInactiveItems   = "showInactiveItems"
@@ -124,12 +125,30 @@ enum ItemState: Int {
 
 class ListData {
     private init() {}   // prevent use of default initializer
-    private static var lists = [List]()
+    static var lists = [List]()
     
     // computed values
     static var listCount: Int {
         get {
             return lists.count
+        }
+    }
+    
+    static var listObjCount: Int {
+        get {
+            var count = lists.count
+            for list in lists {
+                count += list.categories.count
+                for category in list.categories {
+                    count += category.items.count
+                    for item in category.items {
+                        if item.imageAsset?.image != nil {
+                            count += 1
+                        }
+                    }
+                }
+            }
+            return count
         }
     }
     
@@ -159,16 +178,23 @@ class ListData {
     }
     
     // class functions
-    class func loadLocal(filePath: String) -> Bool {
-        if let archivedListData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) as? [List] {
+    class func filePath(key: String) -> String {
+        let manager = FileManager.default
+        let url = manager.urls(for: .documentDirectory, in: .userDomainMask).first
+        return (url!.appendingPathComponent(key).path)
+    }
+    
+    class func loadLocal() -> Bool {
+        if let archivedListData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath(key: key_listData)) as? [List] {
             lists = archivedListData
             return true
         }
         return false
     }
     
-    class func saveLocal(filePath: String) -> Bool {
-         return NSKeyedArchiver.archiveRootObject(ListData.lists, toFile: filePath)
+    class func saveLocal() -> Bool {
+        let data = NSKeyedArchiver.archivedData(withRootObject: ListData.lists)
+        return NSKeyedArchiver.archiveRootObject(data, toFile: filePath(key: key_listData))
     }
     
     class func listForRow(at indexPath: IndexPath) -> List? {
@@ -357,7 +383,6 @@ class ListData {
             list.resetCategoryAndItemOrderByPosition()
         }
     }
-
     
     // returns a ListData object from the given recordName
     class func getLocalObject(_ recordIDName: String) -> AnyObject? {
@@ -378,6 +403,8 @@ class ListData {
                                 if item.itemRecord!.recordID.recordName == recordIDName {
                                     return item
                                 }
+                            } else if item.imageAsset?.imageRecord.recordID.recordName == recordIDName {
+                                return item.imageAsset
                             }
                         }
                     }
@@ -502,7 +529,6 @@ class ListData {
         
         return nil
     }
-
 }
 
 ////////////////////////////////////////////////////////////////
@@ -537,7 +563,7 @@ func getItemFromReference(_ imageRecord: CKRecord) -> Item? {
 
 // create a Delete record for this list delete and save to cloud
 func createDeleteRecord(_ database: CKDatabase, recordName: String, objectType: String, objectName: String) {
-    let deleteRecord = CKRecord(recordType: DeletesRecordType)
+    let deleteRecord = CKRecord(recordType: DeletesRecordType, recordID: CKRecord.ID(zoneID: CloudCoordinator.sharedZoneID))
     deleteRecord[key_objectRecordID] = recordName as CKRecordValue?
     deleteRecord[key_objectType] = objectType as CKRecordValue?
     deleteRecord[key_objectName] = objectName as CKRecordValue?
@@ -554,7 +580,7 @@ func createDeleteRecord(_ database: CKDatabase, recordName: String, objectType: 
 
 ////////////////////////////////////////////////////////////////
 //
-//  MARK: - List class
+//  MARK:- List class
 //
 ////////////////////////////////////////////////////////////////
 
@@ -576,8 +602,8 @@ class List: NSObject, NSCoding {
     var needToSave: Bool = false
     var needToDelete: Bool = false
     var modificationDate: Date?
-    var listRecord: CKRecord!
-    var listReference: CKRecord.Reference!
+    var listRecord: CKRecord?
+    var listReference: CKRecord.Reference?
     var order: Int = 0 { didSet { if order != oldValue { needToSave = true } } }
     var showCompletedItems:  Bool = true { didSet { self.updateIndices(); needToSave = true } }
     var showInactiveItems:   Bool = true { didSet { self.updateIndices(); needToSave = true } }
@@ -601,8 +627,11 @@ class List: NSObject, NSCoding {
         
         if createRecord {
             // new list needs a new record and reference
-            self.listRecord = CKRecord.init(recordType: ListsRecordType)
-            self.listReference = CKRecord.Reference.init(record: listRecord, action: CKRecord.Reference.Action.deleteSelf)
+//          listRecord = CKRecord.init(recordType: ListsRecordType)
+//          listReference = CKRecord.Reference.init(record: listRecord, action: CKRecord.Reference.Action.deleteSelf)
+            
+            listRecord = CKRecord(recordType: ListsRecordType, recordID: CKRecord.ID(zoneID: CloudCoordinator.sharedZoneID))
+            listReference = CKRecord.Reference.init(record: listRecord!, action: CKRecord.Reference.Action.deleteSelf)
         }
         
         self.modificationDate = Date.init()
@@ -610,7 +639,7 @@ class List: NSObject, NSCoding {
 
 ///////////////////////////////////////////////////////
 //
-//  MARK: List data I/O methods
+//  MARK:- List data I/O methods
 //
 ///////////////////////////////////////////////////////
     
@@ -676,24 +705,22 @@ class List: NSObject, NSCoding {
         if self.isTutorialList {
             return
         }
-        
-        if let database = appDelegate.privateDatabase {
-            if listRecord != nil {
-                // commit change to cloud
-                if needToDelete {
-                    deleteRecord(listRecord!, database: database)
-                } else if needToSave {
-                    saveRecord(listRecord!)
-                }
-            } else {
-                print("ERROR: list saveToCloud - Can't save list '\(name)' to cloud - listRecord is nil...")
+                
+        if listRecord != nil {
+            // commit change to cloud
+            if needToDelete {
+                deleteRecord(listRecord!, database: CloudCoordinator.privateDatabase)
+            } else if needToSave || appDelegate.needsDataSaveOnMigration {
+                saveRecord(listRecord!)
             }
-        }
+        } else {
+            print("ERROR: list saveToCloud - Can't save list '\(name)' to cloud - listRecord is nil...")
+            }
         
         // pass on to the categories
         if listReference != nil {
             for category in categories {
-                category.saveToCloud(listReference!)
+                category.saveToCloud(listReference: listReference!)
             }
         }
     }
@@ -705,14 +732,24 @@ class List: NSObject, NSCoding {
             return
         }
         
-        listRecord.setObject(self.name as CKRecordValue?,               forKey: key_name)
-        listRecord.setObject(self.listColorName as CKRecordValue?,      forKey: key_listColorName)
-        listRecord.setObject(self.showCompletedItems as CKRecordValue?, forKey: key_showCompletedItems)
-        listRecord.setObject(self.showInactiveItems as CKRecordValue?,  forKey: key_showInactiveItems)
-        listRecord.setObject(self.order as CKRecordValue?,              forKey: key_order)
+        var record = listRecord
+        
+        if listRecord.recordID.zoneID.zoneName.contains("default") {
+            let recordID = CKRecord.ID(recordName: record.recordID.recordName, zoneID: CloudCoordinator.sharedZoneID)
+            let sharedZoneRecord = CKRecord(recordType: ListsRecordType, recordID: recordID)
+            listReference = CKRecord.Reference.init(record: sharedZoneRecord, action: CKRecord.Reference.Action.deleteSelf)
+            record = sharedZoneRecord
+            self.listRecord = sharedZoneRecord
+        }
+        
+        record.setObject(self.name as CKRecordValue?,               forKey: key_name)
+        record.setObject(self.listColorName as CKRecordValue?,      forKey: key_listColorName)
+        record.setObject(self.showCompletedItems as CKRecordValue?, forKey: key_showCompletedItems)
+        record.setObject(self.showInactiveItems as CKRecordValue?,  forKey: key_showInactiveItems)
+        record.setObject(self.order as CKRecordValue?,              forKey: key_order)
         
         // add this record to the batch record array for updating
-        DataPersistenceCoordinator.addToUpdateRecords(listRecord, obj: self)
+        CloudCoordinator.addToUpdateRecords(record, obj: self)
     }
     
     // update this list from cloud storage
@@ -776,7 +813,7 @@ class List: NSObject, NSCoding {
     
 ///////////////////////////////////////////////////////
 //
-//  MARK: Methods for Category and Item objects
+//  MARK:- Methods for Category and Item objects
 //
 ///////////////////////////////////////////////////////
     
@@ -852,7 +889,7 @@ class List: NSObject, NSCoding {
     
 ///////////////////////////////////////////////////////
 //
-//  MARK: Remove and insert methods for List objects
+//  MARK:- Remove and insert methods for List objects
 //
 ///////////////////////////////////////////////////////
     
@@ -1661,8 +1698,8 @@ class Category: ListObj, NSCoding {
     var displayHeader: Bool = true { didSet { needToSave = true } }
     var expanded: Bool = true { didSet { needToSave = true } }
     var modificationDate: Date?
-    var categoryReference: CKRecord.Reference?
     var categoryRecord: CKRecord?
+    var categoryReference: CKRecord.Reference?
     var isTutorialCategory = false
     var itemAddCount: Int32 = 0
     
@@ -1673,7 +1710,10 @@ class Category: ListObj, NSCoding {
         
         if createRecord {
             // new category needs a new record and reference
-            categoryRecord = CKRecord.init(recordType: CategoriesRecordType)
+//            categoryRecord = CKRecord.init(recordType: CategoriesRecordType)
+//            categoryReference = CKRecord.Reference.init(record: categoryRecord!, action: CKRecord.Reference.Action.deleteSelf)
+            
+            categoryRecord = CKRecord(recordType: CategoriesRecordType, recordID: CKRecord.ID(zoneID: CloudCoordinator.sharedZoneID))
             categoryReference = CKRecord.Reference.init(record: categoryRecord!, action: CKRecord.Reference.Action.deleteSelf)
         }
         
@@ -1734,30 +1774,28 @@ class Category: ListObj, NSCoding {
     }
     
     // commits this category and its items to cloud storage
-    func saveToCloud(_ listReference: CKRecord.Reference) {
+    func saveToCloud(listReference: CKRecord.Reference) {
         // don't save the tutorial to the cloud
         if self.isTutorialCategory {
             return
         }
-        
-        if let database = appDelegate.privateDatabase {
-            if categoryRecord != nil {
-                // commit change to cloud
-                if needToDelete {
-                    deleteRecord(categoryRecord!, database: database)
-                } else if needToSave {
-                    saveRecord(categoryRecord!, listReference: listReference)
-                }
-
-            } else {
-                print("Can't save category '\(name)' - listRecord is nil...")
+                
+        if categoryRecord != nil {
+            // commit change to cloud
+            if needToDelete {
+                deleteRecord(categoryRecord!, database: CloudCoordinator.privateDatabase)
+            } else if needToSave || appDelegate.needsDataSaveOnMigration {
+                saveRecord(categoryRecord!, listReference: listReference)
             }
+
+        } else {
+            print("Can't save category '\(name)' - listRecord is nil...")
         }
         
         // pass on to the items
         if categoryReference != nil {
             for item in items {
-                item.saveToCloud(categoryReference!)
+                item.saveToCloud(categoryReference: categoryReference!)
             }
         }
     }
@@ -1769,14 +1807,24 @@ class Category: ListObj, NSCoding {
             return
         }
         
-        categoryRecord.setObject(self.name as CKRecordValue?,           forKey: key_name)
-        categoryRecord.setObject(self.displayHeader as CKRecordValue?,  forKey: key_displayHeader)
-        categoryRecord.setObject(self.expanded as CKRecordValue?,       forKey: key_expanded)
-        categoryRecord.setObject(listReference,                         forKey: key_owningList)
-        categoryRecord.setObject(self.order as CKRecordValue?,          forKey: key_order)
+        var record = categoryRecord
+        
+        if categoryRecord.recordID.zoneID.zoneName.contains("default") {
+            let recordID = CKRecord.ID(recordName: record.recordID.recordName, zoneID: CloudCoordinator.sharedZoneID)
+            let sharedZoneRecord = CKRecord(recordType: CategoriesRecordType, recordID: recordID)
+            categoryReference = CKRecord.Reference.init(record: sharedZoneRecord, action: CKRecord.Reference.Action.deleteSelf)
+            record = sharedZoneRecord
+            self.categoryRecord = sharedZoneRecord
+        }
+        
+        record.setObject(self.name as CKRecordValue?,           forKey: key_name)
+        record.setObject(self.displayHeader as CKRecordValue?,  forKey: key_displayHeader)
+        record.setObject(self.expanded as CKRecordValue?,       forKey: key_expanded)
+        record.setObject(listReference,                         forKey: key_owningList)
+        record.setObject(self.order as CKRecordValue?,          forKey: key_order)
         
         // add this record to the batch record array for updating
-        DataPersistenceCoordinator.addToUpdateRecords(categoryRecord, obj: self)
+        CloudCoordinator.addToUpdateRecords(record, obj: self)
     }
     
     // update this category from cloud storage
@@ -1966,8 +2014,8 @@ class Item: ListObj, NSCoding {
     
     var state: ItemState        { didSet { if state != oldValue { needToSave = true; modifiedBy = UIDevice.current.name; modifiedDate = Date.init() } } }
     var note: String            { didSet { if note  != oldValue { needToSave = true; modifiedBy = UIDevice.current.name; modifiedDate = Date.init() } } }
-    var itemReference: CKRecord.Reference?
     var itemRecord: CKRecord?
+    var itemReference: CKRecord.Reference?
     var imageAsset: ImageAsset?
     //var isTutorialItem = false
     var createdBy: String           // established locally - saved to cloud
@@ -2002,8 +2050,12 @@ class Item: ListObj, NSCoding {
         
         if createRecord {
             // a new item needs a new cloud record
-            itemRecord = CKRecord.init(recordType: ItemsRecordType)
+//            itemRecord = CKRecord.init(recordType: ItemsRecordType)
+//            itemReference = CKRecord.Reference.init(record: itemRecord!, action: CKRecord.Reference.Action.deleteSelf)
+            
+            itemRecord = CKRecord(recordType: ItemsRecordType, recordID: CKRecord.ID(zoneID: CloudCoordinator.sharedZoneID))
             itemReference = CKRecord.Reference.init(record: itemRecord!, action: CKRecord.Reference.Action.deleteSelf)
+            
             imageAsset = ImageAsset(itemName: name, itemReference: itemReference!)
             createdBy = UIDevice.current.name
             modifiedBy = UIDevice.current.name
@@ -2021,7 +2073,6 @@ class Item: ListObj, NSCoding {
     // Designated memberwise initializer
     init(name: String?, note: String?, imageAsset: ImageAsset?, state: ItemState, /*tutorial: Bool?,*/ itemRecord: CKRecord?, itemReference: CKRecord.Reference?, createdBy: String?, createdDate: Date?, modifiedBy: String?, modifiedDate: Date?, imageModifiedDate: Date?) {
         if let note               = note              { self.note              = note              } else { self.note              = ""                                                                          }
-        //if let tutorial           = tutorial          { self.isTutorialItem    = tutorial          } else { self.isTutorialItem    = false                                                                       }
         if let itemRecord         = itemRecord        { self.itemRecord        = itemRecord        } else { self.itemRecord        = nil                                                                         }
         if let createdBy          = createdBy         { self.createdBy         = createdBy         } else { self.createdBy         = UIDevice.current.name                                                       }
         if let createdDate        = createdDate       { self.createdDate       = createdDate       } else { self.createdDate       = Date.init(timeIntervalSince1970: 0)                                         }
@@ -2083,21 +2134,19 @@ class Item: ListObj, NSCoding {
         coder.encode(self.imageModifiedDate, forKey: key_imageModifiedDate)
         coder.encode(self.itemRecord,        forKey: key_itemRecord)
         coder.encode(self.itemReference,     forKey: key_itemReference)
-        coder.encode(self.state.rawValue,   forKey: key_state)
+        coder.encode(self.state.rawValue,    forKey: key_state)
     }
     
     // commits this item change to cloud storage
-    func saveToCloud(_ categoryReference: CKRecord.Reference) {
-        if let database = appDelegate.privateDatabase {
-            if needToDelete {
-                deleteRecord(itemRecord!, database: database)
-            } else if needToSave {
-                saveRecord(itemRecord!, categoryReference: categoryReference)
-            }
+    func saveToCloud(categoryReference: CKRecord.Reference) {
+        if needToDelete {
+            deleteRecord(itemRecord!, database: CloudCoordinator.privateDatabase)
+        } else if needToSave || appDelegate.needsDataSaveOnMigration {
+            saveRecord(itemRecord!, categoryReference: categoryReference)
         }
         
         // pass save on to the imageAsset
-        if imageAsset != nil && itemReference != nil {
+        if imageAsset != nil && itemReference != nil  {
             imageAsset!.itemName = self.name
             imageAsset!.saveToCloud(itemReference!)
         } else {
@@ -2107,24 +2156,29 @@ class Item: ListObj, NSCoding {
     
     // cloud storage method for this item
     func saveRecord(_ itemRecord: CKRecord, categoryReference: CKRecord.Reference) {
-        // don't save the tutorial to the cloud
-        // if self.isTutorialItem {
-        //    return
-        // }
+        var record = itemRecord
         
-        itemRecord[key_name] = self.name as CKRecordValue?
-        itemRecord[key_note] = self.note as CKRecordValue?
-        itemRecord[key_state] = self.state.rawValue as CKRecordValue?
-        itemRecord[key_owningCategory] = categoryReference
-        itemRecord[key_order] = self.order as CKRecordValue?
-        itemRecord[key_createdBy] = self.createdBy as CKRecordValue?
-        itemRecord[key_createdDate] = self.createdDate as CKRecordValue?
-        itemRecord[key_modifiedBy] = self.modifiedBy as CKRecordValue?
-        itemRecord[key_modifiedDate] = self.modifiedDate as CKRecordValue?
-        itemRecord[key_imageModifiedDate] = self.imageModifiedDate as CKRecordValue?
+        if itemRecord.recordID.zoneID.zoneName.contains("default") {
+            let recordID = CKRecord.ID(recordName: record.recordID.recordName, zoneID: CloudCoordinator.sharedZoneID)
+            let sharedZoneRecord = CKRecord(recordType: ItemsRecordType, recordID: recordID)
+            itemReference = CKRecord.Reference.init(record: sharedZoneRecord, action: CKRecord.Reference.Action.deleteSelf)
+            record = sharedZoneRecord
+            self.itemRecord = sharedZoneRecord
+        }
+        
+        record[key_name] = self.name as CKRecordValue?
+        record[key_note] = self.note as CKRecordValue?
+        record[key_state] = self.state.rawValue as CKRecordValue?
+        record[key_owningCategory] = categoryReference
+        record[key_order] = self.order as CKRecordValue?
+        record[key_createdBy] = self.createdBy as CKRecordValue?
+        record[key_createdDate] = self.createdDate as CKRecordValue?
+        record[key_modifiedBy] = self.modifiedBy as CKRecordValue?
+        record[key_modifiedDate] = self.modifiedDate as CKRecordValue?
+        record[key_imageModifiedDate] = self.imageModifiedDate as CKRecordValue?
         
         // add this record to the batch record array for updating
-        DataPersistenceCoordinator.addToUpdateRecords(itemRecord, obj: self)
+        CloudCoordinator.addToUpdateRecords(record, obj: self)
     }
     
     // update this item from cloud storage
@@ -2398,7 +2452,7 @@ class ImageAsset: NSObject, NSCoding {
             // if image came from cloud data then we have an image but no image data
             // so need a one-time conversion of image to JPEG NSData and encode
             imageData = image!.jpegData(compressionQuality: jpegCompressionQuality)
-            print("imageAsset - converted image to image data for encoding: \(String(describing: itemName))")
+            //print("imageAsset - converted image to image data for encoding: \(String(describing: itemName))")
         }
         coder.encode(self.imageData,     forKey: key_imageData)
     }
@@ -2424,7 +2478,7 @@ class ImageAsset: NSObject, NSCoding {
     
     // commits the image to cloud storage (if needed)
     func saveToCloud(_ itemReference: CKRecord.Reference) {
-        if needToSave {
+        if needToSave || appDelegate.needsDataSaveOnMigration {
             saveRecord(imageRecord, itemReference: itemReference)
         } else if needToDelete {
             deleteRecord(imageRecord)
@@ -2433,14 +2487,25 @@ class ImageAsset: NSObject, NSCoding {
     
     // cloud storage method for this image
     func saveRecord(_ imageRecord: CKRecord, itemReference: CKRecord.Reference) {
-        imageRecord[key_itemName]      = self.itemName as CKRecordValue?
-        imageRecord[key_imageGUID]     = self.imageGUID as CKRecordValue?
-        imageRecord[key_owningItem]    = itemReference
-        imageRecord[key_modifiedDate]  = self.modifiedDate as CKRecordValue?
-        imageRecord[key_imageAsset]    = self.imageAsset
+        guard image != nil else { return }
+        
+        var record = imageRecord
+        
+        if imageRecord.recordID.zoneID.zoneName.contains("default") {
+            let recordID = CKRecord.ID(recordName: record.recordID.recordName, zoneID: CloudCoordinator.sharedZoneID)
+            let sharedZoneRecord = CKRecord(recordType: ImagesRecordType, recordID: recordID)
+            record = sharedZoneRecord
+            self.imageRecord = sharedZoneRecord
+        }
+        
+        record[key_itemName]      = self.itemName as CKRecordValue?
+        record[key_imageGUID]     = self.imageGUID as CKRecordValue?
+        record[key_owningItem]    = itemReference
+        record[key_modifiedDate]  = self.modifiedDate as CKRecordValue?
+        record[key_imageAsset]    = self.imageAsset
         
         // add this record to the batch record array for updating
-        DataPersistenceCoordinator.addToUpdateRecords(imageRecord, obj: self)
+        CloudCoordinator.addToUpdateRecords(record, obj: self)
     }
     
     // deletes the image from the cloud by setting the
@@ -2450,23 +2515,23 @@ class ImageAsset: NSObject, NSCoding {
         imageRecord[key_imageAsset]    = nil
         
         // add this record to the batch record array for updating
-        DataPersistenceCoordinator.addToUpdateRecords(imageRecord, obj: self)
+        CloudCoordinator.addToUpdateRecords(imageRecord, obj: self)
     }
 
     // update this image from cloud storage
     func updateFromRecord(_ record: CKRecord) {
         // does the item need to be notified when the imageAsset is updated???
-        /*
         if let item = getItemFromReference(record) {
-            //
+            item.imageAsset = self
+        } else {
+            print("***** item not found...")
         }
-        */
         
-        if let itemName      = record[key_itemName]     { self.itemName      = (itemName      as! String)      }
-        if let imageGUID     = record[key_imageGUID]    { self.imageGUID     = imageGUID     as! String      }
+        if let itemName      = record[key_itemName]     { self.itemName      = (itemName     as! String)            }
+        if let imageGUID     = record[key_imageGUID]    { self.imageGUID     = imageGUID     as! String             }
         if let itemReference = record[key_owningItem]   { self.itemReference = itemReference as? CKRecord.Reference }
-        if let imageAsset    = record[key_imageAsset]   { self.imageAsset    = imageAsset    as? CKAsset     }
-        if let modifiedDate  = record[key_modifiedDate] { self.modifiedDate  = modifiedDate  as! Date        }
+        if let imageAsset    = record[key_imageAsset]   { self.imageAsset    = imageAsset    as? CKAsset            }
+        if let modifiedDate  = record[key_modifiedDate] { self.modifiedDate  = modifiedDate  as! Date               }
         
         // check date values after update from cloud record - reset if needed
         if self.modifiedDate.compare(Date.init(timeIntervalSince1970: 0)) == ComparisonResult.orderedSame {
@@ -2477,7 +2542,7 @@ class ImageAsset: NSObject, NSCoding {
         if let path = imageAsset?.fileURL!.path {
             let image = UIImage(contentsOfFile: path)
             self.image = image
-            print("ImageAsset.updateFromRecord: got image update for \(imageGUID)...")
+            //print("ImageAsset.updateFromRecord: got image update for \(imageGUID)...")
         }
         
         self.imageRecord = record
@@ -2496,7 +2561,7 @@ class ImageAsset: NSObject, NSCoding {
         var imageWasUpdated = false
         self.needToSave = false
         
-        if self.image !== image {
+        if self.image != image {
             print("setItemImage - new image is different than old: \(String(describing: itemName))")
             self.image = image
             imageWasUpdated = true
@@ -2507,9 +2572,9 @@ class ImageAsset: NSObject, NSCoding {
                     let docsDir: AnyObject = dirPaths[0] as AnyObject
                     self.imageFileURL = URL(fileURLWithPath: docsDir.appendingPathComponent(self.imageGUID + ".png"))
                     
-                    //try UIImagePNGRepresentation(image!)!.writeToURL(imageFileURL!, options: .AtomicWrite)        // without compression
-                    self.imageData = image!.jpegData(compressionQuality: jpegCompressionQuality)                      // compress to JPG - imageData is used for local storage
-                    try self.imageData!.write(to: imageFileURL!, options: .atomicWrite)                            // write compressed file
+                    //try UIImagePNGRepresentation(image!)!.writeToURL(imageFileURL!, options: .AtomicWrite)    // without compression
+                    self.imageData = image!.jpegData(compressionQuality: jpegCompressionQuality)                // compress to JPG - imageData is used for local storage
+                    try self.imageData!.write(to: imageFileURL!, options: .atomicWrite)                         // write compressed file
                     
                     self.imageAsset = CKAsset(fileURL: imageFileURL!)
                     self.needToSave = true

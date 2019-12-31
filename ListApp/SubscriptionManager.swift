@@ -25,7 +25,7 @@ class SubscriptionManager {
     /// Creates a clean set of subscriptions on the iCloud server for the user.
     // Runs the set up code fully if either device has no record of setup or sub count is other than five.
     static func manageSubscriptions() {
-        guard let database = appDelegate.privateDatabase else { return }
+        let database = CloudCoordinator.privateDatabase
         
         // fetch any current subscriptions
         var deleteSubscriptionIDs = [String]()
@@ -55,9 +55,9 @@ class SubscriptionManager {
             
             deleteOperation?.modifySubscriptionsCompletionBlock = { (subscriptions, deletedIds, error) in
                 if error == nil, let subscriptions = subscriptions {
-                    print("**** subscriptions deleted count: \(subscriptions.count)")
+                    print("subscriptions deleted count: \(subscriptions.count)")
                 } else {
-                    print("**** subscription delete error: \(error.debugDescription)")
+                    print("ERROR: subscription delete error - \(error.debugDescription)")
                 }
             }
             

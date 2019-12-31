@@ -10,8 +10,6 @@ import CloudKit
 import StoreKit
 import UserNotifications
 
-private let key_listData = "listData"
-
 // display link scroll loop updates per second
 let kFramesPerSecond         = 60
 
@@ -32,10 +30,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     var rightNavController: UINavigationController?
     var itemViewController: ItemViewController?
     var aboutViewController: AboutViewController?
-    var documentsDirectory: URL?
-    var archiveURL: URL?
-    var cloudUploadStatusRecord: CKRecord?
-    var updateRecords = [CKRecord: AnyObject?]()
 
     // holds references to items that have outdated image assets
     var itemReferences = [CKRecord.Reference]()
@@ -68,10 +62,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     // delete purge delay
     let deletePurgeDays = 30                            // delete records will be purged from cloud storage after this many days
     
-    // iCloud
-    let container = CKContainer.default()
-    var privateDatabase: CKDatabase?
-    
     // iCloud query operations
     var externalListFetch: CKQueryOperation?
     var externalCategoryFetch: CKQueryOperation?
@@ -80,6 +70,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     
     // reachability manager
     var manager: AppManager = AppManager.sharedInstance
+    
+    // migration - execute a save after both the list data and the image data have been downloaded and merged
+    var needsDataSaveOnMigration = false
+    var listDataMergeComplete = false {
+        didSet {
+            if needsDataSaveOnMigration && imageDataMergeComplete {
+                DataPersistenceCoordinator.saveAll(async: true)
+                appDelegate.needsDataSaveOnMigration = false
+            }
+        }
+    }
+    var imageDataMergeComplete = false {
+        didSet {
+            if needsDataSaveOnMigration && listDataMergeComplete {
+                DataPersistenceCoordinator.saveAll(async: true)
+                appDelegate.needsDataSaveOnMigration = false
+            }
+        }
+    }
     
     // HUD
     var hud: MBProgressHUD?
@@ -98,25 +107,72 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         listViewController!.delegate = itemViewController
         itemViewController!.navigationItem.leftItemsSupplementBackButton = true
         itemViewController!.navigationItem.leftBarButtonItem = splitViewController!.displayModeButtonItem
-        
-        documentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
-        archiveURL = documentsDirectory!.appendingPathComponent(key_listData)
-        
+                
         // show both list and item view controllers if possible
         splitViewController!.preferredDisplayMode = UISplitViewController.DisplayMode.allVisible
         
-        privateDatabase = container.privateCloudDatabase
-
         // init the reachability monitor
         AppManager.sharedInstance.initReachabilityMonitor()
         
-        // app setup
-        application.registerForRemoteNotifications()    // register for silent notifications
-        restoreListDataFromLocalStorage()               // gets list data from local storage
-        restoreAppSettings()                            // restores the general app settings
-        CloudCoordinator.fetchCloudData(nil, refreshEnd: {} )            // gets cloud data and merges with local data including cloud deletes
+        // DEVELOPMENT ONLY: delete the shared zone and all the data in the zone
+        // NOTE: Zone deletion can also be done from the CloudKit Dashboard
+        // CloudCoordinator.deleteSharedZone()
+        // return true
+        
+        // check for existing shared zone and proceed with app setup
+        CloudCoordinator.sharedZoneExists() { sharedZoneExists, error in
+            if let error = error {
+                print("***** sharedZoneExists - ERROR: \(error.localizedDescription)")
+            } else {
+                if sharedZoneExists {
+                    self.finishAppSetup(application, sharedZoneWasJustSetup: false)
+                } else {
+                    CloudCoordinator.setupSharedZone() { zoneWasSetup, error in
+                        if let error = error {
+                            print("***** setupSharedZone - ERROR: \(error.localizedDescription)")
+                            DispatchQueue.main.async {
+                                self.handleSharedZoneError(error)
+                            }
+                        } else {
+                            print("shared zone was setup...")
+                            
+                            // app setup after zone created
+                            self.finishAppSetup(application, sharedZoneWasJustSetup: zoneWasSetup)
+                            
+                            // TODO: delete data from default zone (only after code is debugged!!!)
+                            // ...
+                        }
+                    }
+                }
+            }
+        }
         
         return true
+    }
+    
+    func finishAppSetup(_ application: UIApplication, sharedZoneWasJustSetup: Bool) {
+        DispatchQueue.main.async {
+            // if zone was newly created then we will need a local and cloud data save after merge
+            appDelegate.needsDataSaveOnMigration = sharedZoneWasJustSetup
+            application.registerForRemoteNotifications()            // register for silent notifications
+            self.restoreListDataFromLocalStorage()                  // gets list data from local storage
+            self.restoreAppSettings()                               // restores the general app settings
+            CloudCoordinator.fetchCloudData(nil, refreshEnd: {} )   // gets cloud data and merges with local data including cloud deletes
+        }
+    }
+    
+    // TODO: Fix this!!!
+    // This does not work because the itemViewController is not ready to present alerts.
+    func handleSharedZoneError(_ error: Error) {
+        guard let viewController = itemViewController else { return }
+        
+        let alertController = UIAlertController(title: "Error Setting Up iCloud", message: "There was an error encountered while attempting to set up the shared data zone in iCloud.  Please quit realList and re-launch.\n\nERROR: \(error.localizedDescription)", preferredStyle: .alert)
+        let OKAction = UIAlertAction(title: "OK", style: .default) { (action) in
+            // No action
+        }
+        alertController.addAction(OKAction)
+        
+        viewController.present(alertController, animated: true, completion: nil)
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
@@ -124,14 +180,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        print("*** didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
+        //print("*** didRegisterForRemoteNotificationsWithDeviceToken: \(deviceToken)")
         
         // create subscriptions if necessary
         SubscriptionManager.manageSubscriptions()
     }
     
     func restoreListDataFromLocalStorage() {
-        guard let archiveURL = archiveURL else { return }
         guard let listViewController = listViewController else { return }
         guard let itemViewController = itemViewController else { return }
         
@@ -139,7 +194,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         guard UserDefaults.standard.bool(forKey: SubscriptionManager.key_subscribedToPrivateData) else {
             // this is a first load after upgrade to v1.2 so need to delete local data
             do {
-                try FileManager.default.removeItem(atPath: archiveURL.path)
+                try FileManager.default.removeItem(atPath: ListData.filePath(key: key_listData))
             } catch {
                 print("file delete error")
             }
@@ -147,7 +202,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
         
         // restore the list data from local storage
-        if ListData.loadLocal(filePath: archiveURL.path) {
+        if ListData.loadLocal() {
             if let initialListIndex = UserDefaults.standard.object(forKey: key_selectionIndex) as? Int {
                 if initialListIndex >= 0 && initialListIndex < ListData.listCount {
                     itemViewController.list = ListData.list(initialListIndex)
@@ -196,7 +251,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 }
             } else {
                 // if the record has been created or changed, we fetch the data from cloud
-                guard let database = privateDatabase else { return }
+                let database = CloudCoordinator.privateDatabase
                 
                 database.fetch(withRecordID: queryNotification.recordID!) { (record: CKRecord?, error: Error?) -> Void in
                     if error != nil {
@@ -265,7 +320,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         print("applicationWillTerminate...")
         
         // save state and data synchronously
-        DataPersistenceCoordinator.saveAll(asynch: false)
+        DataPersistenceCoordinator.saveAll(async: false)
     }
     
     

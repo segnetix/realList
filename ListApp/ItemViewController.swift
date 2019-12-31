@@ -323,7 +323,6 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
             cell.itemNote.textColor = UIColor.lightGray
             
             cell.backgroundColor = UIColor.white
-            cell.delegate = self
             
             // cell separator
             cell.preservesSuperviewLayoutMargins = false
@@ -1242,7 +1241,7 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
                 if list.categories.count == 1 {
                     let newCategory = list.addCategory("", displayHeader: false, updateIndices: false, createRecord: true)
                     if list.listReference != nil {
-                        newCategory.saveToCloud(list.listReference!)
+                        newCategory.saveToCloud(listReference: list.listReference!)
                     }
                     catAdded = true
                 }
@@ -1799,50 +1798,4 @@ extension ItemViewController: ListSelectionDelegate {
             list = nil
         }
     }
-}
-
-// ItemCellDelegate methods
-extension ItemViewController: ItemCellDelegate {
-    // gesture action methods called from the item cell
-    /*
-    func itemSingleTapAction(sender: UIGestureRecognizer)
-    {
-        // no action for items yet
-    }
-    */
-    
-    /*
-    func itemDoubleTapAction(textField: UITextField)
-    {
-        print("item textField double tapped: '\(textField.text)'")
-        cellDoubleTappedAction(textField)
-    }
-    */
-}
-
-// CategoryCellDelegate methods
-extension ItemViewController: CategoryCellDelegate {
-    // gesture action methods called from the category cell
-    
-    /*
-    func categorySingleTapAction(sender: UIGestureRecognizer)
-    {
-        cellSingleTappedAction(sender)
-    }
-    */
-    
-    /*
-    func categoryDoubleTapAction(textField: UITextField)
-    {
-        print("cat textField double tapped: '\(textField.text)'")
-        cellDoubleTappedAction(textField)
-    }
-    */
-    
-    /*
-    func categoryLongPressAction(sender: UILongPressGestureRecognizer)
-    {
-        longPressedAction(sender)
-    }
-    */
 }

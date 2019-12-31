@@ -50,10 +50,9 @@ class DataPersistenceCoordinator {
     }
     
     /// Saves all app data.  If asynchronous then the save is put on a background thread.
-    static func saveAll(asynch asynchronously: Bool) {
+    static func saveAll(async asynchronously: Bool) {
         saveState(async: asynchronously)
         saveListData(async: asynchronously)
-        print("all list data saved locally...")
     }
     
     /// Writes list data locally and to the cloud
@@ -65,13 +64,12 @@ class DataPersistenceCoordinator {
     /// Writes the complete object graph locally.
     static func saveListDataLocal(async asynchronously: Bool) {
         func save() {
-            guard let archiveURL = appDelegate.archiveURL else { return }
+            let successfulSave = ListData.saveLocal()
             
-            //let successfulSave = NSKeyedArchiver.archiveRootObject(ListData.lists, toFile: archiveURL.path)
-            let successfulSave = ListData.saveLocal(filePath: archiveURL.path)
-            
-            if !successfulSave {
-                print("ERROR: Failed to save list data locally...")
+            if successfulSave {
+                print("all list data saved locally for \(ListData.listObjCount) records")
+            } else {
+                print("ERROR: Failed to save list data locally.  Record count: \(ListData.listObjCount)")
             }
         }
         
@@ -86,7 +84,7 @@ class DataPersistenceCoordinator {
     
     /// Writes any dirty objects to the cloud in a batch operation.
     static func saveListDataCloud(async asynchronously: Bool) {
-        appDelegate.updateRecords.removeAll()   // empty the updateRecords array
+        CloudCoordinator.updateRecords.removeAll()   // empty the updateRecords array
         guard CloudCoordinator.iCloudIsAvailable() else { print("saveListDataCloud - iCloud is not available..."); return }
         
         func save() {
@@ -94,7 +92,8 @@ class DataPersistenceCoordinator {
             CloudCoordinator.batchRecordUpdate()
         }
         
-        // ListData.saveToCloud() must be run on the main thread to ensure that
+        // ListData.saveToCloud() - actually, just collects records that need saving in the CloudCoordinator.updateRecords array
+        // NOTE: must be run on the main thread to ensure that
         // we have gathered any records to be deleted before the
         // list data for the object is deleted
         ListData.saveToCloud()
@@ -180,15 +179,14 @@ class DataPersistenceCoordinator {
                 let newList = List(name: "", createRecord: false)
                 newList.updateFromRecord(record)
                 ListData.appendList(newList)
-                print("added new list: \(newList.name)")
+                //print("added new list: \(newList.name)")
             case CategoriesRecordType:
                 if let list = getListFromReference(record) {
                     let newCategory = list.addCategory("", displayHeader: true, updateIndices: false, createRecord: false)
                     newCategory.updateFromRecord(record)
-                    
-                    print("added new category: \(newCategory.name)")
+                    //print("added new category: \(newCategory.name)")
                 } else {
-                    print("*** ERROR: category \(String(describing: record[key_name])) can't find list \(String(describing: record[key_owningList]))")
+                    //print("*** ERROR: category \(String(describing: record[key_name])) can't find list \(String(describing: record[key_owningList]))")
                 }
             case ItemsRecordType:
                 if let category = getCategoryFromReference(record) {
@@ -198,18 +196,33 @@ class DataPersistenceCoordinator {
                             
                             if let newItem = item {
                                 newItem.updateFromRecord(record)
-                                print("added new item: \(newItem.name)")
+                                //print("added new item: \(newItem.name)")
                             }
                         }
                     }
                 } else {
-                    print("*** ERROR: item \(String(describing: record[key_name])) can't find category \(String(describing: record[key_owningCategory]))")
+                    //print("*** ERROR: item \(String(describing: record[key_name])) can't find category \(String(describing: record[key_owningCategory]))")
                 }
             case ImagesRecordType:
-                if let item = getItemFromReference(record) {
+                var imageAssetRecord = record
+                if forceUpdate {
+                    // we need to create a shared zone record for this image asset
+                    let recordID = CKRecord.ID(recordName: record.recordID.recordName, zoneID: CloudCoordinator.sharedZoneID)
+                    imageAssetRecord = CKRecord(recordType: ImagesRecordType, recordID: recordID)
+                    imageAssetRecord[key_itemName]      = record[key_itemName]
+                    imageAssetRecord[key_imageGUID]     = record[key_imageGUID]
+                    imageAssetRecord[key_owningItem]    = record[key_owningItem]
+                    imageAssetRecord[key_modifiedDate]  = record[key_modifiedDate]
+                    imageAssetRecord[key_imageAsset]    = createNewImageAsset(from: record[key_imageAsset])
+                }
+                
+                if let item = getItemFromReference(imageAssetRecord) {
                     if let image = item.addImageAsset() {
-                        image.updateFromRecord(record)
-                        print("added new image to item: '\(item.name)' imageGUID: \(image.imageGUID)")
+                        image.updateFromRecord(imageAssetRecord)
+                        if let itemRef = item.itemReference {
+                            image.saveToCloud(itemRef)
+                            //print("added new image to item: '\(item.name)' imageGUID: \(image.imageGUID)")
+                        }
                     }
                 } else {
                     print("*** ERROR: image \(String(describing: record[key_imageGUID])) can't find item \(String(describing: record[key_owningItem]))")
@@ -218,6 +231,32 @@ class DataPersistenceCoordinator {
                 break
             }
         }
+    }
+    
+    // creates a new ImageAsset from an existing ImageAsset
+    static func createNewImageAsset(from asset: CKAsset?) -> CKAsset? {
+        guard let asset = asset else { return nil }
+        
+        // unwrap the image from the given asset and assign to a new asset
+        if let path = asset.fileURL?.path {
+            if let image = UIImage(contentsOfFile: path) {
+                do {
+                    let dirPaths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+                    let docsDir: AnyObject = dirPaths[0] as AnyObject
+                    let imageFileURL = URL(fileURLWithPath: docsDir.appendingPathComponent(UUID().uuidString + ".png"))
+                    
+                    //try UIImagePNGRepresentation(image!)!.writeToURL(imageFileURL!, options: .AtomicWrite)    // without compression
+                    let imageData = image.jpegData(compressionQuality: jpegCompressionQuality)                  // compress to JPG - imageData is used for local storage
+                    try imageData?.write(to: imageFileURL, options: .atomicWrite)                               // write compressed file
+                    
+                    return CKAsset(fileURL: imageFileURL)
+                } catch {
+                    print("*** ERROR: createNewImageAsset: \(error)")
+                }
+            }
+        }
+        
+        return nil
     }
     
     // deletes local data associated with the given recordName
@@ -389,10 +428,6 @@ class DataPersistenceCoordinator {
         listVC.lists.removeObjectsInArray(listsToDelete)
         //print("*** processDeleteObjects - deleted \(listsToDelete.count) lists")
         */
-    }
-    
-    static func addToUpdateRecords(_ record: CKRecord, obj: AnyObject) {
-        appDelegate.updateRecords[record] = obj
     }
     
     // these are references to items that need an updated image from the cloud
