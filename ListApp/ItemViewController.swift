@@ -1315,10 +1315,11 @@ class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewD
     func snapshotFromView(_ inputView: UIView) -> UIView {
         // Make an image from the input view.
         UIGraphicsBeginImageContextWithOptions(inputView.bounds.size, false, 0)
-        if let context = UIGraphicsGetCurrentContext()
-        {
+        
+        if let context = UIGraphicsGetCurrentContext() {
             inputView.layer.render(in: context)
         }
+        
         let image = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         

@@ -547,34 +547,37 @@ class SettingsViewController: UIAppViewController {
         }
         
         let cloudSharingController = UICloudSharingController { [weak self] (controller, completion: @escaping (CKShare?, CKContainer?, Error?) -> Void) in
-            guard let `self` = self else {
+            guard let self = self else {
               return
             }
             self.share(rootRecord: listRecord, completion: completion)
         }
-        self.present(cloudSharingController, animated: true) {}
+        self.present(cloudSharingController, animated: true) {
+            print("share returned...")
+        }
     }
     
     func share(rootRecord: CKRecord, completion: @escaping (CKShare?, CKContainer?, Error?) -> Void) {
-      let shareRecord = CKShare(rootRecord: rootRecord)
-      let recordsToSave = [rootRecord, shareRecord];
-      let container = CKContainer.default()
-      let privateDatabase = container.privateCloudDatabase
-      let operation = CKModifyRecordsOperation(recordsToSave: recordsToSave, recordIDsToDelete: [])
-      operation.perRecordCompletionBlock = { (record, error) in
-        if let error = error {
-          print("CloudKit error: \(error.localizedDescription)")
+        let shareRecord = CKShare(rootRecord: rootRecord)
+        let recordsToSave = [rootRecord, shareRecord];
+        let container = CKContainer.default()
+        let privateDatabase = container.privateCloudDatabase
+        let operation = CKModifyRecordsOperation(recordsToSave: recordsToSave, recordIDsToDelete: [])
+        
+        operation.perRecordCompletionBlock = { (record, error) in
+            if let error = error {
+                print("CloudKit error: \(error.localizedDescription)")
+            }
         }
-      }
-      
-      operation.modifyRecordsCompletionBlock = { (savedRecords, deletedRecordIDs, error) in
-        if let error = error {
-          completion(nil, nil, error)
-        } else {
-          completion(shareRecord, container, nil)
+
+        operation.modifyRecordsCompletionBlock = { (savedRecords, deletedRecordIDs, error) in
+            if let error = error {
+                completion(nil, nil, error)
+            } else {
+                completion(shareRecord, container, nil)
+            }
         }
-      }
-     
-      privateDatabase.add(operation)
+
+        privateDatabase.add(operation)
     }
 }
