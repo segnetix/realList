@@ -30,15 +30,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     var rightNavController: UINavigationController?
     var itemViewController: ItemViewController?
     var aboutViewController: AboutViewController?
-
-    // holds references to items that have outdated image assets
-    var itemReferences = [CKRecord.Reference]()
-    
-    // cloud record fetch arrays for launch data merge
-    var listFetchArray = [CKRecord]()
-    var categoryFetchArray = [CKRecord]()
-    var itemFetchArray = [CKRecord]()
-    var deleteFetchArray = [CKRecord]()
     
     // notification record arrays
     var notificationArray = [CKRecord]()
@@ -62,12 +53,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     // delete purge delay
     let deletePurgeDays = 30                            // delete records will be purged from cloud storage after this many days
     
-    // iCloud query operations
-    var externalListFetch: CKQueryOperation?
-    var externalCategoryFetch: CKQueryOperation?
-    var externalDeleteFetch: CKQueryOperation?
-    var externalItemFetch: CKQueryOperation?
-    
     // reachability manager
     var manager: AppManager = AppManager.sharedInstance
     
@@ -77,7 +62,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         didSet {
             if needsDataSaveOnMigration && imageDataMergeComplete {
                 DataPersistenceCoordinator.saveAll(async: true)
-                appDelegate.needsDataSaveOnMigration = false
+                needsDataSaveOnMigration = false
+                CloudCoordinator.deleteAllRecordsInDefaultZone()
             }
         }
     }
@@ -85,7 +71,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         didSet {
             if needsDataSaveOnMigration && listDataMergeComplete {
                 DataPersistenceCoordinator.saveAll(async: true)
-                appDelegate.needsDataSaveOnMigration = false
+                needsDataSaveOnMigration = false
+                CloudCoordinator.deleteAllRecordsInDefaultZone()
             }
         }
     }
@@ -138,9 +125,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                             
                             // app setup after zone created
                             self.finishAppSetup(application, sharedZoneWasJustSetup: zoneWasSetup)
-                            
-                            // TODO: delete data from default zone (only after code is debugged!!!)
-                            // ...
                         }
                     }
                 }
@@ -153,7 +137,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     func finishAppSetup(_ application: UIApplication, sharedZoneWasJustSetup: Bool) {
         DispatchQueue.main.async {
             // if zone was newly created then we will need a local and cloud data save after merge
-            appDelegate.needsDataSaveOnMigration = sharedZoneWasJustSetup
+            self.needsDataSaveOnMigration = sharedZoneWasJustSetup
             application.registerForRemoteNotifications()            // register for silent notifications
             self.restoreListDataFromLocalStorage()                  // gets list data from local storage
             self.restoreAppSettings()                               // restores the general app settings
@@ -162,7 +146,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     // TODO: Fix this!!!
-    // This does not work because the itemViewController is not ready to present alerts.
+    // This does not work because the itemViewController is not ready to present alerts and alerts must be presented from a view controller.
     func handleSharedZoneError(_ error: Error) {
         guard let viewController = itemViewController else { return }
         
@@ -261,13 +245,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                     }
                     if record != nil {
                         DispatchQueue.main.async {
-                            /*
-                            if record!.recordType == ImagesRecordType {
-                                //NSLog("*** adding update record: image for \(record![key_itemName])")
-                            } else {
-                                //NSLog("*** adding update record: \(record![key_name])")
-                            }
-                            */
                             self.notificationArray.append(record!)
                         }
                     }

@@ -36,7 +36,7 @@ let kItemCellHeight:     CGFloat = 56.0
 let kCategoryCellHeight: CGFloat = 44.0
 let kAddItemCellHeight:  CGFloat = 44.0
 
-class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, /*ADBannerViewDelegate,*/ UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate {
+class ItemViewController: UIAppViewController, UITextFieldDelegate, UITableViewDataSource, UITableViewDelegate, UIPrintInteractionControllerDelegate, MFMailComposeViewControllerDelegate {
     @IBOutlet weak var tableView: UITableView!
     //@IBOutlet weak var adBanner: ADBannerView!
     

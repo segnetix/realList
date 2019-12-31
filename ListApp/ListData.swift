@@ -627,9 +627,6 @@ class List: NSObject, NSCoding {
         
         if createRecord {
             // new list needs a new record and reference
-//          listRecord = CKRecord.init(recordType: ListsRecordType)
-//          listReference = CKRecord.Reference.init(record: listRecord, action: CKRecord.Reference.Action.deleteSelf)
-            
             listRecord = CKRecord(recordType: ListsRecordType, recordID: CKRecord.ID(zoneID: CloudCoordinator.sharedZoneID))
             listReference = CKRecord.Reference.init(record: listRecord!, action: CKRecord.Reference.Action.deleteSelf)
         }
@@ -847,7 +844,7 @@ class List: NSObject, NSCoding {
         var item: Item? = nil
         
         if indexForCat > -1 {
-            item = Item(name: name, state: state, createRecord: createRecord/*, tutorial: tutorial*/)
+            item = Item(name: name, state: state, createRecord: createRecord)
             category.items.append(item!)
         } else {
             print("ERROR: addItem given invalid category!")
@@ -1710,9 +1707,6 @@ class Category: ListObj, NSCoding {
         
         if createRecord {
             // new category needs a new record and reference
-//            categoryRecord = CKRecord.init(recordType: CategoriesRecordType)
-//            categoryReference = CKRecord.Reference.init(record: categoryRecord!, action: CKRecord.Reference.Action.deleteSelf)
-            
             categoryRecord = CKRecord(recordType: CategoriesRecordType, recordID: CKRecord.ID(zoneID: CloudCoordinator.sharedZoneID))
             categoryReference = CKRecord.Reference.init(record: categoryRecord!, action: CKRecord.Reference.Action.deleteSelf)
         }
@@ -1835,7 +1829,7 @@ class Category: ListObj, NSCoding {
         if let order         = record[key_order]         { self.order         = order as! Int          }
         
         if self.categoryRecord != nil {
-            let currentOwningListRef = self.categoryRecord!.object(forKey: key_owningList) as! CKRecord.Reference
+            let currentOwningListRef = categoryRecord!.object(forKey: key_owningList) as! CKRecord.Reference
             let newOwningListRef = record.object(forKey: key_owningList) as! CKRecord.Reference
             
             if currentOwningListRef.recordID.recordName != newOwningListRef.recordID.recordName {
@@ -2037,7 +2031,7 @@ class Item: ListObj, NSCoding {
     }
     
     // Designated initializer - new item initializer
-    init(name: String, state: ItemState, createRecord: Bool/*, tutorial: Bool = false*/) {
+    init(name: String, state: ItemState, createRecord: Bool) {
         self.state = state
         self.note = ""
         self.imageAsset = nil
@@ -2050,9 +2044,6 @@ class Item: ListObj, NSCoding {
         
         if createRecord {
             // a new item needs a new cloud record
-//            itemRecord = CKRecord.init(recordType: ItemsRecordType)
-//            itemReference = CKRecord.Reference.init(record: itemRecord!, action: CKRecord.Reference.Action.deleteSelf)
-            
             itemRecord = CKRecord(recordType: ItemsRecordType, recordID: CKRecord.ID(zoneID: CloudCoordinator.sharedZoneID))
             itemReference = CKRecord.Reference.init(record: itemRecord!, action: CKRecord.Reference.Action.deleteSelf)
             
@@ -2071,7 +2062,7 @@ class Item: ListObj, NSCoding {
     }
 
     // Designated memberwise initializer
-    init(name: String?, note: String?, imageAsset: ImageAsset?, state: ItemState, /*tutorial: Bool?,*/ itemRecord: CKRecord?, itemReference: CKRecord.Reference?, createdBy: String?, createdDate: Date?, modifiedBy: String?, modifiedDate: Date?, imageModifiedDate: Date?) {
+    init(name: String?, note: String?, imageAsset: ImageAsset?, state: ItemState, itemRecord: CKRecord?, itemReference: CKRecord.Reference?, createdBy: String?, createdDate: Date?, modifiedBy: String?, modifiedDate: Date?, imageModifiedDate: Date?) {
         if let note               = note              { self.note              = note              } else { self.note              = ""                                                                          }
         if let itemRecord         = itemRecord        { self.itemRecord        = itemRecord        } else { self.itemRecord        = nil                                                                         }
         if let createdBy          = createdBy         { self.createdBy         = createdBy         } else { self.createdBy         = UIDevice.current.name                                                       }
@@ -2206,22 +2197,21 @@ class Item: ListObj, NSCoding {
         }
         
         // if the cloud imageModifiedDate is newer than local then we need to schedule the imageAsset for this item to be pulled
-        if let imageModifiedDate = record[key_imageModifiedDate] as? Date {
-            if imageModifiedDate > self.imageModifiedDate || (imageModifiedDate == self.imageModifiedDate &&
-                                                              imageModifiedDate != Date.init(timeIntervalSince1970: 0) &&
-                                                              self.imageAsset?.image == nil) {
+        if let recordImageModifiedDate = record[key_imageModifiedDate] as? Date {
+            if recordImageModifiedDate > self.imageModifiedDate || (recordImageModifiedDate == self.imageModifiedDate &&
+                                                                    recordImageModifiedDate != Date.init(timeIntervalSince1970: 0) &&
+                                                                    self.imageAsset?.image == nil) {
                 // a newer image for this item exists
                 // add this imageAsset to the array needing fetching
                 if imageAsset != nil {
                     //print("ImageAsset.updateFromRecord - itemRecordID for \(self.name) was added to the itemReferences for image update...")
                     DataPersistenceCoordinator.addToItemReferences(self.itemReference!)
-                    //appDelegate.itemRecordIDs.append(record.recordID.name)
                 } else {
                     print("******* ERROR in item updateFromRecord - the imageAsset for this item is nil...!!!")
                 }
                 
                 // then set the local item imageModifiedDate to cloud value
-                self.imageModifiedDate = imageModifiedDate
+                self.imageModifiedDate = recordImageModifiedDate
             }
         }
         
@@ -2406,7 +2396,7 @@ class ImageAsset: NSObject, NSCoding {
         self.itemReference = itemReference
         self.needToSave = false
         self.needToDelete = false
-        self.imageRecord = CKRecord.init(recordType: ImagesRecordType)
+        self.imageRecord = CKRecord(recordType: ImagesRecordType, recordID: CKRecord.ID(zoneID: CloudCoordinator.sharedZoneID))
         self.modifiedDate = Date.init()
         
         super.init()
@@ -2416,9 +2406,9 @@ class ImageAsset: NSObject, NSCoding {
     init(itemName: String?, imageData: Data?, imageGUID: String?, imageAsset: CKAsset?, itemReference: CKRecord.Reference?, imageRecord: CKRecord?, modifiedDate: Date?) {
         if let itemName      = itemName      { self.itemName      = itemName      } else { self.itemName      = ""                                          }
         if let imageData     = imageData     { self.imageData     = imageData     } else { self.imageData     = nil                                         }
-        if let imageGUID     = imageGUID     { self.imageGUID     = imageGUID     } else { self.imageGUID     = UUID().uuidString                         }
-        if let imageRecord   = imageRecord   { self.imageRecord   = imageRecord   } else { self.imageRecord   = CKRecord.init(recordType: ImagesRecordType) }
-        if let modifiedDate  = modifiedDate  { self.modifiedDate  = modifiedDate  } else { self.modifiedDate  = Date.init(timeIntervalSince1970: 0)       }
+        if let imageGUID     = imageGUID     { self.imageGUID     = imageGUID     } else { self.imageGUID     = UUID().uuidString                           }
+        if let imageRecord   = imageRecord   { self.imageRecord   = imageRecord   } else { self.imageRecord   = CKRecord(recordType: ImagesRecordType, recordID: CKRecord.ID(zoneID: CloudCoordinator.sharedZoneID)) }
+        if let modifiedDate  = modifiedDate  { self.modifiedDate  = modifiedDate  } else { self.modifiedDate  = Date.init(timeIntervalSince1970: 0)         }
         
         if itemReference != nil {
             self.itemReference = itemReference
@@ -2524,7 +2514,7 @@ class ImageAsset: NSObject, NSCoding {
         if let item = getItemFromReference(record) {
             item.imageAsset = self
         } else {
-            print("***** item not found...")
+            print("ERROR: imageAsset.updateFromRecord - owning item not found...")
         }
         
         if let itemName      = record[key_itemName]     { self.itemName      = (itemName     as! String)            }

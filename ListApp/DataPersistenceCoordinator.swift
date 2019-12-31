@@ -361,7 +361,7 @@ class DataPersistenceCoordinator {
         var itemDeleteRecordIDs = [String]()
         
         // populate the delete record arrays by record type
-        for deleteRecord in appDelegate.deleteFetchArray {
+        for deleteRecord in CloudCoordinator.deleteFetchArray {
             let recordType = deleteRecord[key_objectType] as? String
             let recordID = deleteRecord[key_objectRecordID] as? String
             
@@ -382,57 +382,11 @@ class DataPersistenceCoordinator {
         
         // populate delete object arrays where local objects are in the cloud delete arrays
         ListData.deleteObjects(listDeleteRecordIDs: listDeleteRecordIDs, categoryDeleteRecordIDs: categoryDeleteRecordIDs, itemDeleteRecordIDs: itemDeleteRecordIDs)
-        
-        /*
-        //guard let listVC = listViewController else { return }
-        var listsToDelete = [List]()
-        
-        for list in listVC.lists {
-            let listRecordName = list.listRecord?.recordID.recordName
-            if let listRecordName = listRecordName {
-                if listDeleteRecordIDs.contains(listRecordName) {
-                    listsToDelete.append(list)
-                }
-            }
-            
-            var categoriesToDelete = [Category]()
-            for category in list.categories {
-                let categoryRecordName = category.categoryRecord?.recordID.recordName
-                if let categoryRecordName = categoryRecordName {
-                    if categoryDeleteRecordIDs.contains(categoryRecordName) {
-                        categoriesToDelete.append(category)
-                    }
-                }
-                
-                var itemsToDelete = [Item]()
-                for item in category.items {
-                    let itemRecordName = item.itemRecord?.recordID.recordName
-                    if let itemRecordName = itemRecordName {
-                        if itemDeleteRecordIDs.contains(itemRecordName) {
-                            itemsToDelete.append(item)
-                        }
-                    }
-                }
-                
-                // remove the deleted items in this category
-                category.items.removeObjectsInArray(itemsToDelete)
-                //print("*** processDeleteObjects - deleted \(itemsToDelete.count) items in \(list.name): \(category.name)")
-            }
-            
-            // remove the deleted categories in this list
-            list.categories.removeObjectsInArray(categoriesToDelete)
-            //print("*** processDeleteObjects - deleted \(categoriesToDelete.count) categories in \(list.name)")
-        }
-        
-        // remove the deleted lists
-        listVC.lists.removeObjectsInArray(listsToDelete)
-        //print("*** processDeleteObjects - deleted \(listsToDelete.count) lists")
-        */
     }
     
     // these are references to items that need an updated image from the cloud
     static func addToItemReferences(_ reference: CKRecord.Reference) {
-        appDelegate.itemReferences.append(reference)
+        CloudCoordinator.itemReferences.append(reference)
     }
     
     // sorts all lists, categories and items and updates indices

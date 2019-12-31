@@ -17,13 +17,29 @@ class CloudCoordinator {
     static let sharedZone = CKRecordZone(zoneName: sharedZoneName)
     static let sharedZoneID = sharedZone.zoneID
     
+    // iCloud query operations
+    static var externalListFetchOperation: CKQueryOperation?
+    static var externalCategoryFetchOperation: CKQueryOperation?
+    static var externalDeleteFetchOperation: CKQueryOperation?
+    static var externalItemFetchOperation: CKQueryOperation?
+    
+    // cloud record fetch arrays for launch data merge
+    static var listFetchArray = [CKRecord]()
+    static var categoryFetchArray = [CKRecord]()
+    static var itemFetchArray = [CKRecord]()
+    static var deleteFetchArray = [CKRecord]()
+    
+    // holds references to items that have outdated image assets
+    static var itemReferences = [CKRecord.Reference]()
+    
+    // cloud record array for uploading to the cloud
     static var updateRecords = [CKRecord: AnyObject?]()
     
     // MARK:- Functions
     
     // adds the given record to the array of records to be saved to the cloud
     static func addToUpdateRecords(_ record: CKRecord, obj: AnyObject) {
-        CloudCoordinator.updateRecords[record] = obj
+        updateRecords[record] = obj
     }
     
     // checks if the user has logged into their iCloud account or not
@@ -67,7 +83,7 @@ class CloudCoordinator {
             }
                     
             if let fetchedRecordZones = recordZones {
-                let hasSharedZone = fetchedRecordZones.contains(where: { $0.key.zoneName == CloudCoordinator.sharedZoneName } )
+                let hasSharedZone = fetchedRecordZones.contains(where: { $0.key.zoneName == sharedZoneName } )
                 completion(hasSharedZone, nil)
             } else {
                 completion(false, nil)
@@ -123,10 +139,10 @@ class CloudCoordinator {
     // sends all records needing updating in batches to cloud storage (shared zone)
     static func batchRecordUpdate() {
         let database = privateDatabase
-        let batchSize = 250                                                 // this number must be no greater than 400
-        let ckRecords = [CKRecord](CloudCoordinator.updateRecords.keys)     // initializes an array of CKRecords with the keys from the updateRecords dictionary
-        var startIndex = 0                                                  // start index for each loop
-        var stopIndex = -1                                                  // stop index for each loop
+        let batchSize = 250                                // this number must be no greater than 400
+        let ckRecords = [CKRecord](updateRecords.keys)     // initializes an array of CKRecords with the keys from the updateRecords dictionary
+        var startIndex = 0                                 // start index for each loop
+        var stopIndex = -1                                 // stop index for each loop
         
         if ckRecords.count == 0 {
             print("batchRecordUpdate - ckRecords.count == 0")
@@ -164,7 +180,7 @@ class CloudCoordinator {
                 // set completionHandler of wrapper operation if it's the case
                 if error == nil {
                     //print("batch save: \(record![key_name])")
-                    let obj = CloudCoordinator.updateRecords[record]
+                    let obj = updateRecords[record]
                     if obj is List {
                         let list = obj as! List
                         list.needToSave = false
@@ -181,7 +197,7 @@ class CloudCoordinator {
                     }
                 } else {
                     // NOTE: This should be able to handle a CKErrorLimitExceeded error.
-                    let obj = CloudCoordinator.updateRecords[record]
+                    let obj = updateRecords[record]
                     if obj is List {
                         let list = obj as! List
                         print("batch update error: list \(list.name) \(error!.localizedDescription)")
@@ -253,10 +269,10 @@ class CloudCoordinator {
         //NSLog("fetchCloudData...")
         if appDelegate.isUpdating {
             // we only want one refresh running at a time
-            refreshEnd()
             return
         }
         
+        // HUD setup
         appDelegate.isUpdating = true
         appDelegate.refreshLabel = refreshLabel
         appDelegate.refreshEnd = refreshEnd
@@ -290,11 +306,11 @@ class CloudCoordinator {
         }
         
         // clear the record arrays
-        appDelegate.listFetchArray.removeAll()
-        appDelegate.categoryFetchArray.removeAll()
-        appDelegate.itemFetchArray.removeAll()
-        appDelegate.deleteFetchArray.removeAll()
-        appDelegate.itemReferences.removeAll()   // this array will be populated after the items have been merged with any item references that need image updates
+        listFetchArray.removeAll()
+        categoryFetchArray.removeAll()
+        itemFetchArray.removeAll()
+        deleteFetchArray.removeAll()
+        itemReferences.removeAll()   // this array will be populated after the items have been merged with any item references that need image updates
         
         // set up query operations
         let truePredicate = NSPredicate(value: true)
@@ -320,22 +336,22 @@ class CloudCoordinator {
         
         // set up the record fetched block
         listFetch.recordFetchedBlock = { (record : CKRecord!) in
-            appDelegate.listFetchArray.append(record)
+            listFetchArray.append(record)
             //print("list recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
         }
         
         categoryFetch.recordFetchedBlock = { (record : CKRecord!) in
-            appDelegate.categoryFetchArray.append(record)
+            categoryFetchArray.append(record)
             //print("category recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
         }
         
         deleteFetch.recordFetchedBlock = { (record : CKRecord!) in
-            appDelegate.deleteFetchArray.append(record)
+            deleteFetchArray.append(record)
             //print("delete recordFetchedBlock: \(record[key_itemName]) \(record[key_deletedDate]) \(record.recordID.recordName)")
         }
         
         itemFetch.recordFetchedBlock = { (record : CKRecord!) in
-            appDelegate.itemFetchArray.append(record)
+            itemFetchArray.append(record)
             itemFetchCount += 1
             //print("item recordFetchedBlock: \(record[key_name]) \(record[key_order]) \(record.recordID.recordName)")
         }
@@ -350,26 +366,26 @@ class CloudCoordinator {
             }
             
             if cursor != nil {
-                print("\(appDelegate.listFetchArray.count) lists - there is more data to fetch...")
+                print("\(listFetchArray.count) lists - there is more data to fetch...")
                 let newOperation = CKQueryOperation(cursor: cursor!)
                 newOperation.recordFetchedBlock = listFetch.recordFetchedBlock
                 newOperation.queryCompletionBlock = listFetch.queryCompletionBlock
                 newOperation.resultsLimit = resultCount
                 listFetch = newOperation
-                appDelegate.externalListFetch = listFetch
+                externalListFetchOperation = listFetch
                 database.add(newOperation)
             } else if listFetch.isCancelled {
                 print("listFetch cancelled...")
-                appDelegate.externalListFetch = nil
-                appDelegate.externalCategoryFetch?.cancel()
-                appDelegate.externalDeleteFetch?.cancel()
-                appDelegate.externalItemFetch?.cancel()
+                externalListFetchOperation = nil
+                externalCategoryFetchOperation?.cancel()
+                externalDeleteFetchOperation?.cancel()
+                externalItemFetchOperation?.cancel()
                 HUDControl.stopHUD()
                 appDelegate.isUpdating = false
                 appDelegate.refreshEnd()
             } else {
                 //NSLog("list fetch complete")
-                DispatchQueue.main.async { appDelegate.externalListFetch = nil }
+                DispatchQueue.main.async { externalListFetchOperation = nil }
             }
         }
         
@@ -380,23 +396,23 @@ class CloudCoordinator {
             }
             
             if cursor != nil {
-                print("\(appDelegate.categoryFetchArray.count) categories - there is more data to fetch...")
+                print("\(categoryFetchArray.count) categories - there is more data to fetch...")
                 let newOperation = CKQueryOperation(cursor: cursor!)
                 newOperation.recordFetchedBlock = categoryFetch.recordFetchedBlock
                 newOperation.queryCompletionBlock = categoryFetch.queryCompletionBlock
                 newOperation.resultsLimit = resultCount
                 categoryFetch = newOperation
-                appDelegate.externalCategoryFetch = categoryFetch
+                externalCategoryFetchOperation = categoryFetch
                 database.add(newOperation)
             } else if categoryFetch.isCancelled {
                 print("categoryFetch cancelled...")
-                appDelegate.externalCategoryFetch = nil
-                appDelegate.externalDeleteFetch?.cancel()
-                appDelegate.externalItemFetch?.cancel()
+                externalCategoryFetchOperation = nil
+                externalDeleteFetchOperation?.cancel()
+                externalItemFetchOperation?.cancel()
                 HUDControl.stopHUD()
             } else {
                 //NSLog("category fetch complete")
-                DispatchQueue.main.async { appDelegate.externalCategoryFetch = nil }
+                DispatchQueue.main.async { externalCategoryFetchOperation = nil }
             }
         }
         
@@ -407,22 +423,22 @@ class CloudCoordinator {
             }
             
             if cursor != nil {
-                print("\(appDelegate.deleteFetchArray.count) delete items - there is more data to fetch...")
+                print("\(deleteFetchArray.count) delete items - there is more data to fetch...")
                 let newOperation = CKQueryOperation(cursor: cursor!)
                 newOperation.recordFetchedBlock = deleteFetch.recordFetchedBlock
                 newOperation.queryCompletionBlock = deleteFetch.queryCompletionBlock
                 newOperation.resultsLimit = resultCount
                 deleteFetch = newOperation
-                appDelegate.externalDeleteFetch = deleteFetch
+                externalDeleteFetchOperation = deleteFetch
                 database.add(newOperation)
             } else if deleteFetch.isCancelled {
                 print("deleteFetch cancelled...")
-                appDelegate.externalDeleteFetch = nil
-                appDelegate.externalItemFetch?.cancel()
+                externalDeleteFetchOperation = nil
+                externalItemFetchOperation?.cancel()
                 HUDControl.stopHUD()
             } else {
                 //NSLog("delete fetch complete")
-                DispatchQueue.main.async { appDelegate.externalDeleteFetch = nil }
+                DispatchQueue.main.async { externalDeleteFetchOperation = nil }
             }
         }
         
@@ -445,17 +461,17 @@ class CloudCoordinator {
             
             if cursor != nil {
                 //print("item cursor: \(cursor)")
-                print("\(appDelegate.itemFetchArray.count) items - there is more data to fetch...")
+                print("\(itemFetchArray.count) items - there is more data to fetch...")
                 let newOperation = CKQueryOperation(cursor: cursor!)
                 newOperation.recordFetchedBlock = itemFetch.recordFetchedBlock
                 newOperation.queryCompletionBlock = itemFetch.queryCompletionBlock
                 newOperation.resultsLimit = resultCount
                 itemFetch = newOperation
-                appDelegate.externalItemFetch = itemFetch
+                externalItemFetchOperation = itemFetch
                 database.add(newOperation)
             } else if itemFetch.isCancelled {
                 print("itemFetch cancelled...")
-                appDelegate.externalItemFetch = nil
+                externalItemFetchOperation = nil
                 HUDControl.stopHUD()
             } else {
                 //NSLog("item fetch complete")
@@ -464,29 +480,29 @@ class CloudCoordinator {
                 //NSLog("start fetch wait...")
                 repeat {
                     // hold until other completion blocks finish
-                } while appDelegate.externalListFetch != nil || appDelegate.externalCategoryFetch != nil || appDelegate.externalDeleteFetch != nil
+                } while externalListFetchOperation != nil || externalCategoryFetchOperation != nil || externalDeleteFetchOperation != nil
                 //NSLog("end fetch wait...")
                 
                 //NSLog("array counts - list: \(self.listFetchArray.count) category: \(self.categoryFetchArray.count) item: \(self.itemFetchArray.count) delete: \(self.deleteFetchArray.count)")
                 
                 DispatchQueue.main.async {
                     //NSLog("dispatch main thread merge")
-                    appDelegate.externalListFetch = nil
-                    appDelegate.externalCategoryFetch = nil
-                    appDelegate.externalItemFetch = nil
-                    appDelegate.externalDeleteFetch = nil
+                    externalListFetchOperation = nil
+                    externalCategoryFetchOperation = nil
+                    externalItemFetchOperation = nil
+                    externalDeleteFetchOperation = nil
                     
                     // merge cloud data
-                    CloudCoordinator.mergeCloudData()
+                    mergeCloudData()
                 }
             }
         }
         
         // set external fetch pointers
-        appDelegate.externalListFetch = listFetch
-        appDelegate.externalCategoryFetch = categoryFetch
-        appDelegate.externalDeleteFetch = deleteFetch
-        appDelegate.externalItemFetch = itemFetch
+        externalListFetchOperation = listFetch
+        externalCategoryFetchOperation = categoryFetch
+        externalDeleteFetchOperation = deleteFetch
+        externalItemFetchOperation = itemFetch
         
         // execute the query operations
         database.add(itemFetch)
@@ -507,19 +523,19 @@ class CloudCoordinator {
         var canceled = false
         
         // executes on main thread
-        if let externalListFetch = appDelegate.externalListFetch {
+        if let externalListFetch = externalListFetchOperation {
             externalListFetch.cancel()
             canceled = true
         }
-        if let externalCategoryFetch = appDelegate.externalCategoryFetch {
+        if let externalCategoryFetch = externalCategoryFetchOperation {
             externalCategoryFetch.cancel()
             canceled = true
         }
-        if let externalDeleteFetch = appDelegate.externalDeleteFetch {
+        if let externalDeleteFetch = externalDeleteFetchOperation {
             externalDeleteFetch.cancel()
             canceled = true
         }
-        if let externalItemFetch = appDelegate.externalItemFetch {
+        if let externalItemFetch = externalItemFetchOperation {
             externalItemFetch.cancel()
             canceled = true
         }
@@ -540,7 +556,7 @@ class CloudCoordinator {
         let batchSize = 50          // size of the batch request block
         var imageFetchCount = 0     // holds count of fetched images
         
-        if appDelegate.itemReferences.count == 0 {
+        if itemReferences.count == 0 {
             print("fetchImageData = itemReferences.count == 0")
             HUDControl.stopHUD()
             return
@@ -561,8 +577,8 @@ class CloudCoordinator {
             stopIndex += batchSize
             loop += 1
             
-            if stopIndex > appDelegate.itemReferences.count - 1 {
-                stopIndex = appDelegate.itemReferences.count - 1
+            if stopIndex > itemReferences.count - 1 {
+                stopIndex = itemReferences.count - 1
             }
             
             if stopIndex < startIndex {
@@ -577,10 +593,10 @@ class CloudCoordinator {
             // set up a temp arrary of references for this batch
             var batchReferences = [CKRecord.Reference]()
             for i in startIndex...stopIndex {
-                batchReferences.append(appDelegate.itemReferences[i])
+                batchReferences.append(itemReferences[i])
             }
             
-            print("fetchImageData - \(startIndex+1) to \(stopIndex+1) of \(appDelegate.itemReferences.count)")
+            print("fetchImageData - \(startIndex+1) to \(stopIndex+1) of \(itemReferences.count)")
             
             let predicate = NSPredicate(format: "owningItem IN %@", argumentArray: [batchReferences])
             let imageQuery = CKQuery(recordType: ImagesRecordType, predicate: predicate)
@@ -605,14 +621,14 @@ class CloudCoordinator {
                 
                 // send this batch of image records to the merge method on the main thread
                 DispatchQueue.main.async {
-                    CloudCoordinator.mergeImageCloudData(imageArray, forceUpdate: forceUpdate, completion: completion)
+                    mergeImageCloudData(imageArray, forceUpdate: forceUpdate, completion: completion)
                 }
             }
             
             // execute the query operation
             privateDatabase.add(imageFetch)
             
-        } while stopIndex < appDelegate.itemReferences.count - 1
+        } while stopIndex < itemReferences.count - 1
     }
     
     // after fetching cloud data, merge with local data
@@ -624,15 +640,15 @@ class CloudCoordinator {
         // the closing hud (1.0 sec) will prevent user interaction during the merge
         HUDControl.startHUDwithDone()
         
-        for cloudList in appDelegate.listFetchArray {
+        for cloudList in listFetchArray {
             DataPersistenceCoordinator.updateFromRecord(cloudList, forceUpdate: false)
         }
         
-        for cloudCategory in appDelegate.categoryFetchArray {
+        for cloudCategory in categoryFetchArray {
             DataPersistenceCoordinator.updateFromRecord(cloudCategory, forceUpdate: false)
         }
         
-        for cloudItem in appDelegate.itemFetchArray {
+        for cloudItem in itemFetchArray {
            DataPersistenceCoordinator.updateFromRecord(cloudItem, forceUpdate: false)
         }
         
@@ -644,7 +660,7 @@ class CloudCoordinator {
         
         // now that items are merged we can call fetchImageData to
         // retreive any images that need updating
-        CloudCoordinator.fetchImageData(forceUpdate: appDelegate.needsDataSaveOnMigration) {
+        fetchImageData(forceUpdate: appDelegate.needsDataSaveOnMigration) {
             DispatchQueue.main.async {
                 appDelegate.imageDataMergeComplete = true
             }
@@ -700,7 +716,7 @@ class CloudCoordinator {
         var purgeRecords = [CKRecord]()
         
         // collect records to be purged
-        for record in appDelegate.deleteFetchArray {
+        for record in deleteFetchArray {
             if let deleteDate = record[key_deletedDate] as? Date {
                 let expirationDate = (userCalendar as NSCalendar).date(byAdding: timeInterval, to: deleteDate, options: [])!
                 
@@ -711,7 +727,37 @@ class CloudCoordinator {
         }
         
         // submit delete operation
-        CloudCoordinator.batchRecordDelete(purgeRecords)
+        batchRecordDelete(purgeRecords)
+    }
+    
+    // delete all default zone records
+    // this should be run once after successfully copying data to the shared zone
+    static func deleteAllRecordsInDefaultZone() {
+        
+        container.privateCloudDatabase.fetchAllRecordZones { zones, error in
+            guard let zones = zones, error == nil else {
+                print("Error fetching zones.")
+                return
+            }
+            
+            let zoneIDs = zones.map { $0.zoneID }
+            let defaultZoneID = zoneIDs.filter { $0.zoneName.contains("default") }
+                        
+            let deletionOperation = CKModifyRecordZonesOperation(recordZonesToSave: nil, recordZoneIDsToDelete: defaultZoneID)
+            deletionOperation.modifyRecordZonesCompletionBlock = { _, deletedZones, error in
+                guard error == nil else {
+                    let error = error!
+
+                    print("Error deleting records.", error)
+                    return
+                }
+
+                print("Records successfully deleted in this zone.")
+            }
+
+            container.privateCloudDatabase.add(deletionOperation)
+            
+        }
     }
     
 }
