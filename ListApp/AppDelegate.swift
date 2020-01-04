@@ -207,6 +207,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 if initialListIndex >= 0 && initialListIndex < ListData.listCount {
                     itemViewController.list = ListData.list(initialListIndex)
                     listViewController.selectionIndex = initialListIndex
+                    // we need this refresh for iPad if loading exclusively from local data
+                    listViewController.tableView.reloadData()
                 } else {
                     listViewController.selectionIndex = -1
                 }
