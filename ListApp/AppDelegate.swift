@@ -13,6 +13,9 @@ import UserNotifications
 // display link scroll loop updates per second
 let kFramesPerSecond         = 60
 
+// list data key
+private let key_listData = "listData"
+
 // price formatter function
 let priceFormatter: NumberFormatter = {
     let formatter = NumberFormatter()
@@ -30,7 +33,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     var rightNavController: UINavigationController?
     var itemViewController: ItemViewController?
     var aboutViewController: AboutViewController?
-    
+
+    // local persistence
+    var documentsDirectory: URL?
+    var archiveURL: URL?
+
     // notification record arrays
     var notificationArray = [CKRecord]()
     var deleteNotificationArray = [String]()
@@ -95,6 +102,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         itemViewController!.navigationItem.leftItemsSupplementBackButton = true
         itemViewController!.navigationItem.leftBarButtonItem = splitViewController!.displayModeButtonItem
                 
+        // local persistence
+        documentsDirectory = FileManager().urls(for: .documentDirectory, in: .userDomainMask).first!
+        archiveURL = documentsDirectory!.appendingPathComponent(key_listData)
+
         // show both list and item view controllers if possible
         splitViewController!.preferredDisplayMode = UISplitViewController.DisplayMode.allVisible
         
@@ -108,8 +119,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         
         // check for existing shared zone and proceed with app setup
         CloudCoordinator.sharedZoneExists() { sharedZoneExists, error in
-            if let error = error {
-                print("***** sharedZoneExists - ERROR: \(error.localizedDescription)")
+            if let nsError = error as NSError? {
+                if nsError.domain == "NetworkNotAvailable" && nsError.code == 999 {
+                    self.finishAppSetup(application, sharedZoneWasJustSetup: false)
+                }
+                print("***** return from sharedZoneExists - ERROR: \(nsError.localizedDescription)")
             } else {
                 if sharedZoneExists {
                     self.finishAppSetup(application, sharedZoneWasJustSetup: false)
@@ -171,6 +185,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     func restoreListDataFromLocalStorage() {
+        guard let archiveURL = archiveURL else { return }
+
         guard let listViewController = listViewController else { return }
         guard let itemViewController = itemViewController else { return }
         
@@ -178,7 +194,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         guard UserDefaults.standard.bool(forKey: SubscriptionManager.key_subscribedToPrivateData) else {
             // this is a first load after upgrade to v1.2 so need to delete local data
             do {
-                try FileManager.default.removeItem(atPath: ListData.filePath(key: key_listData))
+                try FileManager.default.removeItem(atPath: archiveURL.path)
             } catch {
                 print("file delete error")
             }
@@ -186,7 +202,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
         
         // restore the list data from local storage
-        if ListData.loadLocal() {
+        if ListData.loadLocal(filePath: archiveURL.path) {
             if let initialListIndex = UserDefaults.standard.object(forKey: key_selectionIndex) as? Int {
                 if initialListIndex >= 0 && initialListIndex < ListData.listCount {
                     itemViewController.list = ListData.list(initialListIndex)
@@ -257,6 +273,53 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                 notificationProcessingEventIsPending = true
             }
         }
+    }
+    
+    // notifies the delegate that the app has access to shared information, and needs to handle the new content
+    func application(_ application: UIApplication, userDidAcceptCloudKitShareWith cloudKitShareMetadata: CKShare.Metadata) {
+        let acceptSharing: CKAcceptSharesOperation = CKAcceptSharesOperation(shareMetadatas: [cloudKitShareMetadata])
+         
+        acceptSharing.qualityOfService = .userInteractive
+        
+        acceptSharing.perShareCompletionBlock = { meta, share, error in
+            print("successfully shared")
+        }
+        
+        acceptSharing.acceptSharesCompletionBlock = { error in
+            guard (error == nil) else {
+                print("Error \(error?.localizedDescription ?? "")")
+                return
+            }
+             
+            self.fetchShare(cloudKitShareMetadata)
+        }
+        
+        CKContainer(identifier: cloudKitShareMetadata.containerIdentifier).add(acceptSharing)
+    }
+    
+    // may want this in the CloudCoordinator
+    func fetchShare(_ cloudKitShareMetadata: CKShare.Metadata) {
+        let operation = CKFetchRecordsOperation(recordIDs: [cloudKitShareMetadata.rootRecordID])
+         
+        operation.perRecordCompletionBlock = { record, _, error in
+            guard error == nil, record != nil else{
+                print("error \(error?.localizedDescription ?? "")")
+                return
+            }
+            
+            DispatchQueue.main.async {
+                // handle the data updates to the UI
+            }
+        }
+        
+        operation.fetchRecordsCompletionBlock = { _, error in
+            guard error != nil else{
+                print("error \(error?.localizedDescription ?? "")")
+                return
+            }
+        }
+        
+        CKContainer.default().sharedCloudDatabase.add(operation)
     }
     
     @objc func processNotificationRecords() {

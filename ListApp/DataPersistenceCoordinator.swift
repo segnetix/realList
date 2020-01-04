@@ -64,12 +64,13 @@ class DataPersistenceCoordinator {
     /// Writes the complete object graph locally.
     static func saveListDataLocal(async asynchronously: Bool) {
         func save() {
-            let successfulSave = ListData.saveLocal()
+            guard let archiveURL = appDelegate.archiveURL else { return }
+
+            //let successfulSave = NSKeyedArchiver.archiveRootObject(ListData.lists, toFile: archiveURL.path)
+            let successfulSave = ListData.saveLocal(filePath: archiveURL.path)
             
-            if successfulSave {
-                print("all list data saved locally for \(ListData.listObjCount) records")
-            } else {
-                print("ERROR: Failed to save list data locally.  Record count: \(ListData.listObjCount)")
+            if !successfulSave {
+                print("ERROR: Failed to save list data locally...")
             }
         }
         

@@ -9,7 +9,7 @@
 import UIKit
 import CloudKit
 
-class SettingsViewController: UIAppViewController {
+class SettingsViewController: UIAppViewController, UICloudSharingControllerDelegate {
     let appDelegate = UIApplication.shared.delegate as! AppDelegate
     let containerView: UIView = UIView()
     let newCategoryButton: UIButton = UIButton()
@@ -540,44 +540,110 @@ class SettingsViewController: UIAppViewController {
         presentingViewController!.dismiss(animated: true, completion: nil)
     }
     
+    // MARK:- CloudSharingController
+    
+    func cloudSharingControllerDidSaveShare(_ csc: UICloudSharingController) {
+        print("saved successfully")
+    }
+     
+    func cloudSharingController(_ csc: UICloudSharingController, failedToSaveShareWithError error: Error) {
+        print("failed to save: \(error.localizedDescription)")
+    }
+     
+    func itemThumbnailData(for csc: UICloudSharingController) -> Data? {
+        return nil //You can set a hero image in your share sheet. Nil uses the default.
+    }
+     
+    func itemTitle(for csc: UICloudSharingController) -> String? {
+        return "List Name"
+    }
+    
     @objc func presentCloudSharingController () {
         guard let listRecord = itemVC?.list.listRecord else {
             print("SettingsViewController.share - listRecord not available")
             return
         }
         
-        let cloudSharingController = UICloudSharingController { [weak self] (controller, completion: @escaping (CKShare?, CKContainer?, Error?) -> Void) in
-            guard let self = self else {
-              return
-            }
-            self.share(rootRecord: listRecord, completion: completion)
+        let share = CKShare(rootRecord: listRecord)
+
+        if let itemName = listRecord[key_name] {
+            //self.itemName = item.object(forKey: "name") as? String
+            share[CKShare.SystemFieldKey.title] = "Sharing \(itemName)" as CKRecordValue?
+        } else {
+            share[CKShare.SystemFieldKey.title] = "" as CKRecordValue?
+            //self.itemName = "item"
         }
-        self.present(cloudSharingController, animated: true) {
-            print("share returned...")
+
+        share[CKShare.SystemFieldKey.shareType] = "com.segnetix.RealList" as CKRecordValue
+        prepareToShare(share: share, record: listRecord)
+    }
+    
+    private func prepareToShare(share: CKShare, record: CKRecord) {
+        var sharingViewController: UICloudSharingController?
+        
+        if record.share == nil {
+            sharingViewController = UICloudSharingController(preparationHandler: { (UICloudSharingController, handler: @escaping (CKShare?, CKContainer?, Error?) -> Void) in
+                let modRecordsList = CKModifyRecordsOperation(recordsToSave: [record, share], recordIDsToDelete: nil)
+                modRecordsList.modifyRecordsCompletionBlock = { (record, recordID, error) in
+                    handler(share, CKContainer.default(), error)
+                }
+                CKContainer.default().privateCloudDatabase.add(modRecordsList)
+            })
+            
+            if let sharingViewController = sharingViewController {
+                sharingViewController.delegate = self
+                sharingViewController.availablePermissions = [.allowPrivate, .allowReadOnly, .allowReadWrite]
+                self.navigationController?.present(sharingViewController, animated:true, completion:nil)
+            }
+        } else {
+            let container = CKContainer.default()
+            
+            if let shareReference = record.share {
+                container.privateCloudDatabase.fetch(withRecordID: shareReference.recordID) { (record, error) in
+                    guard let shareRecord = record as? CKShare else {
+                        if let error = error {
+                            print(error.localizedDescription)
+                        }
+                        return
+                    }
+                    if let url = shareRecord.url {
+                        print(url)
+                    }
+                    
+                    sharingViewController = UICloudSharingController(share: shareRecord, container: CKContainer.default())
+                    
+                    if let sharingViewController = sharingViewController {
+                        sharingViewController.delegate = self
+                        sharingViewController.availablePermissions = [.allowPrivate, .allowReadOnly, .allowReadWrite]
+                        self.navigationController?.present(sharingViewController, animated: true, completion: nil)
+                    }
+                    return
+                }
+            }
         }
     }
     
-    func share(rootRecord: CKRecord, completion: @escaping (CKShare?, CKContainer?, Error?) -> Void) {
-        let shareRecord = CKShare(rootRecord: rootRecord)
-        let recordsToSave = [rootRecord, shareRecord];
-        let container = CKContainer.default()
-        let privateDatabase = container.privateCloudDatabase
-        let operation = CKModifyRecordsOperation(recordsToSave: recordsToSave, recordIDsToDelete: [])
-        
-        operation.perRecordCompletionBlock = { (record, error) in
-            if let error = error {
-                print("CloudKit error: \(error.localizedDescription)")
-            }
-        }
-
-        operation.modifyRecordsCompletionBlock = { (savedRecords, deletedRecordIDs, error) in
-            if let error = error {
-                completion(nil, nil, error)
-            } else {
-                completion(shareRecord, container, nil)
-            }
-        }
-
-        privateDatabase.add(operation)
-    }
+//    func share(rootRecord: CKRecord, completion: @escaping (CKShare?, CKContainer?, Error?) -> Void) {
+//        let shareRecord = CKShare(rootRecord: rootRecord)
+//        let recordsToSave = [rootRecord, shareRecord];
+//        let container = CKContainer.default()
+//        let privateDatabase = container.privateCloudDatabase
+//        let operation = CKModifyRecordsOperation(recordsToSave: recordsToSave, recordIDsToDelete: [])
+//        
+//        operation.perRecordCompletionBlock = { (record, error) in
+//            if let error = error {
+//                print("CloudKit error: \(error.localizedDescription)")
+//            }
+//        }
+//
+//        operation.modifyRecordsCompletionBlock = { (savedRecords, deletedRecordIDs, error) in
+//            if let error = error {
+//                completion(nil, nil, error)
+//            } else {
+//                completion(shareRecord, container, nil)
+//            }
+//        }
+//
+//        privateDatabase.add(operation)
+//    }
 }

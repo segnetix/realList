@@ -74,6 +74,12 @@ class CloudCoordinator {
     }
     
     static func sharedZoneExists(completion: @escaping (Bool, Error?) -> Void) {
+        guard CloudCoordinator.iCloudIsAvailable() else {
+            let error: Error = NSError(domain: "NetworkNotAvailable", code: 999, userInfo: nil)
+            completion(false, error)
+            return
+        }
+        
         let fetchZonesOperation = CKFetchRecordZonesOperation.fetchAllRecordZonesOperation()
         
         fetchZonesOperation.fetchRecordZonesCompletionBlock = { (recordZones: [CKRecordZone.ID : CKRecordZone]?, error: Error?) -> Void in

@@ -17,7 +17,6 @@ let ImagesRecordType = "Images"
 let DeletesRecordType = "Deletes"
 
 // key strings for record access
-let key_listData = "listData"
 let key_name                = "name"
 let key_showCompletedItems  = "showCompletedItems"
 let key_showInactiveItems   = "showInactiveItems"
@@ -177,24 +176,17 @@ class ListData {
         }
     }
     
-    // class functions
-    class func filePath(key: String) -> String {
-        let manager = FileManager.default
-        let url = manager.urls(for: .documentDirectory, in: .userDomainMask).first
-        return (url!.appendingPathComponent(key).path)
-    }
-    
-    class func loadLocal() -> Bool {
-        if let archivedListData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath(key: key_listData)) as? [List] {
+    //MARK:- Class Functions
+    class func loadLocal(filePath: String) -> Bool {
+        if let archivedListData = NSKeyedUnarchiver.unarchiveObject(withFile: filePath) as? [List] {
             lists = archivedListData
             return true
         }
         return false
     }
     
-    class func saveLocal() -> Bool {
-        let data = NSKeyedArchiver.archivedData(withRootObject: ListData.lists)
-        return NSKeyedArchiver.archiveRootObject(data, toFile: filePath(key: key_listData))
+    class func saveLocal(filePath: String) -> Bool {
+        return NSKeyedArchiver.archiveRootObject(ListData.lists, toFile: filePath)
     }
     
     class func listForRow(at indexPath: IndexPath) -> List? {
